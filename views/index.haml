@@ -1,0 +1,25 @@
+!!! 5
+%html{ :lang => "ja" }
+  %head
+    %meta{ :charset => "utf-8" }
+    %meta{ :name => "description", :content => "A web interface to support visualizing the public ChIP-Seq data archived in SRA via IGV." }
+    %meta{ :name => "author", :content => "Shinya Oki, Tazto Ohta" }
+    
+    %title= "ChIP-Atlas"
+    
+    / Bootstrap core CSS
+    %link{ :href => "https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css", :rel => "stylesheet" }
+    
+    / Custom style for this website
+    %link{ :href => "#{app_root}/style.css", :rel => "stylesheet"}
+    
+  %body
+    
+    / 'code here'
+    
+    /
+      Bootstrap Core Javascript
+      =========================
+    %script{ :src => "https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js" }
+    %script{ :src => "https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js" }
+    %script{ :src => "http://getbootstrap.com/assets/js/ie10-viewport-bug-workaround.js" }
