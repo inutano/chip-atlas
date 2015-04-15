@@ -4,22 +4,101 @@
     %meta{ :charset => "utf-8" }
     %meta{ :name => "description", :content => "A web interface to support visualizing the public ChIP-Seq data archived in SRA via IGV." }
     %meta{ :name => "author", :content => "Shinya Oki, Tazto Ohta" }
-    
+
     %title= "ChIP-Atlas"
-    
+
     / Bootstrap core CSS
     %link{ :href => "https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css", :rel => "stylesheet" }
-    
+
     / Custom style for this website
     %link{ :href => "#{app_root}/style.css", :rel => "stylesheet"}
-    
+
   %body
-    
+    .container
+      .page-header
+        %h1
+          ChIP-Atlas
+
+      - @ag_class = @list.map{|n| n[1] }.uniq
+      - @cl_class = @list.map{|n| n[2] }.uniq
+      - @ag_subclass = @list.map{|n| n[4] }.uniq
+      - @cl_subclass = @list.map{|n| n[5] }.uniq
+      - @qval = @list.map{|n| n[3] }.uniq
+
+      %section
+        %row
+          .col-md-4
+            %form
+              %select.form-control#agClass{ "multiple" => true }
+                - @ag_class.each do |ag|
+                  %option{ :value => ag }= ag
+              %select.form-control#agSubClass{ "multiple" => true }
+                - @ag_subclass.each do |ag|
+                  %option{ :value => ag }= ag
+
+          .col-md-4
+            %form
+              %select.form-control#clClass{ "multiple" => true }
+                - @cl_class.each do |cl|
+                  %option{ :value => cl }= cl
+              %select.form-control#clSubClass{ "multiple" => true }
+                - @cl_subclass.each do |cl|
+                  %option{ :value => cl }= cl
+          
+          .col-md-4
+            %form
+              %select.form-control#qval{ "multiple" => true }
+                - @qval.each do |qv|
+                  %option{ :value => qv }= qv
+
+        %row
+          .col-md-4.col-md-offset-4
+            .form-group
+              %button.btn.btn-default{ "id" => "submit", "type" => "button" }= "View on IGV"
+
     / 'code here'
-    
+
     /
       Bootstrap Core Javascript
       =========================
     %script{ :src => "https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js" }
     %script{ :src => "https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js" }
     %script{ :src => "http://getbootstrap.com/assets/js/ie10-viewport-bug-workaround.js" }
+
+    :javascript
+      $(function(){
+        $("button#submit").click(function(){
+          var button = $(this);
+          button.attr("disabled", true);
+
+          var data = { 
+            agClass: $("#agClass option:selected").text(),
+            agSubClass: $("#agSubClass option:selected").text(),
+            clClass: $("#clClass option:selected").text(),
+            clSubClass: $("#clSubClass option:selected").text(),
+            qval: $("#qval option:selected").text()
+          };
+          
+          alert(JSON.stringify(data));
+          
+          $.ajax({
+            type : 'post',
+            url : "#{app_root}/view",
+            data: JSON.stringify(data),
+            contentType: 'application/json',
+            dataType: 'json',
+            scriptCharset: 'utf-8',
+            success : function(response) {
+              alert(JSON.stringify(response));
+              window.open(response.url, "_self", "")
+            },
+            error : function(response){
+              alert(JSON.stringify(response));
+              alert("error!");
+            },
+            complete: function(){
+              button.attr("disabled", false);
+            }
+          });
+        })
+      })
