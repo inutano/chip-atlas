@@ -19,7 +19,17 @@ class PeakJohn < Sinatra::Base
     end
     
     def archive_base
-      "http://dbarchive.biosciencedbc.jp/kyushu-u/hg19/assembled/"
+      "http://dbarchive.biosciencedbc.jp/kyushu-u/"
+    end
+    
+    def igv_browsing_url(data)
+      igv_url   = data["igv"] || "http://localhost:60151"
+      condition = data["condition"]
+      genome    = condition["genome"]
+      filename  = Bedfile.get_filename(condition)
+    
+      archive_path = File.join(archive_base, genome, "assembled", filename)
+      "#{igv_url}/load?genome=#{genome}&file=#{archive_path}"
     end
   end
   
@@ -38,10 +48,10 @@ class PeakJohn < Sinatra::Base
   end
   
   post "/browse" do
-    data = JSON.parse(request.body.read)
-    igv_url = data["igv"] || "localhost:60151"
-    archive_path = Bedfile.archive_path(archive_base, data["condition"])
-    redirect_to = "http://#{igv_url}/load?genome=#{data["condition"]["genome"]}&file=#{archive_path}"
-    JSON.dump({ "url" => redirect_to })
+    JSON.dump({ "url" => igv_browsing_url(JSON.parse(request.body.read)) })
+  end
+  
+  get "/view" do
+    params[:id]
   end
 end
