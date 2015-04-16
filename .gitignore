@@ -1,2 +1,4 @@
 public
 vendor
+.sass-cache
+database.sqlite
