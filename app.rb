@@ -17,35 +17,31 @@ class PeakJohn < Sinatra::Base
     def app_root
       "#{env["rack.url_scheme"]}://#{env["HTTP_HOST"]}#{env["SCRIPT_NAME"]}"
     end
+    
+    def archive_base
+      "http://dbarchive.biosciencedbc.jp/kyushu-u/hg19/assembled/"
+    end
   end
   
   get "/:source.css" do
     sass params[:source].intern
   end
-
+  
   get "/" do
-    @list = open("#{app_root}/filelist.tab").readlines.map do |line_n|
-      line_n.chomp.split("\t")
-    end
     haml :index
   end
   
-  post "/view" do
+  get "/index" do
+    genome = params[:genome]
+    404 if !Bedfile.list_of_genome.include?(genome)
+    JSON.dump(Bedfile.index_by_genome(genome))
+  end
+  
+  post "/browse" do
     data = JSON.parse(request.body.read)
-    ag_class = data["agClass"]
-    ag_subclass = data["agSubClass"]
-    cl_class = data["clClass"]
-    cl_subclass = data["clSubClass"]
-    qval = data["qval"]
-    filename = open("#{app_root}/filelist.tab").readlines.select do |line_n|
-      line = line_n.chomp.split("\t")
-      line[1] == ag_class && \
-      line[2] == cl_class && \
-      line[3] == qval && \
-      line[4] == ag_subclass && \
-      line[5] == cl_subclass
-    end
-    fname = filename.first.split("\t").first.sub("bed","bb")
-    JSON.dump({ "url" => "http://localhost:60151/load?file=http://dbarchive.biosciencedbc.jp/kyushu-u/hg19/assembled/#{fname}&genome=hg19"})
+    igv_url = data["igv"] || "localhost:60151"
+    archive_path = Bedfile.archive_path(archive_base, data["condition"])
+    redirect_to = "http://#{igv_url}/load?genome=#{data["condition"]["genome"]}&file=#{archive_path}"
+    JSON.dump({ "url" => redirect_to })
   end
 end
