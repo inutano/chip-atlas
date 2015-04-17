@@ -1,10 +1,46 @@
 class Experiment < ActiveRecord::Base
+  class << self
+    def list_of_facets
+      [ :agClass, :agSubClass, :clClass, :clSubClass ]
+    end
+    
+    def list_of_genome
+      self.all.map{|r| r.genome }.uniq
+    end
+    
+    def index_by_genome(genome)
+      records = records_by_genome(genome)
+      index_all_facets(records)
+    end
+
+    def records_by_genome(genome)
+      self.where(:genome => genome)
+    end
+    
+    def index_all_facets(records)
+      index = Hash.new
+      list_of_facets.each do |facet|
+        index[facet] = index_with_experiment_count(records, facet)
+      end
+      index
+    end
+    
+    def index_with_experiment_count(records, column)
+      index = Hash.new(0)
+      records.each{|n| index[n.send(column)] += 1 }
+      index
+    end
+  end
 end
 
 class Bedfile < ActiveRecord::Base
   class << self
     def list_of_facets
       [ :agClass, :agSubClass, :clClass, :clSubClass, :qval ]
+    end
+    
+    def qval_range
+      self.all.map{|r| r.qval }.uniq
     end
     
     def list_of_genome
