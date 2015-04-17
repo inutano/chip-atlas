@@ -1,0 +1,134 @@
+!!! 5
+%html{ :lang => "ja" }
+  %head
+    %meta{ :charset => "utf-8" }
+    %meta{ "http-equiv" => "X-UA-Compatible", :content => "IE=edge" }
+    %meta{ :name => "viewport", :content => "width=device-width, initial-scale=1" }
+
+    %meta{ :name => "description", :content => "A web interface to support browsing public ChIP-Seq data via IGV." }
+    %meta{ :name => "author", :content => "Shinya Oki, Tazro Ohta" }
+
+    %title= "ChIP-Atlas - details for #{@expid}"
+
+    / Bootstrap core CSS
+    %link{ :href => "https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css", :rel => "stylesheet" }
+
+    / Custom style for this website
+    %link{ :href => "#{app_root}/style.css", :rel => "stylesheet"}
+
+  %body
+    %nav.navbar.navbar-inverse.navbar-fixed-top
+      .container
+        .navbar-header
+          %button.navbar-toggle.collapsed{ :type => "button", "data-toggle" => "collapse", "data-target" => "#navbar", "aria-expanded" => "false", "aria-controls" => "navbar" }
+            %span.sr-only Toggle navigation
+            %span.icon-bar
+            %span.icon-bar
+            %span.icon-bar
+          %a.navbar-brand{ :href => "#{app_root}" }= "ChIP-Atlas"
+        #navbar.collapse.navbar-collapse
+          %ul.nav.navbar-nav
+            %li
+              %a{ :href => "#{app_root}" }= "Home"
+            %li
+              %a{ :href => "#{app_root}/About" }= "About"
+            %li
+              %a{ :href => "#{app_root}/Document" }= "Document"
+    
+    .container
+      .header
+        %h1= "ChIP-Atlas"
+        %p= "Visualize All Peaks from Published ChIP-Seq data."
+        
+      .container
+        - metadata = Experiment.record_by_expid(@expid)
+        %h2= @expid
+        - title = metadata[:title]
+        %h3= title != "-" ? title : "(no title)"
+        
+        %table.table
+          %tr
+            %th= "Genome"
+            %th= "Antigen Class"
+            %th= "Antigen Subclass"
+            %th= "Cell type Class"
+            %th= "Cell type Subclass"
+          %tr
+            %td= metadata[:genome]
+            %td= metadata[:agClass]
+            %td= metadata[:agSubClass]
+            %td= metadata[:clClass]
+            %td= metadata[:clSubClass]
+        
+        %table.table
+          - metadata[:attributes].split("\t").each_slice(3) do |kv_set|
+            %tr
+              - kv_set.each do |kv|
+                %th= kv.split("=").first
+            %tr
+              - kv_set.each do |kv|
+                %td= kv.split("=").last
+
+        %container
+          %row
+            .col-md-4.col-md-offset-4
+              .form-group
+                %button.btn.btn-default{ "id" => "submit", "type" => "button" }= "View Peaks on IGV"
+
+    /
+      Bootstrap Core Javascript
+      =========================
+    %script{ :src => "https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js" }
+    %script{ :src => "https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js" }
+    %script{ :src => "http://getbootstrap.com/assets/js/ie10-viewport-bug-workaround.js" }
+
+    / 'code here'
+
+    - Experiment.list_of_genome.each do |genome|
+      :javascript
+        $("##{genome} a").click(function(e){
+          e.preventDefault()
+          $(this).tab('show')
+        })
+
+    :javascript
+      $(function(){
+        $("button#submit").click(function(){
+          var button = $(this);
+          button.attr("disabled", true);
+          
+          var data = {
+            // igv: $().text
+            condition: {
+              genome: $(".genomeTab ul li.active a").text().replace(/[\n\s ]/g, ""),
+              agClass: $("#agClass option:selected").val(),
+              agSubClass: $("#agSubClass option:selected").val(),
+              clClass: $("#clClass option:selected").val(),
+              clSubClass: $("#clSubClass option:selected").val(),
+              qval: $("#qval option:selected").val()
+            }
+          };
+
+          alert(JSON.stringify(data));
+
+          $.ajax({
+            type : 'post',
+            url : "#{app_root}/browse",
+            data: JSON.stringify(data),
+            contentType: 'application/json',
+            dataType: 'json',
+            scriptCharset: 'utf-8',
+            success : function(response) {
+              alert(JSON.stringify(response));
+              window.open(response.url, "_self", "")
+            },
+            error : function(response){
+              alert(JSON.stringify(response));
+              alert("error!");
+            },
+            complete: function(){
+              button.attr("disabled", false);
+            }
+          });
+        })
+      })
