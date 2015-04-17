@@ -31,6 +31,10 @@ class PeakJohn < Sinatra::Base
       archive_path = File.join(archive_base, genome, "assembled", filename)
       "#{igv_url}/load?genome=#{genome}&file=#{archive_path}"
     end
+    
+    def list_of_genome
+      Bedfile.list_of_genome
+    end
   end
   
   get "/:source.css" do
