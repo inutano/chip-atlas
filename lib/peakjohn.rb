@@ -38,6 +38,7 @@ class Experiment < ActiveRecord::Base
     def record_by_expid(expid)
       records = self.where(:expid => expid)
       raise NameError if records.size > 1
+      record = records.first
       { :expid      => expid,
         :genome     => record.genome,
         :agClass    => record.agClass,
