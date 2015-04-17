@@ -35,6 +35,10 @@ class PeakJohn < Sinatra::Base
     def list_of_genome
       Bedfile.list_of_genome
     end
+    
+    def index_by_genome(genome)
+      Bedfile.index_by_genome(genome)
+    end
   end
   
   get "/:source.css" do
@@ -43,12 +47,6 @@ class PeakJohn < Sinatra::Base
   
   get "/" do
     haml :index
-  end
-  
-  get "/index" do
-    genome = params[:genome]
-    404 if !Bedfile.list_of_genome.include?(genome)
-    JSON.dump(Bedfile.index_by_genome(genome))
   end
   
   post "/browse" do

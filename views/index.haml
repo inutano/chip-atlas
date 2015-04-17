@@ -56,20 +56,20 @@
           - list_of_genome.each.with_index do |genome, i|
             - if i == 0
               .tab-pane.fade.in.active{ :role => "tabpanel", :id => genome }
-                - index = JSON.load(open(app_root + "/index?genome=" + genome))
+                - index = index_by_genome(genome)
                 %row
                   .col-md-4
                     %form
                       .form-group
                         %label{ :for => "agClass" }= "Antigen Class"
                         %select.form-control#agClass{ "multiple" => true, "size" => 8 }
-                          - index['agClass'].each_pair do |ag, num|
+                          - index[:agClass].each_pair do |ag, num|
                             %option{ :value => ag }= "#{ag} (#{num})"
                       
                       .form-group
                         %label{ :for => "agSubClass" }= "Antigen Sub Class"
                         %select.form-control#agSubClass{ "multiple" => true, "size" => 8  }
-                          - index['agSubClass'].each_pair do |ag, num|
+                          - index[:agSubClass].each_pair do |ag, num|
                             %option{ :value => ag }= "#{ag} (#{num})"
                   
                   .col-md-4
@@ -77,12 +77,12 @@
                       .form-group
                         %label{ :for => "clClass" }= "Cell Line Class"
                         %select.form-control#clClass{ "multiple" => true, "size" => 8  }
-                          - index['clClass'].each_pair do |cl, num|
+                          - index[:clClass].each_pair do |cl, num|
                             %option{ :value => cl }= "#{cl} (#{num})"
                         
                         %label{ :for => "clSubClass" }= "Cell Line Sub Class"
                         %select.form-control#clSubClass{ "multiple" => true, "size" => 8  }
-                          - index['clSubClass'].each_pair do |cl, num|
+                          - index[:clSubClass].each_pair do |cl, num|
                             %option{ :value => cl }= "#{cl} (#{num})"
                   
                   .col-md-4
@@ -90,7 +90,7 @@
                       .form-group
                         %label{ :for => "clSubClass" }= "Cell Line Sub Class"
                         %select.form-control#qval{ "multiple" => true, "size" => 8  }
-                          - index['qval'].each_pair do |qv, num|
+                          - index[:qval].each_pair do |qv, num|
                             %option{ :value => qv }= "#{qv} (#{num})"
                 
                 %row
