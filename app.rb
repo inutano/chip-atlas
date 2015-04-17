@@ -46,6 +46,8 @@ class PeakJohn < Sinatra::Base
   end
   
   get "/view" do
-    params[:id]
+    @expid = params[:id]
+    404 if Experiment.id_valid?(@expid)
+    haml :experiment
   end
 end

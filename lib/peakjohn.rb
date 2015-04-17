@@ -30,6 +30,23 @@ class Experiment < ActiveRecord::Base
       records.each{|n| index[n.send(column)] += 1 }
       index
     end
+    
+    def id_valid?(expid)
+      !self.where(:expid => expid).empty?
+    end
+    
+    def record_by_expid(expid)
+      records = self.where(:expid => expid)
+      raise NameError if records.size > 1
+      { :expid      => expid,
+        :genome     => record.genome,
+        :agClass    => record.agClass,
+        :agSubClass => record.agSubClass,
+        :clClass    => record.clClass,
+        :clSubClass => record.clSubClass,
+        :title      => record.title,
+        :attributes => record.additional_attributes }
+    end
   end
 end
 
