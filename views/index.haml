@@ -123,14 +123,17 @@
         $("button#submit").click(function(){
           var button = $(this);
           button.attr("disabled", true);
-
+          
           var data = {
-            genome: $("ul#genomeTab li.active a").text(),
-            agClass: $("#agClass option:selected").val(),
-            agSubClass: $("#agSubClass option:selected").val(),
-            clClass: $("#clClass option:selected").val(),
-            clSubClass: $("#clSubClass option:selected").val(),
-            qval: $("#qval option:selected").val()
+            // igv: $().text
+            condition: {
+              genome: $(".genomeTab ul li.active a").text().replace(/[\n\s ]/g, ""),
+              agClass: $("#agClass option:selected").val(),
+              agSubClass: $("#agSubClass option:selected").val(),
+              clClass: $("#clClass option:selected").val(),
+              clSubClass: $("#clSubClass option:selected").val(),
+              qval: $("#qval option:selected").val()
+            }
           };
 
           alert(JSON.stringify(data));
