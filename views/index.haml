@@ -40,7 +40,7 @@
         %h1= "ChIP-Atlas"
         %p= "Peaks from Published ChIP-Seq data. Browse locally."
 
-      .genometab{ :role => "tabpanel"}
+      .genomeTab{ :role => "tabpanel"}
         %ul.nav.nav-tabs{ :role => "tablist" }
           - list_of_genome.each.with_index do |genome, i|
             - if i == 0
@@ -125,11 +125,12 @@
           button.attr("disabled", true);
 
           var data = {
-            agClass: $("#agClass option:selected").value(),
-            agSubClass: $("#agSubClass option:selected").value(),
-            clClass: $("#clClass option:selected").value(),
-            clSubClass: $("#clSubClass option:selected").value(),
-            qval: $("#qval option:selected").value()
+            genome: $("ul#genomeTab li.active a").text(),
+            agClass: $("#agClass option:selected").val(),
+            agSubClass: $("#agSubClass option:selected").val(),
+            clClass: $("#clClass option:selected").val(),
+            clSubClass: $("#clSubClass option:selected").val(),
+            qval: $("#qval option:selected").val()
           };
 
           alert(JSON.stringify(data));
