@@ -62,13 +62,13 @@
                     %form
                       .form-group
                         %label{ :for => "agClass" }= "Antigen Class"
-                        %select.form-control#agClass{ "multiple" => true, "size" => 8 }
+                        %select.form-control#agClass{ "size" => 8 }
                           - index[:agClass].each_pair do |ag, num|
                             %option{ :value => ag }= "#{ag} (#{num})"
                       
                       .form-group
                         %label{ :for => "agSubClass" }= "Antigen Sub Class"
-                        %select.form-control#agSubClass{ "multiple" => true, "size" => 8  }
+                        %select.form-control#agSubClass{ "size" => 8  }
                           - index[:agSubClass].each_pair do |ag, num|
                             %option{ :value => ag }= "#{ag} (#{num})"
                   
@@ -76,12 +76,12 @@
                     %form
                       .form-group
                         %label{ :for => "clClass" }= "Cell Line Class"
-                        %select.form-control#clClass{ "multiple" => true, "size" => 8  }
+                        %select.form-control#clClass{ "size" => 8  }
                           - index[:clClass].each_pair do |cl, num|
                             %option{ :value => cl }= "#{cl} (#{num})"
                         
                         %label{ :for => "clSubClass" }= "Cell Line Sub Class"
-                        %select.form-control#clSubClass{ "multiple" => true, "size" => 8  }
+                        %select.form-control#clSubClass{ "size" => 8  }
                           - index[:clSubClass].each_pair do |cl, num|
                             %option{ :value => cl }= "#{cl} (#{num})"
                   
@@ -89,7 +89,7 @@
                     %form
                       .form-group
                         %label{ :for => "clSubClass" }= "Cell Line Sub Class"
-                        %select.form-control#qval{ "multiple" => true, "size" => 8  }
+                        %select.form-control#qval{ "size" => 8  }
                           - Bedfile.qval_range.each do |qv|
                             %option{ :value => qv }= "#{qv}"
                 
@@ -106,13 +106,13 @@
                     %form
                       .form-group
                         %label{ :for => "agClass" }= "Antigen Class"
-                        %select.form-control#agClass{ "multiple" => true, "size" => 8 }
+                        %select.form-control#agClass{ "size" => 8 }
                           - index[:agClass].each_pair do |ag, num|
                             %option{ :value => ag }= "#{ag} (#{num})"
                       
                       .form-group
                         %label{ :for => "agSubClass" }= "Antigen Sub Class"
-                        %select.form-control#agSubClass{ "multiple" => true, "size" => 8  }
+                        %select.form-control#agSubClass{ "size" => 8  }
                           - index[:agSubClass].each_pair do |ag, num|
                             %option{ :value => ag }= "#{ag} (#{num})"
                   
@@ -120,12 +120,12 @@
                     %form
                       .form-group
                         %label{ :for => "clClass" }= "Cell Line Class"
-                        %select.form-control#clClass{ "multiple" => true, "size" => 8  }
+                        %select.form-control#clClass{ "size" => 8  }
                           - index[:clClass].each_pair do |cl, num|
                             %option{ :value => cl }= "#{cl} (#{num})"
                         
                         %label{ :for => "clSubClass" }= "Cell Line Sub Class"
-                        %select.form-control#clSubClass{ "multiple" => true, "size" => 8  }
+                        %select.form-control#clSubClass{ "size" => 8  }
                           - index[:clSubClass].each_pair do |cl, num|
                             %option{ :value => cl }= "#{cl} (#{num})"
                   
@@ -133,7 +133,7 @@
                     %form
                       .form-group
                         %label{ :for => "clSubClass" }= "Cell Line Sub Class"
-                        %select.form-control#qval{ "multiple" => true, "size" => 8  }
+                        %select.form-control#qval{ "size" => 8  }
                           - Bedfile.qval_range.each do |qv|
                             %option{ :value => qv }= "#{qv}"
                 
@@ -157,7 +157,7 @@
           e.preventDefault()
           $(this).tab('show')
         })
-
+    
     :javascript
       $(function(){
         $("button#submit").click(function(){
