@@ -63,32 +63,30 @@
                       .form-group
                         %label{ :for => "agClass" }= "Antigen Class"
                         %select.form-control#agClass{ "size" => 8 }
-                          - index[:agClass].each_pair do |ag, num|
-                            %option{ :value => ag }= "#{ag} (#{num})"
+                          - index[:antigen].each_pair do |agClass, agSubClass|
+                            - agClassCount = agSubClass.each_value.reduce(:+)
+                            %option{ :value => agClass }= "#{agClass} (#{agClassCount})"
                       
                       .form-group
                         %label{ :for => "agSubClass" }= "Antigen Sub Class"
                         %select.form-control#agSubClass{ "size" => 8  }
-                          - index[:agSubClass].each_pair do |ag, num|
-                            %option{ :value => ag }= "#{ag} (#{num})"
                   
                   .col-md-4
                     %form
                       .form-group
-                        %label{ :for => "clClass" }= "Cell Line Class"
+                        %label{ :for => "clClass" }= "Cell Type Class"
                         %select.form-control#clClass{ "size" => 8  }
-                          - index[:clClass].each_pair do |cl, num|
-                            %option{ :value => cl }= "#{cl} (#{num})"
+                          - index[:celltype].each_pair do |clClass, clSubClass|
+                            - clClassCount = clSubClass.each_value.reduce(:+)
+                            %option{ :value => clClass }= "#{clClass} (#{clClassCount})"
                         
-                        %label{ :for => "clSubClass" }= "Cell Line Sub Class"
+                        %label{ :for => "clSubClass" }= "Cell Type Sub Class"
                         %select.form-control#clSubClass{ "size" => 8  }
-                          - index[:clSubClass].each_pair do |cl, num|
-                            %option{ :value => cl }= "#{cl} (#{num})"
                   
                   .col-md-4
                     %form
                       .form-group
-                        %label{ :for => "clSubClass" }= "Cell Line Sub Class"
+                        %label{ :for => "qval" }= "Quality Value"
                         %select.form-control#qval{ "size" => 8  }
                           - Bedfile.qval_range.each do |qv|
                             %option{ :value => qv }= "#{qv}"
@@ -107,32 +105,30 @@
                       .form-group
                         %label{ :for => "agClass" }= "Antigen Class"
                         %select.form-control#agClass{ "size" => 8 }
-                          - index[:agClass].each_pair do |ag, num|
-                            %option{ :value => ag }= "#{ag} (#{num})"
+                          - index[:antigen].each_pair do |agClass, agSubClass|
+                            - agClassCount = agSubClass.each_value.reduce(:+)
+                            %option{ :value => agClass }= "#{agClass} (#{agClassCount})"
                       
                       .form-group
                         %label{ :for => "agSubClass" }= "Antigen Sub Class"
                         %select.form-control#agSubClass{ "size" => 8  }
-                          - index[:agSubClass].each_pair do |ag, num|
-                            %option{ :value => ag }= "#{ag} (#{num})"
                   
                   .col-md-4
                     %form
                       .form-group
-                        %label{ :for => "clClass" }= "Cell Line Class"
+                        %label{ :for => "clClass" }= "Cell Type Class"
                         %select.form-control#clClass{ "size" => 8  }
-                          - index[:clClass].each_pair do |cl, num|
-                            %option{ :value => cl }= "#{cl} (#{num})"
+                          - index[:celltype].each_pair do |clClass, clSubClass|
+                            - clClassCount = clSubClass.each_value.reduce(:+)
+                            %option{ :value => clClass }= "#{clClass} (#{clClassCount})"
                         
-                        %label{ :for => "clSubClass" }= "Cell Line Sub Class"
+                        %label{ :for => "clSubClass" }= "Cell Type Sub Class"
                         %select.form-control#clSubClass{ "size" => 8  }
-                          - index[:clSubClass].each_pair do |cl, num|
-                            %option{ :value => cl }= "#{cl} (#{num})"
                   
                   .col-md-4
                     %form
                       .form-group
-                        %label{ :for => "clSubClass" }= "Cell Line Sub Class"
+                        %label{ :for => "qval" }= "Quality Value"
                         %select.form-control#qval{ "size" => 8  }
                           - Bedfile.qval_range.each do |qv|
                             %option{ :value => qv }= "#{qv}"
