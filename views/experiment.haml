@@ -68,7 +68,9 @@
             %tr
               - kv_set.each do |kv|
                 %td= kv.split("=").last
-
+                
+        %p
+          = open("http://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=sra&id=#{@expid}").read
         %container
           %row
             .col-md-4.col-md-offset-4
