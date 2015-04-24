@@ -8,6 +8,8 @@ class Experiment < ActiveRecord::Base
       self.all.map{|r| r.genome }.uniq
     end
     
+    ## Methods to display facets
+    
     def index_by_genome(genome)
       records = records_by_genome(genome)
       index_all_facets(records)
@@ -18,6 +20,25 @@ class Experiment < ActiveRecord::Base
     end
     
     def index_all_facets(records)
+      index = { :antigen => {}, :celltype => {} }
+      records.each do |record|
+        agClass    = record.agClass
+        agSubClass = record.agSubClass
+        clClass    = record.clClass
+        clSubClass = record.clSubClass
+        
+        index[:antigen][agClass] ||= {}
+        index[:antigen][agClass][agSubClass] ||= 0
+        index[:antigen][agClass][agSubClass] += 1
+
+        index[:celltype][clClass] ||= {}
+        index[:celltype][clClass][clSubClass] ||= 0
+        index[:celltype][clClass][clSubClass] += 1
+      end
+      index
+    end
+    
+    def bulk_index(records)
       index = Hash.new
       list_of_facets.each do |facet|
         index[facet] = index_with_experiment_count(records, facet)
@@ -30,6 +51,8 @@ class Experiment < ActiveRecord::Base
       records.each{|n| index[n.send(column)] += 1 }
       index
     end
+    
+    ## Methods for experiment detail template
     
     def id_valid?(expid)
       !self.where(:expid => expid).empty?
