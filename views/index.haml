@@ -158,6 +158,17 @@
           $(this).tab('show')
         })
     
+    - Experiment.list_of_facets.each do |facet|
+      :javascript
+        $("##{facet}").change(function(){
+          var str = "";
+          $("select option:selected").each(function(){
+            str += $(this).text() + "";
+          });
+          $("div##{facet}").text(str);
+        })
+        .change();
+    
     :javascript
       $(function(){
         $("button#submit").click(function(){
