@@ -154,18 +154,18 @@
           $(this).tab('show')
         })
     
-    - { :agClass => :agSubClass, :clClass => :clSubClass }.each_pair do |cl, scl|
+    - [["antigen", :agClass, :agSubClass], ["celltype", :clClass, :clSubClass]].each do |set|
       :javascript
-        var table = JSON.parse('#{JSON.dump(Experiment.index_by_genome("hg19"))}');
-        $("select##{cl}").change(function(){
-          var selected = $("select##{cl} option:selected").text().match(/^(.*)\s\(/)[1];
-          var subClassObj = table["#{cl}"][selected];
+        var table = JSON.parse('#{JSON.dump(Experiment.index_by_genome("'+$(".genomeTab ul li.active a").text().replace(/[\n\s ]/g, "")+'"))}');
+        $("select##{set[1]}").change(function(){
+          var selected = $("select##{set[1]} option:selected").text().match(/^(.*)\s\(/)[1];
+          var subClassObj = table["#{set[0]}"][selected];
           
           Object.keys(subClassObj).forEach(function(key){
             $("<option>")
               .attr("value", key)
               .append(key + " (" + this[key] + ")")
-              .appendTo($("select##{scl}"));
+              .appendTo($("select##{set[2]}"));
           }, subClassObj);
         })
     
