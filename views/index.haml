@@ -160,10 +160,10 @@
     - [["antigen", :agClass, :agSubClass], ["celltype", :clClass, :clSubClass]].each do |set|
       :javascript
         var table = JSON.parse('#{JSON.dump(Experiment.index_all_genome)}');
-        var genome = $(".genomeTab ul li.active a").text().replace(/[\n\s ]/g, "");
-        var index = table[genome];
         
         $("select##{set[1]}").change(function(){
+          var genome = $(".genomeTab ul li.active a").text().replace(/[\n\s ]/g, "");
+          var index = table[genome];
           var selected = $("select##{set[1]} option:selected").text().match(/^(.*)\s\(/)[1];
           var subClassObj = index["#{set[0]}"][selected];
           
