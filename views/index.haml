@@ -69,7 +69,7 @@
                       
                       .form-group
                         %label{ :for => "agSubClass" }= "Antigen Sub Class"
-                        %select.form-control#agSubClass{ "size" => 8  }
+                        %select.form-control.flexselect#agSubClass{ "size" => 8  }
                   
                   .col-md-4
                     %form
@@ -81,7 +81,7 @@
                             %option{ :value => clClass }= "#{clClass} (#{clClassCount})"
                         
                         %label{ :for => "clSubClass" }= "Cell Type Sub Class"
-                        %select.form-control#clSubClass{ "size" => 8  }
+                        %select.form-control.flexselect#clSubClass{ "size" => 8  }
                   
                   .col-md-4
                     %form
@@ -111,7 +111,7 @@
                       
                       .form-group
                         %label{ :for => "agSubClass" }= "Antigen Sub Class"
-                        %select.form-control#agSubClass{ "size" => 8  }
+                        %select.form-control.flexselect#agSubClass{ "size" => 8  }
                   
                   .col-md-4
                     %form
@@ -123,7 +123,7 @@
                             %option{ :value => clClass }= "#{clClass} (#{clClassCount})"
                         
                         %label{ :for => "clSubClass" }= "Cell Type Sub Class"
-                        %select.form-control#clSubClass{ "size" => 8  }
+                        %select.form-control.flexselect#clSubClass{ "size" => 8  }
                   
                   .col-md-4
                     %form
@@ -141,12 +141,15 @@
     /
       Bootstrap Core Javascript
       =========================
+    %link{ :href => "#{app_root}/css/flexselect.css", :rel => "stylesheet", :type => "text/css", :media => "screen" }
     %script{ :src => "https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js" }
     %script{ :src => "https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js" }
     %script{ :src => "http://getbootstrap.com/assets/js/ie10-viewport-bug-workaround.js" }
+    %script{ :src => "#{app_root}/js/liquidmetal.js" }
+    %script{ :src => "#{app_root}/js/jquery.flexselect.js" }
 
     / 'code here'
-
+      
     - Experiment.list_of_genome.each do |genome|
       :javascript
         $("##{genome} a").click(function(e){
@@ -156,10 +159,15 @@
     
     - [["antigen", :agClass, :agSubClass], ["celltype", :clClass, :clSubClass]].each do |set|
       :javascript
-        var table = JSON.parse('#{JSON.dump(Experiment.index_by_genome("'+$(".genomeTab ul li.active a").text().replace(/[\n\s ]/g, "")+'"))}');
+        var table = JSON.parse('#{JSON.dump(Experiment.index_all_genome)}');
+        var genome = $(".genomeTab ul li.active a").text().replace(/[\n\s ]/g, "");
+        var index = table[genome];
+        
         $("select##{set[1]}").change(function(){
           var selected = $("select##{set[1]} option:selected").text().match(/^(.*)\s\(/)[1];
-          var subClassObj = table["#{set[0]}"][selected];
+          var subClassObj = index["#{set[0]}"][selected];
+          
+          $("select##{set[2]}").empty();
           
           Object.keys(subClassObj).forEach(function(key){
             $("<option>")
@@ -168,7 +176,7 @@
               .appendTo($("select##{set[2]}"));
           }, subClassObj);
         })
-    
+        
     - Experiment.list_of_facets.each do |facet|
       :javascript
         $("##{facet}").change(function(){

@@ -19,6 +19,14 @@ class Experiment < ActiveRecord::Base
       self.where(:genome => genome)
     end
     
+    def index_all_genome
+      result = Hash.new
+      list_of_genome.map do |genome|
+        result[genome] = index_by_genome(genome)
+      end
+      result
+    end
+    
     def index_all_facets(records)
       index = { :antigen => {}, :celltype => {} }
       records.each do |record|
