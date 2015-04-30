@@ -154,6 +154,21 @@
           $(this).tab('show')
         })
     
+    - { :agClass => :agSubClass, :clClass => :clSubClass }.each_pair do |cl, scl|
+      :javascript
+        var table = JSON.parse('#{JSON.dump(Experiment.index_by_genome("hg19"))}');
+        $("select##{cl}").change(function(){
+          var selected = $("select##{cl} option:selected").text().match(/^(.*)\s\(/)[1];
+          var subClassObj = table["#{cl}"][selected];
+          
+          Object.keys(subClassObj).forEach(function(key){
+            $("<option>")
+              .attr("value", key)
+              .append(key + " (" + this[key] + ")")
+              .appendTo($("select##{scl}"));
+          }, subClassObj);
+        })
+    
     - Experiment.list_of_facets.each do |facet|
       :javascript
         $("##{facet}").change(function(){
