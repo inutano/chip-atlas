@@ -89,8 +89,8 @@
                     .form-group
                       %label{ :for => "qval" }= "Quality Value"
                       %select.form-control{ :id => "qval", :size => 8  }
-                        - @qval_range.each do |qv|
-                          %option{ :value => qv }= "#{qv}"
+                        - @qval_range.each.with_index do |qv, i|
+                          %option{ :value => qv, "selected" => "#{(i == 0) ? 'true' : '' }" }= "#{qv}"
 
               %row
                 .col-md-4.col-md-offset-4
