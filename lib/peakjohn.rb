@@ -35,12 +35,10 @@ class Experiment < ActiveRecord::Base
         clClass    = record.clClass
         clSubClass = record.clSubClass
         
-        index[:antigen][agClass] ||= {}
-        index[:antigen][agClass][agSubClass] ||= 0
+        index[:antigen][agClass] ||= Hash.new(0)
         index[:antigen][agClass][agSubClass] += 1
 
-        index[:celltype][clClass] ||= {}
-        index[:celltype][clClass][clSubClass] ||= 0
+        index[:celltype][clClass] ||= Hash.new(0)
         index[:celltype][clClass][clSubClass] += 1
       end
       index
