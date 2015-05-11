@@ -38,6 +38,8 @@ class PeakJohn < Sinatra::Base
   end
   
   get "/" do
+    @list_of_genome = Experiment.list_of_genome
+    @index_all_genome = Experiment.index_all_genome
     haml :index
   end
   

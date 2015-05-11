@@ -34,7 +34,7 @@
               %a{ :href => "#{app_root}/About" }= "About"
             %li
               %a{ :href => "#{app_root}/Document" }= "Document"
-    
+
     .container
       .header
         %h1= "ChIP-Atlas"
@@ -42,101 +42,54 @@
 
       .genomeTab{ :role => "tabpanel"}
         %ul.nav.nav-tabs{ :role => "tablist" }
-          - Experiment.list_of_genome.each.with_index do |genome, i|
-            - if i == 0
-              %li.active{ :role => "presentation" }
-                %a{ :href => "##{genome}", "aria-controls" => genome, :role => "tab", "data-toggle" => "tab" }
-                  = "#{genome}"
-            - else
-              %li{ :role => "presentation" }
-                %a{ :href => "##{genome}", "aria-controls" => genome, :role => "tab", "data-toggle" => "tab" }
-                  = "#{genome}"
+          - @list_of_genome.each.with_index do |genome, i|
+            %li{ :role => "presentation", :class => "#{(i == 0) ? 'active' : '' }" }
+              %a{ :href => "##{genome}", "aria-controls" => genome, :role => "tab", "data-toggle" => "tab" }
+                = "#{genome}"
 
         .tab-content
-          - Experiment.list_of_genome.each.with_index do |genome, i|
-            - if i == 0
-              .tab-pane.fade.in.active{ :role => "tabpanel", :id => genome }
-                - index = Experiment.index_by_genome(genome)
-                %row
-                  .col-md-4
-                    %form
-                      .form-group
-                        %label{ :for => "agClass" }= "Antigen Class"
-                        %select.form-control#agClass{ "size" => 8 }
-                          - index[:antigen].each_pair do |agClass, agSubClass|
-                            - agClassCount = agSubClass.each_value.reduce(:+)
-                            %option{ :value => agClass }= "#{agClass} (#{agClassCount})"
-                      
-                      .form-group
-                        %label{ :for => "agSubClass" }= "Antigen Sub Class"
-                        %select.form-control.flexselect#agSubClass{ "size" => 8  }
-                  
-                  .col-md-4
-                    %form
-                      .form-group
-                        %label{ :for => "clClass" }= "Cell Type Class"
-                        %select.form-control#clClass{ "size" => 8  }
-                          - index[:celltype].each_pair do |clClass, clSubClass|
-                            - clClassCount = clSubClass.each_value.reduce(:+)
-                            %option{ :value => clClass }= "#{clClass} (#{clClassCount})"
-                        
-                        %label{ :for => "clSubClass" }= "Cell Type Sub Class"
-                        %select.form-control.flexselect#clSubClass{ "size" => 8  }
-                  
-                  .col-md-4
-                    %form
-                      .form-group
-                        %label{ :for => "qval" }= "Quality Value"
-                        %select.form-control#qval{ "size" => 8  }
-                          - Bedfile.qval_range.each do |qv|
-                            %option{ :value => qv }= "#{qv}"
-                
-                %row
-                  .col-md-4.col-md-offset-4
+          - @list_of_genome.each.with_index do |genome, i|
+            .tab-pane.fade{ :role => "tabpanel", :id => genome, :class => "#{(i == 0) ? 'in active' : ''}" }
+              - index = Experiment.index_by_genome(genome)
+              %row
+                .col-md-4
+                  %form
                     .form-group
-                      %button.btn.btn-default{ "id" => "submit", "type" => "button" }= "View on IGV"
-            
-            - else
-              .tab-pane.fade{ :role => "tabpanel", :id => genome }
-                - index = Experiment.index_by_genome(genome)
-                %row
-                  .col-md-4
-                    %form
-                      .form-group
-                        %label{ :for => "agClass" }= "Antigen Class"
-                        %select.form-control#agClass{ "size" => 8 }
-                          - index[:antigen].each_pair do |agClass, agSubClass|
-                            - agClassCount = agSubClass.each_value.reduce(:+)
-                            %option{ :value => agClass }= "#{agClass} (#{agClassCount})"
-                      
-                      .form-group
-                        %label{ :for => "agSubClass" }= "Antigen Sub Class"
-                        %select.form-control.flexselect#agSubClass{ "size" => 8  }
-                  
-                  .col-md-4
-                    %form
-                      .form-group
-                        %label{ :for => "clClass" }= "Cell Type Class"
-                        %select.form-control#clClass{ "size" => 8  }
-                          - index[:celltype].each_pair do |clClass, clSubClass|
-                            - clClassCount = clSubClass.each_value.reduce(:+)
-                            %option{ :value => clClass }= "#{clClass} (#{clClassCount})"
-                        
-                        %label{ :for => "clSubClass" }= "Cell Type Sub Class"
-                        %select.form-control.flexselect#clSubClass{ "size" => 8  }
-                  
-                  .col-md-4
-                    %form
-                      .form-group
-                        %label{ :for => "qval" }= "Quality Value"
-                        %select.form-control#qval{ "size" => 8  }
-                          - Bedfile.qval_range.each do |qv|
-                            %option{ :value => qv }= "#{qv}"
-                
-                %row
-                  .col-md-4.col-md-offset-4
+                      %label{ :for => "agClass" }= "Antigen Class"
+                      %select.form-control#agClass{ "size" => 8 }
+                        - index[:antigen].each_pair do |agClass, agSubClass|
+                          - agClassCount = agSubClass.each_value.reduce(:+)
+                          %option{ :value => agClass }= "#{agClass} (#{agClassCount})"
+
                     .form-group
-                      %button.btn.btn-default{ "id" => "submit", "type" => "button" }= "View on IGV"
+                      %label{ :for => "agSubClass" }= "Antigen Sub Class"
+                      %select.form-control.flexselect#agSubClass{ "size" => 8  }
+
+                .col-md-4
+                  %form
+                    .form-group
+                      %label{ :for => "clClass" }= "Cell Type Class"
+                      %select.form-control#clClass{ "size" => 8  }
+                        - index[:celltype].each_pair do |clClass, clSubClass|
+                          - clClassCount = clSubClass.each_value.reduce(:+)
+                          %option{ :value => clClass }= "#{clClass} (#{clClassCount})"
+
+                    .form-group
+                      %label{ :for => "clSubClass" }= "Cell Type Sub Class"
+                      %select.form-control.flexselect#clSubClass{ "size" => 8  }
+
+                .col-md-4
+                  %form
+                    .form-group
+                      %label{ :for => "qval" }= "Quality Value"
+                      %select.form-control#qval{ "size" => 8  }
+                        - Bedfile.qval_range.each do |qv|
+                          %option{ :value => qv }= "#{qv}"
+
+              %row
+                .col-md-4.col-md-offset-4
+                  .form-group
+                    %button.btn.btn-default{ "id" => "submit", "type" => "button" }= "View on IGV"
 
     /
       Bootstrap Core Javascript
@@ -149,51 +102,43 @@
     %script{ :src => "#{app_root}/js/jquery.flexselect.js" }
 
     / 'code here'
-      
-    - Experiment.list_of_genome.each do |genome|
-      :javascript
-        $("##{genome} a").click(function(e){
-          e.preventDefault()
+
+    :javascript
+      // tab controller
+      $.each(#{@list_of_genome}, function(i, value){
+        $('#' + value + ' a').click(function(e){
+          e.preventDefault();
           $(this).tab('show')
         })
-    
-    - [["antigen", :agClass, :agSubClass], ["celltype", :clClass, :clSubClass]].each do |set|
-      :javascript
-        var table = JSON.parse('#{JSON.dump(Experiment.index_all_genome)}');
-        
-        $("select##{set[1]}").change(function(){
-          var genome = $(".genomeTab ul li.active a").text().replace(/[\n\s ]/g, "");
-          var index = table[genome];
-          var selected = $("select##{set[1]} option:selected").text().match(/^(.*)\s\(/)[1];
-          var subClassObj = index["#{set[0]}"][selected];
+      });
+      
+      // generate select list
+      var indexAll = JSON.parse('#{JSON.dump(@index_all_genome)}');
+      $.each([["antigen", "ag"], ["celltype", "cl"]], function(i, value){
+        $('select#' + value[1] + 'Class').change(function(){
+          var genome = $('.genomeTab ul li.active a').text().replace(/[\n\s ]/g, "");
+          var index = indexAll[genome];
+          var selected = $('select#' + value[1] + 'Class option:selected').text().replace(/\s\(.*$/,"");
+          var subClassObj = index[value[0]][selected];
           
-          $("select##{set[2]}").empty();
-          
+          $('select#' + value[1] + 'SubClass').empty();
+
           Object.keys(subClassObj).forEach(function(key){
             $("<option>")
               .attr("value", key)
               .append(key + " (" + this[key] + ")")
-              .appendTo($("select##{set[2]}"));
+              .appendTo('select#' + value[1] + 'SubClass');
           }, subClassObj);
         })
-        
-    - Experiment.list_of_facets.each do |facet|
-      :javascript
-        $("##{facet}").change(function(){
-          var str = "";
-          $("select option:selected").each(function(){
-            str += $(this).text() + "";
-          });
-          $("div##{facet}").text(str);
-        })
-        .change();
+      })
     
+    // send data to get igv url
     :javascript
       $(function(){
         $("button#submit").click(function(){
           var button = $(this);
           button.attr("disabled", true);
-          
+
           var data = {
             // igv: $().text
             condition: {
