@@ -55,47 +55,47 @@
                 .col-md-4
                   %form
                     .form-group
-                      %label{ :for => "agClass" }= "Antigen Class"
-                      %select.form-control#agClass{ "size" => 8 }
+                      %label{ :for => "#{genome}agClass" }= "Antigen Class"
+                      %select.form-control{ :id => "#{genome}agClass", :size => 8 }
                         - antigen = index[:antigen]
                         - total = antigen.values.map{|subclass_count| subclass_count.values }.flatten.reduce(:+)
-                        %option{ :value => "All antigens" }= "All antigens (#{total})"
+                        %option{ :value => "All antigens", "selected" => true }= "All antigens (#{total})"
                         - antigen.each_pair do |agClass, agSubClass|
                           - agClassCount = agSubClass.each_value.reduce(:+)
                           %option{ :value => agClass }= "#{agClass} (#{agClassCount})"
 
                     .form-group
-                      %label{ :for => "agSubClass" }= "Antigen Sub Class"
-                      %select.form-control.flexselect#agSubClass{ "size" => 8  }
+                      %label{ :for => "#{genome}agSubClass" }= "Antigen Sub Class"
+                      %select.form-control.flexselect{ :id => "#{genome}agSubClass", :size => 8 }
 
                 .col-md-4
                   %form
                     .form-group
-                      %label{ :for => "clClass" }= "Cell Type Class"
-                      %select.form-control#clClass{ "size" => 8  }
+                      %label{ :for => "#{genome}clClass" }= "Cell Type Class"
+                      %select.form-control{ :id => "#{genome}clClass", :size => 8 }
                         - celltype = index[:celltype]
                         - total = celltype.values.map{|subclass_count| subclass_count.values }.flatten.reduce(:+)
-                        %option{ :value => "All cell types" }= "All cell types (#{total})"
+                        %option{ :value => "All cell types", "selected" => true }= "All cell types (#{total})"
                         - celltype.each_pair do |clClass, clSubClass|
                           - clClassCount = clSubClass.each_value.reduce(:+)
                           %option{ :value => clClass }= "#{clClass} (#{clClassCount})"
 
                     .form-group
-                      %label{ :for => "clSubClass" }= "Cell Type Sub Class"
-                      %select.form-control.flexselect#clSubClass{ "size" => 8  }
+                      %label{ :for => "#{genome}clSubClass" }= "Cell Type Sub Class"
+                      %select.form-control.flexselect{ :id => "#{genome}clSubClass", :size => 8 }
 
                 .col-md-4
                   %form
                     .form-group
                       %label{ :for => "qval" }= "Quality Value"
-                      %select.form-control#qval{ "size" => 8  }
+                      %select.form-control{ :id => "qval", :size => 8  }
                         - @qval_range.each do |qv|
                           %option{ :value => qv }= "#{qv}"
 
               %row
                 .col-md-4.col-md-offset-4
                   .form-group
-                    %button.btn.btn-default{ "id" => "submit", "type" => "button" }= "View on IGV"
+                    %button.btn.btn-default{ :id => "submit", :type => "button" }= "View on IGV"
 
     /
       Bootstrap Core Javascript
@@ -122,28 +122,30 @@
       $('a[data-toggle="tab"]').on('shown.bs.tab', function(e){
         var activatedTab = e.target;
         var previousTab = e.relatedTarget;
+        var genome = $('.genomeTab ul li.active a').text().replace(/[\n\s ]/g, "");
         $.each(["ag","cl"], function(i, value){
-          $('select#' + value + 'SubClass').empty();
+          $('select#' + genome + value + 'SubClass').empty();
         })
       })
       
       // generate subclass list
       var indexAll = JSON.parse('#{JSON.dump(@index_all_genome)}');
-      $.each([["antigen", "ag"], ["celltype", "cl"]], function(i, value){
-        $('select#' + value[1] + 'Class').change(function(){
-          var genome = $('.genomeTab ul li.active a').text().replace(/[\n\s ]/g, "");
-          var index = indexAll[genome];
-          var selected = $('select#' + value[1] + 'Class option:selected').val();
-          var subClassObj = index[value[0]][selected];
-          
-          $('select#' + value[1] + 'SubClass').empty();
-          
-          Object.keys(subClassObj).forEach(function(key){
-            $("<option>")
-              .attr("value", key)
-              .append(key + " (" + this[key] + ")")
-              .appendTo('select#' + value[1] + 'SubClass');
-          }, subClassObj);
+      $.each(#{@list_of_genome}, function(ig, genome){
+        $.each([["antigen", "ag"], ["celltype", "cl"]], function(it, type){
+          $('select#' + genome + type[1] + 'Class').change(function(){
+            var genomeSelected = $('.genomeTab ul li.active a').text().replace(/[\n\s ]/g, "");
+            var valueSelected  = $('select#' + genomeSelected + type[1] + 'Class option:selected').val();
+            var subClassObj    = indexAll[genomeSelected][type[0]][valueSelected];
+            
+            $('select#' + genomeSelected + type[1] + 'SubClass').empty();
+            
+            Object.keys(subClassObj).forEach(function(key){
+              $("<option>")
+                .attr("value", key)
+                .append(key + " (" + this[key] + ")")
+                .appendTo('select#' + genomeSelected + type[1] + 'SubClass');
+            }, subClassObj);
+          });
         })
       })
       
@@ -153,15 +155,16 @@
           var button = $(this);
           button.attr("disabled", true);
 
+          var genome = $('.genomeTab ul li.active a').text().replace(/[\n\s ]/g, "");
           var data = {
             // igv: $().text
             condition: {
-              genome: $(".genomeTab ul li.active a").text().replace(/[\n\s ]/g, ""),
-              agClass: $("#agClass option:selected").val(),
-              agSubClass: $("#agSubClass option:selected").val(),
-              clClass: $("#clClass option:selected").val(),
-              clSubClass: $("#clSubClass option:selected").val(),
-              qval: $("#qval option:selected").val()
+              genome: genome,
+              agClass: $('#' + genome + 'agClass option:selected').val(),
+              agSubClass: $('#' + genome + 'agSubClass option:selected').val(),
+              clClass: $('#' + genome + 'clClass option:selected').val(),
+              clSubClass: $('#' + genome + 'clSubClass option:selected').val(),
+              qval: $('#qval option:selected').val()
             }
           };
 
