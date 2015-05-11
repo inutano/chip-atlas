@@ -145,9 +145,9 @@ class Bedfile < ActiveRecord::Base
     def filesearch(condition)
       self.where(:genome => condition["genome"])
         .where(:agClass => condition["agClass"])
-        .where(:agSubClass => condition["agSubClass"])
+        .where(:agSubClass => condition["agSubClass"] || "-")
         .where(:clClass => condition["clClass"])
-        .where(:clSubClass => condition["clSubClass"])
+        .where(:clSubClass => condition["clSubClass"] || "-")
         .where(:qval => condition["qval"])
     end
   end
