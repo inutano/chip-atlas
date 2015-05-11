@@ -5,7 +5,8 @@ class Experiment < ActiveRecord::Base
     end
     
     def list_of_genome
-      self.all.map{|r| r.genome }.uniq
+      [ "hg19", "mm9", "dm3", "ce10", "sacCer3"]
+      # self.all.map{|r| r.genome }.uniq
     end
     
     ## Methods to display facets
