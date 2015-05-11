@@ -28,7 +28,7 @@ class PeakJohn < Sinatra::Base
       genome    = condition["genome"]
       filename  = Bedfile.get_filename(condition)
     
-      archive_path = File.join(archive_base, genome, "assembled", filename)
+      archive_path = File.join(archive_base, genome, "assembled", filename + ".bed")
       "#{igv_url}/load?genome=#{genome}&file=#{archive_path}"
     end
   end
