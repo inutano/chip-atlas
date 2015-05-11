@@ -50,7 +50,7 @@
         .tab-content
           - @list_of_genome.each.with_index do |genome, i|
             .tab-pane.fade{ :role => "tabpanel", :id => genome, :class => "#{(i == 0) ? 'in active' : ''}" }
-              - index = Experiment.index_by_genome(genome)
+              - index = @index_all_genome[genome]
               %row
                 .col-md-4
                   %form
@@ -83,7 +83,7 @@
                     .form-group
                       %label{ :for => "qval" }= "Quality Value"
                       %select.form-control#qval{ "size" => 8  }
-                        - Bedfile.qval_range.each do |qv|
+                        - @qval_range.each do |qv|
                           %option{ :value => qv }= "#{qv}"
 
               %row
