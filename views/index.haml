@@ -57,7 +57,10 @@
                     .form-group
                       %label{ :for => "agClass" }= "Antigen Class"
                       %select.form-control#agClass{ "size" => 8 }
-                        - index[:antigen].each_pair do |agClass, agSubClass|
+                        - antigen = index[:antigen]
+                        - total = antigen.values.map{|subclass_count| subclass_count.values }.flatten.reduce(:+)
+                        %option{ :value => "All antigens" }= "All antigens (#{total})"
+                        - antigen.each_pair do |agClass, agSubClass|
                           - agClassCount = agSubClass.each_value.reduce(:+)
                           %option{ :value => agClass }= "#{agClass} (#{agClassCount})"
 
@@ -70,7 +73,10 @@
                     .form-group
                       %label{ :for => "clClass" }= "Cell Type Class"
                       %select.form-control#clClass{ "size" => 8  }
-                        - index[:celltype].each_pair do |clClass, clSubClass|
+                        - celltype = index[:celltype]
+                        - total = celltype.values.map{|subclass_count| subclass_count.values }.flatten.reduce(:+)
+                        %option{ :value => "All cell types" }= "All cell types (#{total})"
+                        - celltype.each_pair do |clClass, clSubClass|
                           - clClassCount = clSubClass.each_value.reduce(:+)
                           %option{ :value => clClass }= "#{clClass} (#{clClassCount})"
 
