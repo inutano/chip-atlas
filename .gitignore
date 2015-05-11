@@ -1,4 +1,4 @@
-public
+public/src
 vendor
 .sass-cache
 database.sqlite

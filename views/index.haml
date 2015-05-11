@@ -11,7 +11,7 @@
     %title= "ChIP-Atlas"
 
     / Bootstrap core CSS
-    %link{ :href => "https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css", :rel => "stylesheet" }
+    %link{ :href => "#{app_root}/css/bootstrap.min.css", :rel => "stylesheet" }
 
     / Custom style for this website
     %link{ :href => "#{app_root}/style.css", :rel => "stylesheet"}
@@ -101,9 +101,9 @@
       Bootstrap Core Javascript
       =========================
     %link{ :href => "#{app_root}/css/flexselect.css", :rel => "stylesheet", :type => "text/css", :media => "screen" }
-    %script{ :src => "https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js" }
-    %script{ :src => "https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js" }
-    %script{ :src => "http://getbootstrap.com/assets/js/ie10-viewport-bug-workaround.js" }
+    %script{ :src => "#{app_root}/js/jquery.min.js" }
+    %script{ :src => "#{app_root}/js/bootstrap.min.js" }
+    %script{ :src => "#{app_root}/js/ie10-viewport-bug-workaround.js" }
     %script{ :src => "#{app_root}/js/liquidmetal.js" }
     %script{ :src => "#{app_root}/js/jquery.flexselect.js" }
 
@@ -118,17 +118,26 @@
         })
       });
       
-      // generate select list
+      // tab trigger event
+      $('a[data-toggle="tab"]').on('shown.bs.tab', function(e){
+        var activatedTab = e.target;
+        var previousTab = e.relatedTarget;
+        $.each(["ag","cl"], function(i, value){
+          $('select#' + value + 'SubClass').empty();
+        })
+      })
+      
+      // generate subclass list
       var indexAll = JSON.parse('#{JSON.dump(@index_all_genome)}');
       $.each([["antigen", "ag"], ["celltype", "cl"]], function(i, value){
         $('select#' + value[1] + 'Class').change(function(){
           var genome = $('.genomeTab ul li.active a').text().replace(/[\n\s ]/g, "");
           var index = indexAll[genome];
-          var selected = $('select#' + value[1] + 'Class option:selected').text().replace(/\s\(.*$/,"");
+          var selected = $('select#' + value[1] + 'Class option:selected').val();
           var subClassObj = index[value[0]][selected];
           
           $('select#' + value[1] + 'SubClass').empty();
-
+          
           Object.keys(subClassObj).forEach(function(key){
             $("<option>")
               .attr("value", key)
@@ -137,9 +146,8 @@
           }, subClassObj);
         })
       })
-    
-    // send data to get igv url
-    :javascript
+      
+      // send data to get igv url
       $(function(){
         $("button#submit").click(function(){
           var button = $(this);
