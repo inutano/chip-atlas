@@ -54,16 +54,17 @@
               %row
                 .col-md-4
                   %form
-                    .form-group
-                      %label{ :for => "#{genome}agClass" }= "Antigen Class"
-                      %select.form-control{ :id => "#{genome}agClass", :size => 8 }
-                        - antigen = index[:antigen]
-                        - total = antigen.values.map{|subclass_count| subclass_count.values }.flatten.reduce(:+)
-                        %option{ :value => "All antigens", "selected" => true }= "All antigens (#{total})"
-                        - antigen.each_pair do |agClass, agSubClass|
-                          - agClassCount = agSubClass.each_value.reduce(:+)
-                          %option{ :value => agClass }= "#{agClass} (#{agClassCount})"
-
+                    .panel.panel-default
+                      .panel-heading{ :id => "heading-#{genome}agClass" }
+                        %h4.panel-title
+                          Antigen Class
+                      .panel-body
+                        %select.form-control{ :id => "#{genome}agClass", :size => 10 }
+                          - ag = index[:antigen]
+                          %option{ :value => "All antigens", "selected" => true }= "All antigens (#{ag.values.map{|n| n.values }.flatten.reduce(:+)})"
+                          - ag.each_pair do |agClass, agSubClass|
+                            %option{ :value => agClass }= "#{agClass} (#{agSubClass.each_value.reduce(:+)})"
+                          
                     .panel.panel-default
                       .panel-heading{ :id => "heading-#{genome}agSubClass" }
                         %h4.panel-title
@@ -75,15 +76,16 @@
 
                 .col-md-4
                   %form
-                    .form-group
-                      %label{ :for => "#{genome}clClass" }= "Cell Type Class"
-                      %select.form-control{ :id => "#{genome}clClass", :size => 8 }
-                        - celltype = index[:celltype]
-                        - total = celltype.values.map{|subclass_count| subclass_count.values }.flatten.reduce(:+)
-                        %option{ :value => "All cell types", "selected" => true }= "All cell types (#{total})"
-                        - celltype.each_pair do |clClass, clSubClass|
-                          - clClassCount = clSubClass.each_value.reduce(:+)
-                          %option{ :value => clClass }= "#{clClass} (#{clClassCount})"
+                    .panel.panel-default
+                      .panel-heading{ :id => "heading-#{genome}clClass" }
+                        %h4.panel-title
+                          Cell Type Class
+                      .panel-body
+                        %select.form-control{ :id => "#{genome}clClass", :size => 10 }
+                          - cl = index[:celltype]
+                          %option{ :value => "All cell types", "selected" => true }= "All cell types (#{cl.values.map{|n| n.values }.flatten.reduce(:+)})"
+                          - cl.each_pair do |clClass, clSubClass|
+                            %option{ :value => clClass }= "#{clClass} (#{clSubClass.each_value.reduce(:+)})"
 
                     .panel.panel-default
                       .panel-heading{ :id => "heading-#{genome}clSubClass"}
@@ -96,16 +98,17 @@
                     
                 .col-md-4
                   %form
-                    .form-group
-                      %label{ :for => "qval" }= "Quality Value"
-                      %select.form-control{ :id => "qval", :size => 8  }
-                        - @qval_range.each.with_index do |qv, i|
-                          %option{ :value => qv, "selected" => "#{(i == 0) ? 'true' : '' }" }= "#{qv}"
-
-              %row
-                .col-md-4.col-md-offset-4
-                  .form-group
-                    %button.btn.btn-default{ :id => "submit", :type => "button" }= "View on IGV"
+                    .panel.panel-default
+                      .panel-heading{ :id => "heading-#{genome}qval"}
+                        %h4.panel-title
+                          Quality Value Threshold
+                      .panel-body
+                        %select.form-control{ :id => "#{genome}qval", :size => 5 }
+                          - @qval_range.each.with_index do |qv, i|
+                            %option{ :value => qv, "selected" => "#{(i == 0) ? 'true' : '' }" }= "#{qv}"
+                  
+                  .button-submit
+                    %button.btn.btn-primary.btn-lg.btn-block{ :id => "submit", :type => "button" }= "View on IGV"
 
     /
       Bootstrap Core Javascript
