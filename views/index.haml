@@ -80,6 +80,7 @@
                               Antigen Sub Class
                         .collapse{ :id => "collapse-#{sclass_id}" }
                           .panel-body
+                            .panel-message{ :id => "#{sclass_id}" }
                             %select.form-control.flexselect{ :id => "#{sclass_id}", :size => 8 }
                               %option{ :value => "-", "selected" => true }= "All"
                 
@@ -159,6 +160,23 @@
               switch($(this).attr("id").replace(genome,"").replace("SubClass","")){
                 case "ag":
                   $('select#' + genome + 'clSubClass').val("-");
+                  var button = $('<button>')
+                        .attr("type","button")
+                        .attr("class","close")
+                        .attr("data-dismiss","alert")
+                        .attr("aria-label","Close")
+                        .append('<span aria-hidden="true">×</span>');
+                        
+                  var message = $('<div>')
+                        .attr("class","alert alert-warning alert-dismissible fade in")
+                        .attr("role","alert")
+                        .append(button)
+                        .append('Selecting one SubClass disables another SubClass')
+                        .append('</div>');
+                        
+                  $('.panel-message#' + genome + 'agSubClass')
+                    .append(message);
+
                   break;
                 case "cl":
                   $('select#' + genome + 'agSubClass').val("-");
@@ -168,7 +186,7 @@
           });
         });
       });
-      
+
       // tab trigger event
       $('a[data-toggle="tab"]').on('shown.bs.tab', function(e){
         var activatedTab = e.target;
