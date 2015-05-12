@@ -67,7 +67,7 @@
                     .panel.panel-default
                       .panel-heading{ :id => "heading-#{genome}agSubClass" }
                         %h4.panel-title
-                          %a{ "data-toggle" => "collapse", :href => "#collapse-#{genome}agSubClass", "aria-expanded" => false, "aria-controls" => "collapse-#{genome}agSubClass"}
+                          %a{ "data-toggle" => "collapse", "aria-controls" => "collapse-#{genome}agSubClass", :id => "toggle-#{genome}agSubClass" }
                             Antigen Sub Class
                       .collapse{ :id => "collapse-#{genome}agSubClass" }
                         .panel-body
@@ -88,7 +88,7 @@
                     .panel.panel-default
                       .panel-heading{ :id => "heading-#{genome}clSubClass"}
                         %h4.panel-title
-                          %a{ "data-toggle" => "collapse", :href => "#collapse-#{genome}clSubClass", "aria-expanded" => false, "aria-controls" => "collapse-#{genome}clSubClass"}
+                          %a{ "data-toggle" => "collapse", "aria-controls" => "collapse-#{genome}clSubClass", :id => "toggle-#{genome}clSubClass"}
                             Cell Type Sub Class
                       .collapse{ :id => "collapse-#{genome}clSubClass" }
                         .panel-body
@@ -136,7 +136,16 @@
         $.each(["ag","cl"], function(i, value){
           $('select#' + genome + value + 'SubClass').empty();
         })
-      })
+      });
+      
+      // collapse controller
+      $.each(#{@list_of_genome}, function(i, genome){
+        $.each(["ag", "cl"], function(i, type){
+          $('#toggle-' + genome + type + 'SubClass').click(function(){
+            $('#collapse-' + genome + type + 'SubClass').collapse('toggle');
+          });
+        });
+      });
       
       // generate subclass list
       var indexAll = JSON.parse('#{JSON.dump(@index_all_genome)}');
