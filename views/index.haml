@@ -59,7 +59,7 @@
                         %h4.panel-title
                           Antigen Class
                       .panel-body
-                        %select.form-control{ :id => "#{genome}agClass", :size => 10 }
+                        %select.form-control{ :id => "#{genome}agClass", :size => 8 }
                           - ag = index[:antigen]
                           %option{ :value => "All antigens", "selected" => true }= "All antigens (#{ag.values.map{|n| n.values }.flatten.reduce(:+)})"
                           - ag.each_pair do |agClass, agSubClass|
@@ -81,7 +81,7 @@
                         %h4.panel-title
                           Cell Type Class
                       .panel-body
-                        %select.form-control{ :id => "#{genome}clClass", :size => 10 }
+                        %select.form-control{ :id => "#{genome}clClass", :size => 8 }
                           - cl = index[:celltype]
                           %option{ :value => "All cell types", "selected" => true }= "All cell types (#{cl.values.map{|n| n.values }.flatten.reduce(:+)})"
                           - cl.each_pair do |clClass, clSubClass|
