@@ -109,11 +109,39 @@
     / 'code here'
 
     :javascript
-      // tab controller
-      $.each(#{@list_of_genome}, function(i, value){
-        $('#' + value + ' a').click(function(e){
+      // retrieve index
+      var indexAll = JSON.parse('#{JSON.dump(@index_all_genome)}');
+
+      // iterate for each genomes
+      $.each(#{@list_of_genome}, function(i, genome){
+        // set tab controller
+        $('#' + genome + ' a').click(function(e){
           e.preventDefault();
           $(this).tab('show')
+        })
+        
+        // collapse controller
+        $.each(["ag", "cl"], function(i, type){
+          $('#toggle-' + genome + type + 'SubClass').click(function(){
+            $('#collapse-' + genome + type + 'SubClass').collapse('toggle');
+          });
+        });
+        
+        // generate select tags for subclass
+        $.each([["antigen", "ag"], ["celltype", "cl"]], function(it, type){
+          $('select#' + genome + type[1] + 'Class').change(function(){
+            var genomeSelected = $('.genomeTab ul li.active a').text().replace(/[\n\s ]/g, "");
+            var valueSelected  = $('select#' + genomeSelected + type[1] + 'Class option:selected').val();
+            var subClassObj    = indexAll[genomeSelected][type[0]][valueSelected];
+            
+            $('select#' + genomeSelected + type[1] + 'SubClass').empty();
+            Object.keys(subClassObj).forEach(function(key){
+              $("<option>")
+                .attr("value", key)
+                .append(key + " (" + this[key] + ")")
+                .appendTo('select#' + genomeSelected + type[1] + 'SubClass');
+            }, subClassObj);
+          });
         })
       });
       
@@ -126,36 +154,6 @@
           $('select#' + genome + value + 'SubClass').empty();
         })
       });
-      
-      // collapse controller
-      $.each(#{@list_of_genome}, function(i, genome){
-        $.each(["ag", "cl"], function(i, type){
-          $('#toggle-' + genome + type + 'SubClass').click(function(){
-            $('#collapse-' + genome + type + 'SubClass').collapse('toggle');
-          });
-        });
-      });
-      
-      // generate subclass list
-      var indexAll = JSON.parse('#{JSON.dump(@index_all_genome)}');
-      $.each(#{@list_of_genome}, function(ig, genome){
-        $.each([["antigen", "ag"], ["celltype", "cl"]], function(it, type){
-          $('select#' + genome + type[1] + 'Class').change(function(){
-            var genomeSelected = $('.genomeTab ul li.active a').text().replace(/[\n\s ]/g, "");
-            var valueSelected  = $('select#' + genomeSelected + type[1] + 'Class option:selected').val();
-            var subClassObj    = indexAll[genomeSelected][type[0]][valueSelected];
-            
-            $('select#' + genomeSelected + type[1] + 'SubClass').empty();
-            
-            Object.keys(subClassObj).forEach(function(key){
-              $("<option>")
-                .attr("value", key)
-                .append(key + " (" + this[key] + ")")
-                .appendTo('select#' + genomeSelected + type[1] + 'SubClass');
-            }, subClassObj);
-          });
-        })
-      })
       
       // send data to get igv url
       $(function(){
