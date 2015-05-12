@@ -78,6 +78,33 @@ class Experiment < ActiveRecord::Base
         :title      => record.title,
         :attributes => record.additional_attributes }
     end
+    
+    def fetch_ncbi_metadata(expid)
+      url = "http://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=sra&id=#{expid}"
+      experiment = Nokogiri::XML(open(url))
+      { expid: expid,
+        library_description: {
+          library_name:                  experiment.css("LIBRARY_NAME").inner_text,
+          library_strategy:              experiment.css("LIBRARY_STRATEGY").inner_text,
+          library_source:                experiment.css("LIBRARY_SOURCE").inner_text,
+          library_selection:             experiment.css("LIBRARY_SELECTION").inner_text,
+          library_layout:                experiment.css("LIBRARY_LAYOUT").first.children[0].name,
+          library_orientation:           experiment.css("LIBRARY_LAYOUT").first.children[0].attr("ORIENTATION").to_s,
+          library_nominal_length:        experiment.css("LIBRARY_LAYOUT").first.children[0].attr("NOMINAL_LENGTH").to_s,
+          library_nominal_sdev:          experiment.css("LIBRARY_LAYOUT").first.children[0].attr("NOMINAL_SDEV").to_s,
+          library_construction_protocol: experiment.css("LIBRARY_CONSTRUCTION_PROTOCOL").inner_text,
+        },
+        platform_information: {
+          platform:         experiment.css("PLATFORM").first.children[0].name,
+          instrument_model: experiment.css("INSTRUMENT_MODEL").inner_text,
+          cycle_sequence:   experiment.css("CYCLE_SEQUENCE").inner_text,
+          cycle_count:      experiment.css("CYCLE_COUNT").inner_text,
+          flow_sequence:    experiment.css("FLOW_SEQUENCE").inner_text,
+          flow_count:       experiment.css("FLOW_COUNT").inner_text,
+          key_sequence:     experiment.css("KEY_SEQUENCE").inner_text,
+        }
+      }
+    end
   end
 end
 

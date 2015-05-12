@@ -36,18 +36,20 @@
               %a{ :href => "#{app_root}/Document" }= "Document"
 
     .container
-      .header
-        %h1= "ChIP-Atlas"
-        %p= "Visualize All Peaks from Published ChIP-Seq data."
+      - metadata = Experiment.record_by_expid(@expid)
+      %row
+        .col-md-10
+          .page-header
+            %h2
+              = @expid
+              .small
+                = metadata[:title] != "-" ? metadata[:title] : "no title"
+        .col-md-2
+          .button-submit
+            %button.btn.btn-primary.btn-lg.btn-block= "View on IGV"
 
-      .container
-        - metadata = Experiment.record_by_expid(@expid)
-        .page-header
-          %h2
-            = @expid
-            .small
-              = metadata[:title] != "-" ? metadata[:title] : "no title"
-        %section
+      %row
+        .col-md-12
           %h3= "Curated Sample Data"
           %table.table.table-bordered
             %tr
@@ -62,7 +64,9 @@
               %td= metadata[:agSubClass]
               %td= metadata[:clClass]
               %td= metadata[:clSubClass]
-        %section
+
+      %row
+        .col-md-12
           %h3= "Attributes by Original Data Submitter"
           %table.table.table-bordered
             - metadata[:attributes].split("\t").each_slice(6) do |kv_set|
@@ -73,13 +77,36 @@
                 - kv_set.each do |kv|
                   %td= kv.split("=").last
 
-        %p
-          = open("http://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=sra&id=#{@expid}").read
-        %container
-          %row
-            .col-md-4.col-md-offset-4
-              .form-group
-                %button.btn.btn-default{ "id" => "submit", "type" => "button" }= "View Peaks on IGV"
+      %row
+        .col-md-12
+          %h3= "Metadata from Sequence Read Archive"
+          
+          %h4= "Library Description"
+          %table.table.table-bordered
+            %tr
+              - @ncbi[:library_description].each_pair do |k,v|
+                - if v != ""
+                  %th= k.to_s
+            %tr
+              - @ncbi[:library_description].each_pair do |k,v|
+                - if v != ""
+                  %th= v.to_s
+
+          %h4= "Platform Information"
+          %table.table.table-bordered
+            %tr
+              - @ncbi[:platform_information].each_pair do |k,v|
+                - if v != ""
+                  %th= k.to_s
+            %tr
+              - @ncbi[:platform_information].each_pair do |k,v|
+                - if v != ""
+                  %th= v.to_s
+
+      %row
+        .col-md-12
+          %h3= "Metadata from DBCLS SRA"
+
 
     /
       Bootstrap Core Javascript
@@ -89,52 +116,3 @@
     %script{ :src => "http://getbootstrap.com/assets/js/ie10-viewport-bug-workaround.js" }
 
     / 'code here'
-
-    - Experiment.list_of_genome.each do |genome|
-      :javascript
-        $("##{genome} a").click(function(e){
-          e.preventDefault()
-          $(this).tab('show')
-        })
-
-    :javascript
-      $(function(){
-        $("button#submit").click(function(){
-          var button = $(this);
-          button.attr("disabled", true);
-
-          var data = {
-            // igv: $().text
-            condition: {
-              genome: $(".genomeTab ul li.active a").text().replace(/[\n\s ]/g, ""),
-              agClass: $("#agClass option:selected").val(),
-              agSubClass: $("#agSubClass option:selected").val(),
-              clClass: $("#clClass option:selected").val(),
-              clSubClass: $("#clSubClass option:selected").val(),
-              qval: $("#qval option:selected").val()
-            }
-          };
-
-          alert(JSON.stringify(data));
-
-          $.ajax({
-            type : 'post',
-            url : "#{app_root}/browse",
-            data: JSON.stringify(data),
-            contentType: 'application/json',
-            dataType: 'json',
-            scriptCharset: 'utf-8',
-            success : function(response) {
-              alert(JSON.stringify(response));
-              window.open(response.url, "_self", "")
-            },
-            error : function(response){
-              alert(JSON.stringify(response));
-              alert("error!");
-            },
-            complete: function(){
-              button.attr("disabled", false);
-            }
-          });
-        })
-      })

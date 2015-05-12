@@ -46,13 +46,15 @@ class PeakJohn < Sinatra::Base
   end
   
   post "/browse" do
+    content_type "application/json"
     JSON.dump({ "url" => igv_browsing_url(JSON.parse(request.body.read)) })
   end
   
   get "/view" do
     @expid = params[:id]
-    @ncbi  = Nokogiri::XML(open("http://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=sra&id=#{@expid}"))
     404 if Experiment.id_valid?(@expid)
+    @ncbi  = Experiment.fetch_ncbi_metadata(@expid)
+    puts @ncbi
     haml :experiment
   end
 end
