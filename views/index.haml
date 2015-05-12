@@ -151,6 +151,22 @@
             }, subClassObj);
           });
         })
+        
+        // hide another subclass when one subclass is selected
+        $.each([["antigen", "ag"],["celltype", "cl"]],function(i, type){
+          $('select#' + genome + type[1] + 'SubClass').change(function(){
+            if($(this).val() != "All"){
+              switch($(this).attr("id").replace(genome,"").replace("SubClass","")){
+                case "ag":
+                  $('select#' + genome + 'clSubClass').val("-");
+                  break;
+                case "cl":
+                  $('select#' + genome + 'agSubClass').val("-");
+                  break;
+              };
+            };
+          });
+        });
       });
       
       // tab trigger event
