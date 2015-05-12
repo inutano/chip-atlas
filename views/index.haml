@@ -57,50 +57,31 @@
             .tab-pane.fade{ :role => "tabpanel", :id => genome, :class => "#{(i == 0) ? 'in active' : ''}" }
               - index = @index_all_genome[genome]
               %row
-                .col-md-4
-                  %form
-                    .panel.panel-default
-                      .panel-heading{ :id => "heading-#{genome}agClass" }
-                        %h4.panel-title
-                          Antigen Class
-                      .panel-body
-                        %select.form-control{ :id => "#{genome}agClass", :size => 8 }
-                          - ag = index[:antigen]
-                          %option{ :value => "All antigens", "selected" => true }= "All antigens (#{ag.values.map{|n| n.values }.flatten.reduce(:+)})"
-                          - ag.each_pair do |agClass, agSubClass|
-                            %option{ :value => agClass }= "#{agClass} (#{agSubClass.each_value.reduce(:+)})"
-                          
-                    .panel.panel-default
-                      .panel-heading{ :id => "heading-#{genome}agSubClass" }
-                        %h4.panel-title
-                          %a{ "data-toggle" => "collapse", "aria-controls" => "collapse-#{genome}agSubClass", :id => "toggle-#{genome}agSubClass" }
-                            Antigen Sub Class
-                      .collapse{ :id => "collapse-#{genome}agSubClass" }
+                - [["ag","Antigen"],["cl", "Cell type"]].each do |set|
+                  .col-md-4
+                    %form
+                      .panel.panel-default
+                        - class_id = "#{genome}#{set[0]}Class"
+                        .panel-heading{ :id => "heading-#{class_id}" }
+                          %h4.panel-title= "#{set[1]} Class"
                         .panel-body
-                          %select.form-control.flexselect{ :id => "#{genome}agSubClass", :size => 8 }
-
-                .col-md-4
-                  %form
-                    .panel.panel-default
-                      .panel-heading{ :id => "heading-#{genome}clClass" }
-                        %h4.panel-title
-                          Cell Type Class
-                      .panel-body
-                        %select.form-control{ :id => "#{genome}clClass", :size => 8 }
-                          - cl = index[:celltype]
-                          %option{ :value => "All cell types", "selected" => true }= "All cell types (#{cl.values.map{|n| n.values }.flatten.reduce(:+)})"
-                          - cl.each_pair do |clClass, clSubClass|
-                            %option{ :value => clClass }= "#{clClass} (#{clSubClass.each_value.reduce(:+)})"
-
-                    .panel.panel-default
-                      .panel-heading{ :id => "heading-#{genome}clSubClass"}
-                        %h4.panel-title
-                          %a{ "data-toggle" => "collapse", "aria-controls" => "collapse-#{genome}clSubClass", :id => "toggle-#{genome}clSubClass"}
-                            Cell Type Sub Class
-                      .collapse{ :id => "collapse-#{genome}clSubClass" }
-                        .panel-body
-                          %select.form-control.flexselect{ :id => "#{genome}clSubClass", :size => 8 }
-                    
+                          %select.form-control{ :id => "#{class_id}", :size => 8 }
+                            - ind = index[set[1].downcase.sub("\s","").intern]
+                            - count = ind.values.map{|n| n.values }.flatten.reduce(:+)
+                            %option{ :value => "All #{set[1].downcase}s", "selected" => true }= "All #{set[1].downcase}s (#{count})"
+                            - ind.each_pair do |typeClass, typeSubClass|
+                              %option{ :value => typeClass }= "#{typeClass} (#{typeSubClass.each_value.reduce(:+)})"
+                            
+                      .panel.panel-default
+                        - sclass_id = "#{genome}#{set[0]}SubClass"
+                        .panel-heading{ :id => "heading-#{sclass_id}" }
+                          %h4.panel-title
+                            %a{ "data-toggle" => "collapse", "aria-controls" => "collapse-#{sclass_id}", :id => "toggle-#{sclass_id}" }
+                              Antigen Sub Class
+                        .collapse{ :id => "collapse-#{sclass_id}" }
+                          .panel-body
+                            %select.form-control.flexselect{ :id => "#{sclass_id}", :size => 8 }
+                
                 .col-md-4
                   %form
                     .panel.panel-default
