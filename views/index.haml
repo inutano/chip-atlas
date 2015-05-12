@@ -10,10 +10,10 @@
 
     %title= "ChIP-Atlas"
 
-    / Bootstrap core CSS
+    // Bootstrap core CSS
     %link{ :href => "#{app_root}/css/bootstrap.min.css", :rel => "stylesheet" }
 
-    / Custom style for this website
+    // Custom style for this website
     %link{ :href => "#{app_root}/style.css", :rel => "stylesheet"}
 
   %body
@@ -36,17 +36,22 @@
               %a{ :href => "#{app_root}/Document" }= "Document"
 
     .container
+      // Header Titles. I still love the idea to name this 'peak john' but it is not. I'm okay.
       .header
         %h1= "ChIP-Atlas"
         %p= "Visualize All Peaks from Published ChIP-Seq data."
-
+       
+      // Navigation Tabs, links and contents
       .genomeTab{ :role => "tabpanel"}
+        
+        // Tabs
         %ul.nav.nav-tabs{ :role => "tablist" }
           - @list_of_genome.each.with_index do |genome, i|
             %li{ :role => "presentation", :class => "#{(i == 0) ? 'active' : '' }" }
               %a{ :href => "##{genome}", "aria-controls" => genome, :role => "tab", "data-toggle" => "tab" }
                 = "#{genome}"
-
+        
+        // Contents
         .tab-content
           - @list_of_genome.each.with_index do |genome, i|
             .tab-pane.fade{ :role => "tabpanel", :id => genome, :class => "#{(i == 0) ? 'in active' : ''}" }
