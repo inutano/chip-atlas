@@ -34,41 +34,45 @@
               %a{ :href => "#{app_root}/About" }= "About"
             %li
               %a{ :href => "#{app_root}/Document" }= "Document"
-    
+
     .container
       .header
         %h1= "ChIP-Atlas"
         %p= "Visualize All Peaks from Published ChIP-Seq data."
-        
+
       .container
         - metadata = Experiment.record_by_expid(@expid)
-        %h2= @expid
-        - title = metadata[:title]
-        %h3= title != "-" ? title : "(no title)"
-        
-        %table.table
-          %tr
-            %th= "Genome"
-            %th= "Antigen Class"
-            %th= "Antigen Subclass"
-            %th= "Cell type Class"
-            %th= "Cell type Subclass"
-          %tr
-            %td= metadata[:genome]
-            %td= metadata[:agClass]
-            %td= metadata[:agSubClass]
-            %td= metadata[:clClass]
-            %td= metadata[:clSubClass]
-        
-        %table.table
-          - metadata[:attributes].split("\t").each_slice(3) do |kv_set|
+        .page-header
+          %h2
+            = @expid
+            .small
+              = metadata[:title] != "-" ? metadata[:title] : "no title"
+        %section
+          %h3= "Curated Sample Data"
+          %table.table.table-bordered
             %tr
-              - kv_set.each do |kv|
-                %th= kv.split("=").first
+              %th= "Genome"
+              %th= "Antigen Class"
+              %th= "Antigen Subclass"
+              %th= "Cell type Class"
+              %th= "Cell type Subclass"
             %tr
-              - kv_set.each do |kv|
-                %td= kv.split("=").last
-                
+              %td= metadata[:genome]
+              %td= metadata[:agClass]
+              %td= metadata[:agSubClass]
+              %td= metadata[:clClass]
+              %td= metadata[:clSubClass]
+        %section
+          %h3= "Attributes by Original Data Submitter"
+          %table.table.table-bordered
+            - metadata[:attributes].split("\t").each_slice(6) do |kv_set|
+              %tr
+                - kv_set.each do |kv|
+                  %th= kv.split("=").first
+              %tr
+                - kv_set.each do |kv|
+                  %td= kv.split("=").last
+
         %p
           = open("http://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=sra&id=#{@expid}").read
         %container
@@ -98,7 +102,7 @@
         $("button#submit").click(function(){
           var button = $(this);
           button.attr("disabled", true);
-          
+
           var data = {
             // igv: $().text
             condition: {
