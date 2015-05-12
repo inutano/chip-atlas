@@ -11,6 +11,8 @@ gem 'sass'
 gem 'redcarpet'
 gem 'rack-protection'
 
+gem 'nokogiri'
+
 group :development do
   gem 'sqlite3'
 end

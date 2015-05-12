@@ -5,6 +5,7 @@ require 'sinatra/activerecord'
 require 'haml'
 require 'sass'
 require 'open-uri'
+require 'nokogiri'
 require './lib/peakjohn'
 
 ENV["DATABASE_URL"] ||= "sqlite3:database.sqlite"
@@ -50,6 +51,7 @@ class PeakJohn < Sinatra::Base
   
   get "/view" do
     @expid = params[:id]
+    @ncbi  = Nokogiri::XML(open("http://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=sra&id=#{@expid}"))
     404 if Experiment.id_valid?(@expid)
     haml :experiment
   end
