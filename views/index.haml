@@ -80,6 +80,8 @@
                         .collapse{ :id => "collapse-#{sclass_id}" }
                           .panel-body
                             .panel-message{ :id => "#{sclass_id}" }
+                            // temporally commented out until it works
+                            // %input{ :id => "typeahead-#{sclass_id}", :type => "text" }
                             %select.form-control.flexselect{ :id => "#{sclass_id}", :size => 8 }
                               %option{ :value => "-", "selected" => true }= "All"
                 
@@ -106,6 +108,7 @@
     %script{ :src => "#{app_root}/js/ie10-viewport-bug-workaround.js" }
     %script{ :src => "#{app_root}/js/liquidmetal.js" }
     %script{ :src => "#{app_root}/js/jquery.flexselect.js" }
+    %script{ :src => "#{app_root}/js/typeahead.bundle.js" }
 
     / 'code here'
 
