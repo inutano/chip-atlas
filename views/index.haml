@@ -64,9 +64,14 @@
                           - agClassCount = agSubClass.each_value.reduce(:+)
                           %option{ :value => agClass }= "#{agClass} (#{agClassCount})"
 
-                    .form-group
-                      %label{ :for => "#{genome}agSubClass" }= "Antigen Sub Class"
-                      %select.form-control.flexselect{ :id => "#{genome}agSubClass", :size => 8 }
+                    .panel.panel-default
+                      .panel-heading{ :id => "heading-#{genome}agSubClass" }
+                        %h4.panel-title
+                          %a{ "data-toggle" => "collapse", :href => "#collapse-#{genome}agSubClass", "aria-expanded" => false, "aria-controls" => "collapse-#{genome}agSubClass"}
+                            Antigen Sub Class
+                      .collapse{ :id => "collapse-#{genome}agSubClass" }
+                        .panel-body
+                          %select.form-control.flexselect{ :id => "#{genome}agSubClass", :size => 8 }
 
                 .col-md-4
                   %form
@@ -80,10 +85,15 @@
                           - clClassCount = clSubClass.each_value.reduce(:+)
                           %option{ :value => clClass }= "#{clClass} (#{clClassCount})"
 
-                    .form-group
-                      %label{ :for => "#{genome}clSubClass" }= "Cell Type Sub Class"
-                      %select.form-control.flexselect{ :id => "#{genome}clSubClass", :size => 8 }
-
+                    .panel.panel-default
+                      .panel-heading{ :id => "heading-#{genome}clSubClass"}
+                        %h4.panel-title
+                          %a{ "data-toggle" => "collapse", :href => "#collapse-#{genome}clSubClass", "aria-expanded" => false, "aria-controls" => "collapse-#{genome}clSubClass"}
+                            Cell Type Sub Class
+                      .collapse{ :id => "collapse-#{genome}clSubClass" }
+                        .panel-body
+                          %select.form-control.flexselect{ :id => "#{genome}clSubClass", :size => 8 }
+                    
                 .col-md-4
                   %form
                     .form-group
