@@ -33,9 +33,12 @@
               %a{ :href => "#{app_root}" }= "Home"
             %li
               %a{ :href => "#{app_root}/About" }= "About"
-            %li
-              %a{ :href => "#{app_root}/Document" }= "Document"
-
+          %form.navbar-form.navbar-right{ :role => "search" }
+            %div.form-group
+              %input.form-control{ :type => "text", :placeholder => "Search TF name" }
+            %button.btn.btn-default{ :type => "submit" }
+              Search
+          
     .container
       // Header Titles. I still love the idea to name this 'peak john' but it is not. I'm okay.
       .header
