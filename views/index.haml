@@ -146,12 +146,16 @@
               .append("All")
               .appendTo('select#' + genomeSelected + type[1] + 'SubClass');
             
-            Object.keys(subClassObj).forEach(function(key){
-              $("<option>")
-                .attr("value", key)
-                .append(key + " (" + this[key] + ")")
+            $.map(subClassObj, function(value, key){
+              return [[key, value]];
+            }).sort().forEach(function(element, index, array){
+              var k = element[0];
+              var v = element[1];
+              $('<option>')
+                .attr("value", k)
+                .append(k + " (" + v + ")")
                 .appendTo('select#' + genomeSelected + type[1] + 'SubClass');
-            }, subClassObj);
+            });
           });
         })
         
