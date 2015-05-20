@@ -139,19 +139,22 @@
         // for each subclass section
         $.each([["antigen", "ag"], ["celltype", "cl"]], function(it, type){
           $('select#' + genome + type[1] + 'Class').change(function(){
-            // generate option tags
+            // Common variables
             var genomeSelected = $('.genomeTab ul li.active a').text().replace(/[\n\s ]/g, "");
             var valueSelected  = $('select#' + genomeSelected + type[1] + 'Class option:selected').val();
             var subClassObj    = indexAll[genomeSelected][type[0]][valueSelected];
             
+            // Erase previous options
             $('select#' + genomeSelected + type[1] + 'SubClass').empty();
             
+            // Generate an option for All 
             $("<option>")
               .attr("value", "-")
               .attr("selected", "true")
               .append("All")
               .appendTo('select#' + genomeSelected + type[1] + 'SubClass');
             
+            // Generate options from subClassObj
             $.map(subClassObj, function(value, key){
               return [[key, value]];
             }).sort().forEach(function(element, index, array){
@@ -165,14 +168,17 @@
             
             // activate typeahead
             var typeaheadInput = $('#' + genomeSelected + type[1] + 'SubClass.typeahead');
+            var subClassList = $.map(subClassObj, function(value, key){
+                  return key;
+                });
+            
+            // Erase previous data set
             typeaheadInput.typeahead('destroy');
             
             var list = new Bloodhound({
               datumTokenizer: Bloodhound.tokenizers.whitespace,
               queryTokenizer: Bloodhound.tokenizers.whitespace,
-              local: $.map(subClassObj, function(value, key){
-                return key;
-              })
+              local: subClassList
             });
             
             typeaheadInput.typeahead({
@@ -182,6 +188,20 @@
             },{
               name: 'list',
               source: list
+            });
+            
+            // sync textbox and input field
+            typeaheadInput.keyup(function(){
+              var input = $(this).val();
+              if($.inArray(input,subClassList) > -1){
+                $('select#' + genomeSelected + type[1] + 'SubClass').val(input);
+              }
+            });
+            typeaheadInput.on('typeahead:select', function(){
+              var input = $(this).val();
+              if($.inArray(input,subClassList) > -1){
+                $('select#' + genomeSelected + type[1] + 'SubClass').val(input);
+              }
             });
           });
         })
