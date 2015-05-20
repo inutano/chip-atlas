@@ -10,8 +10,9 @@
 
     %title= "ChIP-Atlas"
 
-    // Bootstrap core CSS
+    // Bootstrap core and typeahead CSS
     %link{ :href => "#{app_root}/css/bootstrap.min.css", :rel => "stylesheet" }
+    %link{ :href => "#{app_root}/css/typeaheadjs.css", :rel => "stylesheet" }
 
     // Custom style for this website
     %link{ :href => "#{app_root}/style.css", :rel => "stylesheet"}
@@ -73,7 +74,7 @@
                               - typeClass = node[0]
                               - typeSubClass = node[1]
                               %option{ :value => typeClass }= "#{typeClass} (#{typeSubClass.each_value.reduce(:+)})"
-                            
+
                       .panel.panel-default
                         - sclass_id = "#{genome}#{set[0]}SubClass"
                         .panel-heading{ :id => "heading-#{sclass_id}" }
@@ -82,8 +83,10 @@
                         .collapse{ :id => "collapse-#{sclass_id}" }
                           .panel-body
                             .panel-message{ :id => "#{sclass_id}" }
-                            // temporally commented out until it works
-                            // %input{ :id => "typeahead-#{sclass_id}", :type => "text" }
+                          
+                            // input box for typeahead
+                            %input.typeahead.form-control{ :type => "text", :placeholder => "type to search", :id => "#{sclass_id}" }
+                          
                             %select.form-control.flexselect{ :id => "#{sclass_id}", :size => 8 }
                               %option{ :value => "-", "selected" => true }= "All"
                 
@@ -117,7 +120,7 @@
     :javascript
       // retrieve index
       var indexAll = JSON.parse('#{JSON.dump(@index_all_genome)}');
-
+      
       // iterate for each genomes
       $.each(#{@list_of_genome}, function(i, genome){
         // set tab controller
@@ -133,9 +136,10 @@
           });
         });
         
-        // generate select tags for subclass
+        // for each subclass section
         $.each([["antigen", "ag"], ["celltype", "cl"]], function(it, type){
           $('select#' + genome + type[1] + 'Class').change(function(){
+            // generate option tags
             var genomeSelected = $('.genomeTab ul li.active a').text().replace(/[\n\s ]/g, "");
             var valueSelected  = $('select#' + genomeSelected + type[1] + 'Class option:selected').val();
             var subClassObj    = indexAll[genomeSelected][type[0]][valueSelected];
@@ -157,6 +161,27 @@
                 .attr("value", k)
                 .append(k + " (" + v + ")")
                 .appendTo('select#' + genomeSelected + type[1] + 'SubClass');
+            });
+            
+            // activate typeahead
+            var typeaheadInput = $('#' + genomeSelected + type[1] + 'SubClass.typeahead');
+            typeaheadInput.typeahead('destroy');
+            
+            var list = new Bloodhound({
+              datumTokenizer: Bloodhound.tokenizers.whitespace,
+              queryTokenizer: Bloodhound.tokenizers.whitespace,
+              local: $.map(subClassObj, function(value, key){
+                return key;
+              })
+            });
+            
+            typeaheadInput.typeahead({
+              hint: true,
+              highlight: true,
+              minLength: 1
+            },{
+              name: 'list',
+              source: list
             });
           });
         })
