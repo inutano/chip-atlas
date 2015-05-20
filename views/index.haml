@@ -69,7 +69,9 @@
                             - ind = index[set[1].downcase.sub("\s","").intern]
                             - count = ind.values.map{|n| n.values }.flatten.reduce(:+)
                             %option{ :value => "All #{set[1].downcase}s", "selected" => true }= "All #{set[1].downcase}s (#{count})"
-                            - ind.each_pair do |typeClass, typeSubClass|
+                            - ind.to_a.sort.each do |node|
+                              - typeClass = node[0]
+                              - typeSubClass = node[1]
                               %option{ :value => typeClass }= "#{typeClass} (#{typeSubClass.each_value.reduce(:+)})"
                             
                       .panel.panel-default
@@ -93,8 +95,8 @@
                           Quality Value Threshold
                       .panel-body
                         %select.form-control{ :id => "#{genome}qval", :size => 5 }
-                          - @qval_range.each.with_index do |qv, i|
-                            %option{ :value => qv, "selected" => "#{(i == 0) ? 'true' : '' }" }= "#{qv}"
+                          - @qval_range.sort.each.with_index do |qv, i|
+                            %option{ :value => qv, "#{(i == 0) ? 'selected' : '' }" => "" }= "#{qv.to_i*10}"
                   
                   .button-submit
                     %button.btn.btn-primary.btn-lg.btn-block{ :id => "submit", :type => "button" }= "View on IGV"
