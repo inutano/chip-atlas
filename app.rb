@@ -45,6 +45,12 @@ class PeakJohn < Sinatra::Base
     haml :index
   end
   
+  get "/analysis" do
+    @index_all_genome = Experiment.index_all_genome
+    @list_of_genome = @index_all_genome.keys
+    haml :analysis
+  end
+  
   post "/browse" do
     content_type "application/json"
     JSON.dump({ "url" => igv_browsing_url(JSON.parse(request.body.read)) })

@@ -29,15 +29,14 @@
           %a.navbar-brand{ :href => "#{app_root}" }= "ChIP-Atlas"
         #navbar.collapse.navbar-collapse
           %ul.nav.navbar-nav
-            %li.active
-              %a{ :href => "#{app_root}" }= "Raw Peak Data"
             %li
+              %a{ :href => "#{app_root}" }= "Raw Peak Data"
+            %li.active
               %a{ :href => "#{app_root}/analysis" }= "Analyzed Data"
             %li
               %a{ :href => "#{app_root}/About" }= "About"
           
     .container
-      // Header Titles. I still love the idea to name this 'peak john' but it is not. I'm okay.
       .header
         %h1= "ChIP-Atlas"
         %p= "Visualize All Peaks from Published ChIP-Seq data."
@@ -56,53 +55,46 @@
         .tab-content
           - @list_of_genome.each.with_index do |genome, i|
             .tab-pane.fade{ :role => "tabpanel", :id => genome, :class => "#{(i == 0) ? 'in active' : ''}" }
-              - index = @index_all_genome[genome]
               %row
-                - [["ag","Antigen"],["cl", "Cell type"]].each do |set|
-                  .col-md-4
-                    %form
-                      .panel.panel-default
-                        - class_id = "#{genome}#{set[0]}Class"
-                        .panel-heading{ :id => "heading-#{class_id}" }
-                          %h4.panel-title= "#{set[1]} Class"
-                        .panel-body
-                          %select.form-control{ :id => "#{class_id}", :size => 8 }
-                            - ind = index[set[1].downcase.sub("\s","").intern]
-                            - count = ind.values.map{|n| n.values }.flatten.reduce(:+)
-                            %option{ :value => "All #{set[1].downcase}s", "selected" => true }= "All #{set[1].downcase}s (#{count})"
-                            - ind.to_a.sort.each do |node|
-                              - typeClass = node[0]
-                              - typeSubClass = node[1]
-                              %option{ :value => typeClass }= "#{typeClass} (#{typeSubClass.each_value.reduce(:+)})"
-
-                      .panel.panel-default
-                        - sclass_id = "#{genome}#{set[0]}SubClass"
-                        .panel-heading{ :id => "heading-#{sclass_id}" }
-                          %h4.panel-title
-                            %a{ "data-toggle" => "collapse", "aria-controls" => "collapse-#{sclass_id}", :id => "toggle-#{sclass_id}" }= "#{set[1]} Sub Class"
-                        .collapse{ :id => "collapse-#{sclass_id}" }
-                          .panel-body
-                            .panel-message{ :id => "#{sclass_id}" }
-                          
-                            // input box for typeahead
-                            %input.typeahead.form-control{ :type => "text", :placeholder => "type to search", :id => "#{sclass_id}" }
-                          
-                            %select.form-control.flexselect{ :id => "#{sclass_id}", :size => 8 }
-                              %option{ :value => "-", "selected" => true }= "All"
-                
                 .col-md-4
-                  %form
-                    .panel.panel-default
-                      .panel-heading{ :id => "heading-#{genome}qval"}
-                        %h4.panel-title
-                          Quality Value Threshold
-                      .panel-body
-                        %select.form-control{ :id => "#{genome}qval", :size => 5 }
-                          - @qval_range.sort.each.with_index do |qv, i|
-                            %option{ :value => qv, "#{(i == 0) ? 'selected' : '' }" => "" }= "#{qv.to_i*10}"
-                  
+                  .panel.panel-default
+                    .panel-heading{ :id => "" }
+                      %h4.panel-title= "1. Choose Starting Type"
+                    .panel-body
+                      %form{ :id => "" }
+                        .radio
+                          %label
+                            %input{ :type => "radio", :id => "", :value => "ag", :name => "datatypeoption" }
+                            = " Antigens "
+                        .radio
+                          %label
+                            %input{ :type => "radio", :id => "", :value => "cl", :name => "datatypeoption" }
+                            = " Cell Types "
+                .col-md-4
+                  .panel.panel-default
+                    .panel-heading{ :id => "" }
+                      %h4.panel-title= "2. Choose Primary Type"
+                    .panel-body
+                      %input.typeahead.form-control{ :type => "text", :placeholder => "type to search", :id => "" }
+                      %select.form-control.flexselect{ :id => "", :size => 8 }
+                        %option{ :value => "-", "selected" => true }= "All"
+                      
+                .col-md-4
+                  .panel.panel-default
+                    .panel-heading{ :id => "" }
+                      %h4.panel-title= "3. Choose Secondary Type"
+                    .panel-body
+                      %input.typeahead.form-control{ :type => "text", :placeholder => "type to search", :id => "" }
+                      %select.form-control.flexselect{ :id => "", :size => 8 }
+                        %option{ :value => "-", "selected" => true }= "All"
+              
+              %row
+                .col-md-3.col-md-offset-6
                   .button-submit
-                    %button.btn.btn-primary.btn-lg.btn-block{ :id => "submit", :type => "button" }= "View on IGV"
+                    %button.btn.btn-primary.btn-lg.btn-block{ :id => "submit-assoc", :type => "button" }= "Co-Association Data"
+                .col-md-3
+                  .button-submit
+                    %button.btn.btn-primary.btn-lg.btn-block{ :id => "submit-target", :type => "button" }= "Potential Target Genes"
 
     /
       Bootstrap Core Javascript
