@@ -94,7 +94,7 @@
                       .panel-body
                         %select.form-control{ :id => "#{genome}qval", :size => 5 }
                           - @qval_range.each.with_index do |qv, i|
-                            %option{ :value => qv, "selected" => "#{(i == 0) ? 'true' : '' }" }= "#{qv}"
+                            %option{ :value => qv, "selected" => "#{(i == 0) ? 'true' : '' }" }= "#{qv.to_i*10}"
                   
                   .button-submit
                     %button.btn.btn-primary.btn-lg.btn-block{ :id => "submit", :type => "button" }= "View on IGV"
