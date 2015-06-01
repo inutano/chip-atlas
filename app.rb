@@ -45,10 +45,16 @@ class PeakJohn < Sinatra::Base
     haml :index
   end
   
-  get "/analysis" do
+  get "/colo" do
     @index_all_genome = Experiment.index_all_genome
     @list_of_genome = @index_all_genome.keys
-    haml :analysis
+    haml :colo
+  end
+
+  get "/target_gene" do
+    @index_all_genome = Experiment.index_all_genome
+    @list_of_genome = @index_all_genome.keys
+    haml :target_gene
   end
   
   post "/browse" do
