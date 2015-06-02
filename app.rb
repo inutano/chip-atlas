@@ -72,6 +72,34 @@ class PeakJohn < Sinatra::Base
     haml :colo
   end
 
+  get "/colo_result" do
+    @index_all_genome = Experiment.index_all_genome
+    @list_of_genome = @index_all_genome.keys
+    
+    h = {}
+    fpath = File.join(app_root, "analysisList.tab")
+    open(fpath).read.split("\n").each do |line|
+      cols = line.split("\t")
+      antigen = cols[0]
+      cell_list = cols[1].split(",")
+      genome = cols[3]
+      
+      h[genome] ||= {}
+      h[genome][:antigen] ||= {}
+      h[genome][:antigen][antigen] = cell_list
+      
+      cell_list.each do |cl|
+        h[genome][:cellline] ||= {}
+        h[genome][:cellline][cl] ||= []
+        h[genome][:cellline][cl] << antigen
+      end
+    end
+    @analysis = h
+    
+    haml :colo_test
+  end
+  
+
   get "/target_gene" do
     @index_all_genome = Experiment.index_all_genome
     @list_of_genome = @index_all_genome.keys
@@ -91,6 +119,27 @@ class PeakJohn < Sinatra::Base
     @analysis = h
     
     haml :target_gene
+  end
+  
+  get "/target_gene_result" do
+    @index_all_genome = Experiment.index_all_genome
+    @list_of_genome = @index_all_genome.keys
+    
+    h = {}
+    fpath = File.join(app_root, "analysisList.tab")
+    open(fpath).read.split("\n").each do |line|
+      cols = line.split("\t")
+      antigen = cols[0]
+      status = cols[2]
+      genome = cols[3]
+      if status == "+"
+        h[genome] ||= []
+        h[genome] << antigen
+      end
+    end
+    @analysis = h
+    
+    haml :target_gene_test
   end
   
   post "/browse" do
