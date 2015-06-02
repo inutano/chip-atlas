@@ -67,6 +67,8 @@
                       %input.typeahead.form-control{ :type => "text", :placeholder => "type to search", :id => "#{panel}-form" }
                       %hr
                       %select.form-control.flexselect{ :id => "", :size => 8 }
+                        - @analysis[genome].sort.each do |ag|
+                          %option{ :value => ag }= ag
 
               .row
                 .col-md-6.col-md-offset-3
