@@ -60,40 +60,43 @@
               .row
                 .col-md-3
                   .panel.panel-default
-                    .panel-heading{ :id => "" }
+                    - panel = "#{genome}StartingPanel"
+                    .panel-heading{ :id => panel }
                       %h4.panel-title= "1. Choose Starting Type"
                     .panel-body
-                      %form{ :id => "" }
+                      %form{ :id => "#{panel}-form" }
                         .radio
                           %label
-                            %input{ :type => "radio", :id => "", :value => "ag", :name => "datatypeoption" }
+                            %input{ :type => "radio", :id => "", :value => "antigen", :name => "datatypeoption" }
                             = " Antigens "
                         .radio
                           %label
-                            %input{ :type => "radio", :id => "", :value => "cl", :name => "datatypeoption" }
+                            %input{ :type => "radio", :id => "", :value => "cellline", :name => "datatypeoption" }
                             = " Cell Types "
                 .col-md-3
                   .panel.panel-default
-                    .panel-heading{ :id => "" }
+                    - panel = "#{genome}PrimaryPanel"
+                    .panel-heading{ :id => panel }
                       %h4.panel-title= "2. Choose Primary Type"
                     .panel-body
-                      %input.typeahead.form-control{ :type => "text", :placeholder => "type to search", :id => "" }
+                      %input.typeahead.form-control{ :type => "text", :placeholder => "type to search", :id => "#{panel}-typeahead" }
                       %hr
-                      %select.form-control.flexselect{ :id => "", :size => 8 }
+                      %select.form-control.flexselect{ :id => "#{panel}-select", :size => 8 }
 
                 .col-md-3
                   .panel.panel-default
-                    .panel-heading{ :id => "" }
+                    - panel = "#{genome}SecondaryPanel"
+                    .panel-heading{ :id => panel }
                       %h4.panel-title= "3. Choose Secondary Type"
                     .panel-body
-                      %input.typeahead.form-control{ :type => "text", :placeholder => "type to search", :id => "" }
+                      %input.typeahead.form-control{ :type => "text", :placeholder => "type to search", :id => "#{panel}-typeahead" }
                       %hr
-                      %select.form-control.flexselect{ :id => "", :size => 8 }
+                      %select.form-control.flexselect{ :id => "#{panel}-select", :size => 8 }
 
               .row
-                .col-md-3.col-md-offset-9
+                .col-md-6.col-md-offset-3
                   .button-submit
-                    %button.btn.btn-primary.btn-lg.btn-block{ :id => "submit-assoc", :type => "button" }= "View Co-Association Data"
+                    %button.btn.btn-primary.btn-lg.btn-block{ :id => "submit", :type => "button" }= "View Co-Association Data"
 
     /
       Bootstrap Core Javascript
