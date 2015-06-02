@@ -143,6 +143,25 @@
               .appendTo(targetSelect);
           });
         });
+
+        $('select#' + genome + 'PrimaryPanel-select').change(function(){
+          // target
+          var targetSelect = $('select#' + genome + 'SecondaryPanel-select');
+
+          // Erase current values
+          targetSelect.empty();
+
+          // populate primary panel
+          var type = $(':radio[name="datatypeoption"]:checked').val();
+          var primaryType = $(this).val();
+          var options = analysis[genome][type][primaryType];
+          options.sort().forEach(function(element, index, array){
+            $('<option>')
+              .attr("value", element)
+              .append(element)
+              .appendTo(targetSelect);
+          });
+        });
         // easy implementation: done
 
         // set tab controller
