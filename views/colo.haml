@@ -142,6 +142,42 @@
               .append(k)
               .appendTo(targetSelect);
           });
+
+          // activate typeahead
+          var typeaheadInput = $('#' + genome + 'PrimaryPanel-typeahead');
+          var options = Object.keys(analysis[genome][type]);
+
+          // Erase previous data set
+          typeaheadInput.typeahead('destroy');
+
+          var list = new Bloodhound({
+            datumTokenizer: Bloodhound.tokenizers.whitespace,
+            queryTokenizer: Bloodhound.tokenizers.whitespace,
+            local: options
+          });
+
+          typeaheadInput.typeahead({
+            hint: true,
+            highlight: true,
+            minLength: 1
+          },{
+            name: 'list',
+            source: list
+          });
+
+          // sync textbox and input field
+          typeaheadInput.keyup(function(){
+            var input = $(this).val();
+            if($.inArray(input,options) > -1){
+              $('select#' + genome + 'PrimaryPanel-select').val(input);
+            }
+          });
+          typeaheadInput.on('typeahead:select', function(){
+            var input = $(this).val();
+            if($.inArray(input,options) > -1){
+              $('select#' + genome + 'PrimaryPanel-select').val(input);
+            }
+          });
         });
 
         $('select#' + genome + 'PrimaryPanel-select').change(function(){
@@ -161,8 +197,42 @@
               .append(element)
               .appendTo(targetSelect);
           });
+
+          // activate typeahead
+          var typeaheadInput = $('#' + genome + 'SecondaryPanel-typeahead');
+
+          // Erase previous data set
+          typeaheadInput.typeahead('destroy');
+
+          var list = new Bloodhound({
+            datumTokenizer: Bloodhound.tokenizers.whitespace,
+            queryTokenizer: Bloodhound.tokenizers.whitespace,
+            local: options
+          });
+
+          typeaheadInput.typeahead({
+            hint: true,
+            highlight: true,
+            minLength: 1
+          },{
+            name: 'list',
+            source: list
+          });
+
+          // sync textbox and input field
+          typeaheadInput.keyup(function(){
+            var input = $(this).val();
+            if($.inArray(input,options) > -1){
+              $('select#' + genome + 'SecondaryPanel-select').val(input);
+            }
+          });
+          typeaheadInput.on('typeahead:select', function(){
+            var input = $(this).val();
+            if($.inArray(input,options) > -1){
+              $('select#' + genome + 'SecondaryPanel-select').val(input);
+            }
+          });
         });
-        // easy implementation: done
 
         // set tab controller
         $('#' + genome + ' a').click(function(e){
