@@ -58,67 +58,17 @@
           - @list_of_genome.each.with_index do |genome, i|
             .tab-pane.fade{ :role => "tabpanel", :id => genome, :class => "#{(i == 0) ? 'in active' : ''}" }
               %row
-                .col-md-3
+                .col-md-3.col-md-offset-3
                   .panel.panel-default
                     .panel-heading{ :id => "" }
-                      %h4.panel-title= "1. Choose Genome"
-                    .panel-body
-                      %form{ :id => "" }
-                        .radio
-                          %label
-                            %input{ :type => "radio", :id => "", :value => "hg19", :name => "genome_option" }
-                            = "hg19"
-                        .radio
-                          %label
-                            %input{ :type => "radio", :id => "", :value => "mm9", :name => "genome_option" }
-                            = "mm9"
-                        .radio
-                          %label
-                            %input{ :type => "radio", :id => "", :value => "dm3", :name => "genome_option" }
-                            = "dm3"
-                        .radio
-                          %label
-                            %input{ :type => "radio", :id => "", :value => "ce10", :name => "genome_option" }
-                            = "ce10"
-                        .radio
-                          %label
-                            %input{ :type => "radio", :id => "", :value => "sacCer3", :name => "genome_option" }
-                            = "sacCer3"
-
-                .col-md-3
-                  .panel.panel-default
-                    .panel-heading{ :id => "" }
-                      %h4.panel-title= "2. Choose Starting Type"
-                    .panel-body
-                      %form{ :id => "" }
-                        .radio
-                          %label
-                            %input{ :type => "radio", :id => "", :value => "ag", :name => "datatypeoption" }
-                            = " Antigens "
-                        .radio
-                          %label
-                            %input{ :type => "radio", :id => "", :value => "cl", :name => "datatypeoption" }
-                            = " Cell Types "
-                .col-md-3
-                  .panel.panel-default
-                    .panel-heading{ :id => "" }
-                      %h4.panel-title= "3. Choose Primary Type"
-                    .panel-body
-                      %input.typeahead.form-control{ :type => "text", :placeholder => "type to search", :id => "" }
-                      %hr
-                      %select.form-control.flexselect{ :id => "", :size => 8 }
-
-                .col-md-3
-                  .panel.panel-default
-                    .panel-heading{ :id => "" }
-                      %h4.panel-title= "4. Choose Secondary Type"
+                      %h4.panel-title= "Choose Antigen"
                     .panel-body
                       %input.typeahead.form-control{ :type => "text", :placeholder => "type to search", :id => "" }
                       %hr
                       %select.form-control.flexselect{ :id => "", :size => 8 }
 
               %row
-                .col-md-3.col-md-offset-9
+                .col-md-6
                   .button-submit
                     %button.btn.btn-primary.btn-lg.btn-block{ :id => "submit-target", :type => "button" }= "View Potential Target Genes"
 
@@ -138,6 +88,9 @@
     :javascript
       // retrieve index
       var indexAll = JSON.parse('#{JSON.dump(@index_all_genome)}');
+
+      // retrieve hash
+      var analysis = JSON.parse('#{JSON.dump(@analysis)}');
 
       // iterate for each genomes
       $.each(#{@list_of_genome}, function(i, genome){
