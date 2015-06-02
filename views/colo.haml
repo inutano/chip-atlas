@@ -121,6 +121,30 @@
 
       // iterate for each genomes
       $.each(#{@list_of_genome}, function(i, genome){
+
+        // easy implementation: need to be refactored
+        $('input[name="datatypeoption"]:radio').change(function(){
+          // target
+          var targetSelect = $('select#' + genome + 'PrimaryPanel-select');
+
+          // Erase current values
+          targetSelect.empty();
+
+          // populate primary panel
+          var type = $(this).val();
+          $.map(analysis[genome][type], function(value, key){
+            return [[key, value]];
+          }).sort().forEach(function(element, index, array){
+            var k = element[0];
+            var v = element[1];
+            $('<option>')
+              .attr("value", k)
+              .append(k)
+              .appendTo(targetSelect);
+          });
+        });
+        // easy implementation: done
+
         // set tab controller
         $('#' + genome + ' a').click(function(e){
           e.preventDefault();
