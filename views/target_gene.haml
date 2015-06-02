@@ -57,7 +57,7 @@
         .tab-content
           - @list_of_genome.each.with_index do |genome, i|
             .tab-pane.fade{ :role => "tabpanel", :id => genome, :class => "#{(i == 0) ? 'in active' : ''}" }
-              %row
+              .row
                 .col-md-3.col-md-offset-3
                   .panel.panel-default
                     .panel-heading{ :id => "" }
@@ -67,7 +67,7 @@
                       %hr
                       %select.form-control.flexselect{ :id => "", :size => 8 }
 
-              %row
+              .row
                 .col-md-6
                   .button-submit
                     %button.btn.btn-primary.btn-lg.btn-block{ :id => "submit-target", :type => "button" }= "View Potential Target Genes"

@@ -59,7 +59,7 @@
           - @list_of_genome.each.with_index do |genome, i|
             .tab-pane.fade{ :role => "tabpanel", :id => genome, :class => "#{(i == 0) ? 'in active' : ''}" }
               - index = @index_all_genome[genome]
-              %row
+              .row
                 - [["ag","Antigen"],["cl", "Cell type"]].each do |set|
                   .col-md-4
                     %form

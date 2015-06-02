@@ -41,7 +41,7 @@
 
     .container
       - metadata = Experiment.record_by_expid(@expid)
-      %row
+      .row
         .col-md-10
           .page-header
             %h2
@@ -52,7 +52,7 @@
           .button-submit
             %button.btn.btn-primary.btn-lg.btn-block= "View on IGV"
 
-      %row
+      .row
         .col-md-12
           %h3= "Curated Sample Data"
           %table.table.table-bordered
@@ -69,7 +69,7 @@
               %td= metadata[:clClass]
               %td= metadata[:clSubClass]
 
-      %row
+      .row
         .col-md-12
           %h3= "Attributes by Original Data Submitter"
           %table.table.table-bordered
@@ -81,7 +81,7 @@
                 - kv_set.each do |kv|
                   %td= kv.split("=").last
 
-      %row
+      .row
         .col-md-12
           %h3= "Metadata from Sequence Read Archive"
 
@@ -107,7 +107,7 @@
                 - if v != ""
                   %th= v.to_s
 
-      %row
+      .row
         .col-md-12
           %h3= "Metadata from DBCLS SRA"
 
