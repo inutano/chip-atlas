@@ -49,7 +49,7 @@ class PeakJohn < Sinatra::Base
     @index_all_genome = Experiment.index_all_genome
     @list_of_genome = @index_all_genome.keys
     
-    @h = {}
+    h = {}
     fpath = File.join(app_root, "analysisList.tab")
     open(fpath).read.split("\n").each do |line|
       cols = line.split("\t")
