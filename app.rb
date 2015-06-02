@@ -81,9 +81,9 @@ class PeakJohn < Sinatra::Base
     open(fpath).read.split("\t").each do |line|
       cols = line.split("\t")
       antigen = cols[0]
-      is_available? = cols[2]
+      status = cols[2]
       genome = cols[3]
-      if is_available? == "+"
+      if status == "+"
         h[genome] ||= []
         h[genome] << antigen
       end
