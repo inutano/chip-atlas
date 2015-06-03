@@ -1,4 +1,8 @@
 public/src
 vendor
 .sass-cache
-database.sqlite
+
+# Elastic Beanstalk Files
+.elasticbeanstalk/*
+!.elasticbeanstalk/*.cfg.yml
+!.elasticbeanstalk/*.global.yml
