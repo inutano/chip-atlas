@@ -73,7 +73,7 @@
               .row
                 .col-md-6.col-md-offset-3
                   .button-submit
-                    %button.btn.btn-primary.btn-lg.btn-block{ :id => "submit", :type => "button" }= "View Potential Target Genes"
+                    %button.btn.btn-primary.btn-lg.btn-block{ :id => "target-gene-submit", :type => "button" }= "View Potential Target Genes"
 
     /
       Bootstrap Core Javascript
@@ -269,7 +269,7 @@
 
       // send data to get igv url
       $(function(){
-        $("button#submit").click(function(){
+        $("button#target-gene-submit").click(function(){
           var button = $(this);
           button.attr("disabled", true);
 
@@ -278,11 +278,7 @@
             // igv: $().text
             condition: {
               genome: genome,
-              agClass: $('#' + genome + 'agClass option:selected').val(),
-              agSubClass: $('#' + genome + 'agSubClass option:selected').val(),
-              clClass: $('#' + genome + 'clClass option:selected').val(),
-              clSubClass: $('#' + genome + 'clSubClass option:selected').val(),
-              qval: $('#' + genome + 'qval option:selected').val()
+              antigen: $('select#' + genome + 'AntigenPanel-select option:selected').val()
             }
           };
 
@@ -290,7 +286,7 @@
 
           $.ajax({
             type : 'post',
-            url : "#{app_root}/browse",
+            url : "#{app_root}/target_gene_result",
             data: JSON.stringify(data),
             contentType: 'application/json',
             dataType: 'json',

@@ -96,7 +96,7 @@
               .row
                 .col-md-6.col-md-offset-3
                   .button-submit
-                    %button.btn.btn-primary.btn-lg.btn-block{ :id => "submit", :type => "button" }= "View Co-Association Data"
+                    %button.btn.btn-primary.btn-lg.btn-block{ :id => "colo-submit", :type => "button" }= "View Co-Association Data"
 
     /
       Bootstrap Core Javascript
@@ -365,28 +365,39 @@
 
       // send data to get igv url
       $(function(){
-        $("button#submit").click(function(){
+        $("button#colo-submit").click(function(){
           var button = $(this);
           button.attr("disabled", true);
 
           var genome = $('.genomeTab ul li.active a').text().replace(/[\n\s ]/g, "");
-          var data = {
-            // igv: $().text
-            condition: {
-              genome: genome,
-              agClass: $('#' + genome + 'agClass option:selected').val(),
-              agSubClass: $('#' + genome + 'agSubClass option:selected').val(),
-              clClass: $('#' + genome + 'clClass option:selected').val(),
-              clSubClass: $('#' + genome + 'clSubClass option:selected').val(),
-              qval: $('#' + genome + 'qval option:selected').val()
-            }
+
+          var primaryType = $(':radio[name="datatypeoption"]:checked').val();
+          var primaryValue = $('select#' + genome + 'PrimaryPanel-select').val();
+          var secondaryValue = $('select#' + genome + 'SecondaryPanel-select').val();
+          var data;
+          if (primaryType == 'antigen') {
+            data = {
+              condition: {
+                genome: genome,
+                antigen: primaryValue,
+                cellline: secondaryValue
+              }
+            };
+          }else {
+            data = {
+              condition: {
+                genome: genome,
+                antigen: secondaryValue,
+                celline: primaryValue
+              }
+            };
           };
 
           alert(JSON.stringify(data));
 
           $.ajax({
             type : 'post',
-            url : "#{app_root}/browse",
+            url : "#{app_root}/colo_result",
             data: JSON.stringify(data),
             contentType: 'application/json',
             dataType: 'json',
