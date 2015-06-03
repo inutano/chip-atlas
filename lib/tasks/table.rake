@@ -8,7 +8,7 @@ namespace :table do
     experiment_list = ENV['experiment']
     bedfile_list    = ENV['bedfile']
     
-    open(experiment_list).readlines.each do |line_n|
+    open(experiment_list, "r:UTF-8").readlines.each do |line_n|
       line = line_n.chomp.split("\t")
       
       expid        = line[0]
@@ -32,7 +32,7 @@ namespace :table do
       exp.save
     end
     
-    open(bedfile_list).readlines.each do |line_n|
+    open(bedfile_list, "r:UTF-8").readlines.each do |line_n|
       line = line_n.chomp.split("\t")
       
       filename    = line[0]
