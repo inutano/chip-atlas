@@ -68,7 +68,7 @@ class PeakJohn < Sinatra::Base
     
     h = {}
     fpath = File.join(app_root, "analysisList.tab")
-    open(fpath, "r:UTF-8").read.split("\n").each do |line|
+    open(fpath).read.split("\n").each do |line|
       cols = line.split("\t")
       antigen = cols[0]
       cell_list = cols[1].split(",")
@@ -95,7 +95,7 @@ class PeakJohn < Sinatra::Base
     
     h = {}
     fpath = File.join(app_root, "analysisList.tab")
-    open(fpath, "r:UTF-8").read.split("\n").each do |line|
+    open(fpath).read.split("\n").each do |line|
       cols = line.split("\t")
       antigen = cols[0]
       status = cols[2]
