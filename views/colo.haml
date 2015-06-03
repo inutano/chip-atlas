@@ -393,7 +393,7 @@
             };
           };
 
-          alert(JSON.stringify(data));
+          // alert(JSON.stringify(data));
 
           $.ajax({
             type : 'post',
@@ -403,11 +403,11 @@
             dataType: 'json',
             scriptCharset: 'utf-8',
             success : function(response) {
-              alert(JSON.stringify(response));
+              // alert(JSON.stringify(response));
               window.open(response.url, "_self", "")
             },
             error : function(response){
-              alert(JSON.stringify(response));
+              // alert(JSON.stringify(response));
               alert("error!");
             },
             complete: function(){
