@@ -23,13 +23,18 @@ class PeakJohn < Sinatra::Base
       "http://dbarchive.biosciencedbc.jp/kyushu-u/"
     end
     
+    def fileformat
+      # ".bed"
+      ".bb"
+    end
+    
     def igv_browsing_url(data)
       igv_url   = data["igv"] || "http://localhost:60151"
       condition = data["condition"]
       genome    = condition["genome"]
       filename  = Bedfile.get_filename(condition)
     
-      archive_path = File.join(archive_base, genome, "assembled", filename + ".bed")
+      archive_path = File.join(archive_base, genome, "assembled", filename + fileformat)
       "#{igv_url}/load?genome=#{genome}&file=#{archive_path}"
     end
 
