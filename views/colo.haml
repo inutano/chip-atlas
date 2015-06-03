@@ -34,7 +34,7 @@
             %li.active
               %a{ :href => "#{app_root}/colo" }= "Co-Association Analysis"
             %li
-              %a{ :href => "#{app_root}/target_gene" }= "Target Gene Analysis"
+              %a{ :href => "#{app_root}/target_genes" }= "Target Gene Analysis"
             %li
               %a{ :href => "#{app_root}/About" }= "About"
 
@@ -397,7 +397,7 @@
 
           $.ajax({
             type : 'post',
-            url : "#{app_root}/colo_result",
+            url : "#{app_root}/colo",
             data: JSON.stringify(data),
             contentType: 'application/json',
             dataType: 'json',

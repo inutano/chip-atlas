@@ -34,14 +34,13 @@
             %li.active
               %a{ :href => "#{app_root}/colo" }= "Co-Association Analysis"
             %li
-              %a{ :href => "#{app_root}/target_gene" }= "Target Gene Analysis"
+              %a{ :href => "#{app_root}/target_genes" }= "Target Gene Analysis"
             %li
               %a{ :href => "#{app_root}/About" }= "About"
 
-
     #iframe
       .iframe
-        %iframe{:src => "http://devbio.med.kyushu-u.ac.jp/chipome/targetGenes/POU5F1.html" }
+        %iframe{ :src => @iframe_url }
 
 
     /

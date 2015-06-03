@@ -32,6 +32,23 @@ class PeakJohn < Sinatra::Base
       archive_path = File.join(archive_base, genome, "assembled", filename + ".bed")
       "#{igv_url}/load?genome=#{genome}&file=#{archive_path}"
     end
+
+    def colo_url(data)
+      base = "http://devbio.med.kyushu-u.ac.jp/chipome/colo"
+      condition = data["condition"]
+      genome    = condition["genome"]
+      antigen   = condition["antigen"]
+      cellline  = condition["cellline"].gsub("\s","_")
+      "#{app_root}/colo_result?base=#{base}/#{antigen}.#{cellline}.html"
+    end
+
+    def target_genes_url(data)
+      base = "http://devbio.med.kyushu-u.ac.jp/chipome/targetGenes"
+      condition = data["condition"]
+      genome    = condition["genome"]
+      antigen   = condition["antigen"]
+      "#{app_root}/target_genes_result?base=#{base}/#{antigen}.html"
+    end
   end
   
   get "/:source.css" do
@@ -72,7 +89,7 @@ class PeakJohn < Sinatra::Base
     haml :colo
   end
 
-  get "/colo_result" do
+  get "/target_genes" do
     @index_all_genome = Experiment.index_all_genome
     @list_of_genome = @index_all_genome.keys
     
@@ -81,65 +98,36 @@ class PeakJohn < Sinatra::Base
     open(fpath).read.split("\n").each do |line|
       cols = line.split("\t")
       antigen = cols[0]
-      cell_list = cols[1].split(",")
+      status = cols[2]
       genome = cols[3]
-      
-      h[genome] ||= {}
-      h[genome][:antigen] ||= {}
-      h[genome][:antigen][antigen] = cell_list
-      
-      cell_list.each do |cl|
-        h[genome][:cellline] ||= {}
-        h[genome][:cellline][cl] ||= []
-        h[genome][:cellline][cl] << antigen
+      if status == "+"
+        h[genome] ||= []
+        h[genome] << antigen
       end
     end
     @analysis = h
     
-    haml :colo_test
+    haml :target_genes
   end
   
+  post "/colo" do
+    content_type "application/json"
+    JSON.dump({ "url" => colo_url(JSON.parse(request.body.read)) })
+  end
 
-  get "/target_gene" do
-    @index_all_genome = Experiment.index_all_genome
-    @list_of_genome = @index_all_genome.keys
-    
-    h = {}
-    fpath = File.join(app_root, "analysisList.tab")
-    open(fpath).read.split("\n").each do |line|
-      cols = line.split("\t")
-      antigen = cols[0]
-      status = cols[2]
-      genome = cols[3]
-      if status == "+"
-        h[genome] ||= []
-        h[genome] << antigen
-      end
-    end
-    @analysis = h
-    
-    haml :target_gene
+  get "/colo_result" do
+    @iframe_url = params[:base]
+    haml :colo_result
   end
   
-  get "/target_gene_result" do
-    @index_all_genome = Experiment.index_all_genome
-    @list_of_genome = @index_all_genome.keys
-    
-    h = {}
-    fpath = File.join(app_root, "analysisList.tab")
-    open(fpath).read.split("\n").each do |line|
-      cols = line.split("\t")
-      antigen = cols[0]
-      status = cols[2]
-      genome = cols[3]
-      if status == "+"
-        h[genome] ||= []
-        h[genome] << antigen
-      end
-    end
-    @analysis = h
-    
-    haml :target_gene_test
+  post "/target_genes" do
+    content_type "application/json"
+    JSON.dump({ "url" => target_genes_url(JSON.parse(request.body.read)) })
+  end
+
+  get "/target_genes_result" do
+    @iframe_url = params[:base]
+    haml :target_genes_result
   end
   
   post "/browse" do
@@ -151,7 +139,6 @@ class PeakJohn < Sinatra::Base
     @expid = params[:id]
     404 if Experiment.id_valid?(@expid)
     @ncbi  = Experiment.fetch_ncbi_metadata(@expid)
-    puts @ncbi
     haml :experiment
   end
 end
