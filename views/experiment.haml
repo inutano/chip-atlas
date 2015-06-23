@@ -51,11 +51,11 @@
               .small
                 = metadata[:title] != "-" ? metadata[:title] : "no title"
         .col-md-2
-          .button-submit.down
+          .button-submit.down3
             %button.btn.btn-primary.btn-lg.btn-block= "View on IGV"
           .dropdown-link
             .dropdown
-              .button.btn.btn-default.btn-lg.dropdown-toggle{ :type => "button", :id => "movies-dropdown", "data-toggle" => "dropdown", "aria-haspopup" => true, "aria-expanded" => true }
+              .button.btn.btn-default.btn-lg.dropdown-toggle{ :type => "button", :id => "analysis-dropdown", "data-toggle" => "dropdown", "aria-haspopup" => true, "aria-expanded" => true }
                 View Analysis
                 %span.caret
               %ul.dropdown-menu{ "aria-labelledby" => "movies-dropdown" }
@@ -63,6 +63,37 @@
                   %a{ :href => "#" }= "Co-Association"
                 %li
                   %a{ :href => "#" }= "Target Gene"
+          .dropdown-link
+            .dropdown
+              .button.btn.btn-default.btn-lg.dropdown-toggle{ :type => "button", :id => "linkout-dropdown", "data-toggle" => "dropdown", "aria-haspopup" => true, "aria-expanded" => true }
+                Link Out
+                %span.caret
+              %ul.dropdown-menu{ "aria-labelledby" => "movies-dropdown" }
+                - antigen = metadata[:agSubClass]
+                - celltype = metadata[:clSubClass].gsub("\s","+")
+                %li.dropdown-header
+                  SRA Experiment
+                %li
+                  %a{ :href => "http://sra.dbcls.jp/search/search?search_query=#{@expid}" }= "DBCLS SRA"
+                %li
+                  %a{ :href => "http://www.ncbi.nlm.nih.gov/sra/?term=#{@expid}" }= "NCBI SRA"
+                %li.dropdown-header
+                  = 'Antigen: ' + antigen
+                %li
+                  %a{ :href => "https://www.wikigenes.org/?search=#{antigen}" }= "wikigenes"
+                %li
+                  %a{ :href => "http://omicspace.riken.jp/PosMed/search?actionType=searchexec&keyword=#{antigen}" }= "PosMed"
+                %li
+                  %a{ :href => "http://pdbj.org/mine/search?query=#{antigen}" }= "PDBj"
+                %li.dropdown-header
+                  = 'CellType: ' + "#{celltype}"
+                %li
+                  %a{ :href => "http://www.atcc.org/Search_Results.aspx?searchTerms=#{celltype}" }= "ATCC"
+                %li
+                  %a{ :href => "http://www.ncbi.nlm.nih.gov/mesh/?term=#{celltype}" }= "MeSH"
+                %li
+                  %a{ :href => "http://www2.brc.riken.jp/lab/cell/list.cgi?skey=#{celltype}" }= "RIKEN BRC"
+
 
 
       .row.mdata
