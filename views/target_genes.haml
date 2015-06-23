@@ -43,9 +43,20 @@
               %a{ :href => "#{app_root}/log" }= "Change Log"
 
     .container
-      .header
-        %h1= "ChIP-Atlas - Target Gene Analysis"
-        %p= "Visualize All Peaks from Published ChIP-Seq data."
+      .row
+        .col-md-10
+          .header
+            %h1= "ChIP-Atlas - Target Gene Analysis"
+            %p= "Predict potential target genes of TFs."
+        .col-md-2
+          .dropdown-help
+            .dropdown
+              .button.btn.btn-default.dropdown-toggle{ :type => "button", :id => "movies-dropdown", "data-toggle" => "dropdown", "aria-haspopup" => true, "aria-expanded" => true }
+                Tutorial movie
+                %span.caret
+              %ul.dropdown-menu{ "aria-labelledby" => "movies-dropdown" }
+                %li
+                  %a{ :href => "#" }= "How to use"
 
       // Navigation Tabs, links and contents
       .genomeTab{ :role => "tabpanel"}
@@ -98,6 +109,7 @@
                 .col-md-6.col-md-offset-3
                   .button-submit
                     %button.btn.btn-primary.btn-lg.btn-block{ :id => "target-gene-submit", :type => "button" }= "View Potential Target Genes"
+                    %button.btn.btn-primary.btn-lg.btn-block{ :id => "target-gene-download", :type => "button" }= "Download (TSV)"
 
     /
       Bootstrap Core Javascript
