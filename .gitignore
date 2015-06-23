@@ -2,3 +2,4 @@ public/src
 vendor
 .sass-cache
 database.sqlite
+table/prev
