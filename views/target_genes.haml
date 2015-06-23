@@ -62,13 +62,33 @@
                   .panel.panel-default
                     - panel = "#{genome}AntigenPanel"
                     .panel-heading{ :id => panel }
-                      %h4.panel-title= "Choose Antigen"
+                      %h4.panel-title= "1. Choose Antigen"
                     .panel-body
                       %input.typeahead.form-control{ :type => "text", :placeholder => "type to search", :id => "#{panel}-typeahead" }
                       %hr
                       %select.form-control.flexselect{ :id => "#{panel}-select",  :size => 8 }
                         - @analysis[genome].sort.each do |ag|
                           %option{ :value => ag }= ag
+                
+                .col-md-3
+                  .panel.panel-default
+                    - panel = "#{genome}DistancePanel"
+                    .panel-heading{ :id => panel }
+                      %h4.panel-title= "2. Choose Distance from TSS"
+                    .panel-body
+                      %form{ :id => "#{panel}-form" }
+                        .radio
+                          %label
+                            %input{ :type => "radio", :id => "", :value => "1", :name => "datatypeoption" }
+                            = " 1k "
+                        .radio
+                          %label
+                            %input{ :type => "radio", :id => "", :value => "5", :name => "datatypeoption" }
+                            = " 5k "
+                        .radio
+                          %label
+                            %input{ :type => "radio", :id => "", :value => "10", :name => "datatypeoption" }
+                            = " 10k "
 
               .row
                 .col-md-6.col-md-offset-3
