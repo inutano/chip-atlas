@@ -69,14 +69,18 @@ class Experiment < ActiveRecord::Base
       records = self.where(:expid => expid)
       raise NameError if records.size > 1
       record = records.first
-      { :expid      => expid,
+      { 
+        :expid      => expid,
         :genome     => record.genome,
         :agClass    => record.agClass,
         :agSubClass => record.agSubClass,
         :clClass    => record.clClass,
         :clSubClass => record.clSubClass,
         :title      => record.title,
-        :attributes => record.additional_attributes }
+        :attributes => record.additional_attributes,
+        :readInfo   => record.readInfo,
+        :clSubClassInfo => record.clSubClassInfo,
+       }
     end
     
     def fetch_ncbi_metadata(expid)

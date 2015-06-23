@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150415101316) do
+ActiveRecord::Schema.define(version: 20150623061634) do
 
   create_table "bedfiles", force: :cascade do |t|
     t.string "filename"
@@ -40,6 +40,8 @@ ActiveRecord::Schema.define(version: 20150415101316) do
     t.string "clSubClass"
     t.string "title"
     t.string "additional_attributes"
+    t.string "clSubClassInfo"
+    t.string "readInfo"
   end
 
   add_index "experiments", ["agClass"], name: "index_experiments_on_agClass"
