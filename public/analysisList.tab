@@ -123,7 +123,7 @@ vfl	Embryo	+	dm3
 vtd	Cell line	+	dm3
 yki	Cell line,Embryo,Larvae	+	dm3
 ADNP2	Digestive tract	+	hg19
-AFF1	Blood	+	hg19
+AFF1	-	+	hg19
 AFF4	Digestive tract,Kidney,Uterus	+	hg19
 AGO1	Breast,Prostate	+	hg19
 AGO2	Prostate	+	hg19
@@ -139,25 +139,25 @@ ARRB1	Lung,Prostate	+	hg19
 ASCL1	Epidermis,Others	+	hg19
 ASF1A	Uterus	+	hg19
 ASH1L	Digestive tract	+	hg19
-ATF1	Blood	+	hg19
+ATF1	-	+	hg19
 ATF2	Digestive tract,Pluripotent stem cell	+	hg19
 ATF3	Digestive tract,Liver,Lung,Neural,Pluripotent stem cell	+	hg19
 ATF6	Digestive tract	+	hg19
 ATF7	Digestive tract	+	hg19
 ATF7IP	Epidermis	+	hg19
-ATRX	Blood	+	hg19
+ATRX	-	+	hg19
 BACH1	Digestive tract,Pluripotent stem cell	+	hg19
-BACH2	Blood	+	hg19
+BACH2	-	+	hg19
 BARX1	Digestive tract	+	hg19
-BATF	Blood	+	hg19
+BATF	-	+	hg19
 BATF3	Digestive tract	+	hg19
 BBX	Digestive tract	+	hg19
 BCL10	Lung	+	hg19
 BCL11A	Breast,Digestive tract,Pluripotent stem cell	+	hg19
 BCL3	Lung	+	hg19
 BCL6	Digestive tract	+	hg19
-BCLAF1	Blood	+	hg19
-BCOR	Blood	+	hg19
+BCLAF1	-	+	hg19
+BCOR	-	+	hg19
 BDP1	Lung,Uterus	+	hg19
 BHLHE40	Digestive tract,Liver,Lung	+	hg19
 BHLHE41	Digestive tract	+	hg19
@@ -175,8 +175,8 @@ C17orf49	Uterus	+	hg19
 C17orf96	Kidney	+	hg19
 CAMTA1	Digestive tract	+	hg19
 CASP8AP2	Digestive tract	+	hg19
-CBFA2T3	Blood	+	hg19
-CBFB	Blood	+	hg19
+CBFA2T3	-	+	hg19
+CBFB	-	+	hg19
 CBX2	Kidney	+	hg19
 CBX3	Digestive tract	+	hg19
 CBX4	Kidney	+	hg19
@@ -185,11 +185,11 @@ CBX6	Breast,Epidermis	+	hg19
 CBX7	Breast,Epidermis	+	hg19
 CBX8	Breast,Epidermis	+	hg19
 CCDC101	Uterus	+	hg19
-CCNT2	Blood	+	hg19
+CCNT2	-	+	hg19
 CDC5L	Digestive tract	+	hg19
 CDK2	Breast	+	hg19
 CDK6	Others	+	hg19
-CDK7	Blood	+	hg19
+CDK7	-	+	hg19
 CDK8	Digestive tract	+	hg19
 CDK9	Kidney	+	hg19
 CDX1	Digestive tract	+	hg19
@@ -214,11 +214,11 @@ CTBP1	Breast,Prostate	+	hg19
 CTBP2	Pluripotent stem cell,Prostate	+	hg19
 CTCF	Adipocyte,Breast,Cardiovascular,Digestive tract,Epidermis,Kidney,Liver,Lung,Muscle,Neural,Others,Pancreas,Placenta,Pluripotent stem cell,Prostate,Uterus	+	hg19
 CTNNB1	Digestive tract	+	hg19
-CUX1	Blood	+	hg19
+CUX1	-	+	hg19
 DCP1A	Uterus	+	hg19
 DDIT3	Digestive tract	+	hg19
 DDX5	Uterus	+	hg19
-DEK	Blood	+	hg19
+DEK	-	+	hg19
 DICER1	Kidney	+	hg19
 DMC1	Gonad	+	hg19
 DMRT2	Digestive tract	+	hg19
@@ -287,16 +287,16 @@ FOXO1	Digestive tract	+	hg19
 FOXO4	Digestive tract	+	hg19
 FOXP1	Digestive tract,Pluripotent stem cell,Prostate	+	hg19
 FOXP2	Digestive tract,Neural	+	hg19
-FOXP3	Blood	+	hg19
+FOXP3	-	+	hg19
 FOXQ1	Digestive tract	+	hg19
 GABPA	Breast,Liver,Lung,Neural,Others,Pluripotent stem cell,Prostate,Uterus	+	hg19
-GATA1	Blood	+	hg19
+GATA1	-	+	hg19
 GATA2	Cardiovascular,Neural	+	hg19
 GATA3	Breast,Lung,Neural	+	hg19
 GATA4	Digestive tract	+	hg19
 GATA6	Digestive tract	+	hg19
 GATAD1	Digestive tract,Uterus	+	hg19
-GFI1B	Blood	+	hg19
+GFI1B	-	+	hg19
 GLI2	Digestive tract	+	hg19
 GLYR1	Uterus	+	hg19
 GMEB2	Digestive tract	+	hg19
@@ -315,7 +315,7 @@ HDAC1	Prostate	+	hg19
 HDAC2	Breast,Liver,Pluripotent stem cell,Prostate	+	hg19
 HDAC3	Prostate	+	hg19
 HDAC6	Pluripotent stem cell	+	hg19
-HDAC8	Blood	+	hg19
+HDAC8	-	+	hg19
 HES4	Digestive tract	+	hg19
 HES5	Digestive tract	+	hg19
 HES7	Digestive tract	+	hg19
@@ -327,8 +327,8 @@ HIC2	Digestive tract	+	hg19
 HIF1A	Breast,Cardiovascular	+	hg19
 HIRA	Lung,Uterus	+	hg19
 HIVEP3	Digestive tract	+	hg19
-HMGN1	Blood	+	hg19
-HMGN3	Blood	+	hg19
+HMGN1	-	+	hg19
+HMGN3	-	+	hg19
 HNF1A	Digestive tract	+	hg19
 HNF1B	Digestive tract	+	hg19
 HNF4A	Digestive tract,Liver	+	hg19
@@ -356,7 +356,7 @@ HOXD13	Digestive tract	+	hg19
 HOXD4	Digestive tract	+	hg19
 HOXD9	Digestive tract	+	hg19
 HSF1	Adipocyte,Breast,Digestive tract,Liver,Lung	+	hg19
-HSF2	Blood	+	hg19
+HSF2	-	+	hg19
 ICE1	Digestive tract	+	hg19
 ICE2	Digestive tract	+	hg19
 ID1	Digestive tract	+	hg19
@@ -364,16 +364,16 @@ ID2	Digestive tract	+	hg19
 ID3	Digestive tract	+	hg19
 ID4	Digestive tract	+	hg19
 IGF1	Epidermis	+	hg19
-IKZF1	Blood	+	hg19
+IKZF1	-	+	hg19
 IKZF5	Digestive tract	+	hg19
 ING2	Digestive tract	+	hg19
 ING5	Digestive tract	+	hg19
-INO80	Blood	+	hg19
+INO80	-	+	hg19
 IRF1	Digestive tract	+	hg19
 IRF2	Digestive tract	+	hg19
 IRF3	Digestive tract,Liver,Uterus	+	hg19
 IRF4	Digestive tract	+	hg19
-IRF5	Blood	+	hg19
+IRF5	-	+	hg19
 IRF8	Digestive tract	+	hg19
 IRF9	Digestive tract	+	hg19
 IRX2	Digestive tract	+	hg19
@@ -386,32 +386,32 @@ JUN	Breast,Cardiovascular,Digestive tract,Liver,Pluripotent stem cell,Uterus	+	h
 JUNB	Digestive tract	+	hg19
 JUND	Breast,Digestive tract,Liver,Lung,Neural,Pluripotent stem cell,Prostate,Uterus	+	hg19
 KAT2A	Uterus	+	hg19
-KAT2B	Blood	+	hg19
-KAT5	Blood	+	hg19
+KAT2B	-	+	hg19
+KAT5	-	+	hg19
 KAT7	Digestive tract	+	hg19
-KAT8	Blood	+	hg19
+KAT8	-	+	hg19
 KCMF1	Digestive tract	+	hg19
 KDM1A	Epidermis,Pluripotent stem cell,Prostate,Uterus	+	hg19
-KDM3A	Blood	+	hg19
+KDM3A	-	+	hg19
 KDM4A	Pluripotent stem cell	+	hg19
 KDM4C	Digestive tract	+	hg19
 KDM5A	Pluripotent stem cell	+	hg19
 KDM5B	Breast,Pluripotent stem cell	+	hg19
 KDM5C	Pluripotent stem cell	+	hg19
 KDM6B	Epidermis	+	hg19
-KLF1	Blood	+	hg19
+KLF1	-	+	hg19
 KLF11	Adipocyte,Digestive tract	+	hg19
 KLF13	Digestive tract	+	hg19
 KLF15	Digestive tract	+	hg19
 KLF4	Breast,Epidermis,Pluripotent stem cell	+	hg19
 KLF5	Digestive tract	+	hg19
 KLF6	Digestive tract	+	hg19
-KMT2A	Blood	+	hg19
+KMT2A	-	+	hg19
 KMT2D	Digestive tract	+	hg19
-L3MBTL2	Blood	+	hg19
+L3MBTL2	-	+	hg19
 LCOR	Digestive tract	+	hg19
 LCORL	Digestive tract	+	hg19
-LDB1	Blood	+	hg19
+LDB1	-	+	hg19
 LHX2	Others	+	hg19
 LHX4	Digestive tract	+	hg19
 LHX5	Digestive tract	+	hg19
@@ -419,11 +419,11 @@ LHX6	Digestive tract	+	hg19
 LIN9	Uterus	+	hg19
 LMNA	Epidermis	+	hg19
 LMNB1	Lung	+	hg19
-LMO1	Blood	+	hg19
-LMO2	Blood	+	hg19
-LMO3	Blood	+	hg19
+LMO1	-	+	hg19
+LMO2	-	+	hg19
+LMO3	-	+	hg19
 LRWD1	Uterus	+	hg19
-LYL1	Blood	+	hg19
+LYL1	-	+	hg19
 MAFB	Digestive tract,Epidermis	+	hg19
 MAFF	Digestive tract,Liver	+	hg19
 MAFG	Digestive tract	+	hg19
@@ -438,22 +438,22 @@ MED1	Adipocyte,Breast,Digestive tract,Lung,Muscle,Neural	+	hg19
 MED12	Prostate	+	hg19
 MEF2A	Neural	+	hg19
 MEF2C	Cardiovascular	+	hg19
-MEIS1	Blood	+	hg19
+MEIS1	-	+	hg19
 MEOX2	Digestive tract	+	hg19
 MITF	Digestive tract,Epidermis,Others	+	hg19
 MIXL1	Digestive tract	+	hg19
 MLLT3	Uterus	+	hg19
 MSC	Digestive tract	+	hg19
-MTA3	Blood	+	hg19
+MTA3	-	+	hg19
 MTF1	Digestive tract	+	hg19
 MXD3	Digestive tract	+	hg19
 MXI1	Digestive tract,Liver,Lung,Neural,Pluripotent stem cell,Uterus	+	hg19
-MYB	Blood	+	hg19
+MYB	-	+	hg19
 MYBL1	Digestive tract	+	hg19
 MYBL2	Liver,Uterus	+	hg19
 MYC	Breast,Cardiovascular,Digestive tract,Epidermis,Kidney,Liver,Lung,Neural,Others,Pluripotent stem cell,Uterus	+	hg19
 MYF6	Digestive tract	+	hg19
-MYH11	Blood	+	hg19
+MYH11	-	+	hg19
 MYNN	Digestive tract	+	hg19
 MYOD1	Digestive tract,Muscle	+	hg19
 NANOG	Pluripotent stem cell	+	hg19
@@ -462,12 +462,12 @@ NCOA3	Breast,Digestive tract	+	hg19
 NCOR1	Digestive tract,Kidney	+	hg19
 NCOR2	Digestive tract	+	hg19
 NELFA	Uterus	+	hg19
-NELFE	Blood	+	hg19
+NELFE	-	+	hg19
 NEUROD2	Digestive tract	+	hg19
 NFAT5	Digestive tract	+	hg19
 NFATC1	Cardiovascular	+	hg19
 NFE2L1	Digestive tract	+	hg19
-NFE2L2	Blood	+	hg19
+NFE2L2	-	+	hg19
 NFE2L3	Digestive tract	+	hg19
 NFIB	Digestive tract	+	hg19
 NFIC	Liver,Neural,Uterus	+	hg19
@@ -484,7 +484,7 @@ NKX3-1	Prostate	+	hg19
 NKX6-1	Digestive tract	+	hg19
 NME1	Lung	+	hg19
 NOS2	Epidermis	+	hg19
-NOTCH1	Blood	+	hg19
+NOTCH1	-	+	hg19
 NPAT	Digestive tract	+	hg19
 NR1D1	Digestive tract	+	hg19
 NR1H2	Digestive tract	+	hg19
@@ -510,7 +510,7 @@ OVOL2	Digestive tract	+	hg19
 PAF1	Lung	+	hg19
 PALB2	Breast	+	hg19
 PARP1	Breast	+	hg19
-PAX5	Blood	+	hg19
+PAX5	-	+	hg19
 PAX6	Others	+	hg19
 PBX1	Breast,Digestive tract	+	hg19
 PBX2	Digestive tract	+	hg19
@@ -519,18 +519,18 @@ PCF11	Digestive tract	+	hg19
 PCGF2	Others	+	hg19
 PDX1	Pluripotent stem cell	+	hg19
 PGR	Breast,Cardiovascular,Muscle	+	hg19
-PHF6	Blood	+	hg19
+PHF6	-	+	hg19
 PHF8	Neural,Pluripotent stem cell,Uterus	+	hg19
 PIAS4	Lung	+	hg19
 PLAG1	Digestive tract	+	hg19
 PML	Breast	+	hg19
 POU2F1	Uterus	+	hg19
-POU2F2	Blood	+	hg19
+POU2F2	-	+	hg19
 POU5F1	Epidermis,Pluripotent stem cell	+	hg19
 PPARA	Digestive tract	+	hg19
 PPARG	Adipocyte,Cardiovascular,Digestive tract	+	hg19
 PPARGC1A	Liver	+	hg19
-PRAME	Blood	+	hg19
+PRAME	-	+	hg19
 PRDM1	Uterus	+	hg19
 PRDM14	Pluripotent stem cell	+	hg19
 PRDM4	Digestive tract	+	hg19
@@ -538,7 +538,7 @@ PRKCQ	Breast	+	hg19
 PRKDC	Breast,Others	+	hg19
 PROX1	Digestive tract	+	hg19
 RAD21	Breast,Digestive tract,Liver,Lung,Neural,Pluripotent stem cell,Uterus	+	hg19
-RARA	Blood	+	hg19
+RARA	-	+	hg19
 RB1	Lung,Uterus	+	hg19
 RBBP5	Pluripotent stem cell	+	hg19
 RBL1	Lung	+	hg19
@@ -555,8 +555,8 @@ RING1	Breast,Epidermis,Prostate	+	hg19
 RLF	Digestive tract	+	hg19
 RNF2	Breast,Epidermis,Kidney,Pluripotent stem cell,Prostate	+	hg19
 RUNX1	Digestive tract,Prostate	+	hg19
-RUNX1T1	Blood	+	hg19
-RUNX3	Blood	+	hg19
+RUNX1T1	-	+	hg19
+RUNX3	-	+	hg19
 RXRA	Breast,Digestive tract,Liver,Neural,Pluripotent stem cell	+	hg19
 RYBP	Kidney	+	hg19
 SALL4	Digestive tract	+	hg19
@@ -570,7 +570,7 @@ SIRT3	Others	+	hg19
 SIRT6	Pluripotent stem cell	+	hg19
 SIX5	Lung,Pluripotent stem cell	+	hg19
 SKI	Digestive tract	+	hg19
-SMAD1	Blood	+	hg19
+SMAD1	-	+	hg19
 SMAD2	Pluripotent stem cell	+	hg19
 SMAD3	Liver,Lung,Pluripotent stem cell	+	hg19
 SMAD4	Lung,Pluripotent stem cell	+	hg19
@@ -587,15 +587,15 @@ SNAPC1	Breast,Lung	+	hg19
 SNAPC2	Lung	+	hg19
 SNAPC4	Breast,Digestive tract,Lung	+	hg19
 SNAPC5	Lung	+	hg19
-SOX11	Blood	+	hg19
+SOX11	-	+	hg19
 SOX2	Digestive tract,Epidermis,Lung,Neural,Others,Pluripotent stem cell	+	hg19
 SOX9	Digestive tract	+	hg19
 SP1	Digestive tract,Liver,Lung,Pluripotent stem cell	+	hg19
 SP2	Liver,Pluripotent stem cell	+	hg19
 SP4	Pluripotent stem cell	+	hg19
 SPDEF	Breast	+	hg19
-SPI1	Blood	+	hg19
-SRCAP	Blood	+	hg19
+SPI1	-	+	hg19
+SRCAP	-	+	hg19
 SREBF1	Liver	+	hg19
 SREBF2	Liver	+	hg19
 SRF	Breast,Digestive tract,Liver,Pluripotent stem cell,Uterus	+	hg19
@@ -607,7 +607,7 @@ STAT2	Digestive tract	+	hg19
 STAT3	Breast,Uterus	+	hg19
 STAT4	Digestive tract	+	hg19
 STAT5A	Digestive tract	+	hg19
-STAT5B	Blood	+	hg19
+STAT5B	-	+	hg19
 STAT6	Digestive tract	+	hg19
 SUMO1	Lung,Uterus	+	hg19
 SUMO2	Kidney,Lung	+	hg19
@@ -621,11 +621,11 @@ TAF3	Digestive tract	+	hg19
 TAF7	Pluripotent stem cell	+	hg19
 TAL1	Cardiovascular,Digestive tract	+	hg19
 TBL1X	Kidney	+	hg19
-TBL1XR1	Blood	+	hg19
+TBL1XR1	-	+	hg19
 TBP	Liver,Pluripotent stem cell,Uterus	+	hg19
-TBX21	Blood	+	hg19
+TBX21	-	+	hg19
 TCF12	Breast,Liver,Lung,Neural,Pluripotent stem cell,Uterus	+	hg19
-TCF3	Blood	+	hg19
+TCF3	-	+	hg19
 TCF4	Digestive tract	+	hg19
 TCF7L1	Digestive tract	+	hg19
 TCF7L2	Breast,Digestive tract,Kidney,Liver,Pancreas,Prostate,Uterus	+	hg19
@@ -641,7 +641,7 @@ TFAP2A	Breast,Digestive tract,Pluripotent stem cell,Uterus	+	hg19
 TFAP2C	Breast,Epidermis,Uterus	+	hg19
 TFAP4	Digestive tract,Prostate	+	hg19
 TFCP2	Digestive tract	+	hg19
-THAP1	Blood	+	hg19
+THAP1	-	+	hg19
 THAP11	Uterus	+	hg19
 THAP4	Digestive tract	+	hg19
 TLE3	Breast	+	hg19
@@ -655,15 +655,15 @@ TRRAP	Uterus	+	hg19
 TSHZ1	Digestive tract	+	hg19
 TTF2	Uterus	+	hg19
 UBP1	Digestive tract	+	hg19
-UBTF	Blood	+	hg19
+UBTF	-	+	hg19
 USF1	Digestive tract,Liver,Lung,Neural,Pluripotent stem cell,Uterus	+	hg19
 USF2	Liver,Pluripotent stem cell,Uterus	+	hg19
 VDR	Digestive tract,Liver	+	hg19
 WDR5	Epidermis,Others,Prostate	+	hg19
 WHSC1	Digestive tract	+	hg19
-WRNIP1	Blood	+	hg19
+WRNIP1	-	+	hg19
 XBP1	Breast	+	hg19
-XRCC4	Blood	+	hg19
+XRCC4	-	+	hg19
 XRN2	Uterus	+	hg19
 YBX1	Digestive tract	+	hg19
 YY1	Digestive tract,Liver,Lung,Neural,Pluripotent stem cell,Uterus	+	hg19
@@ -676,13 +676,13 @@ ZBTB39	Digestive tract	+	hg19
 ZBTB4	Digestive tract	+	hg19
 ZBTB44	Digestive tract	+	hg19
 ZBTB7A	Liver,Uterus	+	hg19
-ZC3H11A	Blood	+	hg19
+ZC3H11A	-	+	hg19
 ZC3H8	Digestive tract	+	hg19
 ZEB1	Liver	+	hg19
 ZFHX4	Neural	+	hg19
 ZFX	Neural	+	hg19
 ZKSCAN1	Uterus	+	hg19
-ZMIZ1	Blood	+	hg19
+ZMIZ1	-	+	hg19
 ZMYND11	Others	+	hg19
 ZNF12	Digestive tract	+	hg19
 ZNF143	Digestive tract,Kidney,Pluripotent stem cell,Uterus	+	hg19
@@ -693,7 +693,7 @@ ZNF274	Liver,Pluripotent stem cell,Uterus	+	hg19
 ZNF280D	Digestive tract	+	hg19
 ZNF281	Digestive tract	+	hg19
 ZNF3	Digestive tract	-	hg19
-ZNF384	Blood	+	hg19
+ZNF384	-	+	hg19
 ZNF395	Digestive tract	+	hg19
 ZNF486	Pluripotent stem cell	+	hg19
 ZNF581	Digestive tract	+	hg19
@@ -705,30 +705,30 @@ ZNF83	Digestive tract	+	hg19
 ZNF84	Digestive tract	+	hg19
 ZNF92	Others	+	hg19
 ZZZ3	Uterus	+	hg19
-Ahr	Blood	+	mm9
-Aicda	Blood	+	mm9
+Ahr	-	+	mm9
+Aicda	-	+	mm9
 Ar	Gonad,Kidney,Prostate	+	mm9
 Arid3a	Pluripotent stem cell	+	mm9
 Arntl	Liver	+	mm9
 Ascl1	Embryo,Embryonic fibroblast,Neural	+	mm9
-Ascl2	Blood	+	mm9
-Ash2l	Blood	+	mm9
+Ascl2	-	+	mm9
+Ash2l	-	+	mm9
 Atf2	Embryonic fibroblast	+	mm9
-Atf3	Blood	+	mm9
+Atf3	-	+	mm9
 Atf4	Embryonic fibroblast,Epidermis	+	mm9
 Atf7	Embryonic fibroblast	+	mm9
 Atf7ip	Pluripotent stem cell	+	mm9
 Atrx	Embryonic fibroblast,Pluripotent stem cell	+	mm9
 Auts2	Neural	+	mm9
-Bach2	Blood	+	mm9
-Batf	Blood	+	mm9
+Bach2	-	+	mm9
+Batf	-	+	mm9
 Bcl11a	Breast	+	mm9
 Bcl6	Liver,Pancreas	+	mm9
-Bhlhe40	Blood	+	mm9
+Bhlhe40	-	+	mm9
 Bmi1	Neural	+	mm9
-Brca1	Blood	+	mm9
-Brd2	Blood	+	mm9
-Brd3	Blood	+	mm9
+Brca1	-	+	mm9
+Brd2	-	+	mm9
+Brd3	-	+	mm9
 Brd4	Cardiovascular,Embryonic fibroblast,Pluripotent stem cell	+	mm9
 Cbx1	Pluripotent stem cell	+	mm9
 Cbx3	Pluripotent stem cell	+	mm9
@@ -742,8 +742,8 @@ Cdx2	Digestive tract,Placenta,Pluripotent stem cell	+	mm9
 Cebpa	Adipocyte,Embryonic fibroblast,Liver,Neural	+	mm9
 Cebpb	Adipocyte,Embryonic fibroblast,Epidermis,Liver,Muscle,Neural,Others	+	mm9
 Cebpd	Embryonic fibroblast	+	mm9
-Chd1	Blood	+	mm9
-Chd2	Blood	+	mm9
+Chd1	-	+	mm9
+Chd2	-	+	mm9
 Chd4	Breast,Others,Pluripotent stem cell	+	mm9
 Chd7	Pluripotent stem cell	+	mm9
 Clock	Liver	+	mm9
@@ -762,13 +762,13 @@ Dmrtb1	Gonad	+	mm9
 Dnajc2	Pluripotent stem cell	+	mm9
 Dnmt1	Pluripotent stem cell	+	mm9
 Dpy30	Pluripotent stem cell	+	mm9
-E2f1	Blood	+	mm9
+E2f1	-	+	mm9
 E2f3	Embryonic fibroblast	+	mm9
 E2f4	Embryonic fibroblast,Liver,Muscle,Pluripotent stem cell	+	mm9
 Ebf1	Embryonic fibroblast	+	mm9
 Eed	Gonad	+	mm9
 Egr1	Liver	+	mm9
-Egr2	Blood	+	mm9
+Egr2	-	+	mm9
 Ehf	Others	+	mm9
 Ehmt2	Pluripotent stem cell	+	mm9
 Elf5	Placenta	+	mm9
@@ -781,15 +781,15 @@ Ell3	Pluripotent stem cell	+	mm9
 Eomes	Placenta	+	mm9
 Ep300	Cardiovascular,Embryo,Embryonic fibroblast,Kidney,Liver,Lung,Muscle,Neural,Others,Pluripotent stem cell	+	mm9
 Ep400	Pluripotent stem cell	+	mm9
-Ercc3	Blood	+	mm9
+Ercc3	-	+	mm9
 Erf	Embryonic fibroblast	+	mm9
 Erg	Prostate	+	mm9
 Esr1	Breast,Cardiovascular,Liver,Uterus	+	mm9
 Esrra	Others	+	mm9
 Esrrb	Pluripotent stem cell	+	mm9
-Ets1	Blood	+	mm9
-Ets2	Blood	+	mm9
-Etv6	Blood	+	mm9
+Ets1	-	+	mm9
+Ets2	-	+	mm9
+Etv6	-	+	mm9
 Ezh2	Embryo,Embryonic fibroblast,Muscle,Neural,Pluripotent stem cell	+	mm9
 Fli1	Embryo	+	mm9
 Fos	Neural	+	mm9
@@ -800,60 +800,60 @@ Foxa1	Gonad,Kidney,Liver,Lung,Prostate	+	mm9
 Foxa2	Embryo,Liver,Pluripotent stem cell,Uterus	+	mm9
 Foxk1	Muscle	+	mm9
 Foxl2	Epidermis	+	mm9
-Foxo1	Blood	+	mm9
+Foxo1	-	+	mm9
 Foxo3	Neural	+	mm9
 Foxp1	Pancreas	+	mm9
 Foxp2	Liver,Pancreas	+	mm9
-Foxp3	Blood	+	mm9
+Foxp3	-	+	mm9
 Gata1	Embryo,Pluripotent stem cell	+	mm9
 Gata2	Uterus	+	mm9
-Gata3	Blood	+	mm9
+Gata3	-	+	mm9
 Gata4	Cardiovascular,Embryonic fibroblast,Liver,Pluripotent stem cell	+	mm9
 Gata6	Embryonic fibroblast	+	mm9
-Gfi1	Blood	+	mm9
+Gfi1	-	+	mm9
 Gps2	Embryonic fibroblast	+	mm9
 Grhl3	Epidermis	+	mm9
-Grip1	Blood	+	mm9
+Grip1	-	+	mm9
 Gsk3b	Embryonic fibroblast	+	mm9
-Gtf2a2	Blood	+	mm9
+Gtf2a2	-	+	mm9
 Gtf2b	Cardiovascular,Liver	+	mm9
 Gtf2e2	Liver	+	mm9
-Gtf2f1	Blood	+	mm9
+Gtf2f1	-	+	mm9
 Hcfc1	Pluripotent stem cell	+	mm9
 Hdac1	Muscle,Pluripotent stem cell	+	mm9
 Hdac2	Muscle,Pluripotent stem cell	+	mm9
 Hdac3	Liver	+	mm9
 Hells	Embryonic fibroblast	+	mm9
 Hexim1	Embryonic fibroblast	+	mm9
-Hif1a	Blood	+	mm9
+Hif1a	-	+	mm9
 Hira	Pluripotent stem cell	+	mm9
 Hnf4a	Digestive tract,Embryo,Gonad,Kidney,Liver,Prostate	+	mm9
 Hoxb4	Pluripotent stem cell	+	mm9
 Hsf1	Gonad,Neural	+	mm9
 Hsf2	Gonad	+	mm9
 Ikzf1	Others	+	mm9
-Ikzf3	Blood	+	mm9
-Irf1	Blood	+	mm9
-Irf2	Blood	+	mm9
-Irf3	Blood	+	mm9
-Irf4	Blood	+	mm9
-Irf7	Blood	+	mm9
-Irf8	Blood	+	mm9
+Ikzf3	-	+	mm9
+Irf1	-	+	mm9
+Irf2	-	+	mm9
+Irf3	-	+	mm9
+Irf4	-	+	mm9
+Irf7	-	+	mm9
+Irf8	-	+	mm9
 Isl1	Pluripotent stem cell	+	mm9
 Jarid2	Pluripotent stem cell	+	mm9
-Jmjd6	Blood	+	mm9
+Jmjd6	-	+	mm9
 Jun	Embryonic fibroblast,Muscle	+	mm9
 Junb	Embryonic fibroblast,Neural	+	mm9
 Jund	Embryo,Embryonic fibroblast	+	mm9
 Kansl3	Pluripotent stem cell	+	mm9
-Kat2a	Blood	+	mm9
+Kat2a	-	+	mm9
 Kat8	Pluripotent stem cell	+	mm9
 Kdm1a	Embryonic fibroblast,Gonad,Muscle,Others,Pluripotent stem cell	+	mm9
 Kdm2a	Pluripotent stem cell	+	mm9
 Kdm2b	Pluripotent stem cell	+	mm9
 Kdm4a	Embryonic fibroblast	+	mm9
 Kdm4c	Embryonic fibroblast,Pluripotent stem cell	+	mm9
-Kdm4d	Blood	+	mm9
+Kdm4d	-	+	mm9
 Kdm5a	Pluripotent stem cell	+	mm9
 Kdm5b	Pluripotent stem cell	+	mm9
 Kdm6a	Muscle,Pluripotent stem cell	+	mm9
@@ -866,13 +866,13 @@ Kmt2d	Adipocyte,Pluripotent stem cell	+	mm9
 Ldb1	Pluripotent stem cell	+	mm9
 Lhx2	Epidermis	+	mm9
 Lmnb1	Others	+	mm9
-Maf	Blood	+	mm9
+Maf	-	+	mm9
 Mafa	Pancreas	+	mm9
-Maff	Blood	+	mm9
+Maff	-	+	mm9
 Mafk	Pluripotent stem cell	+	mm9
 Mapk8	Neural,Pluripotent stem cell	+	mm9
 Max	Muscle,Pluripotent stem cell	+	mm9
-Maz	Blood	+	mm9
+Maz	-	+	mm9
 Mbd3	Embryonic fibroblast,Others,Pluripotent stem cell	+	mm9
 Mcrs1	Pluripotent stem cell	+	mm9
 Med1	Embryonic fibroblast,Pluripotent stem cell	+	mm9
@@ -887,7 +887,7 @@ Msl1	Pluripotent stem cell	+	mm9
 Msl2	Pluripotent stem cell	+	mm9
 Mtf2	Pluripotent stem cell	+	mm9
 Mtor	Others	+	mm9
-Mxi1	Blood	+	mm9
+Mxi1	-	+	mm9
 Myb	Gonad	+	mm9
 Myc	Embryo,Embryonic fibroblast,Pluripotent stem cell	+	mm9
 Myf5	Muscle	+	mm9
@@ -904,11 +904,11 @@ Ncor1	Embryonic fibroblast,Liver	+	mm9
 Ncor2	Liver	+	mm9
 Nelfa	Pluripotent stem cell	+	mm9
 Nelfb	Embryonic fibroblast	+	mm9
-Nelfe	Blood	+	mm9
+Nelfe	-	+	mm9
 Neurod1	Pancreas	+	mm9
 Neurod2	Embryonic fibroblast,Pluripotent stem cell	+	mm9
 Nfatc1	Epidermis,Pancreas	+	mm9
-Nfe2	Blood	+	mm9
+Nfe2	-	+	mm9
 Nfib	Epidermis	+	mm9
 Nfic	Embryonic fibroblast	+	mm9
 Nfil3	Liver	+	mm9
@@ -920,10 +920,10 @@ Nkx2-1	Lung	+	mm9
 Nkx2-5	Cardiovascular	+	mm9
 Nkx3-1	Prostate	+	mm9
 Nkx6-1	Pancreas	+	mm9
-Notch1	Blood	+	mm9
+Notch1	-	+	mm9
 Nr1d1	Liver	+	mm9
 Nr1d2	Liver	+	mm9
-Nr1h2	Blood	+	mm9
+Nr1h2	-	+	mm9
 Nr1h3	Liver	+	mm9
 Nr2f2	Cardiovascular	+	mm9
 Nr3c1	Breast,Embryonic fibroblast,Liver,Neural	+	mm9
@@ -936,8 +936,8 @@ Olig2	Embryo,Pluripotent stem cell	+	mm9
 Otx2	Others,Pluripotent stem cell	+	mm9
 Ovol2	Breast	+	mm9
 Parp1	Neural	+	mm9
-Pax5	Blood	+	mm9
-Paxip1	Blood	+	mm9
+Pax5	-	+	mm9
+Paxip1	-	+	mm9
 Pbx1	Embryo,Embryonic fibroblast	+	mm9
 Pgr	Breast,Uterus	+	mm9
 Phf19	Pluripotent stem cell	+	mm9
@@ -948,13 +948,13 @@ Pou3f2	Embryonic fibroblast,Neural,Pluripotent stem cell	+	mm9
 Pou5f1	Pluripotent stem cell	+	mm9
 Ppara	Liver	+	mm9
 Pparg	Adipocyte,Embryonic fibroblast	+	mm9
-Prdm1	Blood	+	mm9
+Prdm1	-	+	mm9
 Ptf1a	Embryo,Pancreas	+	mm9
 Pwp1	Pluripotent stem cell	+	mm9
 Rad21	Digestive tract,Liver,Neural,Pluripotent stem cell,Spleen	+	mm9
 Rad51	Gonad	+	mm9
 Raf1	Pluripotent stem cell	+	mm9
-Rag2	Blood	+	mm9
+Rag2	-	+	mm9
 Rara	Liver,Pluripotent stem cell	+	mm9
 Rarg	Pluripotent stem cell	+	mm9
 Rb1	Embryonic fibroblast	+	mm9
@@ -962,19 +962,19 @@ Rbbp5	Pluripotent stem cell	+	mm9
 Rbpj	Embryo,Muscle,Pluripotent stem cell	+	mm9
 Rbpjl	Embryo	+	mm9
 Rcor1	Pluripotent stem cell	+	mm9
-Rel	Blood	+	mm9
+Rel	-	+	mm9
 Rela	Embryonic fibroblast	+	mm9
-Relb	Blood	+	mm9
+Relb	-	+	mm9
 Rest	Muscle,Pluripotent stem cell	+	mm9
 Rfx1	Pluripotent stem cell	+	mm9
 Rnf2	Embryo,Neural,Pluripotent stem cell	+	mm9
 Rora	Liver	+	mm9
-Rorc	Blood	+	mm9
+Rorc	-	+	mm9
 Rpa1	Embryonic fibroblast,Spleen	+	mm9
-Rpa2	Blood	+	mm9
+Rpa2	-	+	mm9
 Runx1	Pluripotent stem cell	+	mm9
 Runx2	Others	+	mm9
-Runx3	Blood	+	mm9
+Runx3	-	+	mm9
 Rxra	Bone,Embryonic fibroblast,Liver,Neural,Others,Pluripotent stem cell	+	mm9
 Rybp	Pluripotent stem cell	+	mm9
 Setdb1	Pluripotent stem cell	+	mm9
@@ -990,13 +990,13 @@ Smarca4	Breast,Embryonic fibroblast,Epidermis,Pluripotent stem cell	+	mm9
 Smarca5	Breast	+	mm9
 Smc1a	Embryo,Embryonic fibroblast,Pluripotent stem cell	+	mm9
 Smc3	Embryonic fibroblast,Pluripotent stem cell	+	mm9
-Smc5	Blood	+	mm9
+Smc5	-	+	mm9
 Snai1	Muscle	+	mm9
 Sox11	Pluripotent stem cell	+	mm9
 Sox17	Pluripotent stem cell	+	mm9
 Sox2	Embryo,Placenta,Pluripotent stem cell	+	mm9
 Sox3	Muscle,Pluripotent stem cell	+	mm9
-Sox4	Blood	+	mm9
+Sox4	-	+	mm9
 Sox6	Embryo	+	mm9
 Sox9	Epidermis	+	mm9
 Sp1	Placenta,Pluripotent stem cell	+	mm9
@@ -1007,12 +1007,12 @@ Srsf1	Embryonic fibroblast	+	mm9
 Stag1	Embryonic fibroblast,Pluripotent stem cell	+	mm9
 Stag2	Embryonic fibroblast,Pluripotent stem cell	+	mm9
 Stat1	Embryonic fibroblast	+	mm9
-Stat2	Blood	+	mm9
+Stat2	-	+	mm9
 Stat3	Neural	+	mm9
-Stat4	Blood	+	mm9
+Stat4	-	+	mm9
 Stat5a	Breast,Embryonic fibroblast,Liver	+	mm9
 Stat5b	Breast	+	mm9
-Stat6	Blood	+	mm9
+Stat6	-	+	mm9
 Supt5	Pluripotent stem cell	+	mm9
 Supt6	Muscle	+	mm9
 Suv39h1	Pluripotent stem cell	+	mm9
@@ -1025,7 +1025,7 @@ Taf7l	Embryonic fibroblast	+	mm9
 Taf9b	Pluripotent stem cell	+	mm9
 Tal1	Embryo,Pluripotent stem cell	+	mm9
 Tbp	Embryonic fibroblast,Liver,Placenta,Pluripotent stem cell	+	mm9
-Tbx21	Blood	+	mm9
+Tbx21	-	+	mm9
 Tbx3	Cardiovascular,Pluripotent stem cell	+	mm9
 Tcf12	Muscle	+	mm9
 Tcf3	Epidermis,Muscle,Pluripotent stem cell	+	mm9
@@ -1040,33 +1040,33 @@ Tet2	Pluripotent stem cell	+	mm9
 Tet3	Pluripotent stem cell	+	mm9
 Tfap2a	Gonad,Kidney,Prostate	+	mm9
 Tfap2c	Pluripotent stem cell	+	mm9
-Tfap4	Blood	+	mm9
+Tfap4	-	+	mm9
 Tfe3	Pluripotent stem cell	+	mm9
-Tgif1	Blood	+	mm9
+Tgif1	-	+	mm9
 Thap11	Pluripotent stem cell	+	mm9
 Tle1	Epidermis	+	mm9
 Tnni2	Bone	+	mm9
 Trim28	Pluripotent stem cell	+	mm9
 Trp53	Embryo,Embryonic fibroblast	+	mm9
-Tsc22d3	Blood	+	mm9
+Tsc22d3	-	+	mm9
 Twist1	Embryo,Neural	+	mm9
-Ubtf	Blood	+	mm9
+Ubtf	-	+	mm9
 Usf1	Muscle	+	mm9
-Usf2	Blood	+	mm9
+Usf2	-	+	mm9
 Usp16	Pluripotent stem cell	+	mm9
 Utf1	Pluripotent stem cell	+	mm9
 Vdr	Bone,Embryonic fibroblast,Others	+	mm9
 Wdr5	Muscle,Pluripotent stem cell	+	mm9
 Wt1	Embryo,Kidney	+	mm9
 Yy1	Digestive tract,Muscle,Pluripotent stem cell	+	mm9
-Zbtb17	Blood	+	mm9
+Zbtb17	-	+	mm9
 Zc3h11a	Pluripotent stem cell	+	mm9
 Zfp143	Embryonic fibroblast,Pluripotent stem cell	+	mm9
 Zfp322a	Pluripotent stem cell	+	mm9
 Zfp335	Embryo	+	mm9
 Zfp384	Pluripotent stem cell	+	mm9
-Zkscan1	Blood	+	mm9
-Zmiz1	Blood	+	mm9
+Zkscan1	-	+	mm9
+Zmiz1	-	+	mm9
 ESA1	Yeast strain	+	sacCer3
 HMO1	Yeast strain	+	sacCer3
 HST2	Yeast strain	+	sacCer3
