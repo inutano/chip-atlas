@@ -29,20 +29,39 @@
           %a.navbar-brand{ :href => "#{app_root}" }= "ChIP-Atlas"
         #navbar.collapse.navbar-collapse
           %ul.nav.navbar-nav
-            %li.active
-              %a{ :href => "#{app_root}" }= "Raw Peak Data"
             %li
               %a{ :href => "#{app_root}/colo" }= "Co-Association Analysis"
             %li
               %a{ :href => "#{app_root}/target_genes" }= "Target Gene Analysis"
             %li
-              %a{ :href => "#{app_root}/About" }= "About"
+              %a{ :href => "#{app_root}/about" }= "About"
+            %li
+              %a{ :href => "#{app_root}/documents" }= "Documents"
+            %li
+              %a{ :href => "#{app_root}/contact" }= "Contact"
+            %li
+              %a{ :href => "#{app_root}/log" }= "Change Log"
 
     .container
       // Header Titles. I still love the idea to name this 'peak john' but it is not. I'm okay.
-      .header
-        %h1= "ChIP-Atlas"
-        %p= "Visualize All Peaks from Published ChIP-Seq data."
+      .row
+        .col-md-10
+          .header
+            %h1= "ChIP-Atlas"
+            %p= "Visualize All Peaks from Published ChIP-Seq data."
+        .col-md-2
+          .dropdown-help
+            .dropdown
+              .button.btn.btn-default.dropdown-toggle{ :type => "button", :id => "movies-dropdown", "data-toggle" => "dropdown", "aria-haspopup" => true, "aria-expanded" => true }
+                Tutorial movies
+                %span.caret
+              %ul.dropdown-menu{ "aria-labelledby" => "movies-dropdown" }
+                %li
+                  %a{ :href => "#" }= "1-min introduction"
+                %li
+                  %a{ :href => "#" }= "Requirements"
+                %li
+                  %a{ :href => "#" }= "How to use"
 
       // Navigation Tabs, links and contents
       .genomeTab{ :role => "tabpanel"}
@@ -52,7 +71,8 @@
           - @list_of_genome.each.with_index do |genome, i|
             %li{ :role => "presentation", :class => "#{(i == 0) ? 'active' : '' }" }
               %a{ :href => "##{genome}", "aria-controls" => genome, :role => "tab", "data-toggle" => "tab" }
-                = "#{genome}"
+                - genome_sp = { "hg19" => "H. sapiens", "mm9" => "M. musculus", "dm3" => "D. melanogaster", "ce10" => "C. elegans", "sacCer3" => "S. celevisiae"}
+                = "#{genome_sp[genome]}"
 
         // Contents
         .tab-content
@@ -72,7 +92,14 @@
                             - ind = index[set[1].downcase.sub("\s","").intern]
                             - count = ind.values.map{|n| n.values }.flatten.reduce(:+)
                             %option{ :value => "All #{set[1].downcase}s", "selected" => true }= "All #{set[1].downcase}s (#{count})"
-                            - ind.to_a.sort.each do |node|
+
+                            = specials = ["Input control","Others","Unclassified","No description"]
+                            - nodes = ind.to_a.sort
+                            - nodes_normal = nodes.reject{|a| specials.include?(a[0]) }
+                            - nodes_special = specials.map{|special| nodes.select{|n| n[0] == special }[0] }.compact
+                            - collection = nodes_normal + nodes_special
+
+                            - collection.each do |node|
                               - typeClass = node[0]
                               - typeSubClass = node[1]
                               %option{ :value => typeClass }= "#{typeClass} (#{typeSubClass.each_value.reduce(:+)})"
@@ -97,7 +124,7 @@
                     .panel.panel-default
                       .panel-heading{ :id => "heading-#{genome}qval"}
                         %h4.panel-title
-                          Quality Value Threshold
+                          Threshold for Significance
                       .panel-body
                         %select.form-control{ :id => "#{genome}qval", :size => 5 }
                           - @qval_range.sort.each.with_index do |qv, i|
@@ -105,6 +132,8 @@
 
                   .button-submit
                     %button.btn.btn-primary.btn-lg.btn-block{ :id => "submit", :type => "button" }= "View on IGV"
+                    %button.btn.btn-primary.btn-lg.btn-block{ :id => "download", :type => "button" }= "Download BED file"
+
 
     /
       Bootstrap Core Javascript
