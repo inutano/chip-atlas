@@ -11,14 +11,16 @@ namespace :table do
     open(experiment_list, "r:UTF-8").readlines.each do |line_n|
       line = line_n.chomp.split("\t")
       
-      expid        = line[0]
-      genome       = line[1]
-      ag_class     = line[2]
-      ag_subclass  = line[3]
-      cl_class     = line[4]
-      cl_subclass  = line[5]
-      title        = line[6]
-      additional_attributes = line[7..line.size].join("\t")
+      expid            = line[0]
+      genome           = line[1]
+      ag_class         = line[2]
+      ag_subclass      = line[3]
+      cl_class         = line[4]
+      cl_subclass      = line[5]
+      cl_subclass_info = line[6]
+      read_info        = line[7]
+      title            = line[8]
+      additional_attributes = line[9..line.size].join("\t")
       
       exp = Experiment.new
       exp.expid      = expid
@@ -27,6 +29,8 @@ namespace :table do
       exp.agSubClass = ag_subclass
       exp.clClass    = cl_class
       exp.clSubClass = cl_subclass
+      exp.clSubClassInfo = cl_subclass_info
+      exp.readInfo   = read_info
       exp.title      = title
       exp.additional_attributes = additional_attributes
       exp.save
