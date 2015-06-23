@@ -30,13 +30,17 @@
         #navbar.collapse.navbar-collapse
           %ul.nav.navbar-nav
             %li
-              %a{ :href => "#{app_root}" }= "Raw Peak Data"
-            %li
               %a{ :href => "#{app_root}/colo" }= "Co-Association Analysis"
             %li.active
               %a{ :href => "#{app_root}/target_genes" }= "Target Gene Analysis"
             %li
-              %a{ :href => "#{app_root}/About" }= "About"
+              %a{ :href => "#{app_root}/about" }= "About"
+            %li
+              %a{ :href => "#{app_root}/documents" }= "Documents"
+            %li
+              %a{ :href => "#{app_root}/contact" }= "Contact"
+            %li
+              %a{ :href => "#{app_root}/log" }= "Change Log"
 
     .container
       .header
@@ -69,7 +73,7 @@
                       %select.form-control.flexselect{ :id => "#{panel}-select",  :size => 8 }
                         - @analysis[genome].sort.each do |ag|
                           %option{ :value => ag }= ag
-                
+
                 .col-md-3
                   .panel.panel-default
                     - panel = "#{genome}DistancePanel"
