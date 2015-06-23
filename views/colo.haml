@@ -43,9 +43,21 @@
               %a{ :href => "#{app_root}/log" }= "Change Log"
 
     .container
-      .header
-        %h1= "ChIP-Atlas - Co-Association Analysis"
-        %p= "Visualize All Peaks from Published ChIP-Seq data."
+      .row
+        .col-md-10
+          .header
+            %h1= "ChIP-Atlas - Co-Association Analysis"
+            %p= "Predict co-association partners of TFs."
+        .col-md-2
+          .dropdown-help
+            .dropdown
+              .button.btn.btn-default.dropdown-toggle{ :type => "button", :id => "movies-dropdown", "data-toggle" => "dropdown", "aria-haspopup" => true, "aria-expanded" => true }
+                Tutorial movie
+                %span.caret
+              %ul.dropdown-menu{ "aria-labelledby" => "movies-dropdown" }
+                %li
+                  %a{ :href => "#" }= "How to use"
+
 
       // Navigation Tabs, links and contents
       .genomeTab{ :role => "tabpanel"}
@@ -66,17 +78,17 @@
                   .panel.panel-default
                     - panel = "#{genome}StartingPanel"
                     .panel-heading{ :id => panel }
-                      %h4.panel-title= "1. Choose Starting Type"
+                      %h4.panel-title= "1. Search mode"
                     .panel-body
                       %form{ :id => "#{panel}-form" }
                         .radio
                           %label
                             %input{ :type => "radio", :id => "", :value => "antigen", :name => "datatypeoption" }
-                            = " Antigens "
+                            = " Antigens → Cell Type "
                         .radio
                           %label
                             %input{ :type => "radio", :id => "", :value => "cellline", :name => "datatypeoption" }
-                            = " Cell Types "
+                            = " Cell Type → Antigen "
                 .col-md-3
                   .panel.panel-default
                     - panel = "#{genome}PrimaryPanel"
@@ -99,8 +111,15 @@
 
               .row
                 .col-md-6.col-md-offset-3
-                  .button-submit
+                  .button-submit.down
                     %button.btn.btn-primary.btn-lg.btn-block{ :id => "colo-submit", :type => "button" }= "View Co-Association Data"
+              .row.colo-download
+                .col-md-3.col-md-offset-3
+                  .button-submit
+                    %button.btn.btn-primary.btn-lg.btn-block{ :id => "download-tsv", :type => "button" }= "Download (TSV)"
+                .col-md-3
+                  .button-submit
+                    %button.btn.btn-primary.btn-lg.btn-block{ :id => "download-gml", :type => "button" }= "Download (GML)"
 
     /
       Bootstrap Core Javascript
@@ -146,6 +165,15 @@
               .append(k)
               .appendTo(targetSelect);
           });
+
+          // change panel title
+          if(type == "antigen"){
+            $('#' + genome + 'PrimaryPanel h4').text("1. Choose Antigen");
+            $('#' + genome + 'SecondaryPanel h4').text("2. Choose Cell Type Class");
+          }else{
+            $('#' + genome + 'PrimaryPanel h4').text("1. Choose Cell Type Class");
+            $('#' + genome + 'SecondaryPanel h4').text("2. Choose Antigen");
+          }
 
           // activate typeahead
           var typeaheadInput = $('#' + genome + 'PrimaryPanel-typeahead');

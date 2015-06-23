@@ -130,7 +130,7 @@
                           - @qval_range.sort.each.with_index do |qv, i|
                             %option{ :value => qv, "#{(i == 0) ? 'selected' : '' }" => "" }= "#{qv.to_i*10}"
 
-                  .button-submit
+                  .button-submit.down
                     %button.btn.btn-primary.btn-lg.btn-block{ :id => "submit", :type => "button" }= "View on IGV"
                     %button.btn.btn-primary.btn-lg.btn-block{ :id => "download", :type => "button" }= "Download BED file"
 
