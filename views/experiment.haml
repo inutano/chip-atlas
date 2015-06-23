@@ -65,7 +65,7 @@
                   %a{ :href => "#" }= "Target Gene"
 
 
-      .row
+      .row.mdata
         .col-md-12
           %h3= "Curated Sample Data"
           %table.table.table-bordered
@@ -82,7 +82,19 @@
               %td= metadata[:clClass]
               %td= metadata[:clSubClass]
 
-      .row
+      .row.mdata
+        .col-md-12
+          %h3= "Cell type information"
+          %table.table.table-bordered
+            - metadata[:clSubClassInfo].split("|").each_slice(6) do |kv_set|
+              %tr
+                - kv_set.each do |kv|
+                  %th= kv.split("=").first
+              %tr
+                - kv_set.each do |kv|
+                  %td= kv.split("=").last
+
+      .row.mdata
         .col-md-12
           %h3= "Attributes by Original Data Submitter"
           %table.table.table-bordered
@@ -94,33 +106,34 @@
                 - kv_set.each do |kv|
                   %td= kv.split("=").last
 
-      .row
+      .row.mdata
         .col-md-12
           %h3= "Metadata from Sequence Read Archive"
 
-          %h4= "Library Description"
-          %table.table.table-bordered
-            %tr
-              - @ncbi[:library_description].each_pair do |k,v|
-                - if v != ""
-                  %th= k.to_s
-            %tr
-              - @ncbi[:library_description].each_pair do |k,v|
-                - if v != ""
-                  %th= v.to_s
+          .mdata
+            %h4= "Library Description"
+            %table.table.table-bordered
+              %tr
+                - @ncbi[:library_description].each_pair do |k,v|
+                  - if v != ""
+                    %th= k.to_s
+              %tr
+                - @ncbi[:library_description].each_pair do |k,v|
+                  - if v != ""
+                    %td= v.to_s
+          .mdata
+            %h4= "Platform Information"
+            %table.table.table-bordered
+              %tr
+                - @ncbi[:platform_information].each_pair do |k,v|
+                  - if v != ""
+                    %th= k.to_s
+              %tr
+                - @ncbi[:platform_information].each_pair do |k,v|
+                  - if v != ""
+                    %td= v.to_s
 
-          %h4= "Platform Information"
-          %table.table.table-bordered
-            %tr
-              - @ncbi[:platform_information].each_pair do |k,v|
-                - if v != ""
-                  %th= k.to_s
-            %tr
-              - @ncbi[:platform_information].each_pair do |k,v|
-                - if v != ""
-                  %th= v.to_s
-
-      .row
+      .row.mdata
         .col-md-12
           %h3= "Metadata from DBCLS SRA"
 
