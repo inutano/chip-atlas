@@ -69,15 +69,15 @@
         // Tabs
         %ul.nav.nav-tabs{ :role => "tablist" }
           - @list_of_genome.each.with_index do |genome, i|
-            %li{ :role => "presentation", :class => "#{(i == 0) ? 'active' : '' }" }
-              %a{ :href => "##{genome}", "aria-controls" => genome, :role => "tab", "data-toggle" => "tab" }
+            %li{ :role => "presentation", :class => "#{(i == 0) ? 'active' : '' }", :id => "#{genome}-tab" }
+              %a{ :href => "##{genome}-tab-content", "aria-controls" => "#{genome}-tab-content", :role => "tab", "data-toggle" => "tab" }
                 - genome_sp = { "hg19" => "H. sapiens", "mm9" => "M. musculus", "dm3" => "D. melanogaster", "ce10" => "C. elegans", "sacCer3" => "S. celevisiae"}
                 = "#{genome_sp[genome]}"
 
         // Contents
         .tab-content
           - @list_of_genome.each.with_index do |genome, i|
-            .tab-pane.fade{ :role => "tabpanel", :id => genome, :class => "#{(i == 0) ? 'in active' : ''}" }
+            .tab-pane.fade{ :role => "tabpanel", :id => "#{genome}-tab-content", :class => "#{(i == 0) ? 'in active' : ''}" }
               - index = @index_all_genome[genome]
               .row
                 - [["ag","Antigen"],["cl", "Cell type"]].each do |set|
@@ -155,7 +155,7 @@
       // iterate for each genomes
       $.each(#{@list_of_genome}, function(i, genome){
         // set tab controller
-        $('#' + genome + ' a').click(function(e){
+        $('#' + genome + '-tab a').click(function(e){
           e.preventDefault();
           $(this).tab('show')
         })
