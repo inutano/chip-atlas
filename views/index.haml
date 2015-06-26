@@ -70,7 +70,7 @@
         %ul.nav.nav-tabs{ :role => "tablist" }
           - @list_of_genome.each.with_index do |genome, i|
             %li{ :role => "presentation", :class => "#{(i == 0) ? 'active' : '' }", :id => "#{genome}-tab" }
-              %a{ :href => "##{genome}-tab-content", "aria-controls" => "#{genome}-tab-content", :role => "tab", "data-toggle" => "tab" }
+              %a{ :href => "##{genome}-tab-content", "aria-controls" => "#{genome}-tab-content", :role => "tab", "data-toggle" => "tab", "source" => genome }
                 - genome_sp = { "hg19" => "H. sapiens", "mm9" => "M. musculus", "dm3" => "D. melanogaster", "ce10" => "C. elegans", "sacCer3" => "S. celevisiae"}
                 = "#{genome_sp[genome]}"
 
@@ -171,7 +171,7 @@
         $.each([["antigen", "ag"], ["celltype", "cl"]], function(it, type){
           $('select#' + genome + type[1] + 'Class').change(function(){
             // Common variables
-            var genomeSelected = $('.genomeTab ul li.active a').text().replace(/[\n\s ]/g, "");
+            var genomeSelected = $('.genomeTab ul li.active a').attr("source").replace(/[\n\s ]/g, "");
             var valueSelected  = $('select#' + genomeSelected + type[1] + 'Class option:selected').val();
             var subClassObj    = indexAll[genomeSelected][type[0]][valueSelected];
 
