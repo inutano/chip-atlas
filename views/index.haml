@@ -268,10 +268,21 @@
 
         var twoSelectors = ['select#' + genome + 'agSubClass', 'select#' + genome + 'clSubClass'];
         $.each(twoSelectors, function(i, selector){
+          // change by mouse click
           $(selector).change(function(){
             if($(twoSelectors[0]).val() != "-" && $(twoSelectors[1]).val() != "-"){
               disableAnother($(this), genome);
             };
+          });
+          // change by typeahead
+          $.each([["antigen", "ag"], ["celltype", "cl"]], function(it, type){
+            var genomeSelected = $('.genomeTab ul li.active a').attr("source").replace(/[\n\s ]/g, "");
+            var typeaheadInput = $('#' + genomeSelected + type[1] + 'SubClass.typeahead');
+            typeaheadInput.on('typeahead:select', function(){
+              if($(twoSelectors[0]).val() != "-" && $(twoSelectors[1]).val() != "-"){
+                disableAnother($(this), genome);
+              };
+            });
           });
         });
       });
