@@ -213,7 +213,14 @@
           });
         });
 
-        $('select#' + genome + 'PrimaryPanel-select').change(function(){
+        function getOptions(genome, ppanel){
+          var type = $(':radio[name="datatypeoption"]:checked').val();
+          var primaryType = ppanel.val();
+          var options = analysis[genome][type][primaryType];
+          return options;
+        };
+
+        function changeAnother(genome, options){
           // target
           var targetSelect = $('select#' + genome + 'SecondaryPanel-select');
 
@@ -221,15 +228,18 @@
           targetSelect.empty();
 
           // populate primary panel
-          var type = $(':radio[name="datatypeoption"]:checked').val();
-          var primaryType = $(this).val();
-          var options = analysis[genome][type][primaryType];
           options.sort().forEach(function(element, index, array){
             $('<option>')
               .attr("value", element)
               .append(element)
               .appendTo(targetSelect);
           });
+        };
+
+        $('select#' + genome + 'PrimaryPanel-select').change(function(){
+          var ppanel = $(this);
+          var options = getOptions(genome, ppanel);
+          changeAnother(genome, options);
 
           // activate typeahead
           var typeaheadInput = $('#' + genome + 'SecondaryPanel-typeahead');
