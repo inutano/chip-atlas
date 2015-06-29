@@ -28,14 +28,18 @@ class PeakJohn < Sinatra::Base
       ".bb"
     end
     
+    def bedfile_archive(data)
+      condition = data["condition"]
+      genome    = condition["genome"]
+      filename = Bedfile.get_filename(condition)
+      File.join(archive_base, genome, "assembled", filename + fileformat)
+    end
+    
     def igv_browsing_url(data)
       igv_url   = data["igv"] || "http://localhost:60151"
       condition = data["condition"]
       genome    = condition["genome"]
-      filename  = Bedfile.get_filename(condition)
-    
-      archive_path = File.join(archive_base, genome, "assembled", filename + fileformat)
-      "#{igv_url}/load?genome=#{genome}&file=#{archive_path}"
+      "#{igv_url}/load?genome=#{genome}&file=#{bedfile_archive(data)}"
     end
 
     def colo_url(data)
@@ -138,6 +142,10 @@ class PeakJohn < Sinatra::Base
   post "/browse" do
     content_type "application/json"
     JSON.dump({ "url" => igv_browsing_url(JSON.parse(request.body.read)) })
+  end
+
+  post "/download" do
+    redirect bedfile_archive(request.body.read)
   end
   
   get "/view" do
