@@ -213,20 +213,18 @@
           });
         });
 
-        function getOptions(genome, ppanel){
+        function getOptions(genome, analysis){
           var type = $(':radio[name="datatypeoption"]:checked').val();
-          var primaryType = ppanel.val();
+          var primaryType = $('select#' + genome + 'PrimaryPanel-select').val();
           var options = analysis[genome][type][primaryType];
           return options;
         };
 
-        function changeAnother(genome, options){
-          // target
+        function createSecondaryOptions(genome, options){
+          // target secondary panel
           var targetSelect = $('select#' + genome + 'SecondaryPanel-select');
-
           // Erase current values
           targetSelect.empty();
-
           // populate primary panel
           options.sort().forEach(function(element, index, array){
             $('<option>')
@@ -234,25 +232,20 @@
               .append(element)
               .appendTo(targetSelect);
           });
-        };
+        }
 
-        $('select#' + genome + 'PrimaryPanel-select').change(function(){
-          var ppanel = $(this);
-          var options = getOptions(genome, ppanel);
-          changeAnother(genome, options);
-
-          // activate typeahead
+        function enableSecondaryTypeAhead(genome, options){
+          // capture input to put typeahead on
           var typeaheadInput = $('#' + genome + 'SecondaryPanel-typeahead');
-
           // Erase previous data set
           typeaheadInput.typeahead('destroy');
-
+          // create list for incremental search
           var list = new Bloodhound({
             datumTokenizer: Bloodhound.tokenizers.whitespace,
             queryTokenizer: Bloodhound.tokenizers.whitespace,
             local: options
           });
-
+          // activate typeahead
           typeaheadInput.typeahead({
             hint: true,
             highlight: true,
@@ -261,7 +254,6 @@
             name: 'list',
             source: list
           });
-
           // sync textbox and input field
           typeaheadInput.keyup(function(){
             var input = $(this).val();
@@ -275,6 +267,17 @@
               $('select#' + genome + 'SecondaryPanel-select').val(input);
             }
           });
+        }
+
+        $('select#' + genome + 'PrimaryPanel-select').change(function(){
+          var opts = getOptions(genome, analysis);
+          createSecondaryOptions(genome, opts);
+          enableSecondaryTypeAhead(genome, opts);
+        });
+        $('#' + genome + 'PrimaryPanel-typeahead').on('typeahead:select', function(){
+          var opts = getOptions(genome, analysis);
+          createSecondaryOptions(genome, opts);
+          enableSecondaryTypeAhead(genome, opts);
         });
 
         // set tab controller
