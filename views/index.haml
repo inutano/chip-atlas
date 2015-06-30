@@ -43,7 +43,7 @@
               %a{ :href => "#{app_root}/log" }= "Change Log"
 
     .container
-      // The original title 'peak john' was rejected. 
+      // The original title 'peak john' was rejected.
       .row
         .col-md-10
           .header
@@ -291,7 +291,7 @@
       $('a[data-toggle="tab"]').on('shown.bs.tab', function(e){
         var activatedTab = e.target;
         var previousTab = e.relatedTarget;
-        var genome = $('.genomeTab ul li.active a').text().replace(/[\n\s ]/g, "");
+        var genome = $('.genomeTab ul li.active a').attr('source').replace(/[\n\s ]/g, "");
         $.each(["ag","cl"], function(i, value){
           $('select#' + genome + value + 'SubClass').empty();
         })
@@ -303,7 +303,7 @@
           var button = $(this);
           button.attr("disabled", true);
 
-          var genome = $('.genomeTab ul li.active a').text().replace(/[\n\s ]/g, "");
+          var genome = $('.genomeTab ul li.active a').attr('source').replace(/[\n\s ]/g, "");
           var data = {
             // igv: $().text
             condition: {
@@ -339,13 +339,13 @@
           });
         })
       })
-      // send data to get igv url
+      // download data via javascript
       $(function(){
         $("button#download").click(function(){
           var button = $(this);
           button.attr("disabled", true);
 
-          var genome = $('.genomeTab ul li.active a').text().replace(/[\n\s ]/g, "");
+          var genome = $('.genomeTab ul li.active a').attr('source').replace(/[\n\s ]/g, "");
           var data = {
             // igv: $().text
             condition: {
@@ -358,6 +358,8 @@
             }
           };
 
+          alert(JSON.stringify(data));
+
           // alert(JSON.stringify(data));
 
           $.ajax({
@@ -369,6 +371,7 @@
             scriptCharset: 'utf-8',
             success : function(response) {
               // alert(JSON.stringify(response));
+              alert(response.url);
               window.open(response.url, "_self", "")
             },
             error : function(response){
