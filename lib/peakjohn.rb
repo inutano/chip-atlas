@@ -168,7 +168,7 @@ class Bedfile < ActiveRecord::Base
     
     def get_filename(condition)
       results = filesearch(condition)
-      raise NameError if results.size > 1
+      raise NameError if results.size != 1
       results.first.filename
     end
     # http://localhost:60151/load?file=http://dbarchive.biosciencedbc.jp/kyushu-u/hg19/assembled/#{fname}&genome=hg19

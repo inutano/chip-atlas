@@ -33,6 +33,8 @@ class PeakJohn < Sinatra::Base
       genome    = condition["genome"]
       filename = Bedfile.get_filename(condition)
       File.join(archive_base, genome, "assembled", filename + fileformat)
+    rescue NameError
+      nil
     end
     
     def igv_browsing_url(data)
@@ -145,7 +147,14 @@ class PeakJohn < Sinatra::Base
   end
 
   post "/download" do
-    redirect bedfile_archive(request.body.read)
+    fpath = bedfile_archive(JSON.parse(request.body.read))
+    dest = if fpath
+             fpath
+           else
+             '/not_found'
+           end
+    puts dest
+    redirect dest
   end
   
   get "/view" do
