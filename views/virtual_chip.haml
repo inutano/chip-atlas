@@ -29,11 +29,11 @@
           %a.navbar-brand{ :href => "#{app_root}" }= "ChIP-Atlas"
         #navbar.collapse.navbar-collapse
           %ul.nav.navbar-nav
-            %li.active
+            %li
               %a{ :href => "#{app_root}/colo" }= "Co-Association Analysis"
             %li
               %a{ :href => "#{app_root}/target_genes" }= "Target Gene Analysis"
-            %li
+            %li.active
               %a{ :href => "#{app_root}/virtual_chip" }= "VirtualChIP Analysis"
             %li
               %a{ :href => "#{app_root}/about" }= "About"
@@ -48,8 +48,8 @@
       .row
         .col-md-10
           .header
-            %h1= "ChIP-Atlas - Co-Association Analysis"
-            %p= "Predict co-association partners of TFs."
+            %h1= "ChIP-Atlas - VirtualChIP"
+            %p= "Query your data or genes to predict TFs"
         .col-md-2
           .dropdown-help
             .dropdown
@@ -59,7 +59,6 @@
               %ul.dropdown-menu{ "aria-labelledby" => "movies-dropdown" }
                 %li
                   %a{ :href => "#" }= "How to use"
-
 
       // Navigation Tabs, links and contents
       .genomeTab{ :role => "tabpanel"}
@@ -77,52 +76,84 @@
           - @list_of_genome.each.with_index do |genome, i|
             .tab-pane.fade{ :role => "tabpanel", :id => genome, :class => "#{(i == 0) ? 'in active' : ''}" }
               .row
-                .col-md-3
+                .col-md-4
                   .panel.panel-default
-                    - panel = "#{genome}StartingPanel"
+                    - panel = "#{genome}MyDataPanel"
                     .panel-heading{ :id => panel }
-                      %h4.panel-title= "1. Search mode"
+                      %h4.panel-title= "1. Select your data"
                     .panel-body
-                      %form{ :id => "#{panel}-form" }
-                        .radio
-                          %label
-                            %input{ :type => "radio", :id => "", :value => "antigen", :name => "datatypeoption" }
-                            = " Antigens → Cell Type "
-                        .radio
-                          %label
-                            %input{ :type => "radio", :id => "", :value => "cellline", :name => "datatypeoption" }
-                            = " Cell Type → Antigen "
-                .col-md-3
-                  .panel.panel-default
-                    - panel = "#{genome}PrimaryPanel"
-                    .panel-heading{ :id => panel }
-                      %h4.panel-title= "2. Choose Primary Type"
-                    .panel-body
-                      %input.typeahead.form-control{ :type => "text", :placeholder => "type to search", :id => "#{panel}-typeahead" }
-                      %hr
-                      %select.form-control.flexselect{ :id => "#{panel}-select", :size => 8 }
+                      %p
+                        %input.rad1{ :type => "radio", :name => "bedORGene", :value => "bed", :checked => "checked" }
+                        Genomic regions (BED) or sequence motif.
+                        %a.infoBtn#infoBtn1{ :value => "info" }
+                          &#x24D8;
+                      %p
+                        %input.rad2{ :type => "radio", :name => "bedORGene", :value => "gene" }
+                        Gene list (Gene symbols).
+                        %a.infoBtn#infoBtn2
+                          &#x24D8;
+                      %p
+                        Description
+                        %a.star
+                          *
+                        %input#descA{ :type => "text", :placeholder => "Any string for 'My data'", :size => 30}
+                      %p
+                        %a.star
+                          *
+                        %textarea#txtarA{ :name => "txtA", :rows => 10, :cols => 50, :placeholder => "Click the above info buttons to know the description format."}
+                        %input#fileA{ :type => "file" }
 
-                .col-md-3
+                .col-md-4
                   .panel.panel-default
-                    - panel = "#{genome}SecondaryPanel"
+                    - panel = "#{genome}TargetDB"
                     .panel-heading{ :id => panel }
-                      %h4.panel-title= "3. Choose Secondary Type"
+                      %h4.panel-title= "2. Select dataset to be compared"
                     .panel-body
-                      %input.typeahead.form-control{ :type => "text", :placeholder => "type to search", :id => "#{panel}-typeahead" }
-                      %hr
-                      %select.form-control.flexselect{ :id => "#{panel}-select", :size => 8 }
+                      %p
+                        %input#id{ :type => "radio", :name => "rndORbed", :value => "rnd" }
+                        Random permutation of 'My data'.
+                        %a.infoBtn#infoBtn3
+                          &#x24D8;
+                      %p
+                        %h5
+                          Permutation times
+                        %input#rad7{ :type => "radio", :name => "numShuf", :value => "1", :disabled => true, :checked => "checked" }
+                        x1
+                        %input#rad8{ :type => "radio", :name => "numShuf", :value => "1", :disabled => true, :checked => "checked" }
+                        x10
+                        %input#rad9{ :type => "radio", :name => "numShuf", :value => "1", :disabled => true, :checked => "checked" }
+                        x100
+                      %p
+                        %input#rad4{ :type => "radio", :name => "rndORbed", :value => "bedB" }
+                        Another BED or sequence motif.
+                        %a.infoBtn#infoBtn4
+                          &#x24D8;
+                      %p
+                        %input#rad5{ :type => "radio", :name => "refORlist", :value => "ref" }
+                        RefSeq coding genes excluding those in 'My data'.
+                        %a.infoBtn#infoBtn5
+                          &#x24D8;
+                      %p
+                        %input#rad6{ :type => "radio", :name => "refORlist", :value => "list" }
+                        Another gene list (Gene symbols).
+                        %a.infoBtn#infoBtn6
+                          &#x24D8;
+                      %p
+                        Description:
+                        %a.star
+                          *
+                        %input#descB{ :type => "text", :placeholder => "Any string for 'Compare with'", :size => 30 }
+                      %p
+                        %a.star#star2
+                          *
+                        %textarea#txtarB{ :name => "txtB", :rows => 10, :cols => 50, :disabled => true, :placeholder => "Click the bove info buttons to know the description format." }
+                        %input#fileB{ :type => "file", :name => "fsel", :disabled => true }
 
               .row
                 .col-md-6.col-md-offset-3
-                  .button-submit.down
-                    %button.btn.btn-primary.btn-lg.btn-block{ :id => "colo-submit", :type => "button" }= "View Co-Association Data"
-              .row.colo-download
-                .col-md-3.col-md-offset-3
                   .button-submit
-                    %button.btn.btn-primary.btn-lg.btn-block{ :id => "download-tsv", :type => "button" }= "Download (TSV)"
-                .col-md-3
-                  .button-submit
-                    %button.btn.btn-primary.btn-lg.btn-block{ :id => "download-gml", :type => "button" }= "Download (GML)"
+                    %button.btn.btn-primary.btn-lg.btn-block{ :id => "target-gene-submit", :type => "button" }= "View Potential Target Genes"
+                    %button.btn.btn-primary.btn-lg.btn-block{ :id => "target-gene-download", :type => "button" }= "Download (TSV)"
 
     /
       Bootstrap Core Javascript
@@ -144,143 +175,48 @@
       // retrieve hash
       var analysis = JSON.parse('#{JSON.dump(@analysis)}');
 
-
       // iterate for each genomes
       $.each(#{@list_of_genome}, function(i, genome){
 
-        // easy implementation: need to be refactored
-        $('input[name="datatypeoption"]:radio').change(function(){
-          // target
-          var targetSelect = $('select#' + genome + 'PrimaryPanel-select');
+        // easy implementation
+        // activate typeahead
+        var typeaheadInput = $('#' + genome + 'AntigenPanel-typeahead');
+        var options = analysis[genome]
 
-          // Erase current values
-          targetSelect.empty();
+        // Erase previous data set
+        typeaheadInput.typeahead('destroy');
 
-          // populate primary panel
-          var type = $(this).val();
-          $.map(analysis[genome][type], function(value, key){
-            return [[key, value]];
-          }).sort().forEach(function(element, index, array){
-            var k = element[0];
-            var v = element[1];
-            $('<option>')
-              .attr("value", k)
-              .append(k)
-              .appendTo(targetSelect);
-          });
+        var list = new Bloodhound({
+          datumTokenizer: Bloodhound.tokenizers.whitespace,
+          queryTokenizer: Bloodhound.tokenizers.whitespace,
+          local: options
+        });
 
-          // change panel title
-          if(type == "antigen"){
-            $('#' + genome + 'PrimaryPanel h4').text("1. Choose Antigen");
-            $('#' + genome + 'SecondaryPanel h4').text("2. Choose Cell Type Class");
-          }else{
-            $('#' + genome + 'PrimaryPanel h4').text("1. Choose Cell Type Class");
-            $('#' + genome + 'SecondaryPanel h4').text("2. Choose Antigen");
+        typeaheadInput.typeahead({
+          hint: true,
+          highlight: true,
+          minLength: 1
+        },{
+          name: 'list',
+          source: list
+        });
+
+        // sync textbox and input field
+        typeaheadInput.keyup(function(){
+          var input = $(this).val();
+          if($.inArray(input,options) > -1){
+            $('select#' + genome + 'AntigenPanel-select').val(input);
           }
-
-          // activate typeahead
-          var typeaheadInput = $('#' + genome + 'PrimaryPanel-typeahead');
-          var options = Object.keys(analysis[genome][type]);
-
-          // Erase previous data set
-          typeaheadInput.typeahead('destroy');
-
-          var list = new Bloodhound({
-            datumTokenizer: Bloodhound.tokenizers.whitespace,
-            queryTokenizer: Bloodhound.tokenizers.whitespace,
-            local: options
-          });
-
-          typeaheadInput.typeahead({
-            hint: true,
-            highlight: true,
-            minLength: 1
-          },{
-            name: 'list',
-            source: list
-          });
-
-          // sync textbox and input field
-          typeaheadInput.keyup(function(){
-            var input = $(this).val();
-            if($.inArray(input,options) > -1){
-              $('select#' + genome + 'PrimaryPanel-select').val(input);
-            }
-          });
-          typeaheadInput.on('typeahead:select', function(){
-            var input = $(this).val();
-            if($.inArray(input,options) > -1){
-              $('select#' + genome + 'PrimaryPanel-select').val(input);
-            }
-          });
         });
-
-        function getOptions(genome, analysis){
-          var type = $(':radio[name="datatypeoption"]:checked').val();
-          var primaryType = $('select#' + genome + 'PrimaryPanel-select').val();
-          var options = analysis[genome][type][primaryType];
-          return options;
-        };
-
-        function createSecondaryOptions(genome, options){
-          // target secondary panel
-          var targetSelect = $('select#' + genome + 'SecondaryPanel-select');
-          // Erase current values
-          targetSelect.empty();
-          // populate primary panel
-          options.sort().forEach(function(element, index, array){
-            $('<option>')
-              .attr("value", element)
-              .append(element)
-              .appendTo(targetSelect);
-          });
-        }
-
-        function enableSecondaryTypeAhead(genome, options){
-          // capture input to put typeahead on
-          var typeaheadInput = $('#' + genome + 'SecondaryPanel-typeahead');
-          // Erase previous data set
-          typeaheadInput.typeahead('destroy');
-          // create list for incremental search
-          var list = new Bloodhound({
-            datumTokenizer: Bloodhound.tokenizers.whitespace,
-            queryTokenizer: Bloodhound.tokenizers.whitespace,
-            local: options
-          });
-          // activate typeahead
-          typeaheadInput.typeahead({
-            hint: true,
-            highlight: true,
-            minLength: 1
-          },{
-            name: 'list',
-            source: list
-          });
-          // sync textbox and input field
-          typeaheadInput.keyup(function(){
-            var input = $(this).val();
-            if($.inArray(input,options) > -1){
-              $('select#' + genome + 'SecondaryPanel-select').val(input);
-            }
-          });
-          typeaheadInput.on('typeahead:select', function(){
-            var input = $(this).val();
-            if($.inArray(input,options) > -1){
-              $('select#' + genome + 'SecondaryPanel-select').val(input);
-            }
-          });
-        }
-
-        $('select#' + genome + 'PrimaryPanel-select').change(function(){
-          var opts = getOptions(genome, analysis);
-          createSecondaryOptions(genome, opts);
-          enableSecondaryTypeAhead(genome, opts);
+        typeaheadInput.on('typeahead:select', function(){
+          var input = $(this).val();
+          if($.inArray(input,options) > -1){
+            $('select#' + genome + 'AntigenPanel-select').val(input);
+          }
         });
-        $('#' + genome + 'PrimaryPanel-typeahead').on('typeahead:select', function(){
-          var opts = getOptions(genome, analysis);
-          createSecondaryOptions(genome, opts);
-          enableSecondaryTypeAhead(genome, opts);
-        });
+        // easy implementation: done
+
+
 
         // set tab controller
         $('#' + genome + '-tab a').click(function(e){
@@ -413,39 +349,24 @@
 
       // send data to get igv url
       $(function(){
-        $("button#colo-submit").click(function(){
+        $("button#target-gene-submit").click(function(){
           var button = $(this);
           button.attr("disabled", true);
 
           var genome = $('.genomeTab ul li.active a').attr('source').replace(/[\n\s ]/g, "");
-
-          var primaryType = $(':radio[name="datatypeoption"]:checked').val();
-          var primaryValue = $('select#' + genome + 'PrimaryPanel-select').val();
-          var secondaryValue = $('select#' + genome + 'SecondaryPanel-select').val();
-          var data;
-          if (primaryType == 'antigen') {
-            data = {
-              condition: {
-                genome: genome,
-                antigen: primaryValue,
-                cellline: secondaryValue
-              }
-            };
-          }else {
-            data = {
-              condition: {
-                genome: genome,
-                antigen: secondaryValue,
-                celline: primaryValue
-              }
-            };
+          var data = {
+            // igv: $().text
+            condition: {
+              genome: genome,
+              antigen: $('select#' + genome + 'AntigenPanel-select option:selected').val()
+            }
           };
 
           // alert(JSON.stringify(data));
 
           $.ajax({
             type : 'post',
-            url : "#{app_root}/colo",
+            url : "#{app_root}/target_genes",
             data: JSON.stringify(data),
             contentType: 'application/json',
             dataType: 'json',

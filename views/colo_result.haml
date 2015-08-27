@@ -30,13 +30,19 @@
         #navbar.collapse.navbar-collapse
           %ul.nav.navbar-nav
             %li
-              %a{ :href => "#{app_root}" }= "Raw Peak Data"
-            %li.active
               %a{ :href => "#{app_root}/colo" }= "Co-Association Analysis"
             %li
               %a{ :href => "#{app_root}/target_genes" }= "Target Gene Analysis"
             %li
-              %a{ :href => "#{app_root}/About" }= "About"
+              %a{ :href => "#{app_root}/virtual_chip" }= "VirtualChIP Analysis"
+            %li
+              %a{ :href => "#{app_root}/about" }= "About"
+            %li
+              %a{ :href => "#{app_root}/documents" }= "Documents"
+            %li
+              %a{ :href => "#{app_root}/contact" }= "Contact"
+            %li
+              %a{ :href => "#{app_root}/log" }= "Change Log"
 
     #iframe
       .iframe

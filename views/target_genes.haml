@@ -34,6 +34,8 @@
             %li.active
               %a{ :href => "#{app_root}/target_genes" }= "Target Gene Analysis"
             %li
+              %a{ :href => "#{app_root}/virtual_chip" }= "VirtualChIP Analysis"              
+            %li
               %a{ :href => "#{app_root}/about" }= "About"
             %li
               %a{ :href => "#{app_root}/documents" }= "Documents"
@@ -180,7 +182,7 @@
           e.preventDefault();
           $(this).tab('show')
         })
-        
+
         // collapse controller
         $.each(["ag", "cl"], function(i, type){
           $('#toggle-' + genome + type + 'SubClass').click(function(){
