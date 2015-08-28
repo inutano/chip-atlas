@@ -148,12 +148,17 @@
                           *
                         %textarea#txtarB{ :name => "txtB", :rows => 10, :cols => 50, :disabled => true, :placeholder => "Click the bove info buttons to know the description format." }
                         %input#fileB{ :type => "file", :name => "fsel", :disabled => true }
-
-              .row
-                .col-md-6.col-md-offset-3
+                .col-md-2
+                  %p
+                    Project title:
+                    %a.star
+                      *
+                    %input#descC{ :type => "text", :placeholder => "Any string for this project", :size => 40 }
                   .button-submit
-                    %button.btn.btn-primary.btn-lg.btn-block{ :id => "target-gene-submit", :type => "button" }= "View Potential Target Genes"
-                    %button.btn.btn-primary.btn-lg.btn-block{ :id => "target-gene-download", :type => "button" }= "Download (TSV)"
+                    %button.btn.btn-primary.btn-lg.btn-block{ :id => "virtual-chip-submit", :type => "button" }= "submit"
+                  %p
+                    Estimated run time:
+                    %a#msg1= "-"
 
     /
       Bootstrap Core Javascript
@@ -385,3 +390,302 @@
           });
         })
       })
+
+      (function virtualChIP() {
+        var genomeV = "hg19";
+        var antigenV = "All antigens";
+        var celltypeV = "All cell types";
+        var threshV = "20";
+
+        // 最初に行うこと
+        $(document).ready(function() {
+          changeStr();
+          tsv2Array();
+        });
+
+        // イベントごとに処理を振り分ける。
+        $('*').on({
+          'click': function() {
+            var id = $(this).attr('id');
+            switch (id) {
+              case 'rad1':
+              case 'rad2':
+                changeStr(); break;
+              case 'rad3':
+              case 'rad4':
+                enablArea('rndORbed', 'rnd'); break;
+              case 'rad5':
+              case 'rad6':
+                enablArea('refORlist', 'ref'); break;
+              case 'submitVC':
+                post2Wabi(); break;
+            }
+          },
+          'change || keyup': function() {
+            var id = $(this).attr('id');
+            switch (id) {
+              case 'txtarA':
+              case 'txtarB':
+                repl(id, 1); break;
+              case 'descA':
+              case 'descB':
+              case 'descC':
+                repl(id, 2); break;
+              case 'descD':
+              case 'descE':
+                repl(id, 3); break;
+            }
+          },
+        });
+
+        // My data が BED or gene list で切り替える
+        function changeStr() {
+          if (document.getElementById('rad1').checked) {
+            document.getElementById('dispBed').style.display='block';
+            document.getElementById('dispGene').style.display='none';
+            document.getElementById('dispTSS').style.display='none';
+            document.getElementById('rad3').checked=true;
+            document.getElementById('rad4').checked=false;
+            document.getElementById('rad5').checked=false;
+            document.getElementById('rad6').checked=false;
+            document.getElementById('fileB').value='';
+            document.getElementById('txtarB').value='';
+            enablArea('rndORbed', 'rnd')
+          } else {
+            document.getElementById('dispBed').style.display='none';
+            document.getElementById('dispGene').style.display='block';
+            document.getElementById('dispTSS').style.display='block';
+            document.getElementById('rad3').checked=false;
+            document.getElementById('rad4').checked=false;
+            document.getElementById('rad5').checked=true;
+            document.getElementById('rad6').checked=false;
+            enablArea('refORlist', 'ref')
+            document.getElementById('fileB').value='';
+            document.getElementById('txtarB').value='';
+          }
+        }
+
+        // パラメータ生成し、POST する。
+        function post2Wabi() {
+          // パラメータの作成 (必須パラメータ)
+          var para = {};
+          para['bedAFile'] = document.getElementById('txtarA').value;
+          para['descriptionA'] = document.getElementById('descA').value;
+          para['descriptionB'] = document.getElementById('descB').value;
+          para['title'] = document.getElementById('descC').value;
+          para['format'] = 'text';
+          para['result'] = 'www';
+          para['genome'] = genomeV;
+          para['antigenClass'] = antigenV;
+          para['cellClass'] = celltypeV;
+          para['threshold'] = threshV;
+
+          // パラメータの作成 (選択パラメータ)
+          if (document.getElementById('rad1').checked) {  // typeA = BED
+            para['typeA'] = 'BED';
+            if (document.getElementById('rad3').checked) {    // typeB = random
+              para['typeB'] = 'random';
+              var sf = document.getElementsByName('numShuf');
+              for (i = 0; i < sf.length; i++) {
+                if (sf[i].checked) para['permTime'] = sf[i].value;
+              }
+            } else {                                          // typeB = userBED
+              para['typeB'] = 'userBED';
+              para['bedBFile'] = document.getElementById('txtarB').value;
+            }
+          } else {                                        // typeA = gene
+            para['typeA'] = 'gene';
+            if (document.getElementById('rad5').checked) {    // typeB = RefSeq
+              para['typeB'] = 'RefSeq';
+            } else {                                          // typeB = userGenes
+              para['typeB'] = 'userGenes';
+              para['bedBFile'] = document.getElementById('txtarB').value;
+            }
+            para['distanceUp']   = document.getElementById('descD').value;
+            para['distanceDown'] = document.getElementById('descE').value;
+          }
+          // AJAX で POST
+          $.ajax({
+            url: 'http://ddbj.nig.ac.jp/wabi/chipatlas/',
+            type: 'POST',
+            dataType: 'json',
+            data : para,
+            async: false,
+            complete : function(Jdata) {
+              var requestId = JSON.parse(JSON.stringify(Jdata))['responseText'].match(/wabi_chipatlas.*/)[0];
+              var childUrl = 'http://dbarchive.biosciencedbc.jp/kyushu-u/lib/vcResult.html?id='
+              location.href = childUrl + requestId + '&title=' + para['title'] + '&calcm=' + calcm;
+            },
+          });
+        }
+
+        // テキストエリアのテキスト整形
+        function repl(id, n) {
+          // 改行を \n に変換。英数字、タブ、アンダースコア以外は消去 (BED のテキストエリア用)
+          if (n == 1) {
+            document.getElementById(id).value = document.getElementById(id).value.replace(/\r\n/g,'\n').replace(/\r/g,'\n').replace(/[^a-zA-Z0-9\t_\n]/g,'');
+          }
+          // 英数字、スペース、アンダースコア、ピリオド、ハイフン以外は消去 (Description や Title のテキスト用)
+          if (n == 2) {
+            document.getElementById(id).value = document.getElementById(id).value.replace(/[^a-zA-Z0-9 _\.-]/g,'');
+          }
+          // 数字以外は消去 (TSS の距離用)
+          if (n == 3) {
+            document.getElementById(id).value = document.getElementById(id).value.replace(/[^0-9]/g,'');
+          }
+        }
+
+        // フォームの 表示/非表示
+        function enablArea(Name, Val) {
+          var rb = document.getElementsByName(Name);
+          for (i = 0; i < rb.length; i++) {
+            if (rb[i].checked) {
+              if (rb[i].value == Val) {
+                document.formB.txtB.disabled = true;
+                document.formB.fsel.disabled = true;
+                document.getElementById('star2').innerHTML = '';
+                if (Name == 'rndORbed') {
+                  for (j=1; j<=3; j++) document.typeB.elements[j].disabled = false;
+                }
+              } else {
+                document.formB.txtB.disabled = false;
+                document.formB.fsel.disabled = false;
+                document.getElementById('star2').innerHTML = '*';
+                if (Name == 'rndORbed') {
+                  for (j=1; j<=3; j++) document.typeB.elements[j].disabled = true;
+                }
+              }
+            }
+          }
+        }
+
+        // Q & A
+        $('.infoBtn').click(function() {
+          var altype = $(this).attr('id');
+          var note1 = 'Gene symbols in accordance with following gene nomenclature databases are acceptable:\n  H. sapiens: HGNC\n  M. musculus: MGI\n  D. melanogaster: FlyBase\n  C. elegans: WormBase\n  S. cerevisiae: SGD\n\nAcceptable example:\n  POU5F1\n  SPI1\n  TP53\n\nBad example:\n  OCT4\n  PU.1\n  p53';
+          var note2 = 'Example 1. BED format (tab-delimited columns):\n  chr1\t531435\t543845\n  chr2\t738543\t742321\n\n  Acceptable genome assemblies:\n    hg19 (H. sapiens)\n    mm9 (M. musculus)\n    dm3 (D. melanogaster)\n    ce10 (C. elegans)\n    sacCer3 (S. celevisiae)\n\nExample 2. A sequence motif:\n  ATGCAA\n\nExample 3. A sequence motif with degenerate base symbols (ATGC + WSMKRYBDHVN):\n  ACAMKGTA';
+          if (altype == 'infoBtn1') {
+            alert('Check this if you search proteins bound to given genomic regions (UCSC BED format) or to a sequence motif.\n\n' + note2);
+          }
+          if (altype == 'infoBtn2') {
+            alert('Check this if you search proteins bound around given genes.\n\n' + note1);
+          }
+          if (altype == 'infoBtn3') {
+            alert('Check this if you compare \'My data\' with random background. In this case, each genomic location of \'My data\' is permuted on a random chromosome at a random position for specified times. Increasing the permutation times will provide a hihgly randomized background, or a high quality of statistical test, but the calcuration time will be longer.');
+          }
+          if (altype == 'infoBtn4') {
+            alert('Check this if you compare \'My data\' with another data (UCSC BED format or a sequence motif).\n\n' + note2);
+          }
+          if (altype == 'infoBtn5') {
+            alert('Check this if you compare \'My data\' with RefSeq coding genes excluding those listed in \'My data\'.');
+          }
+          if (altype == 'infoBtn6') {
+            alert('Check this if you compare \'My data\' with another gene list.\n\n' + note1);
+          }
+          if (altype == 'infoBtnTSS') {
+            alert('To search protein binding to given genes, specify the distance range from the Transcription Start Sites (TSS).\n\Default is between -5000 and +5000 bp from the TSS.');
+          }
+        });
+
+        // 計算時間予測
+        $('*').on({
+          'mousemove || change': function() {
+            function calc(x, y, z, type) {
+              if (type == 'bed') {
+                var a = z * 8.23e-11 + 1.47e-2;
+                var b = z * 4.72e-11 + 7.24e-3;
+                var c = (x + y) * 6.75e-11 + 1.02e-6;
+                var k = 60;
+                return (k + a*x + b*y +c*z) * (5/7);
+              } else {
+                var a = z * 3.02e-12 + 1.13e-4;
+                var c = (x + x*y) * 3.02e-12 + 2.06e-6;
+                var k = 20;
+                return 1.8 * Math.pow( (k + a * (Math.pow(0.8*x, 1.52) + x*y) + c*z), 0.85 );
+              }
+            }
+
+            genomesize = new Array();
+            genomesize['ce10'] = 100286070;
+            genomesize['dm3'] = 168736537;
+            genomesize['hg19'] = 3137161264;
+            genomesize['mm9'] = 2725765481;
+            genomesize['sacCer3'] = 12157105;
+
+            geneNumb = new Array();
+            geneNumb['ce10'] = 17958;
+            geneNumb['dm3'] = 12635;
+            geneNumb['hg19'] = 18622;
+            geneNumb['mm9'] = 19909;
+            geneNumb['sacCer3'] = 5809;
+
+            var A = document.getElementById('txtarA').value;
+            var B = document.getElementById('txtarB').value;
+            var LF = String.fromCharCode(10); //改行コード
+            var qBed = genomeV + ',' + antigenV + ',' + celltypeV + ',' + threshV;
+            var x = A.replace(/\n$/g,'').split(LF).length;  // txtarA の行数
+            var y = B.replace(/\n$/g,'').split(LF).length;  // txtarB の行数
+            var z = tsvData[qBed];                          // bedL の行数
+
+            if (document.getElementById('rad1').checked) {  // typeA,B = BED or motif の場合
+              if (x == 1 && !A.match(/\t/) && A.length > 0) {  // txtarA が sequence motif の場合
+                x = genomesize[genomeV] / Math.pow(4, A.length);
+              }
+              if (document.getElementById('rad3').checked) {  // typeB = random の場合
+                var sf = document.getElementsByName('numShuf');
+                for (i = 0; i < sf.length; i++) {
+                  if (sf[i].checked) y = sf[i].value;  // y = shuffle の回数
+                }
+                var s = calc(x, y, z, 'rnd');
+              } else {                                        // typeB = BED or motif の場合
+                if (y == 1 && !B.match(/\t/) && B.length > 0) {  // txtarB が sequence motif の場合
+                  y = genomesize[genomeV] / Math.pow(4, B.length);
+                }
+                var s = calc(x, y, z, 'bed');
+              }
+            } else {                                        // typeA,B = gene list の場合
+              if (document.getElementById('rad5').checked) {  // typeB = RefSeq の場合
+                y = geneNumb[genomeV] - x;
+              }
+              var s = calc(x, y, z, 'bed');
+            }
+            calcm = Math.round(s / 60);
+            if (calcm < 60) {  // 60 分以下は min 単位、それ以上は hr 単位
+              document.getElementById('msg1').innerHTML = calcm + ' min';
+            } else {
+              document.getElementById('msg1').innerHTML = (calcm/60).toFixed(1) + ' hr';
+            }
+          }
+        });
+
+        // bedL の行数を記した TSV ファイルを取得
+        function tsv2Array() {
+          tsvData = new Array();
+          var tsvUrl = 'http://dbarchive.biosciencedbc.jp/kyushu-u/lib/lineNum.tsv';
+          var data = new XMLHttpRequest();
+          data.open('GET', tsvUrl, false); //true:非同期,false:同期
+          data.send(null);
+
+          var LF = String.fromCharCode(10); //改行コード
+          var lines = data.responseText.split(LF);
+          for (var i = 0; i < lines.length; ++i) {
+            var c = lines[i].split('\t');
+            tsvData[c[0] + ',' + c[1] + ',' + c[2] + ',' + c[3]] = c[4];
+          }
+        }
+
+        // File を選択すると内容をテキストエリアに反映させる。
+        $('#fileA, #fileB').change(function(event) {
+          var fileId = $(this).attr('id');
+          var file = event.target.files;
+          var reader = new FileReader();
+          reader.readAsText(file[0]);
+          reader.onload = function(ev) {
+            if (fileId == 'fileA') {
+              document.formA.txtA.value = reader.result;
+            } else if (fileId == 'fileB') {
+              document.formB.txtB.value = reader.result;
+            }
+          }
+        });
+      })();
