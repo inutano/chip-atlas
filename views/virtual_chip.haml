@@ -49,7 +49,7 @@
         .col-md-10
           .header
             %h1= "ChIP-Atlas - VirtualChIP"
-            %p= "Query your data or genes to predict TFs"
+            %p= "Analyze your data with public ChIP-seq data."
         .col-md-2
           .dropdown-help
             .dropdown
@@ -83,25 +83,25 @@
                       %h4.panel-title= "1. Select your data"
                     .panel-body
                       %p
-                        %input.rad1{ :type => "radio", :name => "bedORGene", :value => "bed", :checked => "checked" }
+                        %input{ :type => "radio", :id => "#{genome}UserDataBed", :name => "bedORGene", :value => "bed", :checked => "checked" }
                         Genomic regions (BED) or sequence motif.
-                        %a.infoBtn#infoBtn1{ :value => "info" }
+                        %a.infoBtn{ :value => "info", :id => "#{genome}UserDataBed" }
                           &#x24D8;
                       %p
-                        %input.rad2{ :type => "radio", :name => "bedORGene", :value => "gene" }
+                        %input{ :type => "radio", :id => "#{genome}UserDataGenes", :name => "bedORGene", :value => "gene" }
                         Gene list (Gene symbols).
-                        %a.infoBtn#infoBtn2
+                        %a.infoBtn{ :id => "#{genome}UserDataGenes" }
                           &#x24D8;
                       %p
                         Description
                         %a.star
                           *
-                        %input#descA{ :type => "text", :placeholder => "Any string for 'My data'", :size => 30}
+                        %input{ :type => "text", :id => "#{genome}UserDataTitle", :placeholder => "Any string for 'My data'", :size => 30}
                       %p
                         %a.star
                           *
-                        %textarea#txtarA{ :name => "txtA", :rows => 10, :cols => 50, :placeholder => "Click the above info buttons to know the description format."}
-                        %input#fileA{ :type => "file" }
+                        %textarea{ :name => "txtA", :id => "#{genome}UserData", :rows => 10, :cols => 50, :placeholder => "Click the info buttons above to show the description format."}
+                        %input{ :type => "file", :id => "#{genome}UserDataFile" }
 
                 .col-md-4
                   .panel.panel-default
@@ -110,55 +110,45 @@
                       %h4.panel-title= "2. Select dataset to be compared"
                     .panel-body
                       %p
-                        %input#id{ :type => "radio", :name => "rndORbed", :value => "rnd" }
+                        %input{ :type => "radio", :id => "#{genome}comparedWithRandom", :name => "rndORbed", :value => "rnd" }
                         Random permutation of 'My data'.
-                        %a.infoBtn#infoBtn3
+                        %a.infoBtn{ :id => "#{genome}comparedWithRandom" }
                           &#x24D8;
                       %p
                         %h5
                           Permutation times
-                        %input#rad7{ :type => "radio", :name => "numShuf", :value => "1", :disabled => true, :checked => "checked" }
+                        %input{ :type => "radio", :id => "#{genome}comparedWithRandomx1", :name => "numShuf", :value => "1", :disabled => true, :checked => "checked" }
                         x1
-                        %input#rad8{ :type => "radio", :name => "numShuf", :value => "1", :disabled => true, :checked => "checked" }
+                        %input{ :type => "radio", :id => "#{genome}comparedWithRandomx10", :name => "numShuf", :value => "1", :disabled => true, :checked => "checked" }
                         x10
-                        %input#rad9{ :type => "radio", :name => "numShuf", :value => "1", :disabled => true, :checked => "checked" }
+                        %input{ :type => "radio", :id => "#{genome}comparedWithRandomx100", :name => "numShuf", :value => "1", :disabled => true, :checked => "checked" }
                         x100
                       %p
-                        %input#rad4{ :type => "radio", :name => "rndORbed", :value => "bedB" }
+                        %input{ :type => "radio", :id => "#{genome}comparedWithBed", :name => "rndORbed", :value => "bedB" }
                         Another BED or sequence motif.
-                        %a.infoBtn#infoBtn4
-                          &#x24D8;
-                      %p
-                        %input#rad5{ :type => "radio", :name => "refORlist", :value => "ref" }
-                        RefSeq coding genes excluding those in 'My data'.
-                        %a.infoBtn#infoBtn5
-                          &#x24D8;
-                      %p
-                        %input#rad6{ :type => "radio", :name => "refORlist", :value => "list" }
-                        Another gene list (Gene symbols).
-                        %a.infoBtn#infoBtn6
+                        %a.infoBtn{ :id => "#{genome}comparedWithBed" }
                           &#x24D8;
                       %p
                         Description:
                         %a.star
                           *
-                        %input#descB{ :type => "text", :placeholder => "Any string for 'Compare with'", :size => 30 }
+                        %input{ :type => "text", :id => "#{genome}comparedWithTitle", :placeholder => "Any string for 'Compare with'", :size => 30 }
                       %p
-                        %a.star#star2
+                        %a.star{ :id => "" }
                           *
-                        %textarea#txtarB{ :name => "txtB", :rows => 10, :cols => 50, :disabled => true, :placeholder => "Click the bove info buttons to know the description format." }
-                        %input#fileB{ :type => "file", :name => "fsel", :disabled => true }
+                        %textarea{ :name => "txtB", :id => "#{genome}comparedWith", :rows => 10, :cols => 50, :disabled => true, :placeholder => "Click the info buttons above to show the description format." }
+                        %input{ :type => "file", :id => "#{genome}comparedWithFile", :name => "fsel", :disabled => true }
                 .col-md-2
                   %p
                     Project title:
                     %a.star
                       *
-                    %input#descC{ :type => "text", :placeholder => "Any string for this project", :size => 40 }
+                    %input{ :type => "text", :id => "#{genome}ProjectTitle", :placeholder => "Any string for this project", :size => 40 }
                   .button-submit
                     %button.btn.btn-primary.btn-lg.btn-block{ :id => "virtual-chip-submit", :type => "button" }= "submit"
                   %p
                     Estimated run time:
-                    %a#msg1= "-"
+                    %a{ :id => "estimatedRunTime" }= "-"
 
     /
       Bootstrap Core Javascript
@@ -179,6 +169,12 @@
 
       // retrieve hash
       var analysis = JSON.parse('#{JSON.dump(@analysis)}');
+
+      function changeStr(){
+        if ($()) {
+
+        }
+      }
 
       // iterate for each genomes
       $.each(#{@list_of_genome}, function(i, genome){
