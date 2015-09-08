@@ -124,6 +124,7 @@ class PeakJohn < Sinatra::Base
   get "/virtual_chip" do
     @index_all_genome = Experiment.index_all_genome
     @list_of_genome = @index_all_genome.keys
+    @qval_range = Bedfile.qval_range
     haml :virtual_chip
   end
   

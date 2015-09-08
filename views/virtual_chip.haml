@@ -75,6 +75,42 @@
         .tab-content
           - @list_of_genome.each.with_index do |genome, i|
             .tab-pane.fade{ :role => "tabpanel", :id => genome, :class => "#{(i == 0) ? 'in active' : ''}" }
+              - index = @index_all_genome[genome]
+              .row
+                - [["ag","Antigen"],["cl", "Cell type"]].each do |set|
+                  .col-md-4
+                    %form
+                      .panel.panel-default
+                        - class_id = "#{genome}#{set[0]}Class"
+                        .panel-heading{ :id => "heading-#{class_id}" }
+                          %h4.panel-title= "#{set[1]} Class"
+                        .panel-body
+                          %select.form-control{ :id => "#{class_id}", :size => 8 }
+                            - ind = index[set[1].downcase.sub("\s","").intern]
+                            - count = ind.values.map{|n| n.values }.flatten.reduce(:+)
+                            %option{ :value => "All #{set[1].downcase}s", "selected" => true }= "All #{set[1].downcase}s (#{count})"
+
+                            = specials = ["Input control","Others","Unclassified","No description"]
+                            - nodes = ind.to_a.sort
+                            - nodes_normal = nodes.reject{|a| specials.include?(a[0]) }
+                            - nodes_special = specials.map{|special| nodes.select{|n| n[0] == special }[0] }.compact
+                            - collection = nodes_normal + nodes_special
+
+                            - collection.each do |node|
+                              - typeClass = node[0]
+                              - typeSubClass = node[1]
+                              %option{ :value => typeClass }= "#{typeClass} (#{typeSubClass.each_value.reduce(:+)})"
+
+                .col-md-4
+                  %form
+                    .panel.panel-default
+                      .panel-heading{ :id => "heading-#{genome}qval"}
+                        %h4.panel-title
+                          Threshold for Significance
+                      .panel-body
+                        %select.form-control{ :id => "#{genome}qval", :size => 5 }
+                          - @qval_range.sort.each.with_index do |qv, i|
+                            %option{ :value => qv, "#{(i == 0) ? 'selected' : '' }" => "" }= "#{qv.to_i*10}"
               .row
                 .col-md-4
                   .panel.panel-default
@@ -169,12 +205,6 @@
 
       // retrieve hash
       var analysis = JSON.parse('#{JSON.dump(@analysis)}');
-
-      function changeStr(){
-        if ($()) {
-
-        }
-      }
 
       // iterate for each genomes
       $.each(#{@list_of_genome}, function(i, genome){
