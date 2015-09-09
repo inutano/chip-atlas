@@ -118,22 +118,22 @@
                     .panel-heading{ :id => panel }
                       %h4.panel-title= "1. Select your data"
                     .panel-body
-                      %p
+                      .panel-input
                         %input{ :type => "radio", :id => "#{genome}UserDataBed", :name => "bedORGene", :value => "bed", :checked => "checked" }
                         Genomic regions (BED) or sequence motif.
                         %a.infoBtn{ :value => "info", :id => "#{genome}UserDataBed" }
                           &#x24D8;
-                      %p
+                      .panel-input
                         %input{ :type => "radio", :id => "#{genome}UserDataGenes", :name => "bedORGene", :value => "gene" }
                         Gene list (Gene symbols).
                         %a.infoBtn{ :id => "#{genome}UserDataGenes" }
                           &#x24D8;
-                      %p
+                      .panel-input-description
                         Description
                         %a.star
                           *
                         %input{ :type => "text", :id => "#{genome}UserDataTitle", :placeholder => "Any string for 'My data'", :size => 30}
-                      %p
+                      .panel-input-textarea
                         %a.star
                           *
                         %textarea{ :name => "txtA", :id => "#{genome}UserData", :rows => 10, :cols => 50, :placeholder => "Click the info buttons above to show the description format."}
@@ -145,12 +145,12 @@
                     .panel-heading{ :id => panel }
                       %h4.panel-title= "2. Select dataset to be compared"
                     .panel-body
-                      %p
+                      .panel-input
                         %input{ :type => "radio", :id => "#{genome}comparedWithRandom", :name => "rndORbed", :value => "rnd" }
                         Random permutation of 'My data'.
                         %a.infoBtn{ :id => "#{genome}comparedWithRandom" }
                           &#x24D8;
-                      %p
+                      .panel-input
                         %h5
                           Permutation times
                         %input{ :type => "radio", :id => "#{genome}comparedWithRandomx1", :name => "numShuf", :value => "1", :disabled => true, :checked => "checked" }
@@ -159,30 +159,30 @@
                         x10
                         %input{ :type => "radio", :id => "#{genome}comparedWithRandomx100", :name => "numShuf", :value => "1", :disabled => true, :checked => "checked" }
                         x100
-                      %p
+                      .panel-input
                         %input{ :type => "radio", :id => "#{genome}comparedWithBed", :name => "rndORbed", :value => "bedB" }
                         Another BED or sequence motif.
                         %a.infoBtn{ :id => "#{genome}comparedWithBed" }
                           &#x24D8;
-                      %p
+                      .panel-input-description
                         Description:
                         %a.star
                           *
                         %input{ :type => "text", :id => "#{genome}comparedWithTitle", :placeholder => "Any string for 'Compare with'", :size => 30 }
-                      %p
+                      .panel-input-textarea
                         %a.star{ :id => "" }
                           *
                         %textarea{ :name => "txtB", :id => "#{genome}comparedWith", :rows => 10, :cols => 50, :disabled => true, :placeholder => "Click the info buttons above to show the description format." }
                         %input{ :type => "file", :id => "#{genome}comparedWithFile", :name => "fsel", :disabled => true }
                 .col-md-2
-                  %p
+                  .project-title
                     Project title:
                     %a.star
                       *
                     %input{ :type => "text", :id => "#{genome}ProjectTitle", :placeholder => "Any string for this project", :size => 40 }
                   .button-submit
                     %button.btn.btn-primary.btn-lg.btn-block{ :id => "virtual-chip-submit", :type => "button" }= "submit"
-                  %p
+                  .estimated-run-time
                     Estimated run time:
                     %a{ :id => "estimatedRunTime" }= "-"
 
