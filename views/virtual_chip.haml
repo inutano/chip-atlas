@@ -74,7 +74,7 @@
         // Contents
         .tab-content
           - @list_of_genome.each.with_index do |genome, i|
-            .tab-pane.fade{ :role => "tabpanel", :id => genome, :class => "#{(i == 0) ? 'in active' : ''}" }
+            .tab-pane.fade{ :role => "tabpanel", :id => "#{genome}-tab-content", :class => "#{(i == 0) ? 'in active' : ''}" }
               - index = @index_all_genome[genome]
               .row
                 - [["ag","Antigen"],["cl", "Cell type"]].each do |set|
