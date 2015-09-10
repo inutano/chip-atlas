@@ -146,7 +146,7 @@
                       %h4.panel-title= "2. Select dataset to be compared"
                     .panel-body
                       .panel-input.bed
-                        %input{ :type => "radio", :id => "#{genome}comparedWithRandom", :name => "rndORbed", :value => "rnd" }
+                        %input{ :type => "radio", :id => "#{genome}comparedWithRandom", :name => "comparedWith", :value => "rnd" }
                         Random permutation of 'My data'.
                         %a.infoBtn{ :id => "#{genome}comparedWithRandom" }
                           &#x24D8;
@@ -160,17 +160,17 @@
                         %input{ :type => "radio", :id => "#{genome}comparedWithRandomx100", :name => "numShuf", :value => "1", :disabled => true, :checked => "checked" }
                         x100
                       .panel-input.bed
-                        %input{ :type => "radio", :id => "#{genome}comparedWithBed", :name => "rndORbed", :value => "bedB" }
+                        %input{ :type => "radio", :id => "#{genome}comparedWithBed", :name => "comparedWith", :value => "bedB" }
                         Another BED or sequence motif.
                         %a.infoBtn{ :id => "#{genome}comparedWithBed" }
                           &#x24D8;
                       .panel-input.gene
-                        %input{ :type => "radio", :id => "#{genome}comparedWithRefseq", :name => "refseqORuserlist", :value => "refseq" }
+                        %input{ :type => "radio", :id => "#{genome}comparedWithRefseq", :name => "comparedWith", :value => "refseq" }
                         Refseq coding genes exluding those in 'My data'.
                         %a.infoBtn{ :id => "#{genome}comparedWithRefseq" }
                           &#x24D8;
                       .panel-input.gene
-                        %input{ :type => "radio", :id => "#{genome}comparedWithUserlist", :name => "refseqORuserlist", :value => "userlist" }
+                        %input{ :type => "radio", :id => "#{genome}comparedWithUserlist", :name => "comparedWith", :value => "userlist" }
                         Another gene list (Gene symbols).
                         %a.infoBtn{ :id => "#{genome}comparedWithUserlist" }
                           &#x24D8;
@@ -226,6 +226,57 @@
           $('.panel-input.gene').show();
         }
       });
+
+      // send data to wabi api
+      $(function(){
+        $("button#virtual-chip-submit").click(function(){
+          var button = $(this);
+          button.attr("disabled", true);
+
+          var genome = $('.genomeTab ul li.active a').attr('source').replace(/[\n\s ]/g, "");
+          var data = {
+            genome: genome,
+            antigenClass: $('select#' + genome + 'agClass option:selected').val(),
+            cellClass: $('select#' + genome + 'clClass option:selected').val(),
+            threshold: $('select#' + genome + 'qval option:selected').val(),
+            typeA: $('input[name="bedORGene"]:checked').val(),
+            bedAFile: $('textarea#' + genome + 'UserData').val(),
+            descriptionA: $('input#' + genome + 'UserDataTitle').val(),
+            typeB: $('input[name="comparedWith"]:checked').val(),
+            bedBFile: $('textarea#' + genome + 'comparedWith').val(),
+            descriptionB: $('input#' + genome + 'comparedWithTitle').val(),
+            permTime: $('input[name="numShuf"]:checked').val(),
+            distanceUp: $(),
+            distanceDown: $(),
+            title: $('input#' + genome + 'ProjectTitle').val(),
+            format: 'text',
+            result: 'www'
+          };
+          alert(JSON.stringify(data));
+
+      		$.ajax({
+      			url: 'http://ddbj.nig.ac.jp/wabi/chipatlas/',
+      			type: 'POST',
+      			dataType: 'json',
+      			data : data,
+      			async: false,
+            success : function(response) {
+              alert(JSON.stringify(response));
+      				var requestId = JSON.parse(JSON.stringify(response))['responseText'].match(/wabi_chipatlas.*/)[0];
+      				var childUrl = 'http://dbarchive.biosciencedbc.jp/kyushu-u/lib/vcResult.html?id='
+      				location.href = childUrl + requestId + '&title=' + data['title'] + '&calcm=' + calcm;
+            },
+            error : function(response){
+              alert(JSON.stringify(response));
+              alert("error!");
+            },
+            complete: function(){
+              button.attr("disabled", false);
+            }
+      		});
+        })
+      })
+
 
       // iterate for each genomes
       $.each(#{@list_of_genome}, function(i, genome){
@@ -398,42 +449,3 @@
           $('select#' + genome + value + 'SubClass').empty();
         })
       });
-
-      // send data to get igv url
-      $(function(){
-        $("button#target-gene-submit").click(function(){
-          var button = $(this);
-          button.attr("disabled", true);
-
-          var genome = $('.genomeTab ul li.active a').attr('source').replace(/[\n\s ]/g, "");
-          var data = {
-            // igv: $().text
-            condition: {
-              genome: genome,
-              antigen: $('select#' + genome + 'AntigenPanel-select option:selected').val()
-            }
-          };
-
-          // alert(JSON.stringify(data));
-
-          $.ajax({
-            type : 'post',
-            url : "#{app_root}/target_genes",
-            data: JSON.stringify(data),
-            contentType: 'application/json',
-            dataType: 'json',
-            scriptCharset: 'utf-8',
-            success : function(response) {
-              // alert(JSON.stringify(response));
-              window.open(response.url, "_self", "")
-            },
-            error : function(response){
-              // alert(JSON.stringify(response));
-              alert("error!");
-            },
-            complete: function(){
-              button.attr("disabled", false);
-            }
-          });
-        })
-      })
