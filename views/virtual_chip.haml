@@ -145,12 +145,12 @@
                     .panel-heading{ :id => panel }
                       %h4.panel-title= "2. Select dataset to be compared"
                     .panel-body
-                      .panel-input
+                      .panel-input.bed
                         %input{ :type => "radio", :id => "#{genome}comparedWithRandom", :name => "rndORbed", :value => "rnd" }
                         Random permutation of 'My data'.
                         %a.infoBtn{ :id => "#{genome}comparedWithRandom" }
                           &#x24D8;
-                      .panel-input
+                      .panel-input.bed
                         %h5
                           Permutation times
                         %input{ :type => "radio", :id => "#{genome}comparedWithRandomx1", :name => "numShuf", :value => "1", :disabled => true, :checked => "checked" }
@@ -159,10 +159,20 @@
                         x10
                         %input{ :type => "radio", :id => "#{genome}comparedWithRandomx100", :name => "numShuf", :value => "1", :disabled => true, :checked => "checked" }
                         x100
-                      .panel-input
+                      .panel-input.bed
                         %input{ :type => "radio", :id => "#{genome}comparedWithBed", :name => "rndORbed", :value => "bedB" }
                         Another BED or sequence motif.
                         %a.infoBtn{ :id => "#{genome}comparedWithBed" }
+                          &#x24D8;
+                      .panel-input.gene
+                        %input{ :type => "radio", :id => "#{genome}comparedWithRefseq", :name => "refseqORuserlist", :value => "refseq" }
+                        Refseq coding genes exluding those in 'My data'.
+                        %a.infoBtn{ :id => "#{genome}comparedWithRefseq" }
+                          &#x24D8;
+                      .panel-input.gene
+                        %input{ :type => "radio", :id => "#{genome}comparedWithUserlist", :name => "refseqORuserlist", :value => "userlist" }
+                        Another gene list (Gene symbols).
+                        %a.infoBtn{ :id => "#{genome}comparedWithUserlist" }
                           &#x24D8;
                       .panel-input-description
                         Description:
@@ -205,6 +215,17 @@
 
       // retrieve hash
       var analysis = JSON.parse('#{JSON.dump(@analysis)}');
+
+      // Switch compared data panel by primary data type
+      $("input[name='bedORGene']").change(function(){
+        if($(this).val() === 'bed'){
+          $('.panel-input.bed').show();
+          $('.panel-input.gene').hide();
+        }else if ($(this).val() === 'gene') {
+          $('.panel-input.bed').hide();
+          $('.panel-input.gene').show();
+        }
+      });
 
       // iterate for each genomes
       $.each(#{@list_of_genome}, function(i, genome){
