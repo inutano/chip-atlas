@@ -41,28 +41,46 @@
               %a{ :href => "#{app_root}/documents" }= "Documents"
 
 
+    .jumbotron
+      .container
+        %h1
+          ChIP-Atlas
+        %p
+          ChIP-Atlas is an integrative and comprehensive database for visualizing and exploiting public ChIP-seq data (Movie). ChIP-Atlas covers almost all public ChIP-seq data deposited as SRA (Sequence Read Archives) in NCBI, DDBJ or ENA, and is based on over 30,000 experiments. ChIP-Atlas has mainly following four functions:
     .container
-      // The original title 'peak john' was rejected.
       .row
-        .col-md-10
-          .header
-            %h1= "ChIP-Atlas"
-            %p= "Visualize All Peaks from Published ChIP-Seq data."
-        .col-md-2
-          .dropdown-help
-            .dropdown
-              .button.btn.btn-default.dropdown-toggle{ :type => "button", :id => "movies-dropdown", "data-toggle" => "dropdown", "aria-haspopup" => true, "aria-expanded" => true }
-                Tutorial movies
-                %span.caret
-              %ul.dropdown-menu{ "aria-labelledby" => "movies-dropdown" }
-                %li
-                  %a{ :href => "#" }= "1-min introduction"
-                %li
-                  %a{ :href => "#" }= "Requirements"
-                %li
-                  %a{ :href => "#" }= "How to use"
-
-
+        .col-md-3
+          %h2
+            %a{ :href => "#{app_root}/peak_browser" }
+              Peak viewer
+          %p
+            graphically visualizes protein bindings on given genomic loci with genome browser (IGV).
+            %a
+              Watch Movie
+        .col-md-3
+          %h2
+            %a{ :href => "#{app_root}/target_genes" }
+              Target genes
+          %p
+            predicts target genes bound by given transcription factors.
+            %a
+              Watch Movie
+        .col-md-3
+          %h2
+            %a{ :href => "#{app_root}/colo" }
+              Colocalization
+          %p
+            predicts partner proteins colocalizing with given transcription factors.
+            %a
+              Watch Movie
+        .col-md-3
+          %h2
+            %a{ :href => "#{app_root}/virtual_chip" }
+              Virtual ChIP
+          %p
+            predicts proteins bound to given genomic loci and genes.
+            %a
+              Watch Movie
     /
       Bootstrap Core Javascript
       =========================
