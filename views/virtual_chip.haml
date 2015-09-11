@@ -286,6 +286,22 @@
           });
         });
 
+        // put file content into the textarea
+        $('input#' + genome + 'UserDataFile, input#' + genome + 'comparedWithFile').change(function(event) {
+          alert("file detected");
+          var fileId = $(this).attr('id');
+          var file = event.target.files;
+          var reader = new FileReader();
+          reader.readAsText(file[0]);
+          reader.onload = function(ev) {
+            if (fileId == genome + 'UserDataFile') {
+              $('textarea#' + genome + 'UserData').val(reader.result);
+            } else if (fileId == genome + 'comparedWithFile') {
+              $('textarea#' + genome + 'comparedWith').val(reader.result);
+            }
+      		}
+      	});
+
         // for each subclass section
         $.each([["antigen", "ag"], ["celltype", "cl"]], function(it, type){
           $('select#' + genome + type[1] + 'Class').change(function(){
