@@ -29,20 +29,16 @@
           %a.navbar-brand{ :href => "#{app_root}" }= "ChIP-Atlas"
         #navbar.collapse.navbar-collapse
           %ul.nav.navbar-nav
+            %li.active
+              %a{ :href => "#{app_root}/peak_browser" }= "Peak Browser"
             %li
               %a{ :href => "#{app_root}/colo" }= "Co-Association Analysis"
             %li
               %a{ :href => "#{app_root}/target_genes" }= "Target Gene Analysis"
             %li
-              %a{ :href => "#{app_root}/virtual_chip" }= "VirtualChIP Analysis"          
-            %li
-              %a{ :href => "#{app_root}/about" }= "About"
+              %a{ :href => "#{app_root}/virtual_chip" }= "VirtualChIP Analysis"
             %li
               %a{ :href => "#{app_root}/documents" }= "Documents"
-            %li
-              %a{ :href => "#{app_root}/contact" }= "Contact"
-            %li
-              %a{ :href => "#{app_root}/log" }= "Change Log"
 
     .container
       // The original title 'peak john' was rejected.
