@@ -209,9 +209,6 @@
       // retrieve index
       var indexAll = JSON.parse('#{JSON.dump(@index_all_genome)}');
 
-      // retrieve hash
-      var analysis = JSON.parse('#{JSON.dump(@analysis)}');
-
       // Switch compared data panel by primary data type
       $("input[name='bedORGene']").change(function(){
         if($(this).val() === 'bed'){
@@ -276,47 +273,6 @@
 
       // iterate for each genomes
       $.each(#{@list_of_genome}, function(i, genome){
-
-        // easy implementation
-        // activate typeahead
-        var typeaheadInput = $('#' + genome + 'AntigenPanel-typeahead');
-        var options = analysis[genome]
-
-        // Erase previous data set
-        typeaheadInput.typeahead('destroy');
-
-        var list = new Bloodhound({
-          datumTokenizer: Bloodhound.tokenizers.whitespace,
-          queryTokenizer: Bloodhound.tokenizers.whitespace,
-          local: options
-        });
-
-        typeaheadInput.typeahead({
-          hint: true,
-          highlight: true,
-          minLength: 1
-        },{
-          name: 'list',
-          source: list
-        });
-
-        // sync textbox and input field
-        typeaheadInput.keyup(function(){
-          var input = $(this).val();
-          if($.inArray(input,options) > -1){
-            $('select#' + genome + 'AntigenPanel-select').val(input);
-          }
-        });
-        typeaheadInput.on('typeahead:select', function(){
-          var input = $(this).val();
-          if($.inArray(input,options) > -1){
-            $('select#' + genome + 'AntigenPanel-select').val(input);
-          }
-        });
-        // easy implementation: done
-
-
-
         // set tab controller
         $('#' + genome + '-tab a').click(function(e){
           e.preventDefault();
