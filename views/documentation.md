@@ -1,5 +1,5 @@
-# ChIP-Atlas / Documents
-Documents for computational processing in ChIP-Atlas.
+# ChIP-Atlas / Documentation
+Documentation for computational processing in ChIP-Atlas.
 ## Table of Contents
 1. [Data source](#data_source_doc)
 2. [Primary processing](#primary_processing_doc)
@@ -236,20 +236,20 @@ Comprehensive peak-call data as described in **4. Peak browser**. The result wil
   ```
 
   A header and column 4 or later can be included, but they are ignored for the analysis. BE CAREFUL that the BED files in the following genome assembly are only acceptable:
-  
+
   - hg19 (*H. sapiens*)
   - mm9 (*M. musculus*)
   - dm3 (*D. melanogaster*)
   - ce10 (*C. elegans*)
   - sacCer3 (*S. celevisiae*)
-  
+
   If the BED file is in other genome assembly, convert it to proper assembly with [UCSC liftOver tool][liftOver].
-  
+
 - Motif (lower panels of the submission form)  
 A sequence motif described in [IUPAC nucleic acid notation][IUPAC]. In addition to ATGC, ambiguity characters are also acceptable (WSMKRYBDHVN).
 - Gene list (lower panels of the submission form)  
 Gene symbols described according to following nomenclatures:
-    
+
     * [HGNC][HGNC] (*H. sapiens*)  
     * [MGI][MGI] (*M. musculus*)
     * [FlyBase][FlyBase] (*D. melanogaster*)
@@ -317,4 +317,3 @@ If the gene list are described in other format (eg. Gene IDs in Refseq or Emsemb
 [liftOver]: https://genome.ucsc.edu/cgi-bin/hgLiftOver
 [IUPAC]: https://en.wikipedia.org/wiki/Nucleic_acid_notation
 [DAVID]: https://david.ncifcrf.gov
-
