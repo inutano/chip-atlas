@@ -3,3 +3,4 @@ vendor
 .sass-cache
 database.sqlite
 table/prev
+public/images
