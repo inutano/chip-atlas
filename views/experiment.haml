@@ -208,7 +208,8 @@
         rikenbrc: "http://www2.brc.riken.jp/lab/cell/list.cgi?skey="
       };
 
-      $('button').click(function(){
+      $('button').on('click', function(event){
+        event.preventDefault();
         var namespace = dbNamespace[$(this).attr("id")];
         switch (true){
           case $(this).hasClass('antigen'):
