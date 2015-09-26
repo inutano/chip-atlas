@@ -511,3 +511,37 @@
           $('select#' + genome + value + 'SubClass').empty();
         })
       });
+
+      // Q & A
+      $('.infoBtn').click(function(){
+        var altype = $(this).attr('id');
+        var genome = $('.genomeTab ul li.active a').attr('source').replace(/[\n\s ]/g, "");
+
+        var note1 = 'Gene symbols in accordance with following gene nomenclature databases are acceptable:\n  H. sapiens: HGNC\n  M. musculus: MGI\n  D. melanogaster: FlyBase\n  C. elegans: WormBase\n  S. cerevisiae: SGD\n\nAcceptable example:\n  POU5F1\n  SPI1\n  TP53\n\nBad example:\n  OCT4\n  PU.1\n  p53';
+
+        var note2 = 'Example 1. BED format (tab-delimited columns):\n  chr1\t531435\t543845\n  chr2\t738543\t742321\n\n  Acceptable genome assemblies:\n    hg19 (H. sapiens)\n    mm9 (M. musculus)\n    dm3 (D. melanogaster)\n    ce10 (C. elegans)\n    sacCer3 (S. celevisiae)\n\nExample 2. A sequence motif:\n  ATGCAA\n\nExample 3. A sequence motif with degenerate base symbols (ATGC + WSMKRYBDHVN):\n  ACAMKGTA';
+
+        switch($(this).attr('id')){
+          case genome + 'UserDataBed':
+          	alert('Check this if you search proteins bound to given genomic regions (UCSC BED format) or to a sequence motif.\n\n' + note2);
+            break;
+          case genome + 'UserDataGenes':
+          	alert('Check this if you search proteins bound around given genes.\n\n' + note1);
+            break;
+          case genome + 'comparedWithRandom':
+            alert('Check this if you compare \'My data\' with random background. In this case, each genomic location of \'My data\' is permuted on a random chromosome at a random position for specified times. Increasing the permutation times will provide a hihgly randomized background, or a high quality of statistical test, but the calcuration time will be longer.');
+            break;
+          case genome + 'comparedWithBed':
+            alert('Check this if you compare \'My data\' with another data (UCSC BED format or a sequence motif).\n\n' + note2);
+            break;
+          case genome + 'comparedWithRefseq':
+            alert('Check this if you compare \'My data\' with RefSeq coding genes excluding those listed in \'My data\'.');
+            break;
+          case genome + 'comparedWithUserlist':
+            alert('Check this if you compare \'My data\' with another gene list.\n\n' + note1);
+            break;
+          case genome + 'TSS':
+            alert('To search protein binding to given genes, specify the distance range from the Transcription Start Sites (TSS).\n\Default is between -5000 and +5000 bp from the TSS.');
+            break;
+        };
+      });
