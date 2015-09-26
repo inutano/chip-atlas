@@ -6,6 +6,7 @@ require 'haml'
 require 'sass'
 require 'open-uri'
 require 'net/http'
+require 'json'
 require 'nokogiri'
 require './lib/peakjohn'
 
@@ -99,6 +100,15 @@ class PeakJohn < Sinatra::Base
         response.code.to_i == 200
       end
     end
+    
+    def exp2run(exp_id)
+      h = open(File.join(app_root, "tables/exp2run.json")){|f| JSON.load(f) }
+      h[exp_id]
+    end
+    
+    def get_images_path(exp_id)
+      exp2run(exp_id).map{|id| get_fastqc_image(id) }.flatten
+    end
   end
   
   get "/:source.css" do
@@ -110,10 +120,6 @@ class PeakJohn < Sinatra::Base
     @list_of_genome = @index_all_genome.keys
     @qval_range = Bedfile.qval_range
     haml :about
-  end
-  
-  get "/fqc" do
-    get_fastqc_image("DRR000004")
   end
   
   get "/peak_browser" do
