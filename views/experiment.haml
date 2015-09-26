@@ -53,7 +53,7 @@
             %button.btn.btn-primary.btn-lg.btn-block= "View on IGV"
           .dropdown-link
             .dropdown
-              .button.btn.btn-default.btn-lg.dropdown-toggle{ :type => "button", :id => "analysis-dropdown", "data-toggle" => "dropdown", "aria-haspopup" => true, "aria-expanded" => true }
+              .button.btn.btn-primary.btn-lg.dropdown-toggle{ :type => "button", :id => "analysis-dropdown", "data-toggle" => "dropdown", "aria-haspopup" => true, "aria-expanded" => true }
                 View Analysis
                 %span.caret
               %ul.dropdown-menu{ "aria-labelledby" => "movies-dropdown" }
@@ -63,7 +63,7 @@
                   %a{ :href => "#" }= "Target Gene"
           .dropdown-link
             .dropdown
-              .button.btn.btn-default.btn-lg.dropdown-toggle{ :type => "button", :id => "linkout-dropdown", "data-toggle" => "dropdown", "aria-haspopup" => true, "aria-expanded" => true }
+              .button.btn.btn-primary.btn-lg.dropdown-toggle{ :type => "button", :id => "linkout-dropdown", "data-toggle" => "dropdown", "aria-haspopup" => true, "aria-expanded" => true }
                 Link Out
                 %span.caret
               %ul.dropdown-menu{ "aria-labelledby" => "movies-dropdown" }
@@ -161,6 +161,28 @@
                 - @ncbi[:platform_information].each_pair do |k,v|
                   - if v != ""
                     %td= v.to_s
+      .row.mdata
+        .col-md-12
+          %h3= "External Database Query"
+          %p
+            %form.form-inline
+              .form-group
+                %label{ :for => 'queryAntigen' }
+                  Query antigen
+                %input.form-control{ :type => "text", :id => "queryAntigen", :value => "#{metadata[:agSubClass]}"}
+              %button.btn.btn-primary.antigen{ :type => "submit", :id => "wikigenes" }= "WikiGenes"
+              %button.btn.btn-primary.antigen{ :type => "submit", :id => "posmed" }= "PosMed"
+              %button.btn.btn-primary.antigen{ :type => "submit", :id => "pdbj" }= "PDBj"
+
+          %p
+            %form.form-inline
+              .form-group
+                %label{ :for => 'queryCelltype' }
+                  Query cell-type
+                %input.form-control{ :type => "text", :id => "queryCelltype", :value => "#{metadata[:clSubClass]}"}
+              %button.btn.btn-primary.celltype{ :type => "submit", :id => "atcc" }= "ATCC"
+              %button.btn.btn-primary.celltype{ :type => "submit", :id => "mesh" }= "MeSH"
+              %button.btn.btn-primary.celltype{ :type => "submit", :id => "rikenbrc" }= "RIKEN BRC"
 
       .row.mdata
         .col-md-12
@@ -176,3 +198,27 @@
     %script{ :src => "http://getbootstrap.com/assets/js/ie10-viewport-bug-workaround.js" }
 
     / 'code here'
+    :javascript
+      var dbNamespace = {
+        wikigenes: "https://www.wikigenes.org/?search=",
+        posmed: "http://omicspace.riken.jp/PosMed/search?actionType=searchexec&keyword=",
+        pdbj: "http://pdbj.org/mine/search?query=",
+        atcc: "http://www.atcc.org/Search_Results.aspx?searchTerms=",
+        mesh: "http://www.ncbi.nlm.nih.gov/mesh/?term=",
+        rikenbrc: "http://www2.brc.riken.jp/lab/cell/list.cgi?skey="
+      };
+
+      $('button').click(function(){
+        var namespace = dbNamespace[$(this).attr("id")];
+        switch (true){
+          case $(this).hasClass('antigen'):
+            var id = $('input#queryAntigen').val().replace(/\s/,"+");
+            var uri = namespace + id;
+            break;
+          case $(this).hasClass('celltype'):
+            var id = $('input#queryCelltype').val().replace(/\s/,"+");
+            var uri = namespace + id;
+            break;
+        };
+        window.open(uri);
+      });
