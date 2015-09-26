@@ -5,6 +5,7 @@ require 'sinatra/activerecord'
 require 'haml'
 require 'sass'
 require 'open-uri'
+require 'net/http'
 require 'nokogiri'
 require './lib/peakjohn'
 
@@ -60,6 +61,44 @@ class PeakJohn < Sinatra::Base
       antigen   = condition["antigen"]
       "#{app_root}/target_genes_result?base=#{base}/#{antigen}.html"
     end
+    
+    def get_fastqc_image(run_id) ## :( ##
+      head = run_id.sub(/...$/,"")
+      path = File.join("http://data.dbcls.jp/~inutano/fastqc", head, run_id)
+      save_path = "./public/images/fastqc/#{head}/#{run_id}"
+      
+      files = ["_fastqc","_1_fastqc","_2_fastqc"].map do |read|
+        File.join(app_root, "images/fastqc/#{head}/#{run_id}", run_id+read, "Images/per_base_quality.png")
+      end
+      
+      fstatus = files.map do |url|
+        uri = URI(url)
+        request = Net::HTTP.new(uri.host, uri.port)
+        response = request.request_head(uri.path)
+        response.code.to_i
+      end
+      
+      if !fstatus.include?(200)
+        FileUtils.mkdir_p(save_path) if !File.exist?(save_path)
+        Net::HTTP.start("data.dbcls.jp") do |http|
+          ["_fastqc.zip","_1_fastqc.zip","_2_fastqc.zip"].each do |suffix|
+            fname = run_id + suffix
+            resp = http.get("/~inutano/fastqc/#{head}/#{run_id}/#{fname}")
+            open(File.join(save_path,fname), "wb") do |file|
+              file.write(resp.body)
+            end
+          end
+        end
+        `unzip -d "#{save_path}" "#{save_path}/*zip"`
+      end
+      
+      return files.select do |url|
+        uri = URI(url)
+        request = Net::HTTP.new(uri.host, uri.port)
+        response = request.request_head(uri.path)
+        response.code.to_i == 200
+      end
+    end
   end
   
   get "/:source.css" do
@@ -71,6 +110,10 @@ class PeakJohn < Sinatra::Base
     @list_of_genome = @index_all_genome.keys
     @qval_range = Bedfile.qval_range
     haml :about
+  end
+  
+  get "/fqc" do
+    get_fastqc_image("DRR000004")
   end
   
   get "/peak_browser" do
