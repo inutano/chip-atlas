@@ -175,16 +175,16 @@
                     .panel-body
                       .panel-input.desc
                         %label{ :for => "#{genome}UserDataTitle"}
-                          User data title
-                        %input{ :type => "text", :id => "#{genome}UserDataTitle", :size => 30 }
+                          User data title:
+                        %input{ :type => "text", :id => "#{genome}UserDataTitle"}
                       .panel-input.desc
                         %label{ :for => "#{genome}ComparedWithTitle"}
-                          Compared data title
-                        %input{ :type => "text", :id => "#{genome}ComparedWithTitle", :size => 30 }
+                          Compared data title:
+                        %input{ :type => "text", :id => "#{genome}ComparedWithTitle"}
                       .panel-input.desc
                         %label{ :for => "#{genome}ProjectTitle" }
                           Project title:
-                        %input{ :type => "text", :id => "#{genome}ProjectTitle", :size => 30 }
+                        %input{ :type => "text", :id => "#{genome}ProjectTitle"}
                       .button-submit
                         %button.btn.btn-primary.btn-lg.btn-block{ :id => "virtual-chip-submit", :type => "button" }= "submit"
                       .estimated-run-time
@@ -272,6 +272,11 @@
 
       // iterate for each genomes
       $.each(#{@list_of_genome}, function(i, genome){
+        // default value for dataset
+        $('input#' + genome + 'UserDataTitle').val("Sample A");
+        $('input#' + genome + 'ComparedWithTitle').val("Sample B");
+        $('input#' + genome + 'ProjectTitle').val("My project");
+
         // set tab controller
         $('#' + genome + '-tab a').click(function(e){
           e.preventDefault();
