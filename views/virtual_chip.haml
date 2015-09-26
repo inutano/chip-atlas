@@ -143,11 +143,11 @@
                         .form.form-inline
                           %label{ :for => "permutationTimes"}
                             Permutation times
-                          %input.form-control{ :type => "radio", :id => "#{genome}comparedWithRandomx1", :name => "numShuf", :value => "1", :disabled => true, :checked => "checked" }
+                          %input.form-control{ :type => "radio", :id => "#{genome}comparedWithRandomx1", :name => "numShuf", :value => "1", :checked => "checked" }
                           x1
-                          %input.form-control{ :type => "radio", :id => "#{genome}comparedWithRandomx10", :name => "numShuf", :value => "10", :disabled => true, :checked => "checked" }
+                          %input.form-control{ :type => "radio", :id => "#{genome}comparedWithRandomx10", :name => "numShuf", :value => "10", :checked => "checked" }
                           x10
-                          %input.form-control{ :type => "radio", :id => "#{genome}comparedWithRandomx100", :name => "numShuf", :value => "100", :disabled => true, :checked => "checked" }
+                          %input.form-control{ :type => "radio", :id => "#{genome}comparedWithRandomx100", :name => "numShuf", :value => "100", :checked => "checked" }
                           x100
                       .panel-input.bed
                         %input{ :type => "radio", :id => "#{genome}comparedWithBed", :name => "comparedWith", :value => "bed" }
@@ -165,8 +165,8 @@
                         %a.infoBtn{ :id => "#{genome}comparedWithUserlist" }
                           &#x24D8;
                       .panel-input-textarea
-                        %textarea{ :name => "txtB", :id => "#{genome}comparedWith", :rows => 10, :cols => 50, :disabled => true, :placeholder => "Click the info buttons above to show the description format." }
-                        %input{ :type => "file", :id => "#{genome}comparedWithFile", :name => "fsel", :disabled => true }
+                        %textarea{ :name => "txtB", :id => "#{genome}comparedWith", :rows => 10, :cols => 50, :placeholder => "Click the info buttons above to show the description format." }
+                        %input{ :type => "file", :id => "#{genome}comparedWithFile", :name => "fsel" }
                 .col-md-4
                   .panel.panel-default
                     - panel = "#{genome}Desc"
@@ -269,22 +269,7 @@
         })
       })
 
-      function tsv2Array(){
-        tsvData = new Array();
-        var tsvUrl = 'http://dbarchive.biosciencedbc.jp/kyushu-u/lib/lineNum.tsv';
-        var data = new XMLHttpRequest();
-        data.open('GET', tsvUrl, false);
-        data.send(null);
-        var lf = String.fromCharCode(10);
-        var lines = data.responseText.split(lf);
-        for (var i = 0; i < lines.length; ++i) {
-          var c = lines[i].split('\t');
-          tsvData[c[0] + ',' + c[1] + ',' + c[2] + ',' + c[3]] = c[4];
-        }
-        return tsvData;
-      }
-
-      function estimetedTime(numLinesA, numLinesB, numRef, type){
+      function estimatedTime(numLinesA, numLinesB, numRef, type){
         switch(type){
           case 'bed':
             var a = numRef * 8.23e-11 + 1.47e-2;
@@ -316,57 +301,61 @@
         sacCer3: 5809
       };
 
+      function getSeconds(userData, comparedWith, numRef){
+        var lf = String.fromCharCode(10);
+        var numLinesUserData = userData.replace(/\n$/g,'').split(lf).length;
+        var numLinesComparedWith = comparedWith.replace(/\n$/g,'').split(lf).length;
+        switch($('input[name="bedORGene"]:checked').val()){
+          case 'bed':
+            switch($('input[name="comparedWith"]:checked').val()){
+              case 'rnd':
+                numLinesComparedWith = $('input[name="numShuf"]:checked').val();
+                var seconds = estimatedTime(numLinesUserData, numLinesComparedWith, numRef, 'rnd');
+                break;
+              case 'bed':
+                if(numLinesUserData == 1 && !userData.match(/\t/)){ // sequence motif
+                  numLinesUserData = genomesize[genome] / Math.pow(4, userData.length);
+                }
+                if(numLinesComparedWith == 1 && !comparedWith.match(/\t/)){
+                  numLinesComparedWith = genomesize[genome] / Math.pow(4, comparedWith.length);
+                }
+                var seconds = estimatedTime(numLinesUserData, numLinesComparedWith, numRef, 'bed');
+                break;
+            };
+            break;
+          case 'gene':
+            switch($('input[name="comparedWith"]:checked').val()){
+              case 'refseq':
+                numLinesComparedWith = numGenes[genome] - numLinesUserData;
+                var seconds = estimatedTime(numLinesUserData, numLinesComparedWith, numRef, 'bed');
+                break;
+              case 'userlist':
+                var seconds = estimatedTime(numLinesUserData, numLinesComparedWith, numRef, 'bed');
+                break;
+            };
+            break;
+        };
+        var minutes = Math.round(seconds / 60);
+        if (minutes < 60) {
+          var est = minutes + ' mins';
+        } else {
+          var est = (minutes/60).toFixed(1) + ' hr';
+        }
+        return est;
+      }
+
       $('*').on({
         'mousemove || change': function(){
-          var lf = String.fromCharCode(10);
+          var genome = $('.genomeTab ul li.active a').attr('source').replace(/[\n\s ]/g, "");
           var userData = $('textarea#' + genome + 'UserData').val();
           var comparedWith = $('textarea#' + genome + 'comparedWith').val();
-          var numLinesUserData = userData.replace(/\n$/g,'').split(lf).length;
-          var numLinesComparedWith = comparedWith.replace(/\n$/g,'').split(lf).length;
-
           var ag = $('select#' + genome + 'agClass').val();
           var cl = $('select#' + genome + 'clClass').val();
           var qval = $('select#' + genome + 'qval').val();
           var qBed = genome + ',' + ag + ',' + cl + ',' + qval;
-          var numRef = tsv2Array()[qBed];
-
-          switch($('input[name="bedORGene"]:checked').val()){
-            case 'bed':
-              switch($('input[name="comparedWith"]:checked').val()){
-                case 'rnd':
-                  numLinesComparedWith = $('input[name="numShuf"]:checked').val();
-                  var seconds = estimetedTime(numLinesUserData, numLinesComparedWith, numRef, 'rnd');
-                  break;
-
-                case 'bed':
-                  if(numLinesUserData == 1 && !userData.match(/\t/)){ // sequence motif
-                    numLinesUserData = genomesize[genome] / Math.pow(4, userData.length);
-                  }
-                  if(numLinesComparedWith == 1 && !comparedWith.match(/\t/)){
-                    numLinesComparedWith = genomesize[genome] / Math.pow(4, comparedWith.length);
-                  }
-                  var seconds = estimetedTime(numLinesUserData, numLinesComparedWith, numRef, 'bed');
-                  break;
-              };
-              break;
-            case 'gene':
-              switch($('input[name="comparedWith"]:checked').val()){
-                case 'refseq':
-                  numLinesComparedWith = numGenes[genome] - numLinesUserData;
-                  var seconds = estimetedTime(numLinesUserData, numLinesComparedWith, numRef, 'bed');
-                  break;
-                case 'userlist':
-                  var seconds = estimetedTime(numLinesUserData, numLinesComparedWith, numRef, 'bed');
-                  break;
-              };
-              break;
-          };
-          var minutes = Math.round(seconds / 60);
-          if (minutes < 60) {
-            var est = minutes + ' mins';
-          } else {
-            var est = (minutes/60).toFixed(1) + ' hr';
-          }
+          var data = JSON.parse('#{JSON.dump(@number_of_lines)}');
+          var numRef = data[qBed];
+          var est = getSeconds(userData, comparedWith, numRef)
           $('#estimatedRunTime').html(est);
         }
       });

@@ -109,6 +109,16 @@ class PeakJohn < Sinatra::Base
     def get_images_path(exp_id)
       exp2run(exp_id).map{|id| get_fastqc_image(id) }.flatten
     end
+    
+    def number_of_lines
+      data = open("http://dbarchive.biosciencedbc.jp/kyushu-u/lib/lineNum.tsv").read
+      h = {}
+      data.split("\n").each do |line|
+        l = line.split("\t")
+        h[l[0..3].join(",")] = l[4]
+      end
+      h
+    end
   end
   
   get "/:source.css" do
@@ -181,6 +191,7 @@ class PeakJohn < Sinatra::Base
     @index_all_genome = Experiment.index_all_genome
     @list_of_genome = @index_all_genome.keys
     @qval_range = Bedfile.qval_range
+    @number_of_lines = number_of_lines
     haml :virtual_chip
   end
   
