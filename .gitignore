@@ -4,3 +4,4 @@ vendor
 database.sqlite
 table/prev
 public/images
+public/tables
