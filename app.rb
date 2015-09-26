@@ -154,6 +154,10 @@ class PeakJohn < Sinatra::Base
     @iframe_url = params[:base]
     haml :target_genes_result
   end
+
+  get "/documentation" do
+    haml :documentation
+  end
   
   post "/browse" do
     content_type "application/json"
