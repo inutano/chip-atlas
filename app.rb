@@ -235,6 +235,13 @@ class PeakJohn < Sinatra::Base
     redirect dest
   end
   
+  post "/wabi_chipatlas" do
+    json_headers = {"Content-Type" => "application/json", "Accept" => "application/json"}
+    uri = URI.parse('http://ddbj.nig.ac.jp/wabi/chipatlas')
+    http = Net::HTTP.new(uri.host, uri.port)
+    JSON.dump(http.post(uri.path, request.body.read, json_headers))
+  end
+  
   get "/view" do
     @expid = params[:id]
     404 if Experiment.id_valid?(@expid)

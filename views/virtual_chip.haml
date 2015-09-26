@@ -246,26 +246,29 @@
           };
           alert(JSON.stringify(data));
 
-      		$.ajax({
-      			url: 'http://ddbj.nig.ac.jp/wabi/chipatlas/',
-      			type: 'POST',
-      			dataType: 'json',
-      			data : data,
-      			async: false,
+
+          $.ajax({
+            type : 'post',
+            url : "#{app_root}/wabi_chipatlas",
+            data: JSON.stringify(data),
+            contentType: 'application/json',
+            dataType: 'json',
+            scriptCharset: 'utf-8',
             success : function(response) {
               alert(JSON.stringify(response));
-      				var requestId = JSON.parse(JSON.stringify(response))['responseText'].match(/wabi_chipatlas.*/)[0];
-      				var childUrl = 'http://dbarchive.biosciencedbc.jp/kyushu-u/lib/vcResult.html?id='
-      				location.href = childUrl + requestId + '&title=' + data['title'] + '&calcm=' + calcm;
+              var requestId = response.responseText.match(/wabi_chipatlas.*/)[0];
+              var baseUrl = 'http://dbarchive.biosciencedbc.jp/kyushu-u/lib/vcResult.html?id=';
+              window.open(baseUrl + requestId + '&title=' + data['title']) // + '&calcm=' + calcm;
             },
             error : function(response){
-              alert(JSON.stringify(response));
+              // alert(JSON.stringify(response));
               alert("error!");
             },
             complete: function(){
               button.attr("disabled", false);
             }
-      		});
+          });
+
         })
       })
 
