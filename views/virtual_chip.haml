@@ -145,12 +145,12 @@
                             Permutation times
                           %input.form-control{ :type => "radio", :id => "#{genome}comparedWithRandomx1", :name => "numShuf", :value => "1", :disabled => true, :checked => "checked" }
                           x1
-                          %input.form-control{ :type => "radio", :id => "#{genome}comparedWithRandomx10", :name => "numShuf", :value => "1", :disabled => true, :checked => "checked" }
+                          %input.form-control{ :type => "radio", :id => "#{genome}comparedWithRandomx10", :name => "numShuf", :value => "10", :disabled => true, :checked => "checked" }
                           x10
-                          %input.form-control{ :type => "radio", :id => "#{genome}comparedWithRandomx100", :name => "numShuf", :value => "1", :disabled => true, :checked => "checked" }
+                          %input.form-control{ :type => "radio", :id => "#{genome}comparedWithRandomx100", :name => "numShuf", :value => "100", :disabled => true, :checked => "checked" }
                           x100
                       .panel-input.bed
-                        %input{ :type => "radio", :id => "#{genome}comparedWithBed", :name => "comparedWith", :value => "bedB" }
+                        %input{ :type => "radio", :id => "#{genome}comparedWithBed", :name => "comparedWith", :value => "bed" }
                         BED or sequence motif
                         %a.infoBtn{ :id => "#{genome}comparedWithBed" }
                           &#x24D8;
@@ -269,6 +269,107 @@
         })
       })
 
+      function tsv2Array(){
+        tsvData = new Array();
+        var tsvUrl = 'http://dbarchive.biosciencedbc.jp/kyushu-u/lib/lineNum.tsv';
+        var data = new XMLHttpRequest();
+        data.open('GET', tsvUrl, false);
+        data.send(null);
+        var lf = String.fromCharCode(10);
+        var lines = data.responseText.split(lf);
+        for (var i = 0; i < lines.length; ++i) {
+          var c = lines[i].split('\t');
+          tsvData[c[0] + ',' + c[1] + ',' + c[2] + ',' + c[3]] = c[4];
+        }
+        return tsvData;
+      }
+
+      function estimetedTime(numLinesA, numLinesB, numRef, type){
+        switch(type){
+          case 'bed':
+            var a = numRef * 8.23e-11 + 1.47e-2;
+            var b = numRef * 4.72e-11 + 7.24e-3;
+            var c = (numLinesA + numLinesB) * 6.75e-11 + 1.02e-6;
+            var k = 60;
+            return (k + a*numLinesA + b*numLinesB +c*numRef) * (5/7);
+          default:
+            var a = numRef * 3.02e-12 + 1.13e-4;
+            var c = (numLinesA + numLinesA*numLinesB) * 3.02e-12 + 2.06e-6;
+            var k = 20;
+            return 1.8 * Math.pow( (k + numLinesA * (Math.pow(0.8*numLinesA, 1.52) + numLinesA*numLinesB) + c*numRef), 0.85 );
+        }
+      }
+
+      var genomesize = {
+        ce10: 100286070,
+        dm3: 168736537,
+        hg19: 3137161264,
+        mm9: 2725765481,
+        sacCer3: 12157105
+      };
+
+      var numGenes = {
+        ce10: 17958,
+        dm3: 12635,
+        hg19: 18622,
+        mm9: 19909,
+        sacCer3: 5809
+      };
+
+      $('*').on({
+        'mousemove || change': function(){
+          var lf = String.fromCharCode(10);
+          var userData = $('textarea#' + genome + 'UserData').val();
+          var comparedWith = $('textarea#' + genome + 'comparedWith').val();
+          var numLinesUserData = userData.replace(/\n$/g,'').split(lf).length;
+          var numLinesComparedWith = comparedWith.replace(/\n$/g,'').split(lf).length;
+
+          var ag = $('select#' + genome + 'agClass').val();
+          var cl = $('select#' + genome + 'clClass').val();
+          var qval = $('select#' + genome + 'qval').val();
+          var qBed = genome + ',' + ag + ',' + cl + ',' + qval;
+          var numRef = tsv2Array()[qBed];
+
+          switch($('input[name="bedORGene"]:checked').val()){
+            case 'bed':
+              switch($('input[name="comparedWith"]:checked').val()){
+                case 'rnd':
+                  numLinesComparedWith = $('input[name="numShuf"]:checked').val();
+                  var seconds = estimetedTime(numLinesUserData, numLinesComparedWith, numRef, 'rnd');
+                  break;
+
+                case 'bed':
+                  if(numLinesUserData == 1 && !userData.match(/\t/)){ // sequence motif
+                    numLinesUserData = genomesize[genome] / Math.pow(4, userData.length);
+                  }
+                  if(numLinesComparedWith == 1 && !comparedWith.match(/\t/)){
+                    numLinesComparedWith = genomesize[genome] / Math.pow(4, comparedWith.length);
+                  }
+                  var seconds = estimetedTime(numLinesUserData, numLinesComparedWith, numRef, 'bed');
+                  break;
+              };
+              break;
+            case 'gene':
+              switch($('input[name="comparedWith"]:checked').val()){
+                case 'refseq':
+                  numLinesComparedWith = numGenes[genome] - numLinesUserData;
+                  var seconds = estimetedTime(numLinesUserData, numLinesComparedWith, numRef, 'bed');
+                  break;
+                case 'userlist':
+                  var seconds = estimetedTime(numLinesUserData, numLinesComparedWith, numRef, 'bed');
+                  break;
+              };
+              break;
+          };
+          var minutes = Math.round(seconds / 60);
+          if (minutes < 60) {
+            var est = minutes + ' mins';
+          } else {
+            var est = (minutes/60).toFixed(1) + ' hr';
+          }
+          $('#estimatedRunTime').html(est);
+        }
+      });
 
       // iterate for each genomes
       $.each(#{@list_of_genome}, function(i, genome){
