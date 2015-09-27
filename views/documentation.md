@@ -81,29 +81,31 @@ Experimental materials used for each SRX were manually annotated, by which it is
         (eg. phospho-SMAD3 => SMAD3)
         + If an antibody recognizes multiple family molecules, the top in ascending order was chosen.  
         (eg. Anti-SMAD2/3 antibody => SMAD2)
+
 4. Criteria for cell types annotation:
-    - **_H. sapiens_ and _M. musculus_**  
-      Cell types were mainly classified with derived tissues. ES and iPS cells were exceptionally classified in 'Pluripotent stem cell' class.
 
-        | Cell-type class       | Cell-type                        |
-        |-----------------------|----------------------------------|
-        | Blood                 | K-562; CD4-Positive T-Lymphocytes|
-        | Breast                | MCF-7; T-47D                     |
-        | Pluripotent stem cell | hESC H1; iPS cells               |
+- **_H. sapiens_ and _M. musculus_**  
+Cell types were mainly classified with derived tissues. ES and iPS cells were exceptionally classified in 'Pluripotent stem cell' class.
 
-    - **_D. melanogaster_**  
-      Cell types were mainly classified with cell lines and developmental stages.
-    - **_C. elegans_**  
-      Mainly classified with developmental stages.
-    - **_S. cerevisiae_**  
-      Classified with yeast strains.
-    - **Standardized Nomenclatures**  
-      Nomenclatures of cell lines and tissue names were standardized according to those recorded in following frameworks and resources.
+| Cell-type class       | Cell-type                        |
+|-----------------------|----------------------------------|
+| Blood                 | K-562; CD4-Positive T-Lymphocytes|
+| Breast                | MCF-7; T-47D                     |
+| Pluripotent stem cell | hESC H1; iPS cells               |
 
-        - Supplementary Table 2 in Yu et. al 2015 ([PMID: 25877200][PMID_25877200]), proposing unified cell-line names
-        - [ATCC], a nonprofit repository of cell lines
-        - [MeSH] \(Medical Subject Headings\) for tissue names
-        - [FlyBase] for cell lines of *D. melanogaster*
+- **_D. melanogaster_**  
+  Cell types were mainly classified with cell lines and developmental stages.
+- **_C. elegans_**  
+  Mainly classified with developmental stages.
+- **_S. cerevisiae_**  
+  Classified with yeast strains.
+- **Standardized Nomenclatures**  
+  Nomenclatures of cell lines and tissue names were standardized according to those recorded in following frameworks and resources.
+
+    - Supplementary Table 2 in Yu et. al 2015 ([PMID: 25877200][PMID_25877200]), proposing unified cell-line names
+    - [ATCC], a nonprofit repository of cell lines
+    - [MeSH] \(Medical Subject Headings\) for tissue names
+    - [FlyBase] for cell lines of *D. melanogaster*
 
         (eg. MDA-231, MDA231, MDAMB231 => MDA-MB-231)
 5. Antigens or cell types were classified in 'Uncategorized' class if the curators could not understand the meanings of attribute values.
@@ -184,17 +186,17 @@ Eventually, a set of nine Boolean results (similar or not) is returned to indica
 3. Processing:  
   Peak-call data in an identical cell-type class were processed through CoLo. The scores between the two BED files were calculated by multiplication of the combination of the H (= 3), M (= 2) or L (= 1) as follows:
 
-    |SRX_1|SRX_2|Scores|
-    |:---:|:---:|:----:|
-    |H    |H    |9     |
-    |H    |M    |6     |
-    |H    |L    |3     |
-    |M    |H    |6     |
-    |M    |M    |4     |
-    |M    |L    |2     |
-    |L    |H    |3     |
-    |L    |M    |2     |
-    |L    |L    |1     |
+|SRX_1|SRX_2|Scores|
+|:---:|:---:|:----:|
+|H    |H    |9     |
+|H    |M    |6     |
+|H    |L    |3     |
+|M    |H    |6     |
+|M    |M    |4     |
+|M    |L    |2     |
+|L    |H    |3     |
+|L    |M    |2     |
+|L    |L    |1     |
 
   If multiple H/M/L combinations were returned from SRX_1 and SRX_2, the highest score was adopted. The scores (1 to 9) were colored in blue, green to red, and colored in gray if all of the nine H/M/L combinations were false. The 'Average' column on the leftmost of the table is the means of the CoLo scores in the same row. The 'STRING' column on the rightmost indicates the STRING scores for the protein-protein interaction (**6.2**). For the detail, protein-protein pairs in protein.actions.v10.txt.gz file were extracted if matching to following all conditions:
 
