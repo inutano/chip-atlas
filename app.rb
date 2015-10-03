@@ -54,12 +54,18 @@ class PeakJohn < Sinatra::Base
       "#{app_root}/colo_result?base=#{base}/#{antigen}.#{cellline}.html"
     end
 
-    def target_genes_url(data)
-      base = "http://devbio.med.kyushu-u.ac.jp/chipome/targetGenes"
+    def target_genes_url(data,type)
       condition = data["condition"]
       genome    = condition["genome"]
       antigen   = condition["antigen"]
-      "#{app_root}/target_genes_result?base=#{base}/#{antigen}.html"
+      distance  = condition["distance"]
+      base = "http://dbarchive.biosciencedbc.jp/kyushu-u/#{genome}/target"
+      case type
+      when "submit"
+        "#{app_root}/target_genes_result?base=#{base}/#{antigen}.#{distance}.html"
+      when "tsv"
+        "#{base}/#{antigen}.#{distance}.tsv"
+      end
     end
     
     def get_fastqc_image(run_id) ## :( ##
@@ -206,7 +212,7 @@ class PeakJohn < Sinatra::Base
   
   post "/target_genes" do
     content_type "application/json"
-    JSON.dump({ "url" => target_genes_url(JSON.parse(request.body.read)) })
+    JSON.dump({ "url" => target_genes_url(JSON.parse(request.body.read), params[:type]) })
   end
 
   get "/target_genes_result" do

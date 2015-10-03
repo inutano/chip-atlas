@@ -96,22 +96,22 @@
                       %form{ :id => "#{panel}-form" }
                         .radio
                           %label
-                            %input{ :type => "radio", :id => "", :value => "1", :name => "datatypeoption" }
+                            %input{ :type => "radio", :id => "", :value => "1", :name => "distanceOption" }
                             = " ±1k "
                         .radio
                           %label
-                            %input{ :type => "radio", :id => "", :value => "5", :name => "datatypeoption" }
+                            %input{ :type => "radio", :id => "", :value => "5", :name => "distanceOption" }
                             = " ±5k "
                         .radio
                           %label
-                            %input{ :type => "radio", :id => "", :value => "10", :name => "datatypeoption" }
+                            %input{ :type => "radio", :id => "", :value => "10", :name => "distanceOption" }
                             = " ±10k "
 
               .row
                 .col-md-6.col-md-offset-3
                   .button-submit
-                    %button.btn.btn-primary.btn-lg.btn-block{ :id => "target-gene-submit", :type => "button" }= "View Potential Target Genes"
-                    %button.btn.btn-primary.btn-lg.btn-block{ :id => "target-gene-download", :type => "button" }= "Download (TSV)"
+                    %button.btn.btn-primary.btn-lg.btn-block.post{ :id => "target-gene-submit", :type => "button" }= "View Potential Target Genes"
+                    %button.btn.btn-primary.btn-lg.btn-block.post{ :id => "target-gene-download", :type => "button" }= "Download (TSV)"
 
     /
       Bootstrap Core Javascript
@@ -307,7 +307,7 @@
 
       // send data to get igv url
       $(function(){
-        $("button#target-gene-submit").click(function(){
+        $("button.post").click(function(){
           var button = $(this);
           button.attr("disabled", true);
 
@@ -316,15 +316,27 @@
             // igv: $().text
             condition: {
               genome: genome,
-              antigen: $('select#' + genome + 'AntigenPanel-select option:selected').val()
+              antigen: $('select#' + genome + 'AntigenPanel-select option:selected').val(),
+              distance: $('input[name=distanceOption]:checked').val()
             }
           };
 
           // alert(JSON.stringify(data));
 
+          var buttonId = $(this).attr("id");
+          var suffix;
+          switch(buttonId){
+            case 'target-gene-submit':
+              suffix = 'submit';
+              break;
+            case 'target-gene-download':
+              suffix = 'tsv';
+              break;
+          };
+
           $.ajax({
             type : 'post',
-            url : "#{app_root}/target_genes",
+            url : "#{app_root}/target_genes?type="+suffix,
             data: JSON.stringify(data),
             contentType: 'application/json',
             dataType: 'json',
