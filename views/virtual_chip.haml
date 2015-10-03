@@ -73,13 +73,13 @@
             .tab-pane.fade{ :role => "tabpanel", :id => "#{genome}-tab-content", :class => "#{(i == 0) ? 'in active' : ''}" }
               - index = @index_all_genome[genome]
               .row
-                - [["ag","Antigen"],["cl", "Cell type"]].each do |set|
+                - [["ag","Antigen"],["cl", "Cell type"]].each.with_index do |set, i|
                   .col-md-4
                     %form
                       .panel.panel-default
                         - class_id = "#{genome}#{set[0]}Class"
                         .panel-heading{ :id => "heading-#{class_id}" }
-                          %h4.panel-title= "#{set[1]} Class"
+                          %h4.panel-title= "#{i+1} #{set[1]} Class"
                         .panel-body
                           %select.form-control{ :id => "#{class_id}", :size => 8 }
                             - ind = index[set[1].downcase.sub("\s","").intern]
@@ -102,7 +102,7 @@
                     .panel.panel-default
                       .panel-heading{ :id => "heading-#{genome}qval"}
                         %h4.panel-title
-                          Threshold for Significance
+                          3. Threshold for Significance
                       .panel-body
                         %select.form-control{ :id => "#{genome}qval", :size => 5 }
                           - @qval_range.sort.each.with_index do |qv, i|
@@ -112,7 +112,7 @@
                   .panel.panel-default
                     - panel = "#{genome}MyDataPanel"
                     .panel-heading{ :id => panel }
-                      %h4.panel-title= "1. Select your data"
+                      %h4.panel-title= "4. Select your data"
                     .panel-body
                       .panel-input
                         %input{ :type => "radio", :id => "#{genome}UserDataBed", :name => "bedORGene", :value => "bed", :checked => "checked" }
@@ -132,7 +132,7 @@
                   .panel.panel-default
                     - panel = "#{genome}TargetDB"
                     .panel-heading{ :id => panel }
-                      %h4.panel-title= "2. Select dataset to be compared"
+                      %h4.panel-title= "5. Select dataset to be compared"
                     .panel-body
                       .panel-input.bed
                         %input{ :type => "radio", :id => "#{genome}comparedWithRandom", :name => "comparedWith", :value => "rnd" }
@@ -171,20 +171,26 @@
                   .panel.panel-default
                     - panel = "#{genome}Desc"
                     .panel-heading{ :id => panel }
-                      %h4.panel-title= "3. Describe datasets"
+                      %h4.panel-title= "6. Describe datasets"
                     .panel-body
                       .panel-input.desc
                         %label{ :for => "#{genome}UserDataTitle"}
                           User data title:
                         %input{ :type => "text", :id => "#{genome}UserDataTitle"}
+                        %a.infoBtn{ :value => "info", :id => "#{genome}UserDataBed" }
+                          &#x24D8;
                       .panel-input.desc
                         %label{ :for => "#{genome}ComparedWithTitle"}
                           Compared data title:
                         %input{ :type => "text", :id => "#{genome}ComparedWithTitle"}
+                        %a.infoBtn{ :value => "info", :id => "#{genome}UserDataBed" }
+                          &#x24D8;
                       .panel-input.desc
                         %label{ :for => "#{genome}ProjectTitle" }
                           Project title:
                         %input{ :type => "text", :id => "#{genome}ProjectTitle"}
+                        %a.infoBtn{ :value => "info", :id => "#{genome}UserDataBed" }
+                          &#x24D8;
                       .button-submit
                         %button.btn.btn-primary.btn-lg.btn-block{ :id => "virtual-chip-submit", :type => "button" }= "submit"
                       .estimated-run-time
@@ -366,8 +372,8 @@
       // iterate for each genomes
       $.each(#{@list_of_genome}, function(i, genome){
         // default value for dataset
-        $('input#' + genome + 'UserDataTitle').val("Sample A");
-        $('input#' + genome + 'ComparedWithTitle').val("Sample B");
+        $('input#' + genome + 'UserDataTitle').val("My data");
+        $('input#' + genome + 'ComparedWithTitle').val("Control");
         $('input#' + genome + 'ProjectTitle').val("My project");
 
         // set tab controller
