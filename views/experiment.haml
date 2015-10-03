@@ -61,9 +61,23 @@
                 %span.caret
               %ul.dropdown-menu{ "aria-labelledby" => "movies-dropdown" }
                 %li
-                  %a{ :href => "#" }= "Co-Association"
+                  %a{ :href => "#" }= "Colocalization"
                 %li
-                  %a{ :href => "#" }= "Target Gene"
+                  %a{ :href => "#" }= "Target Genes"
+          .dropdown-link
+            .dropdown
+              .button.btn.btn-primary.btn-lg.dropdown-toggle{ :type => "button", :id => "analysis-dropdown", "data-toggle" => "dropdown", "aria-haspopup" => true, "aria-expanded" => true }
+                Download
+                %span.caret
+              %ul.dropdown-menu{ "aria-labelledby" => "movies-dropdown" }
+                %li
+                  %a{ :href => "#" }= "BigWig"
+                %li
+                  %a{ :href => "#" }= "Peak-call (q < 1E-05)"
+                %li
+                  %a{ :href => "#" }= "Peak-call (q < 1E-10)"
+                %li
+                  %a{ :href => "#" }= "Peak-call (q < 1E-20)"
           .dropdown-link
             .dropdown
               .button.btn.btn-primary.btn-lg.dropdown-toggle{ :type => "button", :id => "linkout-dropdown", "data-toggle" => "dropdown", "aria-haspopup" => true, "aria-expanded" => true }
@@ -100,43 +114,36 @@
       .row.mdata
         .col-md-12
           %h3= "Curated Sample Data"
-          %table.table.table-bordered
-            %tr
-              %th= "Genome"
-              %th= "Antigen Class"
-              %th= "Antigen Subclass"
-              %th= "Cell type Class"
-              %th= "Cell type Subclass"
-            %tr
-              %td= metadata[:genome]
-              %td= metadata[:agClass]
-              %td= metadata[:agSubClass]
-              %td= metadata[:clClass]
-              %td= metadata[:clSubClass]
+          %hr
+          %dl.dl-horizontal
+            %dt{ style: 'white-space: normal;' }= "Genome"
+            %dd= metadata[:genome]
+            %dt{ style: 'white-space: normal;' }= "Antigen Class"
+            %dd= metadata[:agClass]
+            %dt{ style: 'white-space: normal;' }= "Antigen"
+            %dd= metadata[:agSubClass]
+            %dt{ style: 'white-space: normal;' }= "Cell type Class"
+            %dd= metadata[:clClass]
+            %dt{ style: 'white-space: normal;' }= "Cell type"
+            %dd= metadata[:clSubClass]
 
       .row.mdata
         .col-md-12
           %h3= "Cell type information"
-          %table.table.table-bordered
-            - metadata[:clSubClassInfo].split("|").each_slice(6) do |kv_set|
-              %tr
-                - kv_set.each do |kv|
-                  %th= kv.split("=").first
-              %tr
-                - kv_set.each do |kv|
-                  %td= kv.split("=").last
+          %hr
+          %dl.dl-horizontal
+            - metadata[:clSubClassInfo].split("|").each do |kv|
+              %dt{ style: 'white-space: normal;' }= kv.split("=").first
+              %dd= kv.split("=").last
 
       .row.mdata
         .col-md-12
           %h3= "Attributes by Original Data Submitter"
-          %table.table.table-bordered
-            - metadata[:attributes].split("\t").each_slice(6) do |kv_set|
-              %tr
-                - kv_set.each do |kv|
-                  %th= kv.split("=").first
-              %tr
-                - kv_set.each do |kv|
-                  %td= kv.split("=").last
+          %hr
+          %dl.dl-horizontal
+            - metadata[:attributes].split("\t").each do |kv|
+              %dt{ style: 'white-space: normal;' }= kv.split("=").first
+              %dd= kv.split("=").last
 
       .row.mdata
         .col-md-12
@@ -144,26 +151,22 @@
 
           .mdata
             %h4= "Library Description"
-            %table.table.table-bordered
-              %tr
-                - @ncbi[:library_description].each_pair do |k,v|
-                  - if v != ""
-                    %th= k.to_s
-              %tr
-                - @ncbi[:library_description].each_pair do |k,v|
-                  - if v != ""
-                    %td= v.to_s
+            %hr
+            %dl.dl-horizontal
+              - @ncbi[:library_description].each_pair do |k,v|
+                - if v != ""
+                  %dt{ style: 'white-space: normal;' }= k.to_s
+                  %dd= v.to_s
+
           .mdata
             %h4= "Platform Information"
-            %table.table.table-bordered
-              %tr
-                - @ncbi[:platform_information].each_pair do |k,v|
-                  - if v != ""
-                    %th= k.to_s
-              %tr
-                - @ncbi[:platform_information].each_pair do |k,v|
-                  - if v != ""
-                    %td= v.to_s
+            %hr
+            %dl.dl-horizontal
+              - @ncbi[:platform_information].each_pair do |k,v|
+                - if v != ""
+                  %dt{ style: 'white-space: normal;' }= k.to_s
+                  %dd= v.to_s
+
       .row.mdata
         .col-md-12
           %h3= "External Database Query"
