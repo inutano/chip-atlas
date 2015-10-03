@@ -121,24 +121,25 @@
                     .panel-heading{ :id => panel }
                       %h4.panel-title= "4. Select your data"
                     .panel-body
-                      .checkbox.panel-input
-                        %label
-                          %input{ :type => "radio", :id => "#{genome}UserDataBed", :name => "bedORGene", :value => "bed", :checked => "checked" }
-                          Genomic regions (BED) or sequence motif
-                          %a.infoBtn{ :value => "info", :id => "#{genome}UserDataBed" }
-                            &#x24D8;
-                      .checkbox.panel-input
-                        %label
-                          %input{ :type => "radio", :id => "#{genome}UserDataGenes", :name => "bedORGene", :value => "gene" }
-                          Gene list (Gene symbols)
-                          %a.infoBtn{ :id => "#{genome}UserDataGenes" }
-                            &#x24D8;
-                      .form-group.panel-input-textarea
-                        %textarea.form-control{ :name => "txtA", :id => "#{genome}UserData", :rows => 8, :cols => 50, :placeholder => "Click the info buttons above to show the description format."}
-                      .form-group
-                        %input{ :type => "file", :id => "#{genome}UserDataFile" }
-                        %p.help-block
-                          Choose file on your computer
+                      %form
+                        .checkbox.panel-input
+                          %label
+                            %input{ :type => "radio", :id => "#{genome}UserDataBed", :name => "bedORGene", :value => "bed", :checked => "checked" }
+                            Genomic regions (BED) or sequence motif
+                            %a.infoBtn{ :value => "info", :id => "#{genome}UserDataBed" }
+                              &#x24D8;
+                        .checkbox.panel-input
+                          %label
+                            %input{ :type => "radio", :id => "#{genome}UserDataGenes", :name => "bedORGene", :value => "gene" }
+                            Gene list (Gene symbols)
+                            %a.infoBtn{ :id => "#{genome}UserDataGenes" }
+                              &#x24D8;
+                        .form-group.panel-input-textarea
+                          %textarea.form-control{ :name => "txtA", :id => "#{genome}UserData", :rows => 8, :cols => 50, :placeholder => "Click the info buttons above to show the description format."}
+                        .form-group
+                          %input{ :type => "file", :id => "#{genome}UserDataFile" }
+                          %p.help-block
+                            Choose file on your computer
 
                 .col-md-4
                   .panel.panel-default
@@ -146,45 +147,46 @@
                     .panel-heading{ :id => panel }
                       %h4.panel-title= "5. Select dataset to be compared"
                     .panel-body
-                      .checkbox.panel-input.bed
-                        %label
-                          %input{ :type => "radio", :id => "#{genome}comparedWithRandom", :name => "comparedWith", :value => "rnd" }
-                          Random permutation of user data
-                          %a.infoBtn{ :id => "#{genome}comparedWithRandom" }
-                            &#x24D8;
-                        .checkbox.form-inline
-                          %p.help-block.ptimes{ :for => "permutationTimes"}
-                            Permutation times
-                            %input.form-control{ :type => "radio", :id => "#{genome}comparedWithRandomx1", :name => "numShuf", :value => "1", :checked => "checked" }
-                            x1
-                            %input.form-control{ :type => "radio", :id => "#{genome}comparedWithRandomx10", :name => "numShuf", :value => "10", :checked => "checked" }
-                            x10
-                            %input.form-control{ :type => "radio", :id => "#{genome}comparedWithRandomx100", :name => "numShuf", :value => "100", :checked => "checked" }
-                            x100
-                      .checkbox.panel-input.bed
-                        %label
-                          %input{ :type => "radio", :id => "#{genome}comparedWithBed", :name => "comparedWith", :value => "bed" }
-                          BED or sequence motif
-                          %a.infoBtn{ :id => "#{genome}comparedWithBed" }
-                            &#x24D8;
-                      .checkbox.panel-input.gene
-                        %label
-                          %input{ :type => "radio", :id => "#{genome}comparedWithRefseq", :name => "comparedWith", :value => "refseq" }
-                          Refseq coding genes (exluding user data)
-                          %a.infoBtn{ :id => "#{genome}comparedWithRefseq" }
-                            &#x24D8;
-                      .checkbox.panel-input.gene
-                        %label
-                          %input{ :type => "radio", :id => "#{genome}comparedWithUserlist", :name => "comparedWith", :value => "userlist" }
-                          Gene list (Gene symbols)
-                          %a.infoBtn{ :id => "#{genome}comparedWithUserlist" }
-                            &#x24D8;
-                      .form-group.panel-input-textarea
-                        %textarea.form-control{ :name => "txtB", :id => "#{genome}comparedWith", :rows => 8, :cols => 50, :placeholder => "Click the info buttons above to show the description format." }
-                      .form-group
-                        %input{ :type => "file", :id => "#{genome}comparedWithFile", :name => "fsel" }
-                        %p.help-block
-                          Choose file on your computer
+                      %form
+                        .checkbox.panel-input.bed
+                          %label
+                            %input{ :type => "radio", :id => "#{genome}comparedWithRandom", :name => "comparedWith", :value => "rnd", :checked => "checked" }
+                            Random permutation of user data
+                            %a.infoBtn{ :id => "#{genome}comparedWithRandom" }
+                              &#x24D8;
+                          .checkbox.form-inline
+                            %p.help-block.ptimes{ :for => "permutationTimes"}
+                              Permutation times
+                              %input.form-control{ :type => "radio", :id => "#{genome}comparedWithRandomx1", :name => "numShuf", :value => "1", :checked => "checked" }
+                              x1
+                              %input.form-control{ :type => "radio", :id => "#{genome}comparedWithRandomx10", :name => "numShuf", :value => "10"}
+                              x10
+                              %input.form-control{ :type => "radio", :id => "#{genome}comparedWithRandomx100", :name => "numShuf", :value => "100"}
+                              x100
+                        .checkbox.panel-input.bed
+                          %label
+                            %input{ :type => "radio", :id => "#{genome}comparedWithBed", :name => "comparedWith", :value => "bed" }
+                            BED or sequence motif
+                            %a.infoBtn{ :id => "#{genome}comparedWithBed" }
+                              &#x24D8;
+                        .checkbox.panel-input.gene
+                          %label
+                            %input{ :type => "radio", :id => "#{genome}comparedWithRefseq", :name => "comparedWith", :value => "refseq" }
+                            Refseq coding genes (exluding user data)
+                            %a.infoBtn{ :id => "#{genome}comparedWithRefseq" }
+                              &#x24D8;
+                        .checkbox.panel-input.gene
+                          %label
+                            %input{ :type => "radio", :id => "#{genome}comparedWithUserlist", :name => "comparedWith", :value => "userlist" }
+                            Gene list (Gene symbols)
+                            %a.infoBtn{ :id => "#{genome}comparedWithUserlist" }
+                              &#x24D8;
+                        .form-group.panel-input-textarea
+                          %textarea.form-control{ :name => "txtB", :id => "#{genome}comparedWith", :rows => 8, :cols => 50, :placeholder => "Click the info buttons above to show the description format." }
+                        .form-group
+                          %input{ :type => "file", :id => "#{genome}comparedWithFile", :name => "fsel" }
+                          %p.help-block
+                            Choose file on your computer
 
                 .col-md-4
                   .panel.panel-default
