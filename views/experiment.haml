@@ -52,6 +52,13 @@
               .small
                 = metadata[:title] != "-" ? metadata[:title] : "no title"
         .col-md-2
+          - igv_base = "http://localhost:60151/load?file="
+          - nbdc_base = "http://dbarchive.biosciencedbc.jp/kyushu-u"
+          - expid = @expid
+          - genome = metadata[:genome]
+          - antigen = URI.escape(metadata[:agSubClass])
+          - celltype = URI.escape(metadata[:clSubClass])
+          - fname = URI.escape("#{metadata[:agSubClass]} (@ #{metadata[:clSubClass]}) #{expid}")
           .dropdown-link
             .dropdown
               .button.btn.btn-primary.btn-lg.dropdown-toggle{ :type => "button", :id => "igv-dropdown", "data-toggle" => "dropdown", "aria-haspopup" => true, "aria-expanded" => true }
@@ -59,13 +66,13 @@
                 %span.caret
               %ul.dropdown-menu{ "aria-labelledby" => "igv-dropdown" }
                 %li
-                  %a{ :href => "#" }= "BigWig"
+                  %a{ :href => "#{igv_base}#{nbdc_base}/#{genome}/eachData/bw/#{expid}.bw&genome=#{genome}&name=#{fname}" }= "BigWig"
                 %li
-                  %a{ :href => "#" }= "Peak-call (q < 1E-05)"
+                  %a{ :href => "#{igv_base}#{nbdc_base}/#{genome}/eachData/bb05/#{expid}.05.bb&genome=#{genome}&name=#{fname}%20(1E-05)" }= "Peak-call (q < 1E-05)"
                 %li
-                  %a{ :href => "#" }= "Peak-call (q < 1E-10)"
+                  %a{ :href => "#{igv_base}#{nbdc_base}/#{genome}/eachData/bb10/#{expid}.10.bb&genome=#{genome}&name=#{fname}%20(1E-10)" }= "Peak-call (q < 1E-10)"
                 %li
-                  %a{ :href => "#" }= "Peak-call (q < 1E-20)"
+                  %a{ :href => "#{igv_base}#{nbdc_base}/#{genome}/eachData/bb20/#{expid}.20.bb&genome=#{genome}&name=#{fname}%20(1E-20)" }= "Peak-call (q < 1E-20)"
           .dropdown-link
             .dropdown
               .button.btn.btn-primary.btn-lg.dropdown-toggle{ :type => "button", :id => "analysis-dropdown", "data-toggle" => "dropdown", "aria-haspopup" => true, "aria-expanded" => true }
@@ -73,9 +80,13 @@
                 %span.caret
               %ul.dropdown-menu{ "aria-labelledby" => "analysis-dropdown" }
                 %li
-                  %a{ :href => "#" }= "Colocalization"
+                  %a{ :href => "#{nbdc_base}/#{genome}/colo/#{expid}.html" }= "Colocalization"
                 %li
-                  %a{ :href => "#" }= "Target Genes"
+                  %a{ :href => "#{nbdc_base}/#{genome}/target/#{expid}.1.html" }= "Target Genes (TSS ± 1kb)"
+                %li
+                  %a{ :href => "#{nbdc_base}/#{genome}/target/#{expid}.5.html" }= "Target Genes (TSS ± 5kb)"
+                %li
+                  %a{ :href => "#{nbdc_base}/#{genome}/target/#{expid}.10.html" }= "Target Genes (TSS ± 10kb)"
           .dropdown-link
             .dropdown
               .button.btn.btn-primary.btn-lg.dropdown-toggle{ :type => "button", :id => "download-dropdown", "data-toggle" => "dropdown", "aria-haspopup" => true, "aria-expanded" => true }
@@ -83,21 +94,19 @@
                 %span.caret
               %ul.dropdown-menu{ "aria-labelledby" => "download-dropdown" }
                 %li
-                  %a{ :href => "#" }= "BigWig"
+                  %a{ :href => "#{nbdc_base}/#{genome}/eachData/bw/#{expid}.bw" }= "BigWig"
                 %li
-                  %a{ :href => "#" }= "Peak-call (q < 1E-05)"
+                  %a{ :href => "#{nbdc_base}/#{genome}/eachData/bed05/#{expid}.05.bed" }= "Peak-call (q < 1E-05)"
                 %li
-                  %a{ :href => "#" }= "Peak-call (q < 1E-10)"
+                  %a{ :href => "#{nbdc_base}/#{genome}/eachData/bed10/#{expid}.10.bed" }= "Peak-call (q < 1E-10)"
                 %li
-                  %a{ :href => "#" }= "Peak-call (q < 1E-20)"
+                  %a{ :href => "#{nbdc_base}/#{genome}/eachData/bed20/#{expid}.20.bed" }= "Peak-call (q < 1E-20)"
           .dropdown-link
             .dropdown
               .button.btn.btn-primary.btn-lg.dropdown-toggle{ :type => "button", :id => "linkout-dropdown", "data-toggle" => "dropdown", "aria-haspopup" => true, "aria-expanded" => true }
                 Link Out
                 %span.caret
               %ul.dropdown-menu{ "aria-labelledby" => "linkout-dropdown" }
-                - antigen = metadata[:agSubClass]
-                - celltype = metadata[:clSubClass].gsub("\s","+")
                 %li.dropdown-header
                   SRA Experiment
                 %li
