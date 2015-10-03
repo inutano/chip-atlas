@@ -73,7 +73,7 @@
         // Contents
         .tab-content
           - @list_of_genome.each.with_index do |genome, i|
-            .tab-pane.fade{ :role => "tabpanel", :id => genome, :class => "#{(i == 0) ? 'in active' : ''}" }
+            .tab-pane.fade{ :role => "tabpanel", :id => "#{genome}-tab-content", :class => "#{(i == 0) ? 'in active' : ''}" }
               .row
                 .col-md-3
                   .panel.panel-default
