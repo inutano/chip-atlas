@@ -357,8 +357,6 @@
             }
           };
 
-          alert(JSON.stringify(data));
-
           // alert(JSON.stringify(data));
 
           $.ajax({
@@ -370,7 +368,7 @@
             scriptCharset: 'utf-8',
             success : function(response) {
               // alert(JSON.stringify(response));
-              alert(response.url);
+              // alert(response.url);
               window.open(response.url, "_self", "")
             },
             error : function(response){

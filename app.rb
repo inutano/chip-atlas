@@ -26,8 +26,7 @@ class PeakJohn < Sinatra::Base
     end
     
     def fileformat
-      # ".bed"
-      ".bb"
+      ".bed"
     end
     
     def bedfile_archive(data)
@@ -225,14 +224,8 @@ class PeakJohn < Sinatra::Base
   end
 
   post "/download" do
-    fpath = bedfile_archive(JSON.parse(request.body.read))
-    dest = if fpath
-             fpath
-           else
-             '/not_found'
-           end
-    puts dest
-    redirect dest
+    content_type "application/json"
+    JSON.dump({ "url" => bedfile_archive(JSON.parse(request.body.read)) })
   end
   
   post "/wabi_chipatlas" do
