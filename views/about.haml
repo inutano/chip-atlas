@@ -49,13 +49,16 @@
         %h1
           ChIP-Atlas
         %p.main-desc
-          ChIP-Atlas is an integrative and comprehensive database for visualizing and exploiting public ChIP-seq data (Movie). ChIP-Atlas covers almost all public ChIP-seq data deposited as SRA (Sequence Read Archives) in NCBI, DDBJ or ENA, and is based on over 30,000 experiments. ChIP-Atlas has mainly following four functions:
+          ChIP-Atlas is an integrative and comprehensive database for visualizing and exploiting public ChIP-seq data. ChIP-Atlas covers almost all public ChIP-seq data submitted to the SRA (Sequence Read Archives) in NCBI, DDBJ or ENA, and is based on over 30,000 experiments.
     .container
+      .row
+        %h4
+          4 main features of ChIP-Atlas are;
       .row
         .col-md-3
           %h2
             %a{ :href => "#{app_root}/peak_browser" }
-              Peak Broeser
+              Peak Browser
           %p.main-desc
             graphically visualizes protein bindings on given genomic loci with genome browser (IGV).
             %a
@@ -78,8 +81,10 @@
               Watch Movie
         .col-md-3
           %h2
-            %a{ :href => "#{app_root}/virtual_chip" }
-              Virtual ChIP
+            %a{ :href => "#{app_root}/in_silico_chip" }
+              %span.italic
+                in silico
+              ChIP
           %p.main-desc
             predicts proteins bound to given genomic loci and genes.
             %a
