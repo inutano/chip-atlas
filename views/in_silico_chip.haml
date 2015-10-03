@@ -151,7 +151,7 @@
                       %form
                         .checkbox.panel-input.bed
                           %label
-                            %input{ :type => "radio", :id => "#{genome}comparedWithRandom", :name => "rndORBed", :value => "rnd", :checked => "checked" }
+                            %input{ :type => "radio", :id => "#{genome}comparedWithRandom", :name => "comparedWith", :value => "rnd", :checked => "checked" }
                             Random permutation of user data
                             %a.infoBtn{ :id => "#{genome}comparedWithRandom" }
                               &#x24D8;
@@ -166,20 +166,20 @@
                               x100
                         .checkbox.panel-input.bed
                           %label
-                            %input{ :type => "radio", :id => "#{genome}comparedWithBed", :name => "rndORBed", :value => "bed" }
+                            %input{ :type => "radio", :id => "#{genome}comparedWithBed", :name => "comparedWith", :value => "bed" }
                             BED or sequence motif
                             %a.infoBtn{ :id => "#{genome}comparedWithBed" }
                               &#x24D8;
                       %form
                         .checkbox.panel-input.gene.default-hide
                           %label
-                            %input{ :type => "radio", :id => "#{genome}comparedWithRefseq", :name => "refseqORGene", :value => "refseq" }
+                            %input{ :type => "radio", :id => "#{genome}comparedWithRefseq", :name => "comparedWith", :value => "refseq" }
                             Refseq coding genes (exluding user data)
                             %a.infoBtn{ :id => "#{genome}comparedWithRefseq" }
                               &#x24D8;
                         .checkbox.panel-input.gene.default-hide
                           %label
-                            %input{ :type => "radio", :id => "#{genome}comparedWithUserlist", :name => "refseqORGene", :value => "gene" }
+                            %input{ :type => "radio", :id => "#{genome}comparedWithUserlist", :name => "comparedWith", :value => "userlist" }
                             Gene list (Gene symbols)
                             %a.infoBtn{ :id => "#{genome}comparedWithUserlist" }
                               &#x24D8;
@@ -276,8 +276,8 @@
         };
       });
 
-      // bed - random or bed
-      $("input[name='rndORBed']").change(function(){
+      // compared with
+      $("input[name='comparedWith']").change(function(){
         var genome = $('.genomeTab ul li.active a').attr('source').replace(/[\n\s ]/g, "");
         switch($(this).val()){
           case 'rnd':
@@ -288,25 +288,14 @@
             $('.panel-input.rnd').hide();
             $('.panel-input.bed-input.comparedWith').show();
             break;
-        };
-      });
-
-      // gene - refseq or gene
-      $("input[name='refseqORGene']").change(function(){
-        var genome = $('.genomeTab ul li.active a').attr('source').replace(/[\n\s ]/g, "");
-        switch($(this).val()){
           case 'refseq':
             $('.panel-input.bed-input.comparedWith').hide();
             break;
-          case 'gene':
+          case 'userlist':
             $('.panel-input.bed-input.comparedWith').show();
             break;
         };
       });
-
-
-
-
 
       // send data to wabi api
       $(function(){
@@ -327,11 +316,14 @@
             bedBFile: $('textarea#' + genome + 'comparedWith').val(),
             descriptionB: $('input#' + genome + 'comparedWithTitle').val(),
             permTime: $('input[name="numShuf"]:checked').val(),
-            distanceUp: $(),
-            distanceDown: $(),
+            distanceUp: $('input#' + genome + 'DistanceUp').val(),
+            distanceDown: $('input#' + genome + 'DistanceDown').val(),
             title: $('input#' + genome + 'ProjectTitle').val(),
             format: 'text',
-            result: 'www'
+            result: 'www',
+            qsubOptions: '-N test',
+            urlStr: 'http://ddbj.nig.ac.jp/wabi/chipatlas/',
+
           };
           alert(JSON.stringify(data));
 
