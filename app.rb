@@ -54,6 +54,23 @@ class PeakJohn < Sinatra::Base
       "#{app_root}/colo_result?base=#{base}/#{antigen}.#{cellline}.html"
     end
 
+    def colo_url(data,type)
+      condition = data["condition"]
+      genome    = condition["genome"]
+      antigen   = condition["antigen"]
+      cellline  = condition["cellline"].gsub("\s","_")
+      base = "http://dbarchive.biosciencedbc.jp/kyushu-u/#{genome}/colo"
+      case type
+      when "submit"
+        # "#{app_root}/target_genes_result?base=#{base}/#{antigen}.#{distance}.html"
+        "#{base}/#{antigen}.#{cellline}.html"
+      when "tsv"
+        "#{base}/#{antigen}.#{cellline}.tsv"
+      when "gml"
+        "#{base}/#{cellline}.gml"
+      end
+    end
+
     def target_genes_url(data,type)
       condition = data["condition"]
       genome    = condition["genome"]
@@ -202,7 +219,7 @@ class PeakJohn < Sinatra::Base
   
   post "/colo" do
     content_type "application/json"
-    JSON.dump({ "url" => colo_url(JSON.parse(request.body.read)) })
+    JSON.dump({ "url" => colo_url(JSON.parse(request.body.read), params[:type]) })
   end
 
   get "/colo_result" do

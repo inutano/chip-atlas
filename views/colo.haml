@@ -114,14 +114,14 @@
               .row
                 .col-md-6.col-md-offset-3
                   .button-submit.down
-                    %button.btn.btn-primary.btn-lg.btn-block{ :id => "colo-submit", :type => "button" }= "View Colocalization Data"
+                    %button.btn.btn-primary.btn-lg.btn-block.post{ :id => "colo-submit", :type => "button" }= "View Colocalization Data"
               .row.colo-download
                 .col-md-3.col-md-offset-3
                   .button-submit
-                    %button.btn.btn-primary.btn-lg.btn-block{ :id => "download-tsv", :type => "button" }= "Download (TSV)"
+                    %button.btn.btn-primary.btn-lg.btn-block.post{ :id => "download-tsv", :type => "button" }= "Download (TSV)"
                 .col-md-3
                   .button-submit
-                    %button.btn.btn-primary.btn-lg.btn-block{ :id => "download-gml", :type => "button" }= "Download (GML)"
+                    %button.btn.btn-primary.btn-lg.btn-block.post{ :id => "download-gml", :type => "button" }= "Download (GML)"
 
     /
       Bootstrap Core Javascript
@@ -447,7 +447,7 @@
 
       // send data to get igv url
       $(function(){
-        $("button#colo-submit").click(function(){
+        $("button.post").click(function(){
           var button = $(this);
           button.attr("disabled", true);
 
@@ -477,9 +477,23 @@
 
           // alert(JSON.stringify(data));
 
+          var buttonId = $(this).attr("id");
+          var suffix;
+          switch(buttonId){
+            case 'colo-submit':
+              suffix = 'submit';
+              break;
+            case 'download-tsv':
+              suffix = 'tsv';
+              break;
+            case 'download-gml':
+              suffix = 'gml';
+              break;
+          };
+
           $.ajax({
             type : 'post',
-            url : "#{app_root}/colo",
+            url : "#{app_root}/colo?type="+suffix,
             data: JSON.stringify(data),
             contentType: 'application/json',
             dataType: 'json',
