@@ -134,6 +134,7 @@
                             Gene list (Gene symbols)
                             %a.infoBtn{ :id => "#{genome}UserDataGenes" }
                               &#x24D8;
+                      .panel-input.bed-input.userData
                         .form-group.panel-input-textarea
                           %textarea.form-control{ :name => "txtA", :id => "#{genome}UserData", :rows => 8, :cols => 50, :placeholder => "Click the info buttons above to show the description format."}
                         .form-group
@@ -150,14 +151,14 @@
                       %form
                         .checkbox.panel-input.bed
                           %label
-                            %input{ :type => "radio", :id => "#{genome}comparedWithRandom", :name => "comparedWith", :value => "rnd" }
+                            %input{ :type => "radio", :id => "#{genome}comparedWithRandom", :name => "rndORBed", :value => "rnd", :checked => "checked" }
                             Random permutation of user data
                             %a.infoBtn{ :id => "#{genome}comparedWithRandom" }
                               &#x24D8;
-                          .checkbox.form-inline
+                          .checkbox.form-inline.panel-input.rnd
                             %p.help-block.ptimes{ :for => "permutationTimes"}
                               Permutation times
-                              %input.form-control{ :type => "radio", :id => "#{genome}comparedWithRandomx1", :name => "numShuf", :value => "1" }
+                              %input.form-control{ :type => "radio", :id => "#{genome}comparedWithRandomx1", :name => "numShuf", :value => "1", :checked => "checked" }
                               x1
                               %input.form-control{ :type => "radio", :id => "#{genome}comparedWithRandomx10", :name => "numShuf", :value => "10"}
                               x10
@@ -165,23 +166,24 @@
                               x100
                         .checkbox.panel-input.bed
                           %label
-                            %input{ :type => "radio", :id => "#{genome}comparedWithBed", :name => "comparedWith", :value => "bed" }
+                            %input{ :type => "radio", :id => "#{genome}comparedWithBed", :name => "rndORBed", :value => "bed" }
                             BED or sequence motif
                             %a.infoBtn{ :id => "#{genome}comparedWithBed" }
                               &#x24D8;
                       %form
-                        .checkbox.panel-input.gene
+                        .checkbox.panel-input.gene.default-hide
                           %label
-                            %input{ :type => "radio", :id => "#{genome}comparedWithRefseq", :name => "comparedWith", :value => "refseq" }
+                            %input{ :type => "radio", :id => "#{genome}comparedWithRefseq", :name => "refseqORGene", :value => "refseq" }
                             Refseq coding genes (exluding user data)
                             %a.infoBtn{ :id => "#{genome}comparedWithRefseq" }
                               &#x24D8;
-                        .checkbox.panel-input.gene
+                        .checkbox.panel-input.gene.default-hide
                           %label
-                            %input{ :type => "radio", :id => "#{genome}comparedWithUserlist", :name => "comparedWith", :value => "userlist" }
+                            %input{ :type => "radio", :id => "#{genome}comparedWithUserlist", :name => "refseqORGene", :value => "gene" }
                             Gene list (Gene symbols)
                             %a.infoBtn{ :id => "#{genome}comparedWithUserlist" }
                               &#x24D8;
+                      .panel-input.bed-input.comparedWith.default-hide
                         .form-group.panel-input-textarea
                           %textarea.form-control{ :name => "txtB", :id => "#{genome}comparedWith", :rows => 8, :cols => 50, :placeholder => "Click the info buttons above to show the description format." }
                         .form-group
@@ -213,7 +215,7 @@
                           %a.infoBtn{ :value => "info", :id => "#{genome}ProjectDesc" }
                             &#x24D8;
                         %input.form-control{ :type => "text", :id => "#{genome}ProjectTitle"}
-                      .panel-input.distTSS.form-group
+                      .panel-input.distTSS.form-group.default-hide
                         %p.form-control-static
                           Distance range from TSS
                           %a.infoBtn{ :value => "info", :id => "#{genome}DistTSS" }
@@ -247,16 +249,64 @@
       // retrieve index
       var indexAll = JSON.parse('#{JSON.dump(@index_all_genome)}');
 
-      // Switch compared data panel by primary data type
+      // hide and show by checked radio buttons
+      // bed or gene
       $("input[name='bedORGene']").change(function(){
-        if($(this).val() === 'bed'){
-          $('.panel-input.bed').show();
-          $('.panel-input.gene').hide();
-        }else if ($(this).val() === 'gene') {
-          $('.panel-input.bed').hide();
-          $('.panel-input.gene').show();
-        }
+        var genome = $('.genomeTab ul li.active a').attr('source').replace(/[\n\s ]/g, "");
+        switch($(this).val()){
+          case 'bed':
+            $('.panel-input.bed').show();
+            $('.panel-input.gene.default-hide').hide();
+            $('.panel-input.distTSS').hide();
+            $('.panel-input.rnd').show();
+            $('.panel-input.bed-input.comparedWith').hide();
+            $('input#'+genome+'comparedWithBed').prop("checked",false);
+            $('input#'+genome+'comparedWithRandom').prop("checked",true);
+            $('input#'+genome+'comparedWithRandomx1').prop("checked",true);
+            break;
+          case 'gene':
+            $('.panel-input.bed').hide();
+            $('.panel-input.gene.default-hide').show();
+            $('.panel-input.distTSS').show();
+            $('.panel-input.rnd').show();
+            $('.panel-input.bed-input.comparedWith').hide();
+            $('input#'+genome+'comparedWithUserlist').prop("checked",false);
+            $('input#'+genome+'comparedWithRefseq').prop("checked",true);
+            break;
+        };
       });
+
+      // bed - random or bed
+      $("input[name='rndORBed']").change(function(){
+        var genome = $('.genomeTab ul li.active a').attr('source').replace(/[\n\s ]/g, "");
+        switch($(this).val()){
+          case 'rnd':
+            $('.panel-input.rnd').show();
+            $('.panel-input.bed-input.comparedWith').hide();
+            break;
+          case 'bed':
+            $('.panel-input.rnd').hide();
+            $('.panel-input.bed-input.comparedWith').show();
+            break;
+        };
+      });
+
+      // gene - refseq or gene
+      $("input[name='refseqORGene']").change(function(){
+        var genome = $('.genomeTab ul li.active a').attr('source').replace(/[\n\s ]/g, "");
+        switch($(this).val()){
+          case 'refseq':
+            $('.panel-input.bed-input.comparedWith').hide();
+            break;
+          case 'gene':
+            $('.panel-input.bed-input.comparedWith').show();
+            break;
+        };
+      });
+
+
+
+
 
       // send data to wabi api
       $(function(){
