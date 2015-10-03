@@ -185,7 +185,7 @@
                               &#x24D8;
                       .panel-input.bed-input.comparedWith.default-hide
                         .form-group.panel-input-textarea
-                          %textarea.form-control{ :name => "txtB", :id => "#{genome}comparedWith", :rows => 8, :cols => 50, :placeholder => "Click the info buttons above to show the description format." }
+                          %textarea.form-control{ :name => "txtB", :id => "#{genome}comparedWith", :rows => 8, :cols => 50, :placeholder => "Click the info buttons above to show the description format.", :value => nil }
                         .form-group
                           %input{ :type => "file", :id => "#{genome}comparedWithFile", :name => "fsel" }
                           %p.help-block
@@ -221,9 +221,9 @@
                           %a.infoBtn{ :value => "info", :id => "#{genome}DistTSS" }
                             &#x24D8;
                         .form-inline
-                          %input.form-control{ :type => "text", :id => "#{genome}DistanceDown", :value => "5000", :size => 5 }
+                          %input.form-control{ :type => "text", :id => "#{genome}DistanceDown", :value => "0", :size => 5 }
                           bp &#x2266; TSS &#x2266;
-                          %input.form-control{ :type => "text", :id => "#{genome}DistanceUp", :value => "5000", :size => 5 }
+                          %input.form-control{ :type => "text", :id => "#{genome}DistanceUp", :value => "0", :size => 5 }
                           bp
 
                       .button-submit
@@ -263,6 +263,8 @@
             $('input#'+genome+'comparedWithBed').prop("checked",false);
             $('input#'+genome+'comparedWithRandom').prop("checked",true);
             $('input#'+genome+'comparedWithRandomx1').prop("checked",true);
+            $('input#' + genome + 'DistanceUp').val(0);
+            $('input#' + genome + 'DistanceDown').val(0);
             break;
           case 'gene':
             $('.panel-input.bed').hide();
@@ -272,6 +274,8 @@
             $('.panel-input.bed-input.comparedWith').hide();
             $('input#'+genome+'comparedWithUserlist').prop("checked",false);
             $('input#'+genome+'comparedWithRefseq').prop("checked",true);
+            $('input#' + genome + 'DistanceUp').val(5000);
+            $('input#' + genome + 'DistanceDown').val(5000);
             break;
         };
       });
@@ -282,6 +286,7 @@
         switch($(this).val()){
           case 'rnd':
             $('.panel-input.rnd').show();
+            $('input[name="comparedWith"]').val(null);
             $('.panel-input.bed-input.comparedWith').hide();
             break;
           case 'bed':
@@ -289,6 +294,7 @@
             $('.panel-input.bed-input.comparedWith').show();
             break;
           case 'refseq':
+            $('input[name="comparedWith"]').val(null);
             $('.panel-input.bed-input.comparedWith').hide();
             break;
           case 'userlist':
@@ -314,7 +320,7 @@
             descriptionA: $('input#' + genome + 'UserDataTitle').val(),
             typeB: $('input[name="comparedWith"]:checked').val(),
             bedBFile: $('textarea#' + genome + 'comparedWith').val(),
-            descriptionB: $('input#' + genome + 'comparedWithTitle').val(),
+            descriptionB: $('input#' + genome + 'ComparedWithTitle').val(),
             permTime: $('input[name="numShuf"]:checked').val(),
             distanceUp: $('input#' + genome + 'DistanceUp').val(),
             distanceDown: $('input#' + genome + 'DistanceDown').val(),
@@ -322,11 +328,9 @@
             format: 'text',
             result: 'www',
             qsubOptions: '-N test',
-            urlStr: 'http://ddbj.nig.ac.jp/wabi/chipatlas/',
-
+            address: '',
           };
           alert(JSON.stringify(data));
-
 
           $.ajax({
             type : 'post',
@@ -337,9 +341,9 @@
             scriptCharset: 'utf-8',
             success : function(response) {
               alert(JSON.stringify(response));
-              var requestId = response.responseText.match(/wabi_chipatlas.*/)[0];
+              var requestId = response.requestId;
               var baseUrl = 'http://dbarchive.biosciencedbc.jp/kyushu-u/lib/vcResult.html?id=';
-              window.open(baseUrl + requestId + '&title=' + data['title']) // + '&calcm=' + calcm;
+              window.open(baseUrl + requestId + '&title=' + data['title'], "_self", ""); // + '&calcm=' + calcm;
             },
             error : function(response){
               // alert(JSON.stringify(response));
