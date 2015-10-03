@@ -150,14 +150,14 @@
                       %form
                         .checkbox.panel-input.bed
                           %label
-                            %input{ :type => "radio", :id => "#{genome}comparedWithRandom", :name => "comparedWith", :value => "rnd", :checked => "checked" }
+                            %input{ :type => "radio", :id => "#{genome}comparedWithRandom", :name => "comparedWith", :value => "rnd" }
                             Random permutation of user data
                             %a.infoBtn{ :id => "#{genome}comparedWithRandom" }
                               &#x24D8;
                           .checkbox.form-inline
                             %p.help-block.ptimes{ :for => "permutationTimes"}
                               Permutation times
-                              %input.form-control{ :type => "radio", :id => "#{genome}comparedWithRandomx1", :name => "numShuf", :value => "1", :checked => "checked" }
+                              %input.form-control{ :type => "radio", :id => "#{genome}comparedWithRandomx1", :name => "numShuf", :value => "1" }
                               x1
                               %input.form-control{ :type => "radio", :id => "#{genome}comparedWithRandomx10", :name => "numShuf", :value => "10"}
                               x10
@@ -195,34 +195,34 @@
                     .panel-heading{ :id => panel }
                       %h4.panel-title= "6. Describe datasets"
                     .panel-body
-                      .panel-input.desc
-                        %label{ :for => "#{genome}UserDataTitle"}
-                          User data title:
-                        %input{ :type => "text", :id => "#{genome}UserDataTitle"}
-                        %a.infoBtn{ :value => "info", :id => "#{genome}UserDataDesc" }
-                          &#x24D8;
-                      .panel-input.desc
-                        %label{ :for => "#{genome}ComparedWithTitle"}
-                          Compared data title:
-                        %input{ :type => "text", :id => "#{genome}ComparedWithTitle"}
-                        %a.infoBtn{ :value => "info", :id => "#{genome}ComparedWithDesc" }
-                          &#x24D8;
-                      .panel-input.desc
-                        %label{ :for => "#{genome}ProjectTitle" }
-                          Project title:
-                        %input{ :type => "text", :id => "#{genome}ProjectTitle"}
-                        %a.infoBtn{ :value => "info", :id => "#{genome}ProjectDesc" }
-                          &#x24D8;
+                      .panel-input.desc.form-inline
+                        %p.form-control-static
+                          User data title
+                          %a.infoBtn{ :value => "info", :id => "#{genome}UserDataDesc" }
+                            &#x24D8;
+                        %input.form-control{ :type => "text", :id => "#{genome}UserDataTitle"}
+                      .panel-input.desc.form-inline
+                        %p.form-control-static
+                          Compared data title
+                          %a.infoBtn{ :value => "info", :id => "#{genome}ComparedWithDesc" }
+                            &#x24D8;
+                        %input.form-control{ :type => "text", :id => "#{genome}ComparedWithTitle"}
+                      .panel-input.desc.form-inline
+                        %p.form-control-static
+                          Project title
+                          %a.infoBtn{ :value => "info", :id => "#{genome}ProjectDesc" }
+                            &#x24D8;
+                        %input.form-control{ :type => "text", :id => "#{genome}ProjectTitle"}
                       .panel-input.distTSS.form-group
-                        %label{ :for => "#{genome}DistanceTSS" }
-                          Distance range from TSS:
+                        %p.form-control-static
+                          Distance range from TSS
+                          %a.infoBtn{ :value => "info", :id => "#{genome}DistTSS" }
+                            &#x24D8;
                         .form-inline
                           %input.form-control{ :type => "text", :id => "#{genome}DistanceDown", :value => "5000", :size => 5 }
                           bp &#x2266; TSS &#x2266;
                           %input.form-control{ :type => "text", :id => "#{genome}DistanceUp", :value => "5000", :size => 5 }
                           bp
-                          %a.infoBtn{ :value => "info", :id => "#{genome}ProjectDesc" }
-                            &#x24D8;
 
                       .button-submit
                         %button.btn.btn-primary.btn-lg.btn-block{ :id => "virtual-chip-submit", :type => "button" }= "submit"
@@ -593,6 +593,9 @@
             break;
           case genome + 'ProjectDesc':
             alert('Enter a title for this submission.');
+            break;
+          case genome + 'DistTSS':
+            alert('To search protein binding to given genes, specify the distance range from the Transcription Start Sites (TSS).\n\Default is between -5000 and +5000 bp from the TSS.');
             break;
         };
       });
