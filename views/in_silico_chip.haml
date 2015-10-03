@@ -169,6 +169,7 @@
                             BED or sequence motif
                             %a.infoBtn{ :id => "#{genome}comparedWithBed" }
                               &#x24D8;
+                      %form
                         .checkbox.panel-input.gene
                           %label
                             %input{ :type => "radio", :id => "#{genome}comparedWithRefseq", :name => "comparedWith", :value => "refseq" }
@@ -212,6 +213,17 @@
                         %input{ :type => "text", :id => "#{genome}ProjectTitle"}
                         %a.infoBtn{ :value => "info", :id => "#{genome}ProjectDesc" }
                           &#x24D8;
+                      .panel-input.distTSS.form-group
+                        %label{ :for => "#{genome}DistanceTSS" }
+                          Distance range from TSS:
+                        .form-inline
+                          %input.form-control{ :type => "text", :id => "#{genome}DistanceDown", :value => "5000", :size => 5 }
+                          bp &#x2266; TSS &#x2266;
+                          %input.form-control{ :type => "text", :id => "#{genome}DistanceUp", :value => "5000", :size => 5 }
+                          bp
+                          %a.infoBtn{ :value => "info", :id => "#{genome}ProjectDesc" }
+                            &#x24D8;
+
                       .button-submit
                         %button.btn.btn-primary.btn-lg.btn-block{ :id => "virtual-chip-submit", :type => "button" }= "submit"
                       .estimated-run-time
