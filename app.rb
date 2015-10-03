@@ -187,12 +187,12 @@ class PeakJohn < Sinatra::Base
     haml :target_genes
   end
   
-  get "/virtual_chip" do
+  get "/in_silico_chip" do
     @index_all_genome = Experiment.index_all_genome
     @list_of_genome = @index_all_genome.keys
     @qval_range = Bedfile.qval_range
     @number_of_lines = number_of_lines
-    haml :virtual_chip
+    haml :in_silico_chip
   end
   
   post "/colo" do
