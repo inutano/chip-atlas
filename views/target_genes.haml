@@ -84,8 +84,8 @@
                       %input.typeahead.form-control{ :type => "text", :placeholder => "type to search", :id => "#{panel}-typeahead" }
                       %hr
                       %select.form-control.flexselect{ :id => "#{panel}-select",  :size => 8 }
-                        - @analysis[genome].sort.each do |ag|
-                          %option{ :value => ag }= ag
+                        - @analysis[genome].sort.each.with_index do |ag,i|
+                          %option{ :value => ag, selected: i == 0 ? true : false }= ag
 
                 .col-md-3
                   .panel.panel-default
@@ -96,7 +96,7 @@
                       %form{ :id => "#{panel}-form" }
                         .radio
                           %label
-                            %input{ :type => "radio", :id => "", :value => "1", :name => "distanceOption" }
+                            %input{ :type => "radio", :id => "", :value => "1", :name => "distanceOption", checked: true }
                             = " ±1k "
                         .radio
                           %label
