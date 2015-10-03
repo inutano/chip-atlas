@@ -184,19 +184,19 @@
                         %label{ :for => "#{genome}UserDataTitle"}
                           User data title:
                         %input{ :type => "text", :id => "#{genome}UserDataTitle"}
-                        %a.infoBtn{ :value => "info", :id => "#{genome}UserDataBed" }
+                        %a.infoBtn{ :value => "info", :id => "#{genome}UserDataDesc" }
                           &#x24D8;
                       .panel-input.desc
                         %label{ :for => "#{genome}ComparedWithTitle"}
                           Compared data title:
                         %input{ :type => "text", :id => "#{genome}ComparedWithTitle"}
-                        %a.infoBtn{ :value => "info", :id => "#{genome}UserDataBed" }
+                        %a.infoBtn{ :value => "info", :id => "#{genome}ComparedWithDesc" }
                           &#x24D8;
                       .panel-input.desc
                         %label{ :for => "#{genome}ProjectTitle" }
                           Project title:
                         %input{ :type => "text", :id => "#{genome}ProjectTitle"}
-                        %a.infoBtn{ :value => "info", :id => "#{genome}UserDataBed" }
+                        %a.infoBtn{ :value => "info", :id => "#{genome}ProjectDesc" }
                           &#x24D8;
                       .button-submit
                         %button.btn.btn-primary.btn-lg.btn-block{ :id => "virtual-chip-submit", :type => "button" }= "submit"
@@ -558,6 +558,15 @@
             break;
           case genome + 'TSS':
             alert('To search protein binding to given genes, specify the distance range from the Transcription Start Sites (TSS).\n\Default is between -5000 and +5000 bp from the TSS.');
+            break;
+          case genome + 'UserDataDesc':
+            alert('Enter a title for the data selected in "4. Select your data".');
+            break;
+          case genome + 'ComparedWithDesc':
+            alert('Enter a title for the data selected in "5. Select data to be compared".');
+            break;
+          case genome + 'ProjectDesc':
+            alert('Enter a title for this submission.');
             break;
         };
       });
