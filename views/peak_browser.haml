@@ -149,7 +149,18 @@
 
     :javascript
       // retrieve index
-      var indexAll = JSON.parse('#{JSON.dump(@index_all_genome)}');
+      //var indexAll = JSON.parse('#{JSON.dump(@index_all_genome)}');
+
+      // retrieve index
+      var deepIndex;
+      $.ajax({
+        type: 'GET',
+        url: '/data/experiment_index.json',
+        dataType: 'json',
+        success: function(json){
+          deepIndex = json;
+        }
+      });
 
       // iterate for each genomes
       $.each(#{@list_of_genome}, function(i, genome){
@@ -167,12 +178,13 @@
         });
 
         // for each subclass section
-        $.each([["antigen", "ag"], ["celltype", "cl"]], function(it, type){
+        $.each([["antigen", "ag", "cl"], ["celltype", "cl","ag"]], function(it, type){
           $('select#' + genome + type[1] + 'Class').change(function(){
             // Common variables
             var genomeSelected = $('.genomeTab ul li.active a').attr("source").replace(/[\n\s ]/g, "");
-            var valueSelected  = $('select#' + genomeSelected + type[1] + 'Class option:selected').val();
-            var subClassObj    = indexAll[genomeSelected][type[0]][valueSelected];
+            var valueSelected = $('select#' + genomeSelected + type[1] + 'Class option:selected').val();
+            var anotherSelected = $('select#' + genomeSelected + type[2] + 'Class option:selected').val();
+            var subClassObj = deepIndex[genomeSelected][type[0]][valueSelected][anotherSelected];
 
             // Erase previous options
             $('select#' + genomeSelected + type[1] + 'SubClass').empty();

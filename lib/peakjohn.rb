@@ -15,6 +15,11 @@ class Experiment < ActiveRecord::Base
       records = records_by_genome(genome)
       index_all_facets(records)
     end
+    
+    def deep_index_by_genome(genome)
+      records = records_by_genome(genome)
+      deep_index(records)
+    end
 
     def records_by_genome(genome)
       self.where(:genome => genome)
@@ -24,6 +29,14 @@ class Experiment < ActiveRecord::Base
       result = Hash.new
       list_of_genome.map do |genome|
         result[genome] = index_by_genome(genome)
+      end
+      result
+    end
+    
+    def deep_index_all_genome
+      result = Hash.new
+      list_of_genome.map do |genome|
+        result[genome] = deep_index_by_genome(genome)
       end
       result
     end
@@ -41,6 +54,38 @@ class Experiment < ActiveRecord::Base
 
         index[:celltype][clClass] ||= Hash.new(0)
         index[:celltype][clClass][clSubClass] += 1
+      end
+      index
+    end
+    
+    def empty_index
+      {
+        antigen: {},
+        celltype: {}
+      }
+    end
+    
+    def deep_index(records)
+      index = empty_index
+      records.each do |record|
+        agClass    = record.agClass
+        agSubClass = record.agSubClass
+        clClass    = record.clClass
+        clSubClass = record.clSubClass
+        
+        index[:antigen][agClass] ||= {}
+        index[:antigen][agClass][clClass] ||= Hash.new(0)
+        index[:antigen][agClass][clClass][agSubClass] += 1
+
+        index[:antigen][agClass]["All cell types"] ||= Hash.new(0)
+        index[:antigen][agClass]["All cell types"][agSubClass] += 1
+        
+        index[:celltype][clClass] ||= {}
+        index[:celltype][clClass][agClass] ||= Hash.new(0)
+        index[:celltype][clClass][agClass][clSubClass] += 1
+
+        index[:celltype][clClass]["All antigens"] ||= Hash.new(0)
+        index[:celltype][clClass]["All antigens"][clSubClass] += 1
       end
       index
     end

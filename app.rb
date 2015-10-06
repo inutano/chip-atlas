@@ -147,6 +147,19 @@ class PeakJohn < Sinatra::Base
     sass params[:source].intern
   end
   
+  get "/data/:data.json" do
+    data = case params[:data]
+           when "experiment_index"
+             Experiment.deep_index_all_genome
+           when "list_of_genome"
+             Experiment.list_of_genome
+           when "qval_range"
+             Experiment.qval_range
+           end
+    content_type "application/json"
+    JSON.dump(data)
+  end
+  
   get "/" do
     @index_all_genome = Experiment.index_all_genome
     @list_of_genome = @index_all_genome.keys
@@ -156,8 +169,9 @@ class PeakJohn < Sinatra::Base
   
   get "/peak_browser" do
     @index_all_genome = Experiment.index_all_genome
-    @list_of_genome = @index_all_genome.keys
-    @qval_range = Bedfile.qval_range
+    @deep_index       = Experiment.deep_index_all_genome
+    @list_of_genome   = @index_all_genome.keys
+    @qval_range       = Bedfile.qval_range
     haml :peak_browser
   end
   
