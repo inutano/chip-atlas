@@ -161,9 +161,6 @@ class PeakJohn < Sinatra::Base
   end
   
   get "/" do
-    @index_all_genome = Experiment.index_all_genome
-    @list_of_genome = @index_all_genome.keys
-    @qval_range = Bedfile.qval_range
     haml :about
   end
   
