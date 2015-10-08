@@ -243,7 +243,8 @@ class PeakJohn < Sinatra::Base
 
   get "/colo_result" do
     @iframe_url = params[:base]
-    haml :colo_result
+    # haml :colo_result
+    redirect @iframe_url
   end
   
   post "/target_genes" do
@@ -253,7 +254,8 @@ class PeakJohn < Sinatra::Base
 
   get "/target_genes_result" do
     @iframe_url = params[:base]
-    haml :target_genes_result
+    # haml :target_genes_result
+    redirect @iframe_url
   end
 
   get "/documentation" do
