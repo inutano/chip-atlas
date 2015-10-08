@@ -310,6 +310,15 @@
           button.attr("disabled", true);
 
           var genome = $('.genomeTab ul li.active a').attr('source').replace(/[\n\s ]/g, "");
+
+          var bbf;
+          var bbf_txt = $('textarea#' + genome + 'comparedWith').val();
+          if(bbf_txt == ""){
+            bbf = "empty";
+          }else{
+            bbf = bbf_txt;
+          }
+
           var data = {
             genome: genome,
             antigenClass: $('select#' + genome + 'agClass option:selected').val(),
@@ -319,7 +328,7 @@
             bedAFile: $('textarea#' + genome + 'UserData').val(),
             descriptionA: $('input#' + genome + 'UserDataTitle').val(),
             typeB: $('input[name="comparedWith"]:checked').val(),
-            bedBFile: $('textarea#' + genome + 'comparedWith').val(),
+            bedBFile: bbf,
             descriptionB: $('input#' + genome + 'ComparedWithTitle').val(),
             permTime: $('input[name="numShuf"]:checked').val(),
             distanceUp: $('input#' + genome + 'DistanceUp').val(),
