@@ -286,7 +286,7 @@
         switch($(this).val()){
           case 'rnd':
             $('.panel-input.rnd').show();
-            $('input[name="comparedWith"]').val(null);
+            $('.panel-input.gene.default-hide').hide();
             $('.panel-input.bed-input.comparedWith').hide();
             break;
           case 'bed':
@@ -294,7 +294,7 @@
             $('.panel-input.bed-input.comparedWith').show();
             break;
           case 'refseq':
-            $('input[name="comparedWith"]').val(null);
+            $('.panel-input.gene.default-hide').show();
             $('.panel-input.bed-input.comparedWith').hide();
             break;
           case 'userlist':
