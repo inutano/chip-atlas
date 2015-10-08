@@ -87,7 +87,7 @@
                         .panel-heading{ :id => "heading-#{class_id}" }
                           %h4.panel-title= "#{set[1]} Class"
                         .panel-body
-                          %select.form-control{ :id => "#{class_id}", :size => 8 }
+                          %select.form-control.classSelect{ :id => "#{class_id}", :size => 8, :name => set[1].downcase.sub("\s","") }
                             - ind = index[set[1].downcase.sub("\s","").intern]
                             - count = ind.values.map{|n| n.values }.flatten.reduce(:+)
                             %option{ :value => "All #{set[1].downcase}s", "selected" => true }= "All #{set[1].downcase}s (#{count})"
@@ -151,15 +151,92 @@
       // retrieve index
       //var indexAll = JSON.parse('#{JSON.dump(@index_all_genome)}');
 
-      // retrieve index
-      var deepIndex;
-      $.ajax({
-        type: 'GET',
-        url: '/data/experiment_index.json',
-        dataType: 'json',
-        success: function(json){
-          deepIndex = json;
-        }
+      // generate subclass options
+      // function
+      function activateTypeAhead(genomeSelected, type, options){
+        // activate typeahead
+        var typeaheadInput = $('#' + genomeSelected + type + 'SubClass.typeahead');
+        var subClassList = $.map(options, function(value, key){
+              return key;
+        });
+
+        // Erase previous data set
+        typeaheadInput.typeahead('destroy');
+
+        var list = new Bloodhound({
+          datumTokenizer: Bloodhound.tokenizers.whitespace,
+          queryTokenizer: Bloodhound.tokenizers.whitespace,
+          local: subClassList
+        });
+
+        typeaheadInput.typeahead({
+          hint: true,
+          highlight: true,
+          minLength: 1
+        },{
+          name: 'list',
+          source: list
+        });
+
+        // sync textbox and input field
+        typeaheadInput.keyup(function(){
+          var input = $(this).val();
+          if($.inArray(input, subClassList) > -1){
+            $('select#' + genomeSelected + type + 'SubClass').val(input);
+          }
+        });
+        typeaheadInput.on('typeahead:select', function(){
+          var input = $(this).val();
+          if($.inArray(input,subClassList) > -1){
+            $('select#' + genomeSelected + type + 'SubClass').val(input);
+          }
+        });
+      }
+
+      // option generation
+      $('select.classSelect').change(function(){
+        // base variables
+        var types = ['antigen', 'celltype'];
+        var typesShort = ['ag', 'cl'];
+
+        // retrieve values
+        var classChanged = $(this).attr('name');
+        var genomeSelected = $('.genomeTab ul li.active a').attr("source").replace(/[\n\s ]/g, "");
+        var agSelected = $('select#' + genomeSelected + 'agClass option:selected').val();
+        var clSelected = $('select#' + genomeSelected + 'clClass option:selected').val();
+
+        // Erase existing options and put an option for 'all'
+        $.each(typesShort, function(i, t){
+          var subClassSelect = $('select#' + genomeSelected + t + 'SubClass');
+          subClassSelect.empty();
+          $("<option>")
+            .attr("value", "-")
+            .attr("selected", "true")
+            .append("All")
+            .appendTo(subClassSelect);
+        });
+
+        $.each([['ag', agSelected], ['cl', clSelected]], function(i, set){
+          $.ajax({
+            type: 'GET',
+            url: '/index?' + 'genome=' + genomeSelected + '&agClass=' + agSelected + '&clClass=' + clSelected + '&type=' + set[0],
+            dataType: 'json',
+            success: function(json){
+              var options = json;
+              $.map(options, function(value, key){
+                return [[key, value]];
+              }).sort().forEach(function(element,index,array){
+                var k = element[0];
+                var v = element[1];
+                $('<option>')
+                  .attr("value", k)
+                  .append(k + " (" + v + ")")
+                  .appendTo('select#' + genomeSelected + set[0] + 'SubClass');
+              });
+              activateTypeAhead(genomeSelected, set[0], options);
+            }
+          });
+        });
       });
 
       // iterate for each genomes
@@ -177,87 +254,16 @@
           });
         });
 
-        // for each subclass section
-        $.each([["antigen", "ag", "cl"], ["celltype", "cl","ag"]], function(it, type){
-          $('select#' + genome + type[1] + 'Class').change(function(){
-            // Common variables
-            var genomeSelected = $('.genomeTab ul li.active a').attr("source").replace(/[\n\s ]/g, "");
-            var valueSelected = $('select#' + genomeSelected + type[1] + 'Class option:selected').val();
-            var anotherSelected = $('select#' + genomeSelected + type[2] + 'Class option:selected').val();
-            var subClassObj = deepIndex[genomeSelected][type[0]][valueSelected][anotherSelected];
-
-            // Erase previous options
-            $('select#' + genomeSelected + type[1] + 'SubClass').empty();
-
-            // Generate an option for All
-            $("<option>")
-              .attr("value", "-")
-              .attr("selected", "true")
-              .append("All")
-              .appendTo('select#' + genomeSelected + type[1] + 'SubClass');
-
-            // Generate options from subClassObj
-            $.map(subClassObj, function(value, key){
-              return [[key, value]];
-            }).sort().forEach(function(element, index, array){
-              var k = element[0];
-              var v = element[1];
-              $('<option>')
-                .attr("value", k)
-                .append(k + " (" + v + ")")
-                .appendTo('select#' + genomeSelected + type[1] + 'SubClass');
-            });
-
-            // activate typeahead
-            var typeaheadInput = $('#' + genomeSelected + type[1] + 'SubClass.typeahead');
-            var subClassList = $.map(subClassObj, function(value, key){
-                  return key;
-                });
-
-            // Erase previous data set
-            typeaheadInput.typeahead('destroy');
-
-            var list = new Bloodhound({
-              datumTokenizer: Bloodhound.tokenizers.whitespace,
-              queryTokenizer: Bloodhound.tokenizers.whitespace,
-              local: subClassList
-            });
-
-            typeaheadInput.typeahead({
-              hint: true,
-              highlight: true,
-              minLength: 1
-            },{
-              name: 'list',
-              source: list
-            });
-
-            // sync textbox and input field
-            typeaheadInput.keyup(function(){
-              var input = $(this).val();
-              if($.inArray(input,subClassList) > -1){
-                $('select#' + genomeSelected + type[1] + 'SubClass').val(input);
-              }
-            });
-            typeaheadInput.on('typeahead:select', function(){
-              var input = $(this).val();
-              if($.inArray(input,subClassList) > -1){
-                $('select#' + genomeSelected + type[1] + 'SubClass').val(input);
-              }
-            });
-          });
-        })
-
         // hide another subclass when one subclass is selected
         function disableAnother(thisSelector, genome){
-          // build alert message object
+          // build console.log message object
           var span = $('<span>').attr("aria-hidden","true").append("×")
 
           var button = $('<button>').attr("type","button").attr("class","close")
-                .attr("data-dismiss","alert").attr("aria-label","Close").append(span);
+                .attr("data-dismiss","console.log").attr("aria-label","Close").append(span);
 
-          var message = $('<div>').attr("class","alert alert-warning alert-dismissible fade in")
-                .attr("role","alert").append(button)
+          var message = $('<div>').attr("class","console.log console.log-warning console.log-dismissible fade in")
+                .attr("role","console.log").append(button)
                 .append('Select one SubClass disables another').append('</div>');
 
           switch(thisSelector.attr("id").replace(genome,"").replace("SubClass","")){
@@ -327,8 +333,6 @@
             }
           };
 
-          // alert(JSON.stringify(data));
-
           $.ajax({
             type : 'post',
             url : "#{app_root}/browse",
@@ -337,12 +341,10 @@
             dataType: 'json',
             scriptCharset: 'utf-8',
             success : function(response) {
-              // alert(JSON.stringify(response));
               window.open(response.url, "_self", "")
             },
             error : function(response){
-              // alert(JSON.stringify(response));
-              alert("error!");
+              console.log("error!");
             },
             complete: function(){
               button.attr("disabled", false);
@@ -369,8 +371,6 @@
             }
           };
 
-          // alert(JSON.stringify(data));
-
           $.ajax({
             type : 'post',
             url : "#{app_root}/download",
@@ -379,13 +379,10 @@
             dataType: 'json',
             scriptCharset: 'utf-8',
             success : function(response) {
-              // alert(JSON.stringify(response));
-              // alert(response.url);
               window.open(response.url, "_self", "")
             },
             error : function(response){
-              // alert(JSON.stringify(response));
-              alert("error!");
+              console.log("error!");
             },
             complete: function(){
               button.attr("disabled", false);

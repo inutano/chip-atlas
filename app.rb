@@ -149,8 +149,6 @@ class PeakJohn < Sinatra::Base
   
   get "/data/:data.json" do
     data = case params[:data]
-           when "experiment_index"
-             Experiment.deep_index_all_genome
            when "list_of_genome"
              Experiment.list_of_genome
            when "qval_range"
@@ -160,13 +158,23 @@ class PeakJohn < Sinatra::Base
     JSON.dump(data)
   end
   
+  get "/index" do
+    genome        = params[:genome]
+    ag_class      = params[:agClass]
+    cl_class      = params[:clClass]
+    subclass_type = params[:type]
+    result = Experiment.get_subclass(genome, ag_class, cl_class, subclass_type)
+    p result
+    content_type "application/json"
+    JSON.dump(result)
+  end
+  
   get "/" do
     haml :about
   end
   
   get "/peak_browser" do
     @index_all_genome = Experiment.index_all_genome
-    @deep_index       = Experiment.deep_index_all_genome
     @list_of_genome   = @index_all_genome.keys
     @qval_range       = Bedfile.qval_range
     haml :peak_browser
