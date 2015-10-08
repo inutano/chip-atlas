@@ -60,6 +60,7 @@
           - antigen = URI.escape(metadata[:agSubClass])
           - celltype = URI.escape(metadata[:clSubClass])
           - fname = URI.escape("#{metadata[:agSubClass]} (@ #{metadata[:clSubClass]}) #{expid}")
+          - dfname = "#{genome}_#{antigen}_#{celltype}_#{expid}"
 
           .btn-toolbar{ role: "toolbar" }
             .btn-group{ role: "group" }
@@ -97,13 +98,13 @@
                   %span.caret
                 %ul.dropdown-menu{ "aria-labelledby" => "download-dropdown" }
                   %li
-                    %a{ :href => "#{nbdc_base}/#{genome}/eachData/bw/#{expid}.bw" }= "BigWig"
+                    %a{ :href => "#{nbdc_base}/#{genome}/eachData/bw/#{expid}.bw", :download => "#{dfname}.bw" }= "BigWig"
                   %li
-                    %a{ :href => "#{nbdc_base}/#{genome}/eachData/bed05/#{expid}.05.bed" }= "Peak-call (q < 1E-05)"
+                    %a{ :href => "#{nbdc_base}/#{genome}/eachData/bed05/#{expid}.05.bed", :download => "#{dfname}.05.bb" }= "Peak-call (q < 1E-05)"
                   %li
-                    %a{ :href => "#{nbdc_base}/#{genome}/eachData/bed10/#{expid}.10.bed" }= "Peak-call (q < 1E-10)"
+                    %a{ :href => "#{nbdc_base}/#{genome}/eachData/bed10/#{expid}.10.bed", :download => "#{dfname}.10.bb" }= "Peak-call (q < 1E-10)"
                   %li
-                    %a{ :href => "#{nbdc_base}/#{genome}/eachData/bed20/#{expid}.20.bed" }= "Peak-call (q < 1E-20)"
+                    %a{ :href => "#{nbdc_base}/#{genome}/eachData/bed20/#{expid}.20.bed", :download => "#{dfname}.20.bb" }= "Peak-call (q < 1E-20)"
             .btn-group{ role: "group" }
               .dropdown
                 .button.btn.btn-primary.btn-lg.dropdown-toggle{ :type => "button", :id => "linkout-dropdown", "data-toggle" => "dropdown", "aria-haspopup" => true, "aria-expanded" => true }

@@ -266,6 +266,9 @@ class PeakJohn < Sinatra::Base
   end
 
   post "/download" do
+    headers \
+      "Content-Type" => "application/force-download",
+      "Content-disposition" => "attachment; filename=\"#{request.body.read.split("/").last}\""
     content_type "application/json"
     JSON.dump({ "url" => bedfile_archive(JSON.parse(request.body.read)) })
   end
