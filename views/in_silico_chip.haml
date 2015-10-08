@@ -250,21 +250,26 @@
       var indexAll = JSON.parse('#{JSON.dump(@index_all_genome)}');
 
       // hide and show by checked radio buttons
+      function defaultPosition(){
+        var genome = $('.genomeTab ul li.active a').attr('source').replace(/[\n\s ]/g, "");
+        $('.panel-input.bed').show();
+        $('.panel-input.gene.default-hide').hide();
+        $('.panel-input.distTSS').hide();
+        $('.panel-input.rnd').show();
+        $('.panel-input.bed-input.comparedWith').hide();
+        $('input#'+genome+'comparedWithBed').prop("checked",false);
+        $('input#'+genome+'comparedWithRandom').prop("checked",true);
+        $('input#'+genome+'comparedWithRandomx1').prop("checked",true);
+        $('input#' + genome + 'DistanceUp').val(0);
+        $('input#' + genome + 'DistanceDown').val(0);
+      }
+
       // bed or gene
       $("input[name='bedORGene']").change(function(){
         var genome = $('.genomeTab ul li.active a').attr('source').replace(/[\n\s ]/g, "");
         switch($(this).val()){
           case 'bed':
-            $('.panel-input.bed').show();
-            $('.panel-input.gene.default-hide').hide();
-            $('.panel-input.distTSS').hide();
-            $('.panel-input.rnd').show();
-            $('.panel-input.bed-input.comparedWith').hide();
-            $('input#'+genome+'comparedWithBed').prop("checked",false);
-            $('input#'+genome+'comparedWithRandom').prop("checked",true);
-            $('input#'+genome+'comparedWithRandomx1').prop("checked",true);
-            $('input#' + genome + 'DistanceUp').val(0);
-            $('input#' + genome + 'DistanceDown').val(0);
+            defaultPosition();
             break;
           case 'gene':
             $('.panel-input.bed').hide();
@@ -467,7 +472,8 @@
         // set tab controller
         $('#' + genome + '-tab a').click(function(e){
           e.preventDefault();
-          $(this).tab('show')
+          $(this).tab('show');
+          defaultPosition();
         })
 
         // collapse controller
