@@ -231,6 +231,8 @@
           // Erase current values
           targetSecondarySelect.empty();
 
+          var type = $(this).val();
+
           // change panel title
           if(type == "antigen"){
             $('#' + genome + 'PrimaryPanel h4').text("2. Choose Antigen");
@@ -241,7 +243,6 @@
           }
 
           // populate primary panel
-          var type = $(this).val();
           $.map(analysis[genome][type], function(value, key){
             return [[key, value]];
           }).sort().forEach(function(element, index, array){
