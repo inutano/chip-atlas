@@ -86,7 +86,7 @@
                       .panel.panel-default
                         - class_id = "#{genome}#{set[0]}Class"
                         .panel-heading{ :id => "heading-#{class_id}" }
-                          %h4.panel-title= "#{i+1} #{set[1]} Class"
+                          %h4.panel-title= "#{i+1}. #{set[1]} Class"
                         .panel-body
                           %select.form-control{ :id => "#{class_id}", :size => 8 }
                             - ind = index[set[1].downcase.sub("\s","").intern]
