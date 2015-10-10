@@ -235,9 +235,10 @@
                           %a.infoBtn{ :value => "info", :id => "#{genome}DistTSS" }
                             &#x24D8;
                         .form-inline
-                          %input.form-control{ :type => "text", :id => "#{genome}DistanceDown", :value => "0", :size => 5 }
-                          bp &#x2266; TSS &#x2266;
-                          %input.form-control{ :type => "text", :id => "#{genome}DistanceUp", :value => "0", :size => 5 }
+                          \-
+                          %input.form-control{ :type => "text", :id => "#{genome}DistanceDown", :value => "0", :size => 1 }
+                          bp &#x2266; TSS &#x2266; +
+                          %input.form-control{ :type => "text", :id => "#{genome}DistanceUp", :value => "0", :size => 1 }
                           bp
 
                       .button-submit
@@ -277,6 +278,8 @@
         $('input#'+genome+'comparedWithBed').prop("checked",false);
         $('input#'+genome+'comparedWithRandom').prop("checked",true);
         $('input#'+genome+'comparedWithRandomx1').prop("checked",true);
+        $('input#'+genome+'comparedWithRefseq').prop("checked",false);
+        $('input#'+genome+'comparedWithUserlist').prop("checked",false);
         $('input#' + genome + 'DistanceUp').val(0);
         $('input#' + genome + 'DistanceDown').val(0);
       }
@@ -294,8 +297,12 @@
             $('.panel-input.distTSS').show();
             $('.panel-input.rnd').show();
             $('.panel-input.bed-input.comparedWith').hide();
-            $('input#'+genome+'comparedWithUserlist').prop("checked",false);
             $('input#'+genome+'comparedWithRefseq').prop("checked",true);
+            $('input#'+genome+'comparedWithBed').prop("checked",false);
+            $('input#'+genome+'comparedWithRandom').prop("checked",false);
+            $('input#'+genome+'comparedWithRandomx1').prop("checked",false);
+            $('input#'+genome+'comparedWithRefseq').prop("checked",true);
+            $('input#'+genome+'comparedWithUserlist').prop("checked",false);
             $('input#' + genome + 'DistanceUp').val(5000);
             $('input#' + genome + 'DistanceDown').val(5000);
             break;
@@ -401,6 +408,7 @@
             var c = (numLinesA + numLinesA*numLinesB) * 3.02e-12 + 2.06e-6;
             var k = 20;
             return 1.8 * Math.pow( (k + numLinesA * (Math.pow(0.8*numLinesA, 1.52) + numLinesA*numLinesB) + c*numRef), 0.85 );
+            return 1.8 * Math.pow( (k + a * (Math.pow(0.8*numLinesA, 1.52) + numLinesA*numLinesB) + c*numRef), 0.85 );
         }
       }
 
@@ -420,21 +428,22 @@
         sacCer3: 5809
       };
 
-      function getSeconds(userData, comparedWith, numRef){
+      function estimateTime(userData, comparedWith, numRef){
         var lf = String.fromCharCode(10);
+        var genome = $('.genomeTab ul li.active a').attr('source').replace(/[\n\s ]/g, "");
         var numLinesUserData = userData.replace(/\n$/g,'').split(lf).length;
         var numLinesComparedWith = comparedWith.replace(/\n$/g,'').split(lf).length;
         switch($('input[name="bedORGene"]:checked').val()){
           case 'bed':
+            if(numLinesUserData == 1 && !userData.match(/\t/)){ // sequence motif
+              numLinesUserData = genomesize[genome] / Math.pow(4, userData.length);
+            }
             switch($('input[name="comparedWith"]:checked').val()){
               case 'rnd':
                 numLinesComparedWith = $('input[name="numShuf"]:checked').val();
                 var seconds = estimatedTime(numLinesUserData, numLinesComparedWith, numRef, 'rnd');
                 break;
               case 'bed':
-                if(numLinesUserData == 1 && !userData.match(/\t/)){ // sequence motif
-                  numLinesUserData = genomesize[genome] / Math.pow(4, userData.length);
-                }
                 if(numLinesComparedWith == 1 && !comparedWith.match(/\t/)){
                   numLinesComparedWith = genomesize[genome] / Math.pow(4, comparedWith.length);
                 }
@@ -464,7 +473,7 @@
       }
 
       $('*').on({
-        'mousemove || change': function(){
+        'mousemove || change || keyup': function(){
           var genome = $('.genomeTab ul li.active a').attr('source').replace(/[\n\s ]/g, "");
           var userData = $('textarea#' + genome + 'UserData').val();
           var comparedWith = $('textarea#' + genome + 'comparedWith').val();
@@ -474,7 +483,7 @@
           var qBed = genome + ',' + ag + ',' + cl + ',' + qval;
           var data = JSON.parse('#{JSON.dump(@number_of_lines)}');
           var numRef = data[qBed];
-          var est = getSeconds(userData, comparedWith, numRef)
+          var est = estimateTime(userData, comparedWith, numRef);
           $('#estimatedRunTime').html(est);
         }
       });
@@ -491,7 +500,7 @@
           e.preventDefault();
           $(this).tab('show');
           defaultPosition();
-        })
+        });
 
         // collapse controller
         $.each(["ag", "cl"], function(i, type){
@@ -515,6 +524,7 @@
             }
       		}
       	});
+      });
 
       // tab trigger event
       $('a[data-toggle="tab"]').on('shown.bs.tab', function(e){
@@ -558,13 +568,13 @@
             alert('To search protein binding to given genes, specify the distance range from the Transcription Start Sites (TSS).\n\Default is between -5000 and +5000 bp from the TSS.');
             break;
           case genome + 'UserDataDesc':
-            alert('Enter a title for the data selected in "4. Select your data". Acceptable letters are alphanumeric (a-Z, 0-9), space ( ), underscore (_), period (.) and hyphen (-).');
+            alert('Enter a title for the data selected in "4. Select your data".\nAcceptable letters are alphanumeric (a-Z, 0-9), space ( ), underscore (_), period (.) and hyphen (-).');
             break;
           case genome + 'ComparedWithDesc':
-            alert('Enter a title for the data selected in "5. Select data to be compared". Acceptable letters are alphanumeric (a-Z, 0-9), space ( ), underscore (_), period (.) and hyphen (-).');
+            alert('Enter a title for the data selected in "5. Select data to be compared".\nAcceptable letters are alphanumeric (a-Z, 0-9), space ( ), underscore (_), period (.) and hyphen (-).');
             break;
           case genome + 'ProjectDesc':
-            alert('Enter a title for this submission. Acceptable letters are alphanumeric (a-Z, 0-9), space ( ), underscore (_), period (.) and hyphen (-).');
+            alert('Enter a title for this submission.\nAcceptable letters are alphanumeric (a-Z, 0-9), space ( ), underscore (_), period (.) and hyphen (-).');
             break;
           case genome + 'DistTSS':
             alert('To search protein binding to given genes, specify the distance range from the Transcription Start Sites (TSS).\n\Default is between -5000 and +5000 bp from the TSS.');
