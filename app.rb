@@ -20,15 +20,15 @@ class PeakJohn < Sinatra::Base
     def app_root
       "#{env["rack.url_scheme"]}://#{env["HTTP_HOST"]}#{env["SCRIPT_NAME"]}"
     end
-    
+
     def archive_base
       "http://dbarchive.biosciencedbc.jp/kyushu-u/"
     end
-    
+
     def fileformat
       ".bed"
     end
-    
+
     def bedfile_archive(data)
       condition = data["condition"]
       genome    = condition["genome"]
@@ -37,7 +37,7 @@ class PeakJohn < Sinatra::Base
     rescue NameError
       nil
     end
-    
+
     def igv_browsing_url(data)
       igv_url   = data["igv"] || "http://localhost:60151"
       condition = data["condition"]
@@ -84,23 +84,23 @@ class PeakJohn < Sinatra::Base
         "#{base}/#{antigen}.#{distance}.tsv"
       end
     end
-    
+
     def get_fastqc_image(run_id) ## :( ##
       head = run_id.sub(/...$/,"")
       path = File.join("http://data.dbcls.jp/~inutano/fastqc", head, run_id)
       save_path = "./public/images/fastqc/#{head}/#{run_id}"
-      
+
       files = ["_fastqc","_1_fastqc","_2_fastqc"].map do |read|
         File.join(app_root, "images/fastqc/#{head}/#{run_id}", run_id+read, "Images/per_base_quality.png")
       end
-      
+
       fstatus = files.map do |url|
         uri = URI(url)
         request = Net::HTTP.new(uri.host, uri.port)
         response = request.request_head(uri.path)
         response.code.to_i
       end
-      
+
       if !fstatus.include?(200)
         FileUtils.mkdir_p(save_path) if !File.exist?(save_path)
         Net::HTTP.start("data.dbcls.jp") do |http|
@@ -114,7 +114,7 @@ class PeakJohn < Sinatra::Base
         end
         `unzip -d "#{save_path}" "#{save_path}/*zip"`
       end
-      
+
       return files.select do |url|
         uri = URI(url)
         request = Net::HTTP.new(uri.host, uri.port)
@@ -122,16 +122,16 @@ class PeakJohn < Sinatra::Base
         response.code.to_i == 200
       end
     end
-    
+
     def exp2run(exp_id)
       h = open(File.join(app_root, "tables/exp2run.json")){|f| JSON.load(f) }
       h[exp_id]
     end
-    
+
     def get_images_path(exp_id)
       exp2run(exp_id).map{|id| get_fastqc_image(id) }.flatten
     end
-    
+
     def number_of_lines
       data = open("http://dbarchive.biosciencedbc.jp/kyushu-u/lib/lineNum.tsv").read
       h = {}
@@ -142,11 +142,11 @@ class PeakJohn < Sinatra::Base
       h
     end
   end
-  
+
   get "/:source.css" do
     sass params[:source].intern
   end
-  
+
   get "/data/:data.json" do
     data = case params[:data]
            when "index_all_genome"
@@ -159,7 +159,7 @@ class PeakJohn < Sinatra::Base
     content_type "application/json"
     JSON.dump(data)
   end
-  
+
   get "/index" do
     genome        = params[:genome]
     ag_class      = params[:agClass]
@@ -170,22 +170,22 @@ class PeakJohn < Sinatra::Base
     content_type "application/json"
     JSON.dump(result)
   end
-  
+
   get "/" do
     haml :about
   end
-  
+
   get "/peak_browser" do
     @index_all_genome = Experiment.index_all_genome
     @list_of_genome   = @index_all_genome.keys
     @qval_range       = Bedfile.qval_range
     haml :peak_browser
   end
-  
+
   get "/colo" do
     @index_all_genome = Experiment.index_all_genome
     @list_of_genome = @index_all_genome.keys
-    
+
     h = {}
     fpath = File.join(app_root, "analysisList.tab")
     open(fpath, "r:UTF-8").read.split("\n").each do |line|
@@ -193,11 +193,11 @@ class PeakJohn < Sinatra::Base
       antigen = cols[0]
       cell_list = cols[1].split(",")
       genome = cols[3]
-      
+
       h[genome] ||= {}
       h[genome][:antigen] ||= {}
       h[genome][:antigen][antigen] = cell_list
-      
+
       cell_list.each do |cl|
         h[genome][:cellline] ||= {}
         h[genome][:cellline][cl] ||= []
@@ -205,14 +205,14 @@ class PeakJohn < Sinatra::Base
       end
     end
     @analysis = h
-    
+
     haml :colo
   end
 
   get "/target_genes" do
     @index_all_genome = Experiment.index_all_genome
     @list_of_genome = @index_all_genome.keys
-    
+
     h = {}
     fpath = File.join(app_root, "analysisList.tab")
     open(fpath, "r:UTF-8").read.split("\n").each do |line|
@@ -226,10 +226,10 @@ class PeakJohn < Sinatra::Base
       end
     end
     @analysis = h
-    
+
     haml :target_genes
   end
-  
+
   get "/in_silico_chip" do
     @index_all_genome = Experiment.index_all_genome
     @list_of_genome = @index_all_genome.keys
@@ -237,7 +237,11 @@ class PeakJohn < Sinatra::Base
     @number_of_lines = number_of_lines
     haml :in_silico_chip
   end
-  
+
+  get "/in_silico_chip_result" do
+    haml :in_silico_chip_result
+  end
+
   post "/colo" do
     content_type "application/json"
     JSON.dump({ "url" => colo_url(JSON.parse(request.body.read), params[:type]) })
@@ -248,7 +252,7 @@ class PeakJohn < Sinatra::Base
     # haml :colo_result
     redirect @iframe_url
   end
-  
+
   post "/target_genes" do
     content_type "application/json"
     JSON.dump({ "url" => target_genes_url(JSON.parse(request.body.read), params[:type]) })
@@ -263,7 +267,7 @@ class PeakJohn < Sinatra::Base
   get "/documentation" do
     haml :documentation
   end
-  
+
   post "/browse" do
     content_type "application/json"
     JSON.dump({ "url" => igv_browsing_url(JSON.parse(request.body.read)) })
@@ -276,14 +280,20 @@ class PeakJohn < Sinatra::Base
     content_type "application/json"
     JSON.dump({ "url" => bedfile_archive(JSON.parse(request.body.read)) })
   end
-  
+
+  get "/wabi_chipatlas" do
+    id = params[:id]
+    uge_log = open("http://ddbj.nig.ac.jp/wabi/chipatlas/"+id).read
+    uge_log.split("\n").select{|l| l =~ /^status/ }[0].split(": ")[1]
+  end
+
   post "/wabi_chipatlas" do
     # json_headers = {"Content-Type" => "application/json", "Accept" => "application/json"}
     res = Net::HTTP.post_form(URI.parse('http://ddbj.nig.ac.jp/wabi/chipatlas/'), JSON.parse(request.body.read))
     id = res.body.split("\n").select{|n| n =~ /^requestId/ }.first.split("\s").last
     JSON.dump({ "requestId" => id })
   end
-  
+
   get "/view" do
     @expid = params[:id]
     404 if Experiment.id_valid?(@expid)

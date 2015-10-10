@@ -363,6 +363,7 @@
             distanceUp: $('input#' + genome + 'DistanceUp').val(),
             distanceDown: $('input#' + genome + 'DistanceDown').val(),
             title: $('input#' + genome + 'ProjectTitle').val(),
+            redirectUrl: $(location).attr('origin') + "/in_silico_chip_result",
             format: 'text',
             result: 'www',
             qsubOptions: '-N test',
