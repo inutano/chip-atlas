@@ -245,7 +245,7 @@
                         %button.btn.btn-primary.btn-lg.btn-block{ :id => "virtual-chip-submit", :type => "button" }= "submit"
                       .estimated-run-time
                         Estimated run time:
-                        %a{ :id => "estimatedRunTime" }= "-"
+                        %a#estimated-run-time{ :id => "estimatedRunTime" }= "-"
 
     /
       Bootstrap Core Javascript
@@ -380,8 +380,10 @@
             success : function(response) {
               alert(JSON.stringify(response));
               var requestId = response.requestId;
+              var calcm = $('a#estimated-run-time').text();
               var baseUrl = 'http://dbarchive.biosciencedbc.jp/kyushu-u/lib/vcResult.html?id=';
-              window.open(baseUrl + requestId + '&title=' + data['title'], "_self", ""); // + '&calcm=' + calcm;
+              var requestUrl = baseUrl + requestId + '&title=' + data['title'] + '&calcm=' + calcm
+              window.open(requestUrl, "_self", "");
             },
             error : function(response){
               // alert(JSON.stringify(response));
