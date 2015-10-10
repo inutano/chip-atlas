@@ -149,6 +149,8 @@ class PeakJohn < Sinatra::Base
   
   get "/data/:data.json" do
     data = case params[:data]
+           when "index_all_genome"
+             Experiment.index_all_genome
            when "list_of_genome"
              Experiment.list_of_genome
            when "qval_range"
