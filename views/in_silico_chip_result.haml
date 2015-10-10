@@ -66,9 +66,9 @@
             in silico
           ChIP
         %p= "Analyze your data with public ChIP-seq data."
-      .container
+      .container.job-info
         %p
-          Result page will be available for a week from the time when 'status' is 'finished'.
+          Result page URL will be available for a week from the time when 'status' is 'finished'.
         %table.table
           %tr
             %td
@@ -84,12 +84,12 @@
             %td#submitted-at
           %tr
             %td
-              Current time:
-            %td#current-time
-          %tr
-            %td
               Estimated finishing time:
             %td#estimated-finishing-time
+          %tr
+            %td
+              Current time:
+            %td#current-time
           %tr
             %td
               Status
@@ -144,7 +144,7 @@
       var reqUrl = wabiUrl + reqId;
       var resultUrl = reqUrl + "?info=result";
 
-      $('td#project-title').text('Project title: '+title);
+      $('td#project-title').text(title);
       $('td#request-id').text(reqId);
       $('a#result-url').text(resultUrl);
 
