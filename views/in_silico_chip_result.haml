@@ -165,13 +165,14 @@
           calcTime = 0;
           break;
         case /mins$/.test(calcm):
-          calcTime = calcm.split("\s")[0];
+          calcTime = calcm.split(" ")[0];
           break;
         case /hr$/.test(calcm):
-          calcTime = calcm.split("\s")[0] * 60;
+          calcTime = calcm.split(" ")[0] * 60;
           break;
       }
-      $('td#estimated-finishing-time').text(dateFormat(now.setMinutes(now.getMinutes() + calcTime)));
+      var estFinish = new Date(now.setMinutes(now.getMinutes()+parseInt(calcTime,10)));
+      $('td#estimated-finishing-time').text(dateFormat(estFinish));
 
       // Clock
       $(function(){
