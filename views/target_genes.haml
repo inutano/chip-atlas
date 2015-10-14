@@ -108,15 +108,15 @@
                       %form{ :id => "#{panel}-form" }
                         .radio
                           %label
-                            %input{ :type => "radio", :id => "", :value => "1", :name => "distanceOption", checked: true }
+                            %input{ :type => "radio", :id => "", :value => "1", :name => genome +  "DistanceOption", checked: true }
                             = " ±1k "
                         .radio
                           %label
-                            %input{ :type => "radio", :id => "", :value => "5", :name => "distanceOption" }
+                            %input{ :type => "radio", :id => "", :value => "5", :name => genome + "DistanceOption" }
                             = " ±5k "
                         .radio
                           %label
-                            %input{ :type => "radio", :id => "", :value => "10", :name => "distanceOption" }
+                            %input{ :type => "radio", :id => "", :value => "10", :name => genome +  "DistanceOption" }
                             = " ±10k "
 
               .row
@@ -301,7 +301,7 @@
           condition: {
             genome: genome,
             antigen: $('select#' + genome + 'AntigenPanel-select option:selected').val(),
-            distance: $('input[name=distanceOption]:checked').val()
+            distance: $('input[name='+genome+'DistanceOption]:checked').val()
           }
         };
         return data;
