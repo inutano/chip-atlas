@@ -345,14 +345,15 @@
             // igv: $().text
             condition: {
               genome: genome,
-              agClass: $('#' + genome + 'agClass option:selected').val(),
-              agSubClass: $('#' + genome + 'agSubClass option:selected').val(),
-              clClass: $('#' + genome + 'clClass option:selected').val(),
-              clSubClass: $('#' + genome + 'clSubClass option:selected').val(),
-              qval: $('#' + genome + 'qval option:selected').val()
+              agClass: $('select#' + genome + 'agClass option:selected').val(),
+              agSubClass: $('select#' + genome + 'agSubClass option:selected').val(),
+              clClass: $('select#' + genome + 'clClass option:selected').val(),
+              clSubClass: $('select#' + genome + 'clSubClass option:selected').val(),
+              qval: $('select#' + genome + 'qval option:selected').val()
             }
           };
 
+          alert(JSON.stringify(data));
           $.ajax({
             type : 'post',
             url : "#{app_root}/browse",
