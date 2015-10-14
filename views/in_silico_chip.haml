@@ -172,45 +172,45 @@
                       %form
                         .checkbox.panel-input.bed
                           %label
-                            %input{ :type => "radio", :id => "#{genome}comparedWithRandom", :name => "comparedWith", :value => "rnd", :checked => "checked" }
+                            %input{ :type => "radio", :id => "#{genome}ComparedWithRandom", :name => "comparedWith", :value => "rnd", :checked => "checked" }
                             Random permutation of user data
-                            %a.infoBtn{ :id => "#{genome}comparedWithRandom" }
+                            %a.infoBtn{ :id => "#{genome}ComparedWithRandom" }
                               &#x24D8;
                           .checkbox.form-inline.panel-input.rnd
                             %p.help-block.ptimes{ :for => "permutationTimes"}
                               Permutation times
-                              %input.form-control{ :type => "radio", :id => "#{genome}comparedWithRandomx1", :name => "numShuf", :value => "1", :checked => "checked" }
+                              %input.form-control{ :type => "radio", :id => "#{genome}ComparedWithRandomx1", :name => "numShuf", :value => "1", :checked => "checked" }
                               x1
-                              %input.form-control{ :type => "radio", :id => "#{genome}comparedWithRandomx10", :name => "numShuf", :value => "10"}
+                              %input.form-control{ :type => "radio", :id => "#{genome}ComparedWithRandomx10", :name => "numShuf", :value => "10"}
                               x10
-                              %input.form-control{ :type => "radio", :id => "#{genome}comparedWithRandomx100", :name => "numShuf", :value => "100"}
+                              %input.form-control{ :type => "radio", :id => "#{genome}ComparedWithRandomx100", :name => "numShuf", :value => "100"}
                               x100
                         .checkbox.panel-input.bed
                           %label
-                            %input{ :type => "radio", :id => "#{genome}comparedWithBed", :name => "comparedWith", :value => "bed" }
+                            %input{ :type => "radio", :id => "#{genome}ComparedWithBed", :name => "comparedWith", :value => "bed" }
                             BED or sequence motif
-                            %a.infoBtn{ :id => "#{genome}comparedWithBed" }
+                            %a.infoBtn{ :id => "#{genome}ComparedWithBed" }
                               &#x24D8;
                       %form
                         .checkbox.panel-input.gene.default-hide
                           %label
-                            %input{ :type => "radio", :id => "#{genome}comparedWithRefseq", :name => "comparedWith", :value => "refseq" }
+                            %input{ :type => "radio", :id => "#{genome}ComparedWithRefseq", :name => "comparedWith", :value => "refseq" }
                             Refseq coding genes (exluding user data)
-                            %a.infoBtn{ :id => "#{genome}comparedWithRefseq" }
+                            %a.infoBtn{ :id => "#{genome}ComparedWithRefseq" }
                               &#x24D8;
                         .checkbox.panel-input.gene.default-hide
                           %label
-                            %input{ :type => "radio", :id => "#{genome}comparedWithUserlist", :name => "comparedWith", :value => "userlist" }
+                            %input{ :type => "radio", :id => "#{genome}ComparedWithUserlist", :name => "comparedWith", :value => "userlist" }
                             Gene list (Gene symbols)
-                            %a.infoBtn{ :id => "#{genome}comparedWithUserlist" }
+                            %a.infoBtn{ :id => "#{genome}ComparedWithUserlist" }
                               &#x24D8;
                       .panel-input.bed-input.comparedWith.default-hide
                         .form-group.panel-input-textarea
-                          %textarea.form-control{ :name => "txtB", :id => "#{genome}comparedWith", :rows => 8, :cols => 50, :placeholder => "Click the info buttons above to show the description format.", :value => nil }
+                          %textarea.form-control{ :name => "txtB", :id => "#{genome}ComparedWith", :rows => 8, :cols => 50, :placeholder => "Click the info buttons above to show the description format.", :value => nil }
                         %row
                           .col-md-6
                             .form-group
-                              %input{ :type => "file", :id => "#{genome}comparedWithFile", :name => "fsel" }
+                              %input{ :type => "file", :id => "#{genome}ComparedWithFile", :name => "fsel" }
                               %p.help-block
                                 Choose local file
                           .col-md-5.col-md-offset-1
@@ -347,11 +347,11 @@
         $('.panel-input.distTSS').hide();
         $('.panel-input.rnd').show();
         $('.panel-input.bed-input.comparedWith').hide();
-        $('input#'+genome+'comparedWithBed').prop("checked",false);
-        $('input#'+genome+'comparedWithRandom').prop("checked",true);
-        $('input#'+genome+'comparedWithRandomx1').prop("checked",true);
-        $('input#'+genome+'comparedWithRefseq').prop("checked",false);
-        $('input#'+genome+'comparedWithUserlist').prop("checked",false);
+        $('input#'+genome+'ComparedWithBed').prop("checked",false);
+        $('input#'+genome+'ComparedWithRandom').prop("checked",true);
+        $('input#'+genome+'ComparedWithRandomx1').prop("checked",true);
+        $('input#'+genome+'ComparedWithRefseq').prop("checked",false);
+        $('input#'+genome+'ComparedWithUserlist').prop("checked",false);
         $('input#' + genome + 'DistanceUp').val(0);
         $('input#' + genome + 'DistanceDown').val(0);
       }
@@ -369,12 +369,12 @@
             $('.panel-input.distTSS').show();
             $('.panel-input.rnd').show();
             $('.panel-input.bed-input.comparedWith').hide();
-            $('input#'+genome+'comparedWithRefseq').prop("checked",true);
-            $('input#'+genome+'comparedWithBed').prop("checked",false);
-            $('input#'+genome+'comparedWithRandom').prop("checked",false);
-            $('input#'+genome+'comparedWithRandomx1').prop("checked",false);
-            $('input#'+genome+'comparedWithRefseq').prop("checked",true);
-            $('input#'+genome+'comparedWithUserlist').prop("checked",false);
+            $('input#'+genome+'ComparedWithRefseq').prop("checked",true);
+            $('input#'+genome+'ComparedWithBed').prop("checked",false);
+            $('input#'+genome+'ComparedWithRandom').prop("checked",false);
+            $('input#'+genome+'ComparedWithRandomx1').prop("checked",false);
+            $('input#'+genome+'ComparedWithRefseq').prop("checked",true);
+            $('input#'+genome+'ComparedWithUserlist').prop("checked",false);
             $('input#' + genome + 'DistanceUp').val(5000);
             $('input#' + genome + 'DistanceDown').val(5000);
             break;
@@ -413,7 +413,7 @@
           var genome = $('.genomeTab ul li.active a').attr('source').replace(/[\n\s ]/g, "");
 
           var bbf;
-          var bbf_txt = $('textarea#' + genome + 'comparedWith').val();
+          var bbf_txt = $('textarea#' + genome + 'ComparedWith').val();
           if(bbf_txt == ""){
             bbf = "empty";
           }else{
@@ -546,7 +546,7 @@
         'mousemove || change || keyup': function(){
           var genome = $('.genomeTab ul li.active a').attr('source').replace(/[\n\s ]/g, "");
           var userData = $('textarea#' + genome + 'UserData').val();
-          var comparedWith = $('textarea#' + genome + 'comparedWith').val();
+          var comparedWith = $('textarea#' + genome + 'ComparedWith').val();
           var ag = $('select#' + genome + 'agClass').val();
           var cl = $('select#' + genome + 'clClass').val();
           var qval = $('select#' + genome + 'qval').val();
@@ -580,7 +580,7 @@
         });
 
         // put file content into the textarea
-        $('input#' + genome + 'UserDataFile, input#' + genome + 'comparedWithFile').change(function(event) {
+        $('input#' + genome + 'UserDataFile, input#' + genome + 'ComparedWithFile').change(function(event) {
           console.log("file detected");
           var fileId = $(this).attr('id');
           var file = event.target.files;
@@ -589,8 +589,8 @@
           reader.onload = function(ev) {
             if (fileId == genome + 'UserDataFile') {
               $('textarea#' + genome + 'UserData').val(reader.result);
-            } else if (fileId == genome + 'comparedWithFile') {
-              $('textarea#' + genome + 'comparedWith').val(reader.result);
+            } else if (fileId == genome + 'ComparedWithFile') {
+              $('textarea#' + genome + 'ComparedWith').val(reader.result);
             }
       		}
       	});
@@ -622,16 +622,16 @@
           case genome + 'UserDataGenes':
           	alert('Check this if you search proteins bound around given genes.\n\n' + note1);
             break;
-          case genome + 'comparedWithRandom':
+          case genome + 'ComparedWithRandom':
             alert('Check this if you compare \'My data\' with random background. In this case, each genomic location of \'My data\' is permuted on a random chromosome at a random position for specified times. Increasing the permutation times will provide a hihgly randomized background, or a high quality of statistical test, but the calcuration time will be longer.');
             break;
-          case genome + 'comparedWithBed':
+          case genome + 'ComparedWithBed':
             alert('Check this if you compare \'My data\' with another data (UCSC BED format or a sequence motif).\n\n' + note2);
             break;
-          case genome + 'comparedWithRefseq':
+          case genome + 'ComparedWithRefseq':
             alert('Check this if you compare \'My data\' with RefSeq coding genes excluding those listed in \'My data\'.');
             break;
-          case genome + 'comparedWithUserlist':
+          case genome + 'ComparedWithUserlist':
             alert('Check this if you compare \'My data\' with another gene list.\n\n' + note1);
             break;
           case genome + 'TSS':
