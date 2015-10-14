@@ -363,7 +363,6 @@
             distanceUp: $('input#' + genome + 'DistanceUp').val(),
             distanceDown: $('input#' + genome + 'DistanceDown').val(),
             title: $('input#' + genome + 'ProjectTitle').val(),
-            redirectUrl: $(location).attr('origin') + "/in_silico_chip_result",
             format: 'text',
             result: 'www',
             qsubOptions: '-N test',
@@ -379,16 +378,14 @@
             dataType: 'json',
             scriptCharset: 'utf-8',
             success : function(response) {
-              alert(JSON.stringify(response));
               var requestId = response.requestId;
               var calcm = $('a#estimated-run-time').text();
-              var baseUrl = 'http://dbarchive.biosciencedbc.jp/kyushu-u/lib/vcResult.html?id=';
-              var requestUrl = baseUrl + requestId + '&title=' + data['title'] + '&calcm=' + calcm
-              window.open(requestUrl, "_self", "");
+              var redirectUrl = '/in_silico_chip_result?id=' + requestId + '&title=' + data['title'] + '&calcm=' + calcm;
+              window.open(redirectUrl, "_self", "");
             },
             error : function(response){
               // alert(JSON.stringify(response));
-              alert("error!");
+              alert("Something went bad, or you did it wrong.");
             },
             complete: function(){
               button.attr("disabled", false);
