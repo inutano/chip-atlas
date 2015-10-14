@@ -318,7 +318,7 @@
                     type: 'GET',
                     url: '/tables/bed/bedB_' + genome + '.bed',
                     success: function(data){
-                      $('textarea#' + genome + 'UserData').val(data);
+                      $('textarea#' + genome + 'ComparedWith').val(data);
                     }
                   });
                   break;
@@ -327,7 +327,7 @@
                     type: 'GET',
                     url: '/tables/genes/geneB_' + genome + '.txt',
                     success: function(data){
-                      $('textarea#' + genome + 'UserData').val(data);
+                      $('textarea#' + genome + 'ComparedWith').val(data);
                     }
                   });
                   break;
