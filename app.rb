@@ -45,15 +45,6 @@ class PeakJohn < Sinatra::Base
       "#{igv_url}/load?genome=#{genome}&file=#{bedfile_archive(data)}"
     end
 
-    def colo_url(data)
-      base = "http://devbio.med.kyushu-u.ac.jp/chipome/colo"
-      condition = data["condition"]
-      genome    = condition["genome"]
-      antigen   = condition["antigen"]
-      cellline  = condition["cellline"].gsub("\s","_")
-      "#{app_root}/colo_result?base=#{base}/#{antigen}.#{cellline}.html"
-    end
-
     def colo_url(data,type)
       condition = data["condition"]
       genome    = condition["genome"]
