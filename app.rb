@@ -142,7 +142,7 @@ class PeakJohn < Sinatra::Base
       h
     end
     
-    def analysis_list
+    def colo_analysis
       h = {}
       fpath = File.join(app_root, "analysisList.tab")
       open(fpath, "r:UTF-8").read.split("\n").each do |line|
@@ -163,6 +163,22 @@ class PeakJohn < Sinatra::Base
       end
       h
     end
+    
+    def target_genes_analysis
+      h = {}
+      fpath = File.join(app_root, "analysisList.tab")
+      open(fpath, "r:UTF-8").read.split("\n").each do |line|
+        cols = line.split("\t")
+        antigen = cols[0]
+        status = cols[2]
+        genome = cols[3]
+        if status == "+"
+          h[genome] ||= []
+          h[genome] << antigen
+        end
+      end
+      h
+    end
   end
 
   get "/:source.css" do
@@ -177,8 +193,10 @@ class PeakJohn < Sinatra::Base
              Experiment.list_of_genome
            when "qval_range"
              Experiment.qval_range
-           when "analysis"
-             analysis_list
+           when "colo_analysis"
+             colo_analysis
+           when "target_genes_analysis"
+             target_genes_analysis
            end
     content_type "application/json"
     JSON.dump(data)
