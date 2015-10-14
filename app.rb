@@ -269,16 +269,17 @@ class PeakJohn < Sinatra::Base
   end
 
   post "/browse" do
+    request.body.rewind
+    json = request.body.read
     content_type "application/json"
-    JSON.dump({ "url" => igv_browsing_url(JSON.parse(request.body.read)) })
+    JSON.dump({ "url" => igv_browsing_url(JSON.parse(json)) })
   end
 
   post "/download" do
-    headers \
-      "Content-Type" => "application/force-download",
-      "Content-disposition" => "attachment; filename=\"#{request.body.read.split("/").last}\""
+    request.body.rewind
+    json = request.body.read
     content_type "application/json"
-    JSON.dump({ "url" => bedfile_archive(JSON.parse(request.body.read)) })
+    JSON.dump({ "url" => bedfile_archive(JSON.parse(json)) })
   end
 
   get "/wabi_chipatlas" do
