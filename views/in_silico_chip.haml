@@ -280,12 +280,17 @@
         window.open('/view?id='+expid);
       });
 
+      // function
+      function genomeSelected(){
+        return $('.genomeTab ul li.active a').attr('source').replace(/[\n\s ]/g, "");
+      }
+
       $(function(){
         $('a.dataExample').on('click', function(event){
           event.preventDefault();
           event.stopPropagation();
           var id = $(this).attr("id");
-          var genome = $('.genomeTab ul li.active a').attr('source').replace(/[\n\s ]/g, "");
+          var genome = genomeSelected();
           switch(id){
             case genome + "UserData":
               var type = $('input[name="bedORGene"]:checked').val();
@@ -341,7 +346,7 @@
 
       // hide and show by checked radio buttons
       function defaultPosition(){
-        var genome = $('.genomeTab ul li.active a').attr('source').replace(/[\n\s ]/g, "");
+        var genome = genomeSelected();
         $('.panel-input.bed').show();
         $('.panel-input.gene.default-hide').hide();
         $('.panel-input.distTSS').hide();
@@ -358,7 +363,7 @@
 
       // bed or gene
       $("input[name='bedORGene']").change(function(){
-        var genome = $('.genomeTab ul li.active a').attr('source').replace(/[\n\s ]/g, "");
+        var genome = genomeSelected();
         switch($(this).val()){
           case 'bed':
             defaultPosition();
@@ -383,7 +388,7 @@
 
       // compared with
       $("input[name='comparedWith']").change(function(){
-        var genome = $('.genomeTab ul li.active a').attr('source').replace(/[\n\s ]/g, "");
+        var genome = genomeSelected();
         switch($(this).val()){
           case 'rnd':
             $('.panel-input.rnd').show();
@@ -404,64 +409,118 @@
         };
       });
 
+      function retrieveInputData(type){
+        var genome = genomeSelected();
+        var flatfile;
+        var inputText = $('textarea#' + genome + type).val();
+        if(inputText == ""){
+          flatfile = "empty";
+        }else{
+          flatfile = inputText;
+        }
+        return flatfile;
+      }
+
+      function retrievePostData(){
+        var genome = genomeSelected();
+        var data = {
+          genome: genome,
+          antigenClass: $('select#' + genome + 'agClass option:selected').val(),
+          cellClass: $('select#' + genome + 'clClass option:selected').val(),
+          threshold: $('select#' + genome + 'qval option:selected').val(),
+          typeA: $('input[name="bedORGene"]:checked').val(),
+          bedAFile: $('textarea#' + genome + 'UserData').val(),
+          descriptionA: $('input#' + genome + 'UserDataTitle').val(),
+          typeB: $('input[name="comparedWith"]:checked').val(),
+          bedBFile: retrieveInputData('ComparedWith'),
+          descriptionB: $('input#' + genome + 'ComparedWithTitle').val(),
+          permTime: $('input[name="numShuf"]:checked').val(),
+          distanceUp: $('input#' + genome + 'DistanceUp').val(),
+          distanceDown: $('input#' + genome + 'DistanceDown').val(),
+          title: $('input#' + genome + 'ProjectTitle').val(),
+          format: 'text',
+          result: 'www',
+          qsubOptions: '-N test',
+          address: '',
+        };
+        return data;
+      }
+
+      function evaluateText(data){
+        var descSet = [
+          [data["bedAFile"], "bed"],
+          [data["descriptionA"], "desc"],
+          [data["bedBFile"], "bed"],
+          [data["descriptionB"], "desc"],
+          [data["distanceUp"], "dist"],
+          [data["distanceDown"], "dist"],
+          [data["title"], "desc"]
+        ];
+        var allowedChars = {
+          bed: "alphanumerics, tab, underscore(_)",
+          desc: "alphanumerics, underscore(_), dot(.), dash(-)",
+          dist: "integer"
+        }
+        $.each(descSet, function(i,set){
+          if(isValid(set[0],set[1]) != true){
+            //alert("Invalid characters detected. Allowed characters are;\n"+allowedChars(set[0]));
+            throw new Error("Invalid characters detected. Allowed characters are;\n"+allowedChars[set[1]]);
+          }
+        });
+      }
+
+      function isValid(string, type){
+        var regexp;
+        switch(type){
+          case "bed":
+            regexp = /[A-Za-z0-9\t_]/g;
+            break;
+          case "desc":
+            regexp = /[A-Za-z0-9_.-]/g;
+            break;
+          case "dist":
+            regexp = /[0-9]/g;
+            break;
+        }
+        var filtered = string.replace(regexp, "");
+        if(filtered === ""){
+          return true
+        }
+      }
+
       // send data to wabi api
       $(function(){
         $("button#virtual-chip-submit").click(function(){
           var button = $(this);
           button.attr("disabled", true);
-
-          var genome = $('.genomeTab ul li.active a').attr('source').replace(/[\n\s ]/g, "");
-
-          var bbf;
-          var bbf_txt = $('textarea#' + genome + 'ComparedWith').val();
-          if(bbf_txt == ""){
-            bbf = "empty";
-          }else{
-            bbf = bbf_txt;
+          var data = retrievePostData();
+          // evaluate text input and reject if invalid characters are found
+          try{
+            evaluateText(data);
+            $.ajax({
+              type : 'post',
+              url : "#{app_root}/wabi_chipatlas",
+              data: JSON.stringify(data),
+              contentType: 'application/json',
+              dataType: 'json',
+              scriptCharset: 'utf-8',
+              success : function(response) {
+                var requestId = response.requestId;
+                var calcm = $('a#estimated-run-time').text();
+                var redirectUrl = '/in_silico_chip_result?id=' + requestId + '&title=' + data['title'] + '&calcm=' + calcm;
+                window.open(redirectUrl, "_self", "");
+              },
+              error : function(response){
+                alert("Something went bad, or you did it wrong.");
+              },
+              complete: function(){
+                button.attr("disabled", false);
+              }
+            });
+          }catch(e){
+            alert(e.message);
+            button.prop("disabled", false);
           }
-
-          var data = {
-            genome: genome,
-            antigenClass: $('select#' + genome + 'agClass option:selected').val(),
-            cellClass: $('select#' + genome + 'clClass option:selected').val(),
-            threshold: $('select#' + genome + 'qval option:selected').val(),
-            typeA: $('input[name="bedORGene"]:checked').val(),
-            bedAFile: $('textarea#' + genome + 'UserData').val(),
-            descriptionA: $('input#' + genome + 'UserDataTitle').val(),
-            typeB: $('input[name="comparedWith"]:checked').val(),
-            bedBFile: bbf,
-            descriptionB: $('input#' + genome + 'ComparedWithTitle').val(),
-            permTime: $('input[name="numShuf"]:checked').val(),
-            distanceUp: $('input#' + genome + 'DistanceUp').val(),
-            distanceDown: $('input#' + genome + 'DistanceDown').val(),
-            title: $('input#' + genome + 'ProjectTitle').val(),
-            format: 'text',
-            result: 'www',
-            qsubOptions: '-N test',
-            address: '',
-          };
-
-          $.ajax({
-            type : 'post',
-            url : "#{app_root}/wabi_chipatlas",
-            data: JSON.stringify(data),
-            contentType: 'application/json',
-            dataType: 'json',
-            scriptCharset: 'utf-8',
-            success : function(response) {
-              var requestId = response.requestId;
-              var calcm = $('a#estimated-run-time').text();
-              var redirectUrl = '/in_silico_chip_result?id=' + requestId + '&title=' + data['title'] + '&calcm=' + calcm;
-              window.open(redirectUrl, "_self", "");
-            },
-            error : function(response){
-              alert("Something went bad, or you did it wrong.");
-            },
-            complete: function(){
-              button.attr("disabled", false);
-            }
-          });
-
         })
       })
 
@@ -500,7 +559,7 @@
 
       function estimateTime(userData, comparedWith, numRef){
         var lf = String.fromCharCode(10);
-        var genome = $('.genomeTab ul li.active a').attr('source').replace(/[\n\s ]/g, "");
+        var genome = genomeSelected();
         var numLinesUserData = userData.replace(/\n$/g,'').split(lf).length;
         var numLinesComparedWith = comparedWith.replace(/\n$/g,'').split(lf).length;
         switch($('input[name="bedORGene"]:checked').val()){
@@ -544,7 +603,7 @@
 
       $('*').on({
         'mousemove || change || keyup': function(){
-          var genome = $('.genomeTab ul li.active a').attr('source').replace(/[\n\s ]/g, "");
+          var genome = genomeSelected();
           var userData = $('textarea#' + genome + 'UserData').val();
           var comparedWith = $('textarea#' + genome + 'ComparedWith').val();
           var ag = $('select#' + genome + 'agClass').val();
@@ -600,7 +659,7 @@
       $('a[data-toggle="tab"]').on('shown.bs.tab', function(e){
         var activatedTab = e.target;
         var previousTab = e.relatedTarget;
-        var genome = $('.genomeTab ul li.active a').attr('source').replace(/[\n\s ]/g, "");
+        var genome = genomeSelected();
         $.each(["ag","cl"], function(i, value){
           $('select#' + genome + value + 'SubClass').empty();
         })
@@ -609,7 +668,7 @@
       // Q & A
       $('.infoBtn').click(function(){
         var altype = $(this).attr('id');
-        var genome = $('.genomeTab ul li.active a').attr('source').replace(/[\n\s ]/g, "");
+        var genome = genomeSelected();
 
         var note1 = 'Gene symbols in accordance with following gene nomenclature databases are acceptable:\n  H. sapiens: HGNC\n  M. musculus: MGI\n  D. melanogaster: FlyBase\n  C. elegans: WormBase\n  S. cerevisiae: SGD\n\nAcceptable example:\n  POU5F1\n  SPI1\n  TP53\n\nBad example:\n  OCT4\n  PU.1\n  p53';
 
