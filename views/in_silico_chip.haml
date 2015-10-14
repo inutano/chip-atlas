@@ -148,13 +148,20 @@
                             Gene list (Gene symbols)
                             %a.infoBtn{ :id => "#{genome}UserDataGenes" }
                               &#x24D8;
-                      .panel-input.bed-input.userData
-                        .form-group.panel-input-textarea
-                          %textarea.form-control{ :name => "txtA", :id => "#{genome}UserData", :rows => 8, :cols => 50, :placeholder => "Click the info buttons above to show the description format."}
-                        .form-group
-                          %input{ :type => "file", :id => "#{genome}UserDataFile" }
-                          %p.help-block
-                            Choose file on your computer
+                        .panel-input.bed-input.userData
+                          .form-group.panel-input-textarea
+                            %textarea.form-control{ :name => "txtA", :id => "#{genome}UserData", :rows => 8, :cols => 50, :placeholder => "Click the info buttons above to show the description format."}
+                          %row
+                            .col-md-6
+                              .form-group
+                                %input{ :type => "file", :id => "#{genome}UserDataFile" }
+                                %p.help-block
+                                  Choose local file
+                            .col-md-5.col-md-offset-1
+                              .linkExample
+                                %a.dataExample{ href: "#", id: "#{genome}UserData" }
+                                  Try with example
+
 
                 .col-md-4
                   .panel.panel-default
@@ -200,10 +207,16 @@
                       .panel-input.bed-input.comparedWith.default-hide
                         .form-group.panel-input-textarea
                           %textarea.form-control{ :name => "txtB", :id => "#{genome}comparedWith", :rows => 8, :cols => 50, :placeholder => "Click the info buttons above to show the description format.", :value => nil }
-                        .form-group
-                          %input{ :type => "file", :id => "#{genome}comparedWithFile", :name => "fsel" }
-                          %p.help-block
-                            Choose file on your computer
+                        %row
+                          .col-md-6
+                            .form-group
+                              %input{ :type => "file", :id => "#{genome}comparedWithFile", :name => "fsel" }
+                              %p.help-block
+                                Choose local file
+                          .col-md-5.col-md-offset-1
+                            .linkExample
+                              %a.dataExample{ href: "#", id: "#{genome}ComparedWith" }
+                                Try with example
 
                 .col-md-4
                   .panel.panel-default
@@ -265,6 +278,65 @@
         event.preventDefault();
         var expid = $('input#jumpToExperiment').val();
         window.open('/view?id='+expid);
+      });
+
+      $(function(){
+        $('a.dataExample').on('click', function(event){
+          event.preventDefault();
+          event.stopPropagation();
+          var id = $(this).attr("id");
+          var genome = $('.genomeTab ul li.active a').attr('source').replace(/[\n\s ]/g, "");
+          switch(id){
+            case genome + "UserData":
+              var type = $('input[name="bedORGene"]:checked').val();
+              switch(type){
+                case "bed":
+                  $.ajax({
+                    type: 'GET',
+                    url: '/tables/bed/bedA_' + genome + '.bed',
+                    success: function(data){
+                      $('textarea#' + genome + 'UserData').val(data);
+                    }
+                  });
+                  break;
+                case "gene":
+                  $.ajax({
+                    type: 'GET',
+                    url: '/tables/genes/geneA_' + genome + '.txt',
+                    success: function(data){
+                      $('textarea#' + genome + 'UserData').val(data);
+                    }
+                  });
+                  break;
+              }
+              break;
+            case genome + "ComparedWith":
+              var type = $('input[name="comparedWith"]:checked').val();
+              switch(type){
+                case "bed":
+                  $.ajax({
+                    type: 'GET',
+                    url: '/tables/bed/bedB_' + genome + '.bed',
+                    success: function(data){
+                      $('textarea#' + genome + 'UserData').val(data);
+                    }
+                  });
+                  break;
+                case "userlist":
+                  $.ajax({
+                    type: 'GET',
+                    url: '/tables/genes/geneB_' + genome + '.txt',
+                    success: function(data){
+                      $('textarea#' + genome + 'UserData').val(data);
+                    }
+                  });
+                  break;
+              }
+              break;
+          }
+
+
+        });
       });
 
       // hide and show by checked radio buttons
@@ -511,7 +583,7 @@
 
         // put file content into the textarea
         $('input#' + genome + 'UserDataFile, input#' + genome + 'comparedWithFile').change(function(event) {
-          alert("file detected");
+          console.log("file detected");
           var fileId = $(this).attr('id');
           var file = event.target.files;
           var reader = new FileReader();
