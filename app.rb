@@ -133,7 +133,7 @@ class PeakJohn < Sinatra::Base
     end
 
     def number_of_lines
-      data = open("http://dbarchive.biosciencedbc.jp/kyushu-u/lib/lineNum.tsv").read
+      data = open(File.join(app_root, "tables/lineNum.tsv")).read
       h = {}
       data.split("\n").each do |line|
         l = line.split("\t")

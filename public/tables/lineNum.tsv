@@ -1,0 +1,2042 @@
+ce10	All antigens	All cell types	05	2265659
+ce10	All antigens	Embryo	10	320483
+ce10	TFs and others	Unclassified	20	33
+hg19	RNA polymerase	Placenta	20	0
+hg19	RNA polymerase	Placenta	50	0
+hg19	RNA polymerase	Prostate	05	372088
+hg19	RNA polymerase	Prostate	10	232784
+hg19	RNA polymerase	Prostate	20	129723
+hg19	RNA polymerase	Prostate	50	84348
+hg19	RNA polymerase	Unclassified	05	0
+hg19	RNA polymerase	Unclassified	10	0
+hg19	RNA polymerase	Unclassified	20	0
+hg19	RNA polymerase	Unclassified	50	0
+ce10	TFs and others	Unclassified	50	24
+hg19	RNA polymerase	Uterus	05	660330
+hg19	RNA polymerase	Uterus	10	433412
+hg19	RNA polymerase	Uterus	20	258671
+hg19	RNA polymerase	Uterus	50	164327
+hg19	Unclassified	All cell types	05	3346877
+hg19	Unclassified	All cell types	10	1711582
+hg19	Unclassified	All cell types	20	843377
+hg19	Unclassified	All cell types	50	554694
+hg19	Unclassified	Adipocyte	05	0
+hg19	Unclassified	Adipocyte	10	0
+ce10	RNA polymerase	All cell types	05	127887
+hg19	Unclassified	Adipocyte	20	0
+hg19	Unclassified	Adipocyte	50	0
+hg19	Unclassified	Blood	05	1204546
+hg19	Unclassified	Blood	10	502691
+hg19	Unclassified	Blood	20	218045
+hg19	Unclassified	Blood	50	131253
+hg19	Unclassified	Bone	05	6064
+hg19	Unclassified	Bone	10	1844
+hg19	Unclassified	Bone	20	483
+hg19	Unclassified	Bone	50	301
+ce10	RNA polymerase	All cell types	10	61281
+hg19	Unclassified	Breast	05	346120
+hg19	Unclassified	Breast	10	165871
+hg19	Unclassified	Breast	20	69071
+hg19	Unclassified	Breast	50	42431
+hg19	Unclassified	Cardiovascular	05	42533
+hg19	Unclassified	Cardiovascular	10	5820
+hg19	Unclassified	Cardiovascular	20	1261
+hg19	Unclassified	Cardiovascular	50	614
+hg19	Unclassified	Digestive tract	05	378310
+hg19	Unclassified	Digestive tract	10	269687
+ce10	RNA polymerase	All cell types	20	28719
+hg19	Unclassified	Digestive tract	20	156742
+hg19	Unclassified	Digestive tract	50	104366
+hg19	Unclassified	Epidermis	05	2763
+hg19	Unclassified	Epidermis	10	1205
+hg19	Unclassified	Epidermis	20	361
+hg19	Unclassified	Epidermis	50	126
+hg19	Unclassified	Gonad	05	0
+hg19	Unclassified	Gonad	10	0
+hg19	Unclassified	Gonad	20	0
+hg19	Unclassified	Gonad	50	0
+ce10	RNA polymerase	All cell types	50	18212
+hg19	Unclassified	Kidney	05	92355
+hg19	Unclassified	Kidney	10	38873
+hg19	Unclassified	Kidney	20	13534
+hg19	Unclassified	Kidney	50	7197
+hg19	Unclassified	Liver	05	59627
+hg19	Unclassified	Liver	10	5280
+hg19	Unclassified	Liver	20	449
+hg19	Unclassified	Liver	50	162
+hg19	Unclassified	Lung	05	84970
+hg19	Unclassified	Lung	10	45016
+ce10	RNA polymerase	Adult	05	26216
+hg19	Unclassified	Lung	20	19012
+hg19	Unclassified	Lung	50	9294
+hg19	Unclassified	Muscle	05	17728
+hg19	Unclassified	Muscle	10	9050
+hg19	Unclassified	Muscle	20	3711
+hg19	Unclassified	Muscle	50	2406
+hg19	Unclassified	Neural	05	83333
+hg19	Unclassified	Neural	10	37998
+hg19	Unclassified	Neural	20	14275
+hg19	Unclassified	Neural	50	7440
+ce10	RNA polymerase	Adult	10	13092
+hg19	Unclassified	No description	05	0
+hg19	Unclassified	No description	10	0
+hg19	Unclassified	No description	20	0
+hg19	Unclassified	No description	50	0
+hg19	Unclassified	Others	05	0
+hg19	Unclassified	Others	10	0
+hg19	Unclassified	Others	20	0
+hg19	Unclassified	Others	50	0
+hg19	Unclassified	Pluripotent stem cell	05	405393
+hg19	Unclassified	Pluripotent stem cell	10	283868
+ce10	RNA polymerase	Adult	20	6500
+hg19	Unclassified	Pluripotent stem cell	20	185826
+hg19	Unclassified	Pluripotent stem cell	50	156959
+hg19	Unclassified	Pancreas	05	6220
+hg19	Unclassified	Pancreas	10	2147
+hg19	Unclassified	Pancreas	20	581
+hg19	Unclassified	Pancreas	50	254
+hg19	Unclassified	Placenta	05	0
+hg19	Unclassified	Placenta	10	0
+hg19	Unclassified	Placenta	20	0
+hg19	Unclassified	Placenta	50	0
+ce10	RNA polymerase	Adult	50	4106
+hg19	Unclassified	Prostate	05	858
+hg19	Unclassified	Prostate	10	431
+hg19	Unclassified	Prostate	20	149
+hg19	Unclassified	Prostate	50	86
+hg19	Unclassified	Unclassified	05	108024
+hg19	Unclassified	Unclassified	10	51892
+hg19	Unclassified	Unclassified	20	26119
+hg19	Unclassified	Unclassified	50	12766
+hg19	Unclassified	Uterus	05	508033
+hg19	Unclassified	Uterus	10	289909
+ce10	All antigens	Embryo	20	145203
+ce10	RNA polymerase	Embryo	05	12192
+hg19	Unclassified	Uterus	20	133758
+hg19	Unclassified	Uterus	50	79039
+mm9	All antigens	All cell types	05	130461676
+mm9	All antigens	All cell types	10	74456689
+mm9	All antigens	All cell types	20	38314116
+mm9	All antigens	All cell types	50	23456705
+mm9	All antigens	Adipocyte	05	1581071
+mm9	All antigens	Adipocyte	10	848134
+mm9	All antigens	Adipocyte	20	397592
+mm9	All antigens	Adipocyte	50	219356
+ce10	RNA polymerase	Embryo	10	7705
+mm9	All antigens	Blood	05	40636333
+mm9	All antigens	Blood	10	23409225
+mm9	All antigens	Blood	20	11926036
+mm9	All antigens	Blood	50	7469244
+mm9	All antigens	Bone	05	2287507
+mm9	All antigens	Bone	10	1324860
+mm9	All antigens	Bone	20	621518
+mm9	All antigens	Bone	50	367443
+mm9	All antigens	Breast	05	2343303
+mm9	All antigens	Breast	10	1386404
+ce10	RNA polymerase	Embryo	20	5208
+mm9	All antigens	Breast	20	728340
+mm9	All antigens	Breast	50	412758
+mm9	All antigens	Cardiovascular	05	1864556
+mm9	All antigens	Cardiovascular	10	1078887
+mm9	All antigens	Cardiovascular	20	565341
+mm9	All antigens	Cardiovascular	50	333825
+mm9	All antigens	Digestive tract	05	1796386
+mm9	All antigens	Digestive tract	10	1060968
+mm9	All antigens	Digestive tract	20	509734
+mm9	All antigens	Digestive tract	50	268117
+ce10	RNA polymerase	Embryo	50	4351
+mm9	All antigens	Embryonic fibroblast	05	8450320
+mm9	All antigens	Embryonic fibroblast	10	4887756
+mm9	All antigens	Embryonic fibroblast	20	2563363
+mm9	All antigens	Embryonic fibroblast	50	1553430
+mm9	All antigens	Embryo	05	5784984
+mm9	All antigens	Embryo	10	3071686
+mm9	All antigens	Embryo	20	1575778
+mm9	All antigens	Embryo	50	921660
+mm9	All antigens	Epidermis	05	286947
+mm9	All antigens	Epidermis	10	104905
+ce10	RNA polymerase	Larvae	05	44992
+mm9	All antigens	Epidermis	20	36455
+mm9	All antigens	Epidermis	50	15999
+mm9	All antigens	Gonad	05	4252844
+mm9	All antigens	Gonad	10	2731517
+mm9	All antigens	Gonad	20	1393673
+mm9	All antigens	Gonad	50	635861
+mm9	All antigens	Kidney	05	891392
+mm9	All antigens	Kidney	10	573354
+mm9	All antigens	Kidney	20	331867
+mm9	All antigens	Kidney	50	202570
+ce10	RNA polymerase	Larvae	10	20160
+mm9	All antigens	Liver	05	10848995
+mm9	All antigens	Liver	10	6677698
+mm9	All antigens	Liver	20	3840150
+mm9	All antigens	Liver	50	2843466
+mm9	All antigens	Lung	05	955837
+mm9	All antigens	Lung	10	560666
+mm9	All antigens	Lung	20	298344
+mm9	All antigens	Lung	50	166710
+mm9	All antigens	Muscle	05	1970081
+mm9	All antigens	Muscle	10	1077815
+ce10	RNA polymerase	Larvae	20	9140
+mm9	All antigens	Muscle	20	551849
+mm9	All antigens	Muscle	50	345110
+mm9	All antigens	Neural	05	7104823
+mm9	All antigens	Neural	10	3905249
+mm9	All antigens	Neural	20	1972909
+mm9	All antigens	Neural	50	1138232
+mm9	All antigens	No description	05	8592557
+mm9	All antigens	No description	10	4919697
+mm9	All antigens	No description	20	2525581
+mm9	All antigens	No description	50	1497138
+ce10	RNA polymerase	Larvae	50	5945
+mm9	All antigens	Others	05	2201925
+mm9	All antigens	Others	10	1229355
+mm9	All antigens	Others	20	628362
+mm9	All antigens	Others	50	351953
+mm9	All antigens	Pluripotent stem cell	05	24881536
+mm9	All antigens	Pluripotent stem cell	10	13471440
+mm9	All antigens	Pluripotent stem cell	20	6668372
+mm9	All antigens	Pluripotent stem cell	50	3889855
+mm9	All antigens	Pancreas	05	398079
+mm9	All antigens	Pancreas	10	247963
+ce10	RNA polymerase	Unclassified	05	44487
+mm9	All antigens	Pancreas	20	135504
+mm9	All antigens	Pancreas	50	93612
+mm9	All antigens	Placenta	05	664582
+mm9	All antigens	Placenta	10	293439
+mm9	All antigens	Placenta	20	151686
+mm9	All antigens	Placenta	50	120455
+mm9	All antigens	Prostate	05	790736
+mm9	All antigens	Prostate	10	418759
+mm9	All antigens	Prostate	20	189762
+mm9	All antigens	Prostate	50	112379
+ce10	RNA polymerase	Unclassified	10	20324
+mm9	All antigens	Spleen	05	556579
+mm9	All antigens	Spleen	10	383963
+mm9	All antigens	Spleen	20	248653
+mm9	All antigens	Spleen	50	184111
+mm9	All antigens	Unclassified	05	978656
+mm9	All antigens	Unclassified	10	593925
+mm9	All antigens	Unclassified	20	346349
+mm9	All antigens	Unclassified	50	240785
+mm9	All antigens	Uterus	05	341647
+mm9	All antigens	Uterus	10	199024
+ce10	All antigens	Embryo	50	70298
+ce10	RNA polymerase	Unclassified	20	7871
+mm9	All antigens	Uterus	20	106898
+mm9	All antigens	Uterus	50	72636
+mm9	DNase-seq	All cell types	05	9329676
+mm9	DNase-seq	All cell types	10	5882752
+mm9	DNase-seq	All cell types	20	2970438
+mm9	DNase-seq	All cell types	50	1112969
+mm9	DNase-seq	Adipocyte	05	170598
+mm9	DNase-seq	Adipocyte	10	96660
+mm9	DNase-seq	Adipocyte	20	33846
+mm9	DNase-seq	Adipocyte	50	4881
+ce10	RNA polymerase	Unclassified	50	3810
+mm9	DNase-seq	Blood	05	1699670
+mm9	DNase-seq	Blood	10	1143022
+mm9	DNase-seq	Blood	20	608423
+mm9	DNase-seq	Blood	50	211019
+mm9	DNase-seq	Bone	05	0
+mm9	DNase-seq	Bone	10	0
+mm9	DNase-seq	Bone	20	0
+mm9	DNase-seq	Bone	50	0
+mm9	DNase-seq	Breast	05	984706
+mm9	DNase-seq	Breast	10	652043
+ce10	Unclassified	All cell types	05	33064
+mm9	DNase-seq	Breast	20	371703
+mm9	DNase-seq	Breast	50	199651
+mm9	DNase-seq	Cardiovascular	05	253816
+mm9	DNase-seq	Cardiovascular	10	162770
+mm9	DNase-seq	Cardiovascular	20	72363
+mm9	DNase-seq	Cardiovascular	50	10956
+mm9	DNase-seq	Digestive tract	05	182878
+mm9	DNase-seq	Digestive tract	10	104497
+mm9	DNase-seq	Digestive tract	20	49135
+mm9	DNase-seq	Digestive tract	50	24576
+ce10	Unclassified	All cell types	10	14387
+mm9	DNase-seq	Embryonic fibroblast	05	837030
+mm9	DNase-seq	Embryonic fibroblast	10	515376
+mm9	DNase-seq	Embryonic fibroblast	20	282668
+mm9	DNase-seq	Embryonic fibroblast	50	167709
+mm9	DNase-seq	Embryo	05	967061
+mm9	DNase-seq	Embryo	10	573875
+mm9	DNase-seq	Embryo	20	262417
+mm9	DNase-seq	Embryo	50	66667
+mm9	DNase-seq	Epidermis	05	294
+mm9	DNase-seq	Epidermis	10	30
+ce10	Unclassified	All cell types	20	5006
+mm9	DNase-seq	Epidermis	20	10
+mm9	DNase-seq	Epidermis	50	7
+mm9	DNase-seq	Gonad	05	0
+mm9	DNase-seq	Gonad	10	0
+mm9	DNase-seq	Gonad	20	0
+mm9	DNase-seq	Gonad	50	0
+mm9	DNase-seq	Kidney	05	311775
+mm9	DNase-seq	Kidney	10	202181
+mm9	DNase-seq	Kidney	20	95510
+mm9	DNase-seq	Kidney	50	18933
+ce10	Unclassified	All cell types	50	1348
+mm9	DNase-seq	Liver	05	822467
+mm9	DNase-seq	Liver	10	535567
+mm9	DNase-seq	Liver	20	289505
+mm9	DNase-seq	Liver	50	126974
+mm9	DNase-seq	Lung	05	280163
+mm9	DNase-seq	Lung	10	165683
+mm9	DNase-seq	Lung	20	61454
+mm9	DNase-seq	Lung	50	5041
+mm9	DNase-seq	Muscle	05	87402
+mm9	DNase-seq	Muscle	10	55435
+ce10	Unclassified	Adult	05	15021
+mm9	DNase-seq	Muscle	20	27705
+mm9	DNase-seq	Muscle	50	7584
+mm9	DNase-seq	Neural	05	684259
+mm9	DNase-seq	Neural	10	423936
+mm9	DNase-seq	Neural	20	205173
+mm9	DNase-seq	Neural	50	55334
+mm9	DNase-seq	No description	05	251500
+mm9	DNase-seq	No description	10	155826
+mm9	DNase-seq	No description	20	88495
+mm9	DNase-seq	No description	50	56299
+ce10	Unclassified	Adult	10	6134
+mm9	DNase-seq	Others	05	485104
+mm9	DNase-seq	Others	10	319376
+mm9	DNase-seq	Others	20	165717
+mm9	DNase-seq	Others	50	48915
+mm9	DNase-seq	Pluripotent stem cell	05	1264109
+mm9	DNase-seq	Pluripotent stem cell	10	743615
+mm9	DNase-seq	Pluripotent stem cell	20	336899
+mm9	DNase-seq	Pluripotent stem cell	50	98621
+mm9	DNase-seq	Pancreas	05	0
+mm9	DNase-seq	Pancreas	10	0
+ce10	Unclassified	Adult	20	2024
+mm9	DNase-seq	Pancreas	20	0
+mm9	DNase-seq	Pancreas	50	0
+mm9	DNase-seq	Placenta	05	64
+mm9	DNase-seq	Placenta	10	11
+mm9	DNase-seq	Placenta	20	0
+mm9	DNase-seq	Placenta	50	0
+mm9	DNase-seq	Prostate	05	0
+mm9	DNase-seq	Prostate	10	0
+mm9	DNase-seq	Prostate	20	0
+mm9	DNase-seq	Prostate	50	0
+ce10	Unclassified	Adult	50	763
+mm9	DNase-seq	Spleen	05	46780
+mm9	DNase-seq	Spleen	10	32849
+mm9	DNase-seq	Spleen	20	19415
+mm9	DNase-seq	Spleen	50	9802
+mm9	DNase-seq	Unclassified	05	0
+mm9	DNase-seq	Unclassified	10	0
+mm9	DNase-seq	Unclassified	20	0
+mm9	DNase-seq	Unclassified	50	0
+mm9	DNase-seq	Uterus	05	0
+mm9	DNase-seq	Uterus	10	0
+ce10	All antigens	Larvae	05	1169716
+ce10	Unclassified	Embryo	05	16423
+mm9	DNase-seq	Uterus	20	0
+mm9	DNase-seq	Uterus	50	0
+mm9	Histone	All cell types	05	55199015
+mm9	Histone	All cell types	10	30978151
+mm9	Histone	All cell types	20	15741180
+mm9	Histone	All cell types	50	8965443
+mm9	Histone	Adipocyte	05	796426
+mm9	Histone	Adipocyte	10	394053
+mm9	Histone	Adipocyte	20	171328
+mm9	Histone	Adipocyte	50	84213
+ce10	Unclassified	Embryo	10	7541
+mm9	Histone	Blood	05	18188779
+mm9	Histone	Blood	10	9922271
+mm9	Histone	Blood	20	4719738
+mm9	Histone	Blood	50	2617804
+mm9	Histone	Bone	05	1466159
+mm9	Histone	Bone	10	808894
+mm9	Histone	Bone	20	339100
+mm9	Histone	Bone	50	179064
+mm9	Histone	Breast	05	359473
+mm9	Histone	Breast	10	194417
+ce10	Unclassified	Embryo	20	2803
+mm9	Histone	Breast	20	81890
+mm9	Histone	Breast	50	36986
+mm9	Histone	Cardiovascular	05	961549
+mm9	Histone	Cardiovascular	10	571775
+mm9	Histone	Cardiovascular	20	329906
+mm9	Histone	Cardiovascular	50	212320
+mm9	Histone	Digestive tract	05	1405003
+mm9	Histone	Digestive tract	10	834759
+mm9	Histone	Digestive tract	20	396737
+mm9	Histone	Digestive tract	50	200160
+ce10	Unclassified	Embryo	50	585
+mm9	Histone	Embryonic fibroblast	05	3303341
+mm9	Histone	Embryonic fibroblast	10	2017040
+mm9	Histone	Embryonic fibroblast	20	1110927
+mm9	Histone	Embryonic fibroblast	50	602820
+mm9	Histone	Embryo	05	3173389
+mm9	Histone	Embryo	10	1758939
+mm9	Histone	Embryo	20	1006267
+mm9	Histone	Embryo	50	659951
+mm9	Histone	Epidermis	05	202180
+mm9	Histone	Epidermis	10	76173
+ce10	Unclassified	Larvae	05	1620
+mm9	Histone	Epidermis	20	26985
+mm9	Histone	Epidermis	50	10195
+mm9	Histone	Gonad	05	3393237
+mm9	Histone	Gonad	10	2240449
+mm9	Histone	Gonad	20	1130675
+mm9	Histone	Gonad	50	466272
+mm9	Histone	Kidney	05	217538
+mm9	Histone	Kidney	10	119090
+mm9	Histone	Kidney	20	68574
+mm9	Histone	Kidney	50	48948
+ce10	Unclassified	Larvae	10	712
+mm9	Histone	Liver	05	1915677
+mm9	Histone	Liver	10	1046204
+mm9	Histone	Liver	20	613496
+mm9	Histone	Liver	50	439656
+mm9	Histone	Lung	05	460249
+mm9	Histone	Lung	10	259638
+mm9	Histone	Lung	20	157981
+mm9	Histone	Lung	50	100012
+mm9	Histone	Muscle	05	733925
+mm9	Histone	Muscle	10	372548
+ce10	Unclassified	Larvae	20	179
+mm9	Histone	Muscle	20	174974
+mm9	Histone	Muscle	50	93656
+mm9	Histone	Neural	05	3825516
+mm9	Histone	Neural	10	2049405
+mm9	Histone	Neural	20	1037163
+mm9	Histone	Neural	50	596728
+mm9	Histone	No description	05	9410
+mm9	Histone	No description	10	1446
+mm9	Histone	No description	20	115
+mm9	Histone	No description	50	64
+ce10	Unclassified	Larvae	50	0
+mm9	Histone	Others	05	958588
+mm9	Histone	Others	10	534235
+mm9	Histone	Others	20	293912
+mm9	Histone	Others	50	204220
+mm9	Histone	Pluripotent stem cell	05	12223326
+mm9	Histone	Pluripotent stem cell	10	6899382
+mm9	Histone	Pluripotent stem cell	20	3581547
+mm9	Histone	Pluripotent stem cell	50	2063033
+mm9	Histone	Pancreas	05	31871
+mm9	Histone	Pancreas	10	22585
+ce10	Unclassified	Unclassified	05	0
+mm9	Histone	Pancreas	20	9713
+mm9	Histone	Pancreas	50	1081
+mm9	Histone	Placenta	05	509608
+mm9	Histone	Placenta	10	193048
+mm9	Histone	Placenta	20	82601
+mm9	Histone	Placenta	50	56847
+mm9	Histone	Prostate	05	523111
+mm9	Histone	Prostate	10	280893
+mm9	Histone	Prostate	20	132553
+mm9	Histone	Prostate	50	79551
+ce10	Unclassified	Unclassified	10	0
+mm9	Histone	Spleen	05	208925
+mm9	Histone	Spleen	10	141679
+mm9	Histone	Spleen	20	95754
+mm9	Histone	Spleen	50	75448
+mm9	Histone	Unclassified	05	331735
+mm9	Histone	Unclassified	10	239228
+mm9	Histone	Unclassified	20	179244
+mm9	Histone	Unclassified	50	136414
+mm9	Histone	Uterus	05	0
+mm9	Histone	Uterus	10	0
+ce10	All antigens	Larvae	10	602078
+ce10	Unclassified	Unclassified	20	0
+mm9	Histone	Uterus	20	0
+mm9	Histone	Uterus	50	0
+mm9	Input control	All cell types	05	4870151
+mm9	Input control	All cell types	10	2250748
+mm9	Input control	All cell types	20	971476
+mm9	Input control	All cell types	50	467718
+mm9	Input control	Adipocyte	05	8701
+mm9	Input control	Adipocyte	10	4468
+mm9	Input control	Adipocyte	20	2341
+mm9	Input control	Adipocyte	50	1477
+ce10	Unclassified	Unclassified	50	0
+mm9	Input control	Blood	05	1861143
+mm9	Input control	Blood	10	992252
+mm9	Input control	Blood	20	485088
+mm9	Input control	Blood	50	179982
+mm9	Input control	Bone	05	6000
+mm9	Input control	Bone	10	2456
+mm9	Input control	Bone	20	1352
+mm9	Input control	Bone	50	1025
+mm9	Input control	Breast	05	22439
+mm9	Input control	Breast	10	10705
+dm3	All antigens	All cell types	05	8844139
+mm9	Input control	Breast	20	5264
+mm9	Input control	Breast	50	3649
+mm9	Input control	Cardiovascular	05	166997
+mm9	Input control	Cardiovascular	10	78115
+mm9	Input control	Cardiovascular	20	28528
+mm9	Input control	Cardiovascular	50	16053
+mm9	Input control	Digestive tract	05	16431
+mm9	Input control	Digestive tract	10	9148
+mm9	Input control	Digestive tract	20	4625
+mm9	Input control	Digestive tract	50	3177
+dm3	All antigens	All cell types	10	5488981
+mm9	Input control	Embryonic fibroblast	05	203927
+mm9	Input control	Embryonic fibroblast	10	85493
+mm9	Input control	Embryonic fibroblast	20	32185
+mm9	Input control	Embryonic fibroblast	50	18960
+mm9	Input control	Embryo	05	392733
+mm9	Input control	Embryo	10	120650
+mm9	Input control	Embryo	20	39126
+mm9	Input control	Embryo	50	17952
+mm9	Input control	Epidermis	05	14116
+mm9	Input control	Epidermis	10	4892
+dm3	All antigens	All cell types	20	3150555
+mm9	Input control	Epidermis	20	1848
+mm9	Input control	Epidermis	50	1087
+mm9	Input control	Gonad	05	137361
+mm9	Input control	Gonad	10	54374
+mm9	Input control	Gonad	20	18487
+mm9	Input control	Gonad	50	8681
+mm9	Input control	Kidney	05	7095
+mm9	Input control	Kidney	10	4032
+mm9	Input control	Kidney	20	2139
+mm9	Input control	Kidney	50	1366
+dm3	All antigens	All cell types	50	1871495
+mm9	Input control	Liver	05	144815
+mm9	Input control	Liver	10	59004
+mm9	Input control	Liver	20	28307
+mm9	Input control	Liver	50	17069
+mm9	Input control	Lung	05	8258
+mm9	Input control	Lung	10	5081
+mm9	Input control	Lung	20	2487
+mm9	Input control	Lung	50	1507
+mm9	Input control	Muscle	05	60861
+mm9	Input control	Muscle	10	24505
+dm3	All antigens	Adult	05	1139988
+mm9	Input control	Muscle	20	10782
+mm9	Input control	Muscle	50	7164
+mm9	Input control	Neural	05	434662
+mm9	Input control	Neural	10	198807
+mm9	Input control	Neural	20	75502
+mm9	Input control	Neural	50	40352
+mm9	Input control	No description	05	0
+mm9	Input control	No description	10	0
+mm9	Input control	No description	20	0
+mm9	Input control	No description	50	0
+dm3	All antigens	Adult	10	729309
+mm9	Input control	Others	05	137195
+mm9	Input control	Others	10	57923
+mm9	Input control	Others	20	20148
+mm9	Input control	Others	50	10200
+mm9	Input control	Pluripotent stem cell	05	984402
+mm9	Input control	Pluripotent stem cell	10	405177
+mm9	Input control	Pluripotent stem cell	20	152866
+mm9	Input control	Pluripotent stem cell	50	99952
+mm9	Input control	Pancreas	05	9949
+mm9	Input control	Pancreas	10	3555
+dm3	All antigens	Adult	20	436189
+mm9	Input control	Pancreas	20	1525
+mm9	Input control	Pancreas	50	1011
+mm9	Input control	Placenta	05	32103
+mm9	Input control	Placenta	10	9644
+mm9	Input control	Placenta	20	2716
+mm9	Input control	Placenta	50	1754
+mm9	Input control	Prostate	05	8342
+mm9	Input control	Prostate	10	4234
+mm9	Input control	Prostate	20	2095
+mm9	Input control	Prostate	50	1444
+dm3	All antigens	Adult	50	262234
+mm9	Input control	Spleen	05	105630
+mm9	Input control	Spleen	10	70705
+mm9	Input control	Spleen	20	41322
+mm9	Input control	Spleen	50	29704
+mm9	Input control	Unclassified	05	104820
+mm9	Input control	Unclassified	10	44428
+mm9	Input control	Unclassified	20	12161
+mm9	Input control	Unclassified	50	3770
+mm9	Input control	Uterus	05	2171
+mm9	Input control	Uterus	10	1100
+ce10	All antigens	Larvae	20	264756
+dm3	All antigens	Cell line	05	3641783
+mm9	Input control	Uterus	20	582
+mm9	Input control	Uterus	50	382
+mm9	No description	All cell types	05	17737999
+mm9	No description	All cell types	10	10674154
+mm9	No description	All cell types	20	5842909
+mm9	No description	All cell types	50	3813730
+mm9	No description	Adipocyte	05	0
+mm9	No description	Adipocyte	10	0
+mm9	No description	Adipocyte	20	0
+mm9	No description	Adipocyte	50	0
+dm3	All antigens	Cell line	10	2251553
+mm9	No description	Blood	05	1291498
+mm9	No description	Blood	10	822676
+mm9	No description	Blood	20	427029
+mm9	No description	Blood	50	191742
+mm9	No description	Bone	05	0
+mm9	No description	Bone	10	0
+mm9	No description	Bone	20	0
+mm9	No description	Bone	50	0
+mm9	No description	Breast	05	0
+mm9	No description	Breast	10	0
+dm3	All antigens	Cell line	20	1269283
+mm9	No description	Breast	20	0
+mm9	No description	Breast	50	0
+mm9	No description	Cardiovascular	05	0
+mm9	No description	Cardiovascular	10	0
+mm9	No description	Cardiovascular	20	0
+mm9	No description	Cardiovascular	50	0
+mm9	No description	Digestive tract	05	58606
+mm9	No description	Digestive tract	10	29023
+mm9	No description	Digestive tract	20	10217
+mm9	No description	Digestive tract	50	4365
+dm3	All antigens	Cell line	50	782008
+mm9	No description	Embryonic fibroblast	05	439569
+mm9	No description	Embryonic fibroblast	10	264508
+mm9	No description	Embryonic fibroblast	20	151769
+mm9	No description	Embryonic fibroblast	50	96182
+mm9	No description	Embryo	05	173528
+mm9	No description	Embryo	10	82607
+mm9	No description	Embryo	20	31176
+mm9	No description	Embryo	50	12698
+mm9	No description	Epidermis	05	0
+mm9	No description	Epidermis	10	0
+dm3	All antigens	Embryo	05	2391587
+mm9	No description	Epidermis	20	0
+mm9	No description	Epidermis	50	0
+mm9	No description	Gonad	05	173960
+mm9	No description	Gonad	10	106827
+mm9	No description	Gonad	20	59210
+mm9	No description	Gonad	50	30678
+mm9	No description	Kidney	05	52710
+mm9	No description	Kidney	10	46157
+mm9	No description	Kidney	20	38472
+mm9	No description	Kidney	50	29704
+dm3	All antigens	Embryo	10	1482707
+mm9	No description	Liver	05	4444043
+mm9	No description	Liver	10	2964207
+mm9	No description	Liver	20	1820426
+mm9	No description	Liver	50	1461209
+mm9	No description	Lung	05	0
+mm9	No description	Lung	10	0
+mm9	No description	Lung	20	0
+mm9	No description	Lung	50	0
+mm9	No description	Muscle	05	122088
+mm9	No description	Muscle	10	69424
+dm3	All antigens	Embryo	20	879828
+mm9	No description	Muscle	20	33069
+mm9	No description	Muscle	50	15196
+mm9	No description	Neural	05	722388
+mm9	No description	Neural	10	453650
+mm9	No description	Neural	20	261152
+mm9	No description	Neural	50	164958
+mm9	No description	No description	05	8331647
+mm9	No description	No description	10	4762425
+mm9	No description	No description	20	2436971
+mm9	No description	No description	50	1440775
+dm3	All antigens	Embryo	50	504805
+mm9	No description	Others	05	0
+mm9	No description	Others	10	0
+mm9	No description	Others	20	0
+mm9	No description	Others	50	0
+mm9	No description	Pluripotent stem cell	05	1461126
+mm9	No description	Pluripotent stem cell	10	767928
+mm9	No description	Pluripotent stem cell	20	391810
+mm9	No description	Pluripotent stem cell	50	241336
+mm9	No description	Pancreas	05	40573
+mm9	No description	Pancreas	10	23725
+dm3	All antigens	Larvae	05	1166910
+mm9	No description	Pancreas	20	12282
+mm9	No description	Pancreas	50	9138
+mm9	No description	Placenta	05	0
+mm9	No description	Placenta	10	0
+mm9	No description	Placenta	20	0
+mm9	No description	Placenta	50	0
+mm9	No description	Prostate	05	0
+mm9	No description	Prostate	10	0
+mm9	No description	Prostate	20	0
+mm9	No description	Prostate	50	0
+dm3	All antigens	Larvae	10	751566
+mm9	No description	Spleen	05	107543
+mm9	No description	Spleen	10	83031
+mm9	No description	Spleen	20	62258
+mm9	No description	Spleen	50	46007
+mm9	No description	Unclassified	05	318720
+mm9	No description	Unclassified	10	197966
+mm9	No description	Unclassified	20	107068
+mm9	No description	Unclassified	50	69742
+mm9	No description	Uterus	05	0
+mm9	No description	Uterus	10	0
+ce10	All antigens	Larvae	50	149813
+dm3	All antigens	Larvae	20	442963
+mm9	No description	Uterus	20	0
+mm9	No description	Uterus	50	0
+mm9	TFs and others	All cell types	05	32558168
+mm9	TFs and others	All cell types	10	18444446
+mm9	TFs and others	All cell types	20	9466391
+mm9	TFs and others	All cell types	50	6900767
+mm9	TFs and others	Adipocyte	05	446044
+mm9	TFs and others	Adipocyte	10	233885
+mm9	TFs and others	Adipocyte	20	103286
+mm9	TFs and others	Adipocyte	50	61516
+dm3	All antigens	Larvae	50	271480
+mm9	TFs and others	Blood	05	14330683
+mm9	TFs and others	Blood	10	8700624
+mm9	TFs and others	Blood	20	4799994
+mm9	TFs and others	Blood	50	3688718
+mm9	TFs and others	Bone	05	813743
+mm9	TFs and others	Bone	10	512691
+mm9	TFs and others	Bone	20	280648
+mm9	TFs and others	Bone	50	187103
+mm9	TFs and others	Breast	05	726037
+mm9	TFs and others	Breast	10	371475
+dm3	All antigens	No description	05	318563
+mm9	TFs and others	Breast	20	182664
+mm9	TFs and others	Breast	50	123779
+mm9	TFs and others	Cardiovascular	05	308457
+mm9	TFs and others	Cardiovascular	10	155395
+mm9	TFs and others	Cardiovascular	20	73054
+mm9	TFs and others	Cardiovascular	50	53945
+mm9	TFs and others	Digestive tract	05	60305
+mm9	TFs and others	Digestive tract	10	33452
+mm9	TFs and others	Digestive tract	20	17908
+mm9	TFs and others	Digestive tract	50	13988
+dm3	All antigens	No description	10	182315
+mm9	TFs and others	Embryonic fibroblast	05	2864101
+mm9	TFs and others	Embryonic fibroblast	10	1545160
+mm9	TFs and others	Embryonic fibroblast	20	715295
+mm9	TFs and others	Embryonic fibroblast	50	485813
+mm9	TFs and others	Embryo	05	845735
+mm9	TFs and others	Embryo	10	398470
+mm9	TFs and others	Embryo	20	157168
+mm9	TFs and others	Embryo	50	104061
+mm9	TFs and others	Epidermis	05	68356
+mm9	TFs and others	Epidermis	10	23175
+dm3	All antigens	No description	20	81286
+mm9	TFs and others	Epidermis	20	7283
+mm9	TFs and others	Epidermis	50	4459
+mm9	TFs and others	Gonad	05	370103
+mm9	TFs and others	Gonad	10	206133
+mm9	TFs and others	Gonad	20	104019
+mm9	TFs and others	Gonad	50	73238
+mm9	TFs and others	Kidney	05	225185
+mm9	TFs and others	Kidney	10	154045
+mm9	TFs and others	Kidney	20	101040
+mm9	TFs and others	Kidney	50	87601
+dm3	All antigens	No description	50	29452
+mm9	TFs and others	Liver	05	2246014
+mm9	TFs and others	Liver	10	1291063
+mm9	TFs and others	Liver	20	646810
+mm9	TFs and others	Liver	50	484515
+mm9	TFs and others	Lung	05	152166
+mm9	TFs and others	Lung	10	91667
+mm9	TFs and others	Lung	20	51080
+mm9	TFs and others	Lung	50	41406
+mm9	TFs and others	Muscle	05	687773
+mm9	TFs and others	Muscle	10	362351
+dm3	All antigens	Pupae	05	126120
+mm9	TFs and others	Muscle	20	178732
+mm9	TFs and others	Muscle	50	132856
+mm9	TFs and others	Neural	05	846329
+mm9	TFs and others	Neural	10	495716
+mm9	TFs and others	Neural	20	265250
+mm9	TFs and others	Neural	50	201766
+mm9	TFs and others	No description	05	0
+mm9	TFs and others	No description	10	0
+mm9	TFs and others	No description	20	0
+mm9	TFs and others	No description	50	0
+dm3	All antigens	Pupae	10	62403
+mm9	TFs and others	Others	05	334647
+mm9	TFs and others	Others	10	184670
+mm9	TFs and others	Others	20	80474
+mm9	TFs and others	Others	50	49053
+mm9	TFs and others	Pluripotent stem cell	05	6232826
+mm9	TFs and others	Pluripotent stem cell	10	3093286
+mm9	TFs and others	Pluripotent stem cell	20	1385806
+mm9	TFs and others	Pluripotent stem cell	50	871939
+mm9	TFs and others	Pancreas	05	312276
+mm9	TFs and others	Pancreas	10	196810
+dm3	All antigens	Pupae	20	28667
+mm9	TFs and others	Pancreas	20	111478
+mm9	TFs and others	Pancreas	50	81996
+mm9	TFs and others	Placenta	05	99921
+mm9	TFs and others	Placenta	10	76378
+mm9	TFs and others	Placenta	20	55563
+mm9	TFs and others	Placenta	50	52179
+mm9	TFs and others	Prostate	05	259283
+mm9	TFs and others	Prostate	10	133632
+mm9	TFs and others	Prostate	20	55114
+mm9	TFs and others	Prostate	50	31384
+dm3	All antigens	Pupae	50	15726
+mm9	TFs and others	Spleen	05	59902
+mm9	TFs and others	Spleen	10	37169
+mm9	TFs and others	Spleen	20	20714
+mm9	TFs and others	Spleen	50	18114
+mm9	TFs and others	Unclassified	05	33826
+mm9	TFs and others	Unclassified	10	16627
+mm9	TFs and others	Unclassified	20	6625
+mm9	TFs and others	Unclassified	50	4325
+mm9	TFs and others	Uterus	05	234456
+mm9	TFs and others	Uterus	10	130572
+ce10	All antigens	Unclassified	05	70003
+dm3	All antigens	Unclassified	05	59188
+mm9	TFs and others	Uterus	20	66386
+mm9	TFs and others	Uterus	50	47013
+mm9	RNA polymerase	All cell types	05	5430412
+mm9	RNA polymerase	All cell types	10	3390028
+mm9	RNA polymerase	All cell types	20	1932574
+mm9	RNA polymerase	All cell types	50	1263179
+mm9	RNA polymerase	Adipocyte	05	158713
+mm9	RNA polymerase	Adipocyte	10	118719
+mm9	RNA polymerase	Adipocyte	20	86629
+mm9	RNA polymerase	Adipocyte	50	67170
+dm3	All antigens	Unclassified	10	29128
+mm9	RNA polymerase	Blood	05	782749
+mm9	RNA polymerase	Blood	10	480791
+mm9	RNA polymerase	Blood	20	264545
+mm9	RNA polymerase	Blood	50	166258
+mm9	RNA polymerase	Bone	05	0
+mm9	RNA polymerase	Bone	10	0
+mm9	RNA polymerase	Bone	20	0
+mm9	RNA polymerase	Bone	50	0
+mm9	RNA polymerase	Breast	05	196484
+mm9	RNA polymerase	Breast	10	133027
+dm3	All antigens	Unclassified	20	12339
+mm9	RNA polymerase	Breast	20	75866
+mm9	RNA polymerase	Breast	50	43462
+mm9	RNA polymerase	Cardiovascular	05	173043
+mm9	RNA polymerase	Cardiovascular	10	110451
+mm9	RNA polymerase	Cardiovascular	20	61322
+mm9	RNA polymerase	Cardiovascular	50	40454
+mm9	RNA polymerase	Digestive tract	05	43517
+mm9	RNA polymerase	Digestive tract	10	28361
+mm9	RNA polymerase	Digestive tract	20	16241
+mm9	RNA polymerase	Digestive tract	50	9238
+dm3	All antigens	Unclassified	50	5790
+mm9	RNA polymerase	Embryonic fibroblast	05	664193
+mm9	RNA polymerase	Embryonic fibroblast	10	424700
+mm9	RNA polymerase	Embryonic fibroblast	20	265382
+mm9	RNA polymerase	Embryonic fibroblast	50	179804
+mm9	RNA polymerase	Embryo	05	95695
+mm9	RNA polymerase	Embryo	10	62166
+mm9	RNA polymerase	Embryo	20	30993
+mm9	RNA polymerase	Embryo	50	16754
+mm9	RNA polymerase	Epidermis	05	0
+mm9	RNA polymerase	Epidermis	10	0
+dm3	DNase-seq	All cell types	05	263154
+mm9	RNA polymerase	Epidermis	20	0
+mm9	RNA polymerase	Epidermis	50	0
+mm9	RNA polymerase	Gonad	05	147205
+mm9	RNA polymerase	Gonad	10	102968
+mm9	RNA polymerase	Gonad	20	67805
+mm9	RNA polymerase	Gonad	50	45070
+mm9	RNA polymerase	Kidney	05	77089
+mm9	RNA polymerase	Kidney	10	47849
+mm9	RNA polymerase	Kidney	20	26132
+mm9	RNA polymerase	Kidney	50	16018
+dm3	DNase-seq	All cell types	10	154273
+mm9	RNA polymerase	Liver	05	936193
+mm9	RNA polymerase	Liver	10	583418
+mm9	RNA polymerase	Liver	20	345822
+mm9	RNA polymerase	Liver	50	251652
+mm9	RNA polymerase	Lung	05	55001
+mm9	RNA polymerase	Lung	10	38597
+mm9	RNA polymerase	Lung	20	25342
+mm9	RNA polymerase	Lung	50	18744
+mm9	RNA polymerase	Muscle	05	86415
+mm9	RNA polymerase	Muscle	10	57599
+dm3	DNase-seq	All cell types	20	65311
+mm9	RNA polymerase	Muscle	20	36333
+mm9	RNA polymerase	Muscle	50	26004
+mm9	RNA polymerase	Neural	05	360630
+mm9	RNA polymerase	Neural	10	180407
+mm9	RNA polymerase	Neural	20	92738
+mm9	RNA polymerase	Neural	50	62685
+mm9	RNA polymerase	No description	05	0
+mm9	RNA polymerase	No description	10	0
+mm9	RNA polymerase	No description	20	0
+mm9	RNA polymerase	No description	50	0
+dm3	DNase-seq	All cell types	50	19366
+mm9	RNA polymerase	Others	05	107309
+mm9	RNA polymerase	Others	10	73265
+mm9	RNA polymerase	Others	20	40713
+mm9	RNA polymerase	Others	50	24749
+mm9	RNA polymerase	Pluripotent stem cell	05	1393129
+mm9	RNA polymerase	Pluripotent stem cell	10	848194
+mm9	RNA polymerase	Pluripotent stem cell	20	436890
+mm9	RNA polymerase	Pluripotent stem cell	50	255205
+mm9	RNA polymerase	Pancreas	05	0
+mm9	RNA polymerase	Pancreas	10	0
+dm3	DNase-seq	Adult	05	0
+mm9	RNA polymerase	Pancreas	20	0
+mm9	RNA polymerase	Pancreas	50	0
+mm9	RNA polymerase	Placenta	05	18279
+mm9	RNA polymerase	Placenta	10	13220
+mm9	RNA polymerase	Placenta	20	10589
+mm9	RNA polymerase	Placenta	50	9551
+mm9	RNA polymerase	Prostate	05	0
+mm9	RNA polymerase	Prostate	10	0
+mm9	RNA polymerase	Prostate	20	0
+mm9	RNA polymerase	Prostate	50	0
+dm3	DNase-seq	Adult	10	0
+mm9	RNA polymerase	Spleen	05	27799
+mm9	RNA polymerase	Spleen	10	18530
+mm9	RNA polymerase	Spleen	20	9190
+mm9	RNA polymerase	Spleen	50	5036
+mm9	RNA polymerase	Unclassified	05	1949
+mm9	RNA polymerase	Unclassified	10	414
+mm9	RNA polymerase	Unclassified	20	112
+mm9	RNA polymerase	Unclassified	50	84
+mm9	RNA polymerase	Uterus	05	105020
+mm9	RNA polymerase	Uterus	10	67352
+ce10	All antigens	Unclassified	10	33908
+dm3	DNase-seq	Adult	20	0
+mm9	RNA polymerase	Uterus	20	39930
+mm9	RNA polymerase	Uterus	50	25241
+mm9	Unclassified	All cell types	05	5336255
+mm9	Unclassified	All cell types	10	2836410
+mm9	Unclassified	All cell types	20	1389148
+mm9	Unclassified	All cell types	50	932899
+mm9	Unclassified	Adipocyte	05	589
+mm9	Unclassified	Adipocyte	10	349
+mm9	Unclassified	Adipocyte	20	162
+mm9	Unclassified	Adipocyte	50	99
+dm3	DNase-seq	Adult	50	0
+mm9	Unclassified	Blood	05	2481811
+mm9	Unclassified	Blood	10	1347589
+mm9	Unclassified	Blood	20	621219
+mm9	Unclassified	Blood	50	413721
+mm9	Unclassified	Bone	05	1605
+mm9	Unclassified	Bone	10	819
+mm9	Unclassified	Bone	20	418
+mm9	Unclassified	Bone	50	251
+mm9	Unclassified	Breast	05	54164
+mm9	Unclassified	Breast	10	24737
+dm3	DNase-seq	Cell line	05	120647
+mm9	Unclassified	Breast	20	10953
+mm9	Unclassified	Breast	50	5231
+mm9	Unclassified	Cardiovascular	05	694
+mm9	Unclassified	Cardiovascular	10	381
+mm9	Unclassified	Cardiovascular	20	168
+mm9	Unclassified	Cardiovascular	50	97
+mm9	Unclassified	Digestive tract	05	29646
+mm9	Unclassified	Digestive tract	10	21728
+mm9	Unclassified	Digestive tract	20	14871
+mm9	Unclassified	Digestive tract	50	12613
+dm3	DNase-seq	Cell line	10	74979
+mm9	Unclassified	Embryonic fibroblast	05	138159
+mm9	Unclassified	Embryonic fibroblast	10	35479
+mm9	Unclassified	Embryonic fibroblast	20	5137
+mm9	Unclassified	Embryonic fibroblast	50	2142
+mm9	Unclassified	Embryo	05	136843
+mm9	Unclassified	Embryo	10	74979
+mm9	Unclassified	Embryo	20	48631
+mm9	Unclassified	Embryo	50	43577
+mm9	Unclassified	Epidermis	05	2001
+mm9	Unclassified	Epidermis	10	635
+dm3	DNase-seq	Cell line	20	35335
+mm9	Unclassified	Epidermis	20	329
+mm9	Unclassified	Epidermis	50	251
+mm9	Unclassified	Gonad	05	30978
+mm9	Unclassified	Gonad	10	20766
+mm9	Unclassified	Gonad	20	13477
+mm9	Unclassified	Gonad	50	11922
+mm9	Unclassified	Kidney	05	0
+mm9	Unclassified	Kidney	10	0
+mm9	Unclassified	Kidney	20	0
+mm9	Unclassified	Kidney	50	0
+dm3	DNase-seq	Cell line	50	15447
+mm9	Unclassified	Liver	05	339786
+mm9	Unclassified	Liver	10	198235
+mm9	Unclassified	Liver	20	95784
+mm9	Unclassified	Liver	50	62391
+mm9	Unclassified	Lung	05	0
+mm9	Unclassified	Lung	10	0
+mm9	Unclassified	Lung	20	0
+mm9	Unclassified	Lung	50	0
+mm9	Unclassified	Muscle	05	191617
+mm9	Unclassified	Muscle	10	135953
+dm3	DNase-seq	Embryo	05	0
+mm9	Unclassified	Muscle	20	90254
+mm9	Unclassified	Muscle	50	62650
+mm9	Unclassified	Neural	05	231039
+mm9	Unclassified	Neural	10	103328
+mm9	Unclassified	Neural	20	35931
+mm9	Unclassified	Neural	50	16409
+mm9	Unclassified	No description	05	0
+mm9	Unclassified	No description	10	0
+mm9	Unclassified	No description	20	0
+mm9	Unclassified	No description	50	0
+dm3	DNase-seq	Embryo	10	0
+mm9	Unclassified	Others	05	179082
+mm9	Unclassified	Others	10	59886
+mm9	Unclassified	Others	20	27398
+mm9	Unclassified	Others	50	14816
+mm9	Unclassified	Pluripotent stem cell	05	1322618
+mm9	Unclassified	Pluripotent stem cell	10	713858
+mm9	Unclassified	Pluripotent stem cell	20	382554
+mm9	Unclassified	Pluripotent stem cell	50	259769
+mm9	Unclassified	Pancreas	05	3410
+mm9	Unclassified	Pancreas	10	1288
+dm3	DNase-seq	Embryo	20	0
+mm9	Unclassified	Pancreas	20	506
+mm9	Unclassified	Pancreas	50	386
+mm9	Unclassified	Placenta	05	4607
+mm9	Unclassified	Placenta	10	1138
+mm9	Unclassified	Placenta	20	217
+mm9	Unclassified	Placenta	50	124
+mm9	Unclassified	Prostate	05	0
+mm9	Unclassified	Prostate	10	0
+mm9	Unclassified	Prostate	20	0
+mm9	Unclassified	Prostate	50	0
+dm3	DNase-seq	Embryo	50	0
+mm9	Unclassified	Spleen	05	0
+mm9	Unclassified	Spleen	10	0
+mm9	Unclassified	Spleen	20	0
+mm9	Unclassified	Spleen	50	0
+mm9	Unclassified	Unclassified	05	187606
+mm9	Unclassified	Unclassified	10	95262
+mm9	Unclassified	Unclassified	20	41139
+mm9	Unclassified	Unclassified	50	26450
+mm9	Unclassified	Uterus	05	0
+mm9	Unclassified	Uterus	10	0
+ce10	All antigens	Unclassified	20	13361
+dm3	DNase-seq	Larvae	05	0
+mm9	Unclassified	Uterus	20	0
+mm9	Unclassified	Uterus	50	0
+sacCer3	All antigens	All cell types	05	106830
+sacCer3	All antigens	All cell types	10	64193
+sacCer3	All antigens	All cell types	20	33961
+sacCer3	All antigens	All cell types	50	19368
+sacCer3	All antigens	No description	05	15014
+sacCer3	All antigens	No description	10	8986
+sacCer3	All antigens	No description	20	4801
+sacCer3	All antigens	No description	50	3283
+dm3	DNase-seq	Larvae	10	0
+sacCer3	All antigens	Unclassified	05	0
+sacCer3	All antigens	Unclassified	10	0
+sacCer3	All antigens	Unclassified	20	0
+sacCer3	All antigens	Unclassified	50	0
+sacCer3	All antigens	Yeast strain	05	91816
+sacCer3	All antigens	Yeast strain	10	55207
+sacCer3	All antigens	Yeast strain	20	29160
+sacCer3	All antigens	Yeast strain	50	16085
+sacCer3	All antigens		05	0
+sacCer3	All antigens		10	0
+dm3	DNase-seq	Larvae	20	0
+sacCer3	All antigens		20	0
+sacCer3	All antigens		50	0
+sacCer3	DNase-seq	All cell types	50	0
+sacCer3	Histone	All cell types	05	2729
+sacCer3	Histone	All cell types	10	1893
+sacCer3	Histone	All cell types	20	1113
+sacCer3	Histone	All cell types	50	481
+sacCer3	Histone	No description	05	0
+sacCer3	Histone	No description	10	0
+sacCer3	Histone	No description	20	0
+dm3	DNase-seq	Larvae	50	0
+sacCer3	Histone	No description	50	0
+sacCer3	Histone	Unclassified	05	0
+sacCer3	Histone	Unclassified	10	0
+sacCer3	Histone	Unclassified	20	0
+sacCer3	Histone	Unclassified	50	0
+sacCer3	Histone	Yeast strain	05	2729
+sacCer3	Histone	Yeast strain	10	1893
+sacCer3	Histone	Yeast strain	20	1113
+sacCer3	Histone	Yeast strain	50	481
+sacCer3	Histone		05	0
+dm3	DNase-seq	No description	05	142507
+sacCer3	Histone		10	0
+sacCer3	Histone		20	0
+sacCer3	Histone		50	0
+sacCer3	Input control	All cell types	05	1143
+sacCer3	Input control	All cell types	10	453
+sacCer3	Input control	All cell types	20	117
+sacCer3	Input control	All cell types	50	35
+sacCer3	Input control	No description	05	0
+sacCer3	Input control	No description	10	0
+sacCer3	Input control	No description	20	0
+dm3	DNase-seq	No description	10	79294
+sacCer3	Input control	No description	50	0
+sacCer3	Input control	Unclassified	05	0
+sacCer3	Input control	Unclassified	10	0
+sacCer3	Input control	Unclassified	20	0
+sacCer3	Input control	Unclassified	50	0
+sacCer3	Input control	Yeast strain	05	1143
+sacCer3	Input control	Yeast strain	10	453
+sacCer3	Input control	Yeast strain	20	117
+sacCer3	Input control	Yeast strain	50	35
+sacCer3	Input control		05	0
+dm3	DNase-seq	No description	20	29976
+sacCer3	Input control		10	0
+sacCer3	Input control		20	0
+sacCer3	Input control		50	0
+sacCer3	No description	All cell types	05	51658
+sacCer3	No description	All cell types	10	29313
+sacCer3	No description	All cell types	20	15084
+sacCer3	No description	All cell types	50	9761
+sacCer3	No description	No description	05	15014
+sacCer3	No description	No description	10	8986
+sacCer3	No description	No description	20	4801
+dm3	DNase-seq	No description	50	3919
+sacCer3	No description	No description	50	3283
+sacCer3	No description	Unclassified	05	0
+sacCer3	No description	Unclassified	10	0
+sacCer3	No description	Unclassified	20	0
+sacCer3	No description	Unclassified	50	0
+sacCer3	No description	Yeast strain	05	36644
+sacCer3	No description	Yeast strain	10	20327
+sacCer3	No description	Yeast strain	20	10283
+sacCer3	No description	Yeast strain	50	6478
+sacCer3	No description		05	0
+dm3	DNase-seq	Pupae	05	0
+sacCer3	No description		10	0
+sacCer3	No description		20	0
+sacCer3	No description		50	0
+sacCer3	TFs and others	All cell types	05	41178
+sacCer3	TFs and others	All cell types	10	26511
+sacCer3	TFs and others	All cell types	20	14476
+sacCer3	TFs and others	All cell types	50	7430
+sacCer3	TFs and others	No description	05	0
+sacCer3	TFs and others	No description	10	0
+sacCer3	TFs and others	No description	20	0
+dm3	DNase-seq	Pupae	10	0
+sacCer3	TFs and others	No description	50	0
+sacCer3	TFs and others	Unclassified	05	0
+sacCer3	TFs and others	Unclassified	10	0
+sacCer3	TFs and others	Unclassified	20	0
+sacCer3	TFs and others	Unclassified	50	0
+sacCer3	TFs and others	Yeast strain	05	41178
+sacCer3	TFs and others	Yeast strain	10	26511
+sacCer3	TFs and others	Yeast strain	20	14476
+sacCer3	TFs and others	Yeast strain	50	7430
+sacCer3	TFs and others		05	0
+ce10	All antigens	All cell types	10	1150697
+ce10	All antigens	Unclassified	50	5757
+dm3	DNase-seq	Pupae	20	0
+sacCer3	TFs and others		10	0
+sacCer3	TFs and others		20	0
+sacCer3	TFs and others		50	0
+sacCer3	RNA polymerase	All cell types	05	7724
+sacCer3	RNA polymerase	All cell types	10	4455
+sacCer3	RNA polymerase	All cell types	20	2257
+sacCer3	RNA polymerase	All cell types	50	862
+sacCer3	RNA polymerase	No description	05	0
+sacCer3	RNA polymerase	No description	10	0
+sacCer3	RNA polymerase	No description	20	0
+dm3	DNase-seq	Pupae	50	0
+sacCer3	RNA polymerase	No description	50	0
+sacCer3	RNA polymerase	Unclassified	05	0
+sacCer3	RNA polymerase	Unclassified	10	0
+sacCer3	RNA polymerase	Unclassified	20	0
+sacCer3	RNA polymerase	Unclassified	50	0
+sacCer3	RNA polymerase	Yeast strain	05	7724
+sacCer3	RNA polymerase	Yeast strain	10	4455
+sacCer3	RNA polymerase	Yeast strain	20	2257
+sacCer3	RNA polymerase	Yeast strain	50	862
+sacCer3	RNA polymerase		05	0
+dm3	DNase-seq	Unclassified	05	0
+sacCer3	RNA polymerase		10	0
+sacCer3	RNA polymerase		20	0
+sacCer3	RNA polymerase		50	0
+sacCer3	Unclassified	All cell types	05	2398
+sacCer3	Unclassified	All cell types	10	1568
+sacCer3	Unclassified	All cell types	20	914
+sacCer3	Unclassified	All cell types	50	799
+sacCer3	Unclassified	No description	05	0
+sacCer3	Unclassified	No description	10	0
+sacCer3	Unclassified	No description	20	0
+dm3	DNase-seq	Unclassified	10	0
+sacCer3	Unclassified	No description	50	0
+sacCer3	Unclassified	Unclassified	05	0
+sacCer3	Unclassified	Unclassified	10	0
+sacCer3	Unclassified	Unclassified	20	0
+sacCer3	Unclassified	Unclassified	50	0
+sacCer3	Unclassified	Yeast strain	05	2398
+sacCer3	Unclassified	Yeast strain	10	1568
+sacCer3	Unclassified	Yeast strain	20	914
+sacCer3	Unclassified	Yeast strain	50	799
+sacCer3	Unclassified		05	0
+dm3	DNase-seq	Unclassified	20	0
+sacCer3	Unclassified		10	0
+sacCer3	Unclassified		20	0
+sacCer3	Unclassified		50	0
+dm3	DNase-seq	Unclassified	50	0
+dm3	Histone	All cell types	05	2003216
+dm3	Histone	All cell types	10	1229708
+dm3	Histone	All cell types	20	676013
+dm3	Histone	All cell types	50	373721
+ce10	DNase-seq	All cell types	50	0
+dm3	Histone	Adult	05	422750
+dm3	Histone	Adult	10	249915
+dm3	Histone	Adult	20	130900
+dm3	Histone	Adult	50	69564
+dm3	Histone	Cell line	05	578583
+dm3	Histone	Cell line	10	368327
+dm3	Histone	Cell line	20	194813
+dm3	Histone	Cell line	50	94396
+dm3	Histone	Embryo	05	575276
+dm3	Histone	Embryo	10	344280
+ce10	Histone	All cell types	05	443425
+dm3	Histone	Embryo	20	197445
+dm3	Histone	Embryo	50	118480
+dm3	Histone	Larvae	05	380548
+dm3	Histone	Larvae	10	242605
+dm3	Histone	Larvae	20	141911
+dm3	Histone	Larvae	50	85877
+dm3	Histone	No description	05	0
+dm3	Histone	No description	10	0
+dm3	Histone	No description	20	0
+dm3	Histone	No description	50	0
+ce10	Histone	All cell types	10	209503
+dm3	Histone	Pupae	05	41344
+dm3	Histone	Pupae	10	21598
+dm3	Histone	Pupae	20	9082
+dm3	Histone	Pupae	50	4154
+dm3	Histone	Unclassified	05	4715
+dm3	Histone	Unclassified	10	2983
+dm3	Histone	Unclassified	20	1862
+dm3	Histone	Unclassified	50	1250
+dm3	Input control	All cell types	05	1248454
+dm3	Input control	All cell types	10	809691
+ce10	Histone	All cell types	20	89199
+dm3	Input control	All cell types	20	479576
+dm3	Input control	All cell types	50	215715
+dm3	Input control	Adult	05	230476
+dm3	Input control	Adult	10	170633
+dm3	Input control	Adult	20	122180
+dm3	Input control	Adult	50	65038
+dm3	Input control	Cell line	05	330364
+dm3	Input control	Cell line	10	177443
+dm3	Input control	Cell line	20	78241
+dm3	Input control	Cell line	50	27861
+ce10	Histone	All cell types	50	39895
+dm3	Input control	Embryo	05	430134
+dm3	Input control	Embryo	10	296647
+dm3	Input control	Embryo	20	189026
+dm3	Input control	Embryo	50	88428
+dm3	Input control	Larvae	05	252885
+dm3	Input control	Larvae	10	162055
+dm3	Input control	Larvae	20	87976
+dm3	Input control	Larvae	50	33160
+dm3	Input control	No description	05	0
+dm3	Input control	No description	10	0
+ce10	Histone	Adult	05	94530
+dm3	Input control	No description	20	0
+dm3	Input control	No description	50	0
+dm3	Input control	Pupae	05	4595
+dm3	Input control	Pupae	10	2913
+dm3	Input control	Pupae	20	2153
+dm3	Input control	Pupae	50	1228
+dm3	Input control	Unclassified	05	0
+dm3	Input control	Unclassified	10	0
+dm3	Input control	Unclassified	20	0
+dm3	Input control	Unclassified	50	0
+ce10	Histone	Adult	10	40922
+dm3	No description	All cell types	05	681320
+dm3	No description	All cell types	10	402596
+dm3	No description	All cell types	20	215100
+dm3	No description	All cell types	50	124864
+dm3	No description	Adult	05	0
+dm3	No description	Adult	10	0
+dm3	No description	Adult	20	0
+dm3	No description	Adult	50	0
+dm3	No description	Cell line	05	377917
+dm3	No description	Cell line	10	217924
+ce10	Histone	Adult	20	16056
+dm3	No description	Cell line	20	113419
+dm3	No description	Cell line	50	61585
+dm3	No description	Embryo	05	33982
+dm3	No description	Embryo	10	18508
+dm3	No description	Embryo	20	7031
+dm3	No description	Embryo	50	3053
+dm3	No description	Larvae	05	62551
+dm3	No description	Larvae	10	50452
+dm3	No description	Larvae	20	39068
+dm3	No description	Larvae	50	33480
+ce10	Histone	Adult	50	7045
+dm3	No description	No description	05	176056
+dm3	No description	No description	10	103021
+dm3	No description	No description	20	51310
+dm3	No description	No description	50	25533
+dm3	No description	Pupae	05	0
+dm3	No description	Pupae	10	0
+dm3	No description	Pupae	20	0
+dm3	No description	Pupae	50	0
+dm3	No description	Unclassified	05	30814
+dm3	No description	Unclassified	10	12691
+ce10	All antigens	All cell types	20	508666
+ce10	Histone	Embryo	05	176112
+dm3	No description	Unclassified	20	4272
+dm3	No description	Unclassified	50	1213
+dm3	TFs and others	All cell types	05	3173271
+dm3	TFs and others	All cell types	10	1907382
+dm3	TFs and others	All cell types	20	1084284
+dm3	TFs and others	All cell types	50	702399
+dm3	TFs and others	Adult	05	235574
+dm3	TFs and others	Adult	10	149051
+dm3	TFs and others	Adult	20	86939
+dm3	TFs and others	Adult	50	61343
+ce10	Histone	Embryo	10	96556
+dm3	TFs and others	Cell line	05	1740374
+dm3	TFs and others	Cell line	10	1067526
+dm3	TFs and others	Cell line	20	612540
+dm3	TFs and others	Cell line	50	400831
+dm3	TFs and others	Embryo	05	823862
+dm3	TFs and others	Embryo	10	467957
+dm3	TFs and others	Embryo	20	262464
+dm3	TFs and others	Embryo	50	164282
+dm3	TFs and others	Larvae	05	329990
+dm3	TFs and others	Larvae	10	201069
+ce10	Histone	Embryo	20	45262
+dm3	TFs and others	Larvae	20	111274
+dm3	TFs and others	Larvae	50	69523
+dm3	TFs and others	No description	05	0
+dm3	TFs and others	No description	10	0
+dm3	TFs and others	No description	20	0
+dm3	TFs and others	No description	50	0
+dm3	TFs and others	Pupae	05	43471
+dm3	TFs and others	Pupae	10	21779
+dm3	TFs and others	Pupae	20	11067
+dm3	TFs and others	Pupae	50	6420
+ce10	Histone	Embryo	50	21774
+dm3	TFs and others	Unclassified	05	0
+dm3	TFs and others	Unclassified	10	0
+dm3	TFs and others	Unclassified	20	0
+dm3	TFs and others	Unclassified	50	0
+dm3	RNA polymerase	All cell types	05	971016
+dm3	RNA polymerase	All cell types	10	700657
+dm3	RNA polymerase	All cell types	20	476530
+dm3	RNA polymerase	All cell types	50	353928
+dm3	RNA polymerase	Adult	05	110680
+dm3	RNA polymerase	Adult	10	79747
+ce10	Histone	Larvae	05	172783
+dm3	RNA polymerase	Adult	20	56184
+dm3	RNA polymerase	Adult	50	45053
+dm3	RNA polymerase	Cell line	05	289948
+dm3	RNA polymerase	Cell line	10	222437
+dm3	RNA polymerase	Cell line	20	163714
+dm3	RNA polymerase	Cell line	50	137961
+dm3	RNA polymerase	Embryo	05	435317
+dm3	RNA polymerase	Embryo	10	300886
+dm3	RNA polymerase	Embryo	20	190040
+dm3	RNA polymerase	Embryo	50	116592
+ce10	Histone	Larvae	10	72025
+dm3	RNA polymerase	Larvae	05	122020
+dm3	RNA polymerase	Larvae	10	87423
+dm3	RNA polymerase	Larvae	20	59367
+dm3	RNA polymerase	Larvae	50	48243
+dm3	RNA polymerase	No description	05	0
+dm3	RNA polymerase	No description	10	0
+dm3	RNA polymerase	No description	20	0
+dm3	RNA polymerase	No description	50	0
+dm3	RNA polymerase	Pupae	05	6025
+dm3	RNA polymerase	Pupae	10	4619
+ce10	Histone	Larvae	20	27881
+dm3	RNA polymerase	Pupae	20	3161
+dm3	RNA polymerase	Pupae	50	2836
+dm3	RNA polymerase	Unclassified	05	7026
+dm3	RNA polymerase	Unclassified	10	5545
+dm3	RNA polymerase	Unclassified	20	4064
+dm3	RNA polymerase	Unclassified	50	3243
+dm3	Unclassified	All cell types	05	503708
+dm3	Unclassified	All cell types	10	284674
+dm3	Unclassified	All cell types	20	153741
+dm3	Unclassified	All cell types	50	81502
+ce10	Histone	Larvae	50	11076
+dm3	Unclassified	Adult	05	140508
+dm3	Unclassified	Adult	10	79963
+dm3	Unclassified	Adult	20	39986
+dm3	Unclassified	Adult	50	21236
+dm3	Unclassified	Cell line	05	203950
+dm3	Unclassified	Cell line	10	122917
+dm3	Unclassified	Cell line	20	71221
+dm3	Unclassified	Cell line	50	43927
+dm3	Unclassified	Embryo	05	93016
+dm3	Unclassified	Embryo	10	54429
+ce10	Histone	Unclassified	05	0
+dm3	Unclassified	Embryo	20	33822
+dm3	Unclassified	Embryo	50	13970
+dm3	Unclassified	Larvae	05	18916
+dm3	Unclassified	Larvae	10	7962
+dm3	Unclassified	Larvae	20	3367
+dm3	Unclassified	Larvae	50	1197
+dm3	Unclassified	No description	05	0
+dm3	Unclassified	No description	10	0
+dm3	Unclassified	No description	20	0
+dm3	Unclassified	No description	50	0
+ce10	Histone	Unclassified	10	0
+dm3	Unclassified	Pupae	05	30685
+dm3	Unclassified	Pupae	10	11494
+dm3	Unclassified	Pupae	20	3204
+dm3	Unclassified	Pupae	50	1088
+dm3	Unclassified	Unclassified	05	16633
+dm3	Unclassified	Unclassified	10	7909
+dm3	Unclassified	Unclassified	20	2141
+dm3	Unclassified	Unclassified	50	84
+hg19	All antigens	All cell types	05	234132322
+hg19	All antigens	All cell types	10	138209258
+ce10	All antigens	All cell types	50	267326
+ce10	Histone	Unclassified	20	0
+hg19	All antigens	All cell types	20	73808302
+hg19	All antigens	All cell types	50	41804965
+hg19	All antigens	Adipocyte	05	1255667
+hg19	All antigens	Adipocyte	10	647997
+hg19	All antigens	Adipocyte	20	307104
+hg19	All antigens	Adipocyte	50	204088
+hg19	All antigens	Blood	05	64908226
+hg19	All antigens	Blood	10	40086251
+hg19	All antigens	Blood	20	22773237
+hg19	All antigens	Blood	50	14331476
+ce10	Histone	Unclassified	50	0
+hg19	All antigens	Bone	05	1678120
+hg19	All antigens	Bone	10	882017
+hg19	All antigens	Bone	20	423181
+hg19	All antigens	Bone	50	264105
+hg19	All antigens	Breast	05	21109533
+hg19	All antigens	Breast	10	12656788
+hg19	All antigens	Breast	20	7076872
+hg19	All antigens	Breast	50	4701766
+hg19	All antigens	Cardiovascular	05	11879737
+hg19	All antigens	Cardiovascular	10	7549606
+ce10	Input control	All cell types	05	350538
+hg19	All antigens	Cardiovascular	20	4160202
+hg19	All antigens	Cardiovascular	50	1941777
+hg19	All antigens	Digestive tract	05	15293328
+hg19	All antigens	Digestive tract	10	7610113
+hg19	All antigens	Digestive tract	20	3578379
+hg19	All antigens	Digestive tract	50	1890639
+hg19	All antigens	Epidermis	05	12342757
+hg19	All antigens	Epidermis	10	8139433
+hg19	All antigens	Epidermis	20	4745714
+hg19	All antigens	Epidermis	50	2403898
+ce10	Input control	All cell types	10	144680
+hg19	All antigens	Gonad	05	525825
+hg19	All antigens	Gonad	10	261738
+hg19	All antigens	Gonad	20	112265
+hg19	All antigens	Gonad	50	39964
+hg19	All antigens	Kidney	05	8026411
+hg19	All antigens	Kidney	10	4309354
+hg19	All antigens	Kidney	20	1976173
+hg19	All antigens	Kidney	50	885473
+hg19	All antigens	Liver	05	4854045
+hg19	All antigens	Liver	10	2921990
+ce10	Input control	All cell types	20	44405
+hg19	All antigens	Liver	20	1587088
+hg19	All antigens	Liver	50	1062384
+hg19	All antigens	Lung	05	17057678
+hg19	All antigens	Lung	10	9581292
+hg19	All antigens	Lung	20	4852384
+hg19	All antigens	Lung	50	2559921
+hg19	All antigens	Muscle	05	8764292
+hg19	All antigens	Muscle	10	5086364
+hg19	All antigens	Muscle	20	2398194
+hg19	All antigens	Muscle	50	884028
+ce10	Input control	All cell types	50	8035
+hg19	All antigens	Neural	05	9044290
+hg19	All antigens	Neural	10	5496868
+hg19	All antigens	Neural	20	2949778
+hg19	All antigens	Neural	50	1607265
+hg19	All antigens	No description	05	9421404
+hg19	All antigens	No description	10	5472060
+hg19	All antigens	No description	20	2887419
+hg19	All antigens	No description	50	1872596
+hg19	All antigens	Others	05	8356731
+hg19	All antigens	Others	10	5244745
+ce10	Input control	Adult	05	50344
+hg19	All antigens	Others	20	2838585
+hg19	All antigens	Others	50	1278525
+hg19	All antigens	Pluripotent stem cell	05	21778947
+hg19	All antigens	Pluripotent stem cell	10	12333014
+hg19	All antigens	Pluripotent stem cell	20	6228979
+hg19	All antigens	Pluripotent stem cell	50	2917529
+hg19	All antigens	Pancreas	05	1750809
+hg19	All antigens	Pancreas	10	961033
+hg19	All antigens	Pancreas	20	452386
+hg19	All antigens	Pancreas	50	259298
+ce10	Input control	Adult	10	24341
+hg19	All antigens	Placenta	05	1427201
+hg19	All antigens	Placenta	10	875676
+hg19	All antigens	Placenta	20	414754
+hg19	All antigens	Placenta	50	133357
+hg19	All antigens	Prostate	05	8416012
+hg19	All antigens	Prostate	10	4649324
+hg19	All antigens	Prostate	20	2317517
+hg19	All antigens	Prostate	50	1488488
+hg19	All antigens	Unclassified	05	496411
+hg19	All antigens	Unclassified	10	254896
+ce10	Input control	Adult	20	8532
+hg19	All antigens	Unclassified	20	120823
+hg19	All antigens	Unclassified	50	71291
+hg19	All antigens	Uterus	05	5744898
+hg19	All antigens	Uterus	10	3188699
+hg19	All antigens	Uterus	20	1607268
+hg19	All antigens	Uterus	50	1007097
+hg19	DNase-seq	All cell types	05	64246862
+hg19	DNase-seq	All cell types	10	39366751
+hg19	DNase-seq	All cell types	20	19830576
+hg19	DNase-seq	All cell types	50	6518490
+ce10	Input control	Adult	50	1332
+hg19	DNase-seq	Adipocyte	05	81634
+hg19	DNase-seq	Adipocyte	10	32930
+hg19	DNase-seq	Adipocyte	20	8135
+hg19	DNase-seq	Adipocyte	50	1806
+hg19	DNase-seq	Blood	05	7403911
+hg19	DNase-seq	Blood	10	4744810
+hg19	DNase-seq	Blood	20	2591476
+hg19	DNase-seq	Blood	50	850074
+hg19	DNase-seq	Bone	05	100804
+hg19	DNase-seq	Bone	10	46560
+ce10	All antigens	Adult	05	386208
+ce10	Input control	Embryo	05	131206
+hg19	DNase-seq	Bone	20	12314
+hg19	DNase-seq	Bone	50	693
+hg19	DNase-seq	Breast	05	2340644
+hg19	DNase-seq	Breast	10	1553221
+hg19	DNase-seq	Breast	20	857488
+hg19	DNase-seq	Breast	50	354123
+hg19	DNase-seq	Cardiovascular	05	6362805
+hg19	DNase-seq	Cardiovascular	10	4213154
+hg19	DNase-seq	Cardiovascular	20	2284648
+hg19	DNase-seq	Cardiovascular	50	739305
+ce10	Input control	Embryo	10	44831
+hg19	DNase-seq	Digestive tract	05	4320067
+hg19	DNase-seq	Digestive tract	10	2417275
+hg19	DNase-seq	Digestive tract	20	1057481
+hg19	DNase-seq	Digestive tract	50	230077
+hg19	DNase-seq	Epidermis	05	8389342
+hg19	DNase-seq	Epidermis	10	5754439
+hg19	DNase-seq	Epidermis	20	3365337
+hg19	DNase-seq	Epidermis	50	1421147
+hg19	DNase-seq	Gonad	05	216378
+hg19	DNase-seq	Gonad	10	109820
+ce10	Input control	Embryo	20	13948
+hg19	DNase-seq	Gonad	20	40143
+hg19	DNase-seq	Gonad	50	4347
+hg19	DNase-seq	Kidney	05	5259921
+hg19	DNase-seq	Kidney	10	2671438
+hg19	DNase-seq	Kidney	20	1033384
+hg19	DNase-seq	Kidney	50	231970
+hg19	DNase-seq	Liver	05	320675
+hg19	DNase-seq	Liver	10	217574
+hg19	DNase-seq	Liver	20	134535
+hg19	DNase-seq	Liver	50	66770
+ce10	Input control	Embryo	50	2413
+hg19	DNase-seq	Lung	05	5936638
+hg19	DNase-seq	Lung	10	3569157
+hg19	DNase-seq	Lung	20	1694798
+hg19	DNase-seq	Lung	50	510642
+hg19	DNase-seq	Muscle	05	7095259
+hg19	DNase-seq	Muscle	10	4105540
+hg19	DNase-seq	Muscle	20	1874332
+hg19	DNase-seq	Muscle	50	541198
+hg19	DNase-seq	Neural	05	4489423
+hg19	DNase-seq	Neural	10	2766868
+ce10	Input control	Larvae	05	165991
+hg19	DNase-seq	Neural	20	1403231
+hg19	DNase-seq	Neural	50	499456
+hg19	DNase-seq	No description	05	0
+hg19	DNase-seq	No description	10	0
+hg19	DNase-seq	No description	20	0
+hg19	DNase-seq	No description	50	0
+hg19	DNase-seq	Others	05	5626185
+hg19	DNase-seq	Others	10	3632886
+hg19	DNase-seq	Others	20	1902900
+hg19	DNase-seq	Others	50	625037
+ce10	Input control	Larvae	10	74448
+hg19	DNase-seq	Pluripotent stem cell	05	3262305
+hg19	DNase-seq	Pluripotent stem cell	10	1815960
+hg19	DNase-seq	Pluripotent stem cell	20	821737
+hg19	DNase-seq	Pluripotent stem cell	50	205692
+hg19	DNase-seq	Pancreas	05	325915
+hg19	DNase-seq	Pancreas	10	177039
+hg19	DNase-seq	Pancreas	20	75713
+hg19	DNase-seq	Pancreas	50	26966
+hg19	DNase-seq	Placenta	05	1219509
+hg19	DNase-seq	Placenta	10	739641
+ce10	Input control	Larvae	20	21674
+hg19	DNase-seq	Placenta	20	321024
+hg19	DNase-seq	Placenta	50	58888
+hg19	DNase-seq	Prostate	05	1167068
+hg19	DNase-seq	Prostate	10	625244
+hg19	DNase-seq	Prostate	20	253067
+hg19	DNase-seq	Prostate	50	98578
+hg19	DNase-seq	Unclassified	05	45515
+hg19	DNase-seq	Unclassified	10	5445
+hg19	DNase-seq	Unclassified	20	812
+hg19	DNase-seq	Unclassified	50	394
+ce10	Input control	Larvae	50	4210
+hg19	DNase-seq	Uterus	05	282864
+hg19	DNase-seq	Uterus	10	167750
+hg19	DNase-seq	Uterus	20	98021
+hg19	DNase-seq	Uterus	50	51327
+hg19	Histone	All cell types	05	59190652
+hg19	Histone	All cell types	10	35370769
+hg19	Histone	All cell types	20	19465256
+hg19	Histone	All cell types	50	10873442
+hg19	Histone	Adipocyte	05	572679
+hg19	Histone	Adipocyte	10	263003
+ce10	Input control	Unclassified	05	2997
+hg19	Histone	Adipocyte	20	101513
+hg19	Histone	Adipocyte	50	46976
+hg19	Histone	Blood	05	25299111
+hg19	Histone	Blood	10	16196864
+hg19	Histone	Blood	20	9266442
+hg19	Histone	Blood	50	5356707
+hg19	Histone	Bone	05	770340
+hg19	Histone	Bone	10	415673
+hg19	Histone	Bone	20	218101
+hg19	Histone	Bone	50	132597
+ce10	Input control	Unclassified	10	1060
+hg19	Histone	Breast	05	3875685
+hg19	Histone	Breast	10	2146326
+hg19	Histone	Breast	20	1177643
+hg19	Histone	Breast	50	680665
+hg19	Histone	Cardiovascular	05	2273649
+hg19	Histone	Cardiovascular	10	1384920
+hg19	Histone	Cardiovascular	20	733223
+hg19	Histone	Cardiovascular	50	409892
+hg19	Histone	Digestive tract	05	5084731
+hg19	Histone	Digestive tract	10	2130045
+ce10	All antigens	Adult	10	194228
+ce10	Input control	Unclassified	20	251
+hg19	Histone	Digestive tract	20	1028937
+hg19	Histone	Digestive tract	50	708893
+hg19	Histone	Epidermis	05	1669630
+hg19	Histone	Epidermis	10	997841
+hg19	Histone	Epidermis	20	559615
+hg19	Histone	Epidermis	50	338381
+hg19	Histone	Gonad	05	85660
+hg19	Histone	Gonad	10	41086
+hg19	Histone	Gonad	20	21541
+hg19	Histone	Gonad	50	8564
+ce10	Input control	Unclassified	50	80
+hg19	Histone	Kidney	05	554069
+hg19	Histone	Kidney	10	386256
+hg19	Histone	Kidney	20	273269
+hg19	Histone	Kidney	50	187255
+hg19	Histone	Liver	05	660534
+hg19	Histone	Liver	10	390804
+hg19	Histone	Liver	20	181578
+hg19	Histone	Liver	50	80460
+hg19	Histone	Lung	05	4444099
+hg19	Histone	Lung	10	2491374
+ce10	No description	All cell types	05	22328
+hg19	Histone	Lung	20	1395183
+hg19	Histone	Lung	50	840141
+hg19	Histone	Muscle	05	874902
+hg19	Histone	Muscle	10	491164
+hg19	Histone	Muscle	20	235429
+hg19	Histone	Muscle	50	123149
+hg19	Histone	Neural	05	1068396
+hg19	Histone	Neural	10	598413
+hg19	Histone	Neural	20	319319
+hg19	Histone	Neural	50	209342
+ce10	No description	All cell types	10	12452
+hg19	Histone	No description	05	0
+hg19	Histone	No description	10	0
+hg19	Histone	No description	20	0
+hg19	Histone	No description	50	0
+hg19	Histone	Others	05	594682
+hg19	Histone	Others	10	397912
+hg19	Histone	Others	20	266612
+hg19	Histone	Others	50	188601
+hg19	Histone	Pluripotent stem cell	05	8110222
+hg19	Histone	Pluripotent stem cell	10	5303627
+ce10	No description	All cell types	20	5206
+hg19	Histone	Pluripotent stem cell	20	2849467
+hg19	Histone	Pluripotent stem cell	50	1115480
+hg19	Histone	Pancreas	05	513342
+hg19	Histone	Pancreas	10	307874
+hg19	Histone	Pancreas	20	149644
+hg19	Histone	Pancreas	50	76036
+hg19	Histone	Placenta	05	37672
+hg19	Histone	Placenta	10	32537
+hg19	Histone	Placenta	20	27189
+hg19	Histone	Placenta	50	21297
+ce10	No description	All cell types	50	1843
+hg19	Histone	Prostate	05	1529736
+hg19	Histone	Prostate	10	777698
+hg19	Histone	Prostate	20	376532
+hg19	Histone	Prostate	50	200315
+hg19	Histone	Unclassified	05	31727
+hg19	Histone	Unclassified	10	19072
+hg19	Histone	Unclassified	20	7894
+hg19	Histone	Unclassified	50	2381
+hg19	Histone	Uterus	05	1139786
+hg19	Histone	Uterus	10	598280
+ce10	No description	Adult	05	0
+hg19	Histone	Uterus	20	276125
+hg19	Histone	Uterus	50	146310
+hg19	Input control	All cell types	05	4872582
+hg19	Input control	All cell types	10	1575607
+hg19	Input control	All cell types	20	445951
+hg19	Input control	All cell types	50	202058
+hg19	Input control	Adipocyte	05	6069
+hg19	Input control	Adipocyte	10	2815
+hg19	Input control	Adipocyte	20	958
+hg19	Input control	Adipocyte	50	542
+ce10	No description	Adult	10	0
+hg19	Input control	Blood	05	1240217
+hg19	Input control	Blood	10	382544
+hg19	Input control	Blood	20	115589
+hg19	Input control	Blood	50	53306
+hg19	Input control	Bone	05	31436
+hg19	Input control	Bone	10	14926
+hg19	Input control	Bone	20	5234
+hg19	Input control	Bone	50	2804
+hg19	Input control	Breast	05	402133
+hg19	Input control	Breast	10	106736
+ce10	No description	Adult	20	0
+hg19	Input control	Breast	20	21734
+hg19	Input control	Breast	50	8975
+hg19	Input control	Cardiovascular	05	135689
+hg19	Input control	Cardiovascular	10	85423
+hg19	Input control	Cardiovascular	20	49150
+hg19	Input control	Cardiovascular	50	25255
+hg19	Input control	Digestive tract	05	918920
+hg19	Input control	Digestive tract	10	229826
+hg19	Input control	Digestive tract	20	38118
+hg19	Input control	Digestive tract	50	23402
+ce10	No description	Adult	50	0
+hg19	Input control	Epidermis	05	66022
+hg19	Input control	Epidermis	10	27763
+hg19	Input control	Epidermis	20	8800
+hg19	Input control	Epidermis	50	4234
+hg19	Input control	Gonad	05	5306
+hg19	Input control	Gonad	10	2029
+hg19	Input control	Gonad	20	547
+hg19	Input control	Gonad	50	163
+hg19	Input control	Kidney	05	95600
+hg19	Input control	Kidney	10	28526
+ce10	All antigens	Adult	20	85346
+ce10	No description	Embryo	05	0
+hg19	Input control	Kidney	20	7443
+hg19	Input control	Kidney	50	3580
+hg19	Input control	Liver	05	76057
+hg19	Input control	Liver	10	29045
+hg19	Input control	Liver	20	6159
+hg19	Input control	Liver	50	1474
+hg19	Input control	Lung	05	503515
+hg19	Input control	Lung	10	150629
+hg19	Input control	Lung	20	34005
+hg19	Input control	Lung	50	14633
+ce10	No description	Embryo	10	0
+hg19	Input control	Muscle	05	10599
+hg19	Input control	Muscle	10	4372
+hg19	Input control	Muscle	20	1185
+hg19	Input control	Muscle	50	429
+hg19	Input control	Neural	05	144702
+hg19	Input control	Neural	10	49621
+hg19	Input control	Neural	20	11107
+hg19	Input control	Neural	50	4266
+hg19	Input control	No description	05	0
+hg19	Input control	No description	10	0
+ce10	No description	Embryo	20	0
+hg19	Input control	No description	20	0
+hg19	Input control	No description	50	0
+hg19	Input control	Others	05	306464
+hg19	Input control	Others	10	128289
+hg19	Input control	Others	20	52158
+hg19	Input control	Others	50	24725
+hg19	Input control	Pluripotent stem cell	05	299791
+hg19	Input control	Pluripotent stem cell	10	77976
+hg19	Input control	Pluripotent stem cell	20	20417
+hg19	Input control	Pluripotent stem cell	50	9875
+ce10	No description	Embryo	50	0
+hg19	Input control	Pancreas	05	43849
+hg19	Input control	Pancreas	10	18694
+hg19	Input control	Pancreas	20	5401
+hg19	Input control	Pancreas	50	2089
+hg19	Input control	Placenta	05	2093
+hg19	Input control	Placenta	10	858
+hg19	Input control	Placenta	20	201
+hg19	Input control	Placenta	50	65
+hg19	Input control	Prostate	05	79119
+hg19	Input control	Prostate	10	33802
+ce10	No description	Larvae	05	0
+hg19	Input control	Prostate	20	10443
+hg19	Input control	Prostate	50	4907
+hg19	Input control	Unclassified	05	10745
+hg19	Input control	Unclassified	10	4755
+hg19	Input control	Unclassified	20	1449
+hg19	Input control	Unclassified	50	624
+hg19	Input control	Uterus	05	494256
+hg19	Input control	Uterus	10	196978
+hg19	Input control	Uterus	20	55853
+hg19	Input control	Uterus	50	16710
+ce10	No description	Larvae	10	0
+hg19	No description	All cell types	05	38061993
+hg19	No description	All cell types	10	21425684
+hg19	No description	All cell types	20	11320716
+hg19	No description	All cell types	50	7292050
+hg19	No description	Adipocyte	05	3078
+hg19	No description	Adipocyte	10	1405
+hg19	No description	Adipocyte	20	412
+hg19	No description	Adipocyte	50	174
+hg19	No description	Blood	05	7436762
+hg19	No description	Blood	10	4213842
+ce10	No description	Larvae	20	0
+hg19	No description	Blood	20	2260672
+hg19	No description	Blood	50	1502645
+hg19	No description	Bone	05	65668
+hg19	No description	Bone	10	33687
+hg19	No description	Bone	20	11631
+hg19	No description	Bone	50	6722
+hg19	No description	Breast	05	5402737
+hg19	No description	Breast	10	3446820
+hg19	No description	Breast	20	2028419
+hg19	No description	Breast	50	1479908
+ce10	No description	Larvae	50	0
+hg19	No description	Cardiovascular	05	1476813
+hg19	No description	Cardiovascular	10	774503
+hg19	No description	Cardiovascular	20	411644
+hg19	No description	Cardiovascular	50	231071
+hg19	No description	Digestive tract	05	1589473
+hg19	No description	Digestive tract	10	872623
+hg19	No description	Digestive tract	20	442578
+hg19	No description	Digestive tract	50	265088
+hg19	No description	Epidermis	05	306057
+hg19	No description	Epidermis	10	195982
+ce10	No description	Unclassified	05	22328
+hg19	No description	Epidermis	20	106898
+hg19	No description	Epidermis	50	67066
+hg19	No description	Gonad	05	159763
+hg19	No description	Gonad	10	78990
+hg19	No description	Gonad	20	38323
+hg19	No description	Gonad	50	19613
+hg19	No description	Kidney	05	364858
+hg19	No description	Kidney	10	211882
+hg19	No description	Kidney	20	125213
+hg19	No description	Kidney	50	84995
+ce10	No description	Unclassified	10	12452
+hg19	No description	Liver	05	1251413
+hg19	No description	Liver	10	778357
+hg19	No description	Liver	20	443098
+hg19	No description	Liver	50	310507
+hg19	No description	Lung	05	2015628
+hg19	No description	Lung	10	930008
+hg19	No description	Lung	20	354327
+hg19	No description	Lung	50	180379
+hg19	No description	Muscle	05	383145
+hg19	No description	Muscle	10	212960
+ce10	All antigens	Adult	50	41458
+ce10	No description	Unclassified	20	5206
+hg19	No description	Muscle	20	118854
+hg19	No description	Muscle	50	77172
+hg19	No description	Neural	05	141622
+hg19	No description	Neural	10	60811
+hg19	No description	Neural	20	26165
+hg19	No description	Neural	50	15818
+hg19	No description	No description	05	9421404
+hg19	No description	No description	10	5472060
+hg19	No description	No description	20	2887419
+hg19	No description	No description	50	1872596
+ce10	No description	Unclassified	50	1843
+hg19	No description	Others	05	957121
+hg19	No description	Others	10	489724
+hg19	No description	Others	20	238565
+hg19	No description	Others	50	134443
+hg19	No description	Pluripotent stem cell	05	5457993
+hg19	No description	Pluripotent stem cell	10	2745233
+hg19	No description	Pluripotent stem cell	20	1373148
+hg19	No description	Pluripotent stem cell	50	753257
+hg19	No description	Pancreas	05	695708
+hg19	No description	Pancreas	10	354650
+ce10	TFs and others	All cell types	05	1288417
+hg19	No description	Pancreas	20	165816
+hg19	No description	Pancreas	50	113317
+hg19	No description	Placenta	05	92719
+hg19	No description	Placenta	10	41981
+hg19	No description	Placenta	20	21532
+hg19	No description	Placenta	50	14298
+hg19	No description	Prostate	05	455630
+hg19	No description	Prostate	10	262071
+hg19	No description	Prostate	20	130321
+hg19	No description	Prostate	50	84054
+ce10	TFs and others	All cell types	10	708394
+hg19	No description	Unclassified	05	51228
+hg19	No description	Unclassified	10	36715
+hg19	No description	Unclassified	20	23876
+hg19	No description	Unclassified	50	14045
+hg19	No description	Uterus	05	333173
+hg19	No description	Uterus	10	211380
+hg19	No description	Uterus	20	111805
+hg19	No description	Uterus	50	64882
+hg19	TFs and others	All cell types	05	56873383
+hg19	TFs and others	All cell types	10	33793338
+ce10	TFs and others	All cell types	20	336131
+hg19	TFs and others	All cell types	20	18955356
+hg19	TFs and others	All cell types	50	14459626
+hg19	TFs and others	Adipocyte	05	537335
+hg19	TFs and others	Adipocyte	10	312222
+hg19	TFs and others	Adipocyte	20	173185
+hg19	TFs and others	Adipocyte	50	135666
+hg19	TFs and others	Blood	05	19637911
+hg19	TFs and others	Blood	10	12236878
+hg19	TFs and others	Blood	20	7236292
+hg19	TFs and others	Blood	50	5740018
+ce10	TFs and others	All cell types	50	197993
+hg19	TFs and others	Bone	05	592337
+hg19	TFs and others	Bone	10	306929
+hg19	TFs and others	Bone	20	147883
+hg19	TFs and others	Bone	50	107599
+hg19	TFs and others	Breast	05	7613341
+hg19	TFs and others	Breast	10	4512668
+hg19	TFs and others	Breast	20	2477452
+hg19	TFs and others	Breast	50	1834975
+hg19	TFs and others	Cardiovascular	05	1227743
+hg19	TFs and others	Cardiovascular	10	849824
+ce10	TFs and others	Adult	05	200097
+hg19	TFs and others	Cardiovascular	20	552278
+hg19	TFs and others	Cardiovascular	50	458233
+hg19	TFs and others	Digestive tract	05	2511572
+hg19	TFs and others	Digestive tract	10	1340908
+hg19	TFs and others	Digestive tract	20	632125
+hg19	TFs and others	Digestive tract	50	411596
+hg19	TFs and others	Epidermis	05	1843477
+hg19	TFs and others	Epidermis	10	1114381
+hg19	TFs and others	Epidermis	20	670254
+hg19	TFs and others	Epidermis	50	545628
+ce10	TFs and others	Adult	10	109739
+hg19	TFs and others	Gonad	05	58718
+hg19	TFs and others	Gonad	10	29813
+hg19	TFs and others	Gonad	20	11711
+hg19	TFs and others	Gonad	50	7277
+hg19	TFs and others	Kidney	05	1363737
+hg19	TFs and others	Kidney	10	778469
+hg19	TFs and others	Kidney	20	421380
+hg19	TFs and others	Kidney	50	312783
+hg19	TFs and others	Liver	05	2330994
+hg19	TFs and others	Liver	10	1397577
+ce10	TFs and others	Adult	20	52234
+hg19	TFs and others	Liver	20	759169
+hg19	TFs and others	Liver	50	561630
+hg19	TFs and others	Lung	05	3622935
+hg19	TFs and others	Lung	10	2106358
+hg19	TFs and others	Lung	20	1170053
+hg19	TFs and others	Lung	50	872183
+hg19	TFs and others	Muscle	05	382659
+hg19	TFs and others	Muscle	10	263278
+hg19	TFs and others	Muscle	20	164683
+hg19	TFs and others	Muscle	50	139674
+ce10	TFs and others	Adult	50	28212
+hg19	TFs and others	Neural	05	2822691
+hg19	TFs and others	Neural	10	1798401
+hg19	TFs and others	Neural	20	1078725
+hg19	TFs and others	Neural	50	816644
+hg19	TFs and others	No description	05	0
+hg19	TFs and others	No description	10	0
+hg19	TFs and others	No description	20	0
+hg19	TFs and others	No description	50	0
+hg19	TFs and others	Others	05	829955
+hg19	TFs and others	Others	10	569660
+ce10	All antigens	Embryo	05	639732
+ce10	TFs and others	Embryo	05	303799
+hg19	TFs and others	Others	20	366657
+hg19	TFs and others	Others	50	300636
+hg19	TFs and others	Pluripotent stem cell	05	3900831
+hg19	TFs and others	Pluripotent stem cell	10	1889400
+hg19	TFs and others	Pluripotent stem cell	20	854130
+hg19	TFs and others	Pluripotent stem cell	50	599914
+hg19	TFs and others	Pancreas	05	141280
+hg19	TFs and others	Pancreas	10	83964
+hg19	TFs and others	Pancreas	20	45102
+hg19	TFs and others	Pancreas	50	35092
+ce10	TFs and others	Embryo	10	163850
+hg19	TFs and others	Placenta	05	75208
+hg19	TFs and others	Placenta	10	60659
+hg19	TFs and others	Placenta	20	44808
+hg19	TFs and others	Placenta	50	38809
+hg19	TFs and others	Prostate	05	4811513
+hg19	TFs and others	Prostate	10	2717294
+hg19	TFs and others	Prostate	20	1417282
+hg19	TFs and others	Prostate	50	1016200
+hg19	TFs and others	Unclassified	05	249172
+hg19	TFs and others	Unclassified	10	137017
+ce10	TFs and others	Embryo	20	77982
+hg19	TFs and others	Unclassified	20	60673
+hg19	TFs and others	Unclassified	50	41081
+hg19	TFs and others	Uterus	05	2319974
+hg19	TFs and others	Uterus	10	1287638
+hg19	TFs and others	Uterus	20	671514
+hg19	TFs and others	Uterus	50	483988
+hg19	RNA polymerase	All cell types	05	7529782
+hg19	RNA polymerase	All cell types	10	4960039
+hg19	RNA polymerase	All cell types	20	2944414
+hg19	RNA polymerase	All cell types	50	1903784
+ce10	TFs and others	Embryo	50	41175
+hg19	RNA polymerase	Adipocyte	05	54872
+hg19	RNA polymerase	Adipocyte	10	35622
+hg19	RNA polymerase	Adipocyte	20	22901
+hg19	RNA polymerase	Adipocyte	50	18924
+hg19	RNA polymerase	Blood	05	2682059
+hg19	RNA polymerase	Blood	10	1806486
+hg19	RNA polymerase	Blood	20	1083586
+hg19	RNA polymerase	Blood	50	697166
+hg19	RNA polymerase	Bone	05	111471
+hg19	RNA polymerase	Bone	10	62398
+ce10	TFs and others	Larvae	05	784330
+hg19	RNA polymerase	Bone	20	27535
+hg19	RNA polymerase	Bone	50	13389
+hg19	RNA polymerase	Breast	05	1128873
+hg19	RNA polymerase	Breast	10	725146
+hg19	RNA polymerase	Breast	20	445065
+hg19	RNA polymerase	Breast	50	300689
+hg19	RNA polymerase	Cardiovascular	05	360505
+hg19	RNA polymerase	Cardiovascular	10	235962
+hg19	RNA polymerase	Cardiovascular	20	127998
+hg19	RNA polymerase	Cardiovascular	50	77407
+ce10	TFs and others	Larvae	10	434733
+hg19	RNA polymerase	Digestive tract	05	490255
+hg19	RNA polymerase	Digestive tract	10	349749
+hg19	RNA polymerase	Digestive tract	20	222398
+hg19	RNA polymerase	Digestive tract	50	147217
+hg19	RNA polymerase	Epidermis	05	65466
+hg19	RNA polymerase	Epidermis	10	47822
+hg19	RNA polymerase	Epidermis	20	34449
+hg19	RNA polymerase	Epidermis	50	27316
+hg19	RNA polymerase	Gonad	05	0
+hg19	RNA polymerase	Gonad	10	0
+ce10	TFs and others	Larvae	20	205882
+hg19	RNA polymerase	Gonad	20	0
+hg19	RNA polymerase	Gonad	50	0
+hg19	RNA polymerase	Kidney	05	295871
+hg19	RNA polymerase	Kidney	10	193910
+hg19	RNA polymerase	Kidney	20	101950
+hg19	RNA polymerase	Kidney	50	57693
+hg19	RNA polymerase	Liver	05	154745
+hg19	RNA polymerase	Liver	10	103353
+hg19	RNA polymerase	Liver	20	62100
+hg19	RNA polymerase	Liver	50	41381
+ce10	TFs and others	Larvae	50	128582
+hg19	RNA polymerase	Lung	05	449893
+hg19	RNA polymerase	Lung	10	288750
+hg19	RNA polymerase	Lung	20	185006
+hg19	RNA polymerase	Lung	50	132649
+hg19	RNA polymerase	Muscle	05	0
+hg19	RNA polymerase	Muscle	10	0
+hg19	RNA polymerase	Muscle	20	0
+hg19	RNA polymerase	Muscle	50	0
+hg19	RNA polymerase	Neural	05	294123
+hg19	RNA polymerase	Neural	10	184756
+ce10	TFs and others	Unclassified	05	191
+hg19	RNA polymerase	Neural	20	96956
+hg19	RNA polymerase	Neural	50	54299
+hg19	RNA polymerase	No description	05	0
+hg19	RNA polymerase	No description	10	0
+hg19	RNA polymerase	No description	20	0
+hg19	RNA polymerase	No description	50	0
+hg19	RNA polymerase	Others	05	42324
+hg19	RNA polymerase	Others	10	26274
+hg19	RNA polymerase	Others	20	11693
+hg19	RNA polymerase	Others	50	5083
+ce10	TFs and others	Unclassified	10	72
+hg19	RNA polymerase	Pluripotent stem cell	05	342412
+hg19	RNA polymerase	Pluripotent stem cell	10	216950
+hg19	RNA polymerase	Pluripotent stem cell	20	124254
+hg19	RNA polymerase	Pluripotent stem cell	50	76352
+hg19	RNA polymerase	Pancreas	05	24495
+hg19	RNA polymerase	Pancreas	10	16665
+hg19	RNA polymerase	Pancreas	20	10129
+hg19	RNA polymerase	Pancreas	50	5544
+hg19	RNA polymerase	Placenta	05	0
+hg19	RNA polymerase	Placenta	10	0
