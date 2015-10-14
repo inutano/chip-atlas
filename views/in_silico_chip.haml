@@ -440,7 +440,6 @@
             qsubOptions: '-N test',
             address: '',
           };
-          alert(JSON.stringify(data));
 
           $.ajax({
             type : 'post',
@@ -456,7 +455,6 @@
               window.open(redirectUrl, "_self", "");
             },
             error : function(response){
-              // alert(JSON.stringify(response));
               alert("Something went bad, or you did it wrong.");
             },
             complete: function(){
