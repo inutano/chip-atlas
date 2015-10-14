@@ -100,6 +100,11 @@
               Result URL:
             %td
               %a#result-url
+          %tr
+            %td
+              Download TSV:
+            %td
+              %a#download-tsv
 
     /
       Bootstrap Core Javascript
@@ -146,7 +151,8 @@
 
       $('td#project-title').text(title);
       $('td#request-id').text(reqId);
-      $('a#result-url').text(resultUrl);
+      $('a#result-url').text(resultUrl+"&format=html");
+      $('a#download-tsv').text(resultUrl+"&format=tsv");
 
       // date format converter function
       function dateFormat(date){
@@ -190,7 +196,8 @@
             tdStatus.text(status);
             if(status == "finished"){
               tdStatus.css("color","red");
-              $('a#result-url').attr('href', resultUrl);
+              $('a#result-url').attr('href', resultUrl+"&format=html");
+              $('a#download-tsv').attr('href', resultUrl+"&format=tsv");
               clearInterval(interval);
             }
           });
