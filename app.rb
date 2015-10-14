@@ -113,6 +113,13 @@ class PeakJohn < Sinatra::Base
         response.code.to_i == 200
       end
     end
+    
+    def remotefile_available?(url)
+      uri = URI(url)
+      request = Net::HTTP.new(uri.host, uri.port)
+      response = request.request_head(uri.path)
+      response.code.to_i == 200
+    end
 
     def exp2run(exp_id)
       h = open(File.join(app_root, "tables/exp2run.json")){|f| JSON.load(f) }
@@ -247,7 +254,11 @@ class PeakJohn < Sinatra::Base
   get "/colo_result" do
     @iframe_url = params[:base]
     # haml :colo_result
-    redirect @iframe_url
+    if remotefile_available?(@iframe_url)
+      redirect @iframe_url
+    else
+      redirect "not_found", 404
+    end
   end
 
   post "/target_genes" do
@@ -258,7 +269,11 @@ class PeakJohn < Sinatra::Base
   get "/target_genes_result" do
     @iframe_url = params[:base]
     # haml :target_genes_result
-    redirect @iframe_url
+    if remotefile_available?(@iframe_url)
+      redirect @iframe_url
+    else
+      redirect "not_found", 404
+    end
   end
 
   get "/documentation" do
@@ -297,5 +312,9 @@ class PeakJohn < Sinatra::Base
     404 if Experiment.id_valid?(@expid)
     @ncbi  = Experiment.fetch_ncbi_metadata(@expid)
     haml :experiment
+  end
+  
+  not_found do
+    haml :not_found
   end
 end

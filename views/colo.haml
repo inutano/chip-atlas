@@ -350,6 +350,7 @@
             error : function(response){
               // alert(JSON.stringify(response));
               alert("error!");
+              window.open("/not_found", "_self", "")
             },
             complete: function(){
               button.attr("disabled", false);
