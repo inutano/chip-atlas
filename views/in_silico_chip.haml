@@ -258,7 +258,7 @@
                         %button.btn.btn-primary.btn-lg.btn-block{ :id => "virtual-chip-submit", :type => "button" }= "submit"
                       .estimated-run-time
                         Estimated run time:
-                        %a#estimated-run-time{ :id => "estimatedRunTime" }= "-"
+                        %a#estimated-run-time= "-"
 
     /
       Bootstrap Core Javascript
@@ -726,14 +726,21 @@
         var qBed = genome + ',' + ag + ',' + cl + ',' + qval;
         var numRef = numRef[qBed];
         var est = estimateTime(userData, comparedWith, numRef);
-        $('#estimatedRunTime').html(est);
+        $('#estimated-run-time').html(est);
       }
 
       function estimateTime(userData, comparedWith, numRef){
         var lf = String.fromCharCode(10);
         var genome = genomeSelected();
         var numLinesUserData = userData.replace(/\n$/g,'').split(lf).length;
+        if (userData.length == 0) {
+          var numLinesUserData = 0;
+        }
         var numLinesComparedWith = comparedWith.replace(/\n$/g,'').split(lf).length;
+        if (comparedWith.length == 0) {
+          var numLinesComparedWith = 0;
+        }
+
         switch($('input[name="bedORGene"]:checked').val()){
           case 'bed':
             if(numLinesUserData == 1 && !userData.match(/\t/)){ // sequence motif
