@@ -169,7 +169,7 @@
                 $.each(genomeJson, function(i, genome){
                   // activate typeahead
                   var options = analysisJson[genome];
-                  enableTypeAhead('AntigenPanel', options)
+                  enableTypeAhead('AntigenPanel', options, genome)
                   // set tab controller
                   $('#' + genome + '-tab a').click(function(e){
                     e.preventDefault();
@@ -263,8 +263,7 @@
         });
       }
 
-      function enableTypeAhead(panel, options){
-        var genome = genomeSelected();
+      function enableTypeAhead(panel, options, genome){
         var typeaheadInput = $('#' + genome + panel + '-typeahead');
         typeaheadInput.typeahead('destroy');  // Erase previous data set
         var list = new Bloodhound({ // create list for incremental search
