@@ -190,6 +190,9 @@
             %h4= "Library Description"
             %hr
             %dl.dl-horizontal
+              - if @ncbi[:library_description].values.uniq == [""]
+                %span.italic
+                  No library information are found.
               - @ncbi[:library_description].each_pair do |k,v|
                 - if v != ""
                   %dt{ style: 'white-space: normal;' }= k.to_s
@@ -199,6 +202,9 @@
             %h4= "Platform Information"
             %hr
             %dl.dl-horizontal
+              - if @ncbi[:platform_information].values.uniq == [""]
+                %span.italic
+                  No platform information are found.
               - @ncbi[:platform_information].each_pair do |k,v|
                 - if v != ""
                   %dt{ style: 'white-space: normal;' }= k.to_s
