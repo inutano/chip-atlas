@@ -274,140 +274,356 @@
     / 'code here'
 
     :javascript
-      $('button.go-experiment').on('click', function(event){
-        event.preventDefault();
-        var expid = $('input#jumpToExperiment').val();
-        window.open('/view?id='+expid);
-      });
 
-      // function
-      function genomeSelected(){
-        return $('.genomeTab ul li.active a').attr('source').replace(/[\n\s ]/g, "");
-      }
+      // variables
+      var genomesize = {
+        ce10: 100286070,
+        dm3: 168736537,
+        hg19: 3137161264,
+        mm9: 2725765481,
+        sacCer3: 12157105
+      };
 
+      var numGenes = {
+        ce10: 17958,
+        dm3: 12635,
+        hg19: 18622,
+        mm9: 19909,
+        sacCer3: 5809
+      };
+
+      // onload
       $(function(){
+        // search experiment
+        $('button.go-experiment').on('click', function(event){
+          event.preventDefault();
+          var expid = $('input#jumpToExperiment').val();
+          window.open('/view?id='+expid);
+        });
+
+        // example data
         $('a.dataExample').on('click', function(event){
           event.preventDefault();
           event.stopPropagation();
           var id = $(this).attr("id");
+          putExampleData(id);
+        });
+
+        // Form Layout: User Data
+        $("input[name='bedORGene']").change(function(){
           var genome = genomeSelected();
-          switch(id){
-            case genome + "UserData":
-              var type = $('input[name="bedORGene"]:checked').val();
-              switch(type){
-                case "bed":
-                  $.ajax({
-                    type: 'GET',
-                    url: '/tables/bed/bedA_' + genome + '.bed',
-                    success: function(data){
-                      $('textarea#' + genome + 'UserData').val(data);
-                    }
-                  });
-                  break;
-                case "gene":
-                  $.ajax({
-                    type: 'GET',
-                    url: '/tables/genes/geneA_' + genome + '.txt',
-                    success: function(data){
-                      $('textarea#' + genome + 'UserData').val(data);
-                    }
-                  });
-                  break;
-              }
+          switch($(this).val()){
+            case 'bed':
+              positionBed();
               break;
-            case genome + "ComparedWith":
-              var type = $('input[name="comparedWith"]:checked').val();
-              switch(type){
-                case "bed":
-                  $.ajax({
-                    type: 'GET',
-                    url: '/tables/bed/bedB_' + genome + '.bed',
-                    success: function(data){
-                      $('textarea#' + genome + 'ComparedWith').val(data);
-                    }
-                  });
-                  break;
-                case "userlist":
-                  $.ajax({
-                    type: 'GET',
-                    url: '/tables/genes/geneB_' + genome + '.txt',
-                    success: function(data){
-                      $('textarea#' + genome + 'ComparedWith').val(data);
-                    }
-                  });
-                  break;
-              }
+            case 'gene':
+              positionGene();
               break;
-          }
+          };
+        });
 
+        // Form Layout: Compared With
+        $("input[name='comparedWith']").change(function(){
+          var genome = genomeSelected();
+          switch($(this).val()){
+            case 'rnd':
+              positionComparedRnd();
+              break;
+            case 'bed':
+              positionComparedBed();
+              break;
+            case 'refseq':
+              positionComparedRefseq();
+              break;
+            case 'userlist':
+              positionComparedUserlist();
+              break;
+          };
+        });
 
+        // post to wabi
+        $("button#virtual-chip-submit").click(function(){
+          var button = $(this);
+          var data = retrievePostData();
+          post2wabi(button, data);
+        });
+
+        // calculate estimated running time
+        // get reference of #lines of bed files
+        var numRef;
+        $.ajax({
+          type: 'GET',
+          url: '/data/number_of_lines.json',
+          dataType: 'json',
+        }).done(function(json){
+          numRef = json;
+          $('input, select, textarea').on('click keyup paste change', function(){
+            timeCalculate(numRef);
+          });
+        });
+
+        // iterate for each genomes
+        var genomeList;
+        $.ajax({
+          type: 'GET',
+          url: '/data/list_of_genome.json',
+          dataType: 'json',
+        }).done(function(json){
+          genomeList = json;
+          $.each(genomeList, function(i, genome){
+            // set tab controller
+            $('#' + genome + '-tab a').on('click', function(e){
+              e.preventDefault();
+              $(this).tab('show');
+              positionBed();
+            });
+
+            // put file content into the textarea
+            $('input#' + genome + 'UserDataFile, input#' + genome + 'ComparedWithFile').on('change', function(event) {
+              var fileId = $(this).attr('id');
+              putFile2Textarea(event);
+          	});
+          });
+        });
+
+        // default value for dataset
+        var defaultTitles = {
+          'UserDataTitle':     "My data",
+          'ComparedWithTitle': "Control",
+          'ProjectTitle':      "My project"
+        };
+        $.each(defaultTitles, function(id, dvalue){
+          setInputDefaultValue(id, dvalue);
+        });
+
+        // Q & A
+        $('.infoBtn').click(function(){
+          var genome = genomeSelected();
+          switch($(this).attr('id')){
+            case genome + 'UserDataBed':
+            	alert(helpText[userdatabed] + helpText[note2]);
+              break;
+            case genome + 'UserDataGenes':
+            	alert(helpText[userdatagenes] + helpText[note1]);
+              break;
+            case genome + 'ComparedWithRandom':
+              alert(helpText[comparedwithrandom]);
+              break;
+            case genome + 'ComparedWithBed':
+              alert(helpText[comparedwithbed] + helpText[note2]);
+              break;
+            case genome + 'ComparedWithRefseq':
+              alert(helpText[comparedwithrefseq]);
+              break;
+            case genome + 'ComparedWithUserlist':
+              alert(helpText[comparedwithuserlist] + helpText[note1]);
+              break;
+            case genome + 'TSS':
+              alert(helpText[tss]);
+              break;
+            case genome + 'UserDataDesc':
+              alert(helpText[userdatadesc]);
+              break;
+            case genome + 'ComparedWithDesc':
+              alert(helpText[comparedwithdesc]);
+              break;
+            case genome + 'ProjectDesc':
+              alert(helpText[projectdesc]);
+              break;
+            case genome + 'DistTSS':
+              alert(helpText[disttss]);
+              break;
+          };
         });
       });
 
-      // hide and show by checked radio buttons
-      function defaultPosition(){
-        var genome = genomeSelected();
-        $('.panel-input.bed').show();
-        $('.panel-input.gene.default-hide').hide();
-        $('.panel-input.distTSS').hide();
-        $('.panel-input.rnd').show();
-        $('.panel-input.bed-input.comparedWith').hide();
-        $('input#'+genome+'ComparedWithBed').prop("checked",false);
-        $('input#'+genome+'ComparedWithRandom').prop("checked",true);
-        $('input#'+genome+'ComparedWithRandomx1').prop("checked",true);
-        $('input#'+genome+'ComparedWithRefseq').prop("checked",false);
-        $('input#'+genome+'ComparedWithUserlist').prop("checked",false);
-        $('input#' + genome + 'DistanceUp').val(0);
-        $('input#' + genome + 'DistanceDown').val(0);
+      // functions
+      function genomeSelected(){
+        return $('.genomeTab ul li.active a').attr('source').replace(/[\n\s ]/g, "");
       }
 
-      // bed or gene
-      $("input[name='bedORGene']").change(function(){
+      function putExampleData(id){
         var genome = genomeSelected();
-        switch($(this).val()){
-          case 'bed':
-            defaultPosition();
+        var type;
+        switch(id){
+          case genome + "UserData":
+            type = $('input[name="bedORGene"]:checked').val();
+            putUserData(type);
             break;
-          case 'gene':
-            $('.panel-input.bed').hide();
-            $('.panel-input.gene.default-hide').show();
-            $('.panel-input.distTSS').show();
-            $('.panel-input.rnd').show();
-            $('.panel-input.bed-input.comparedWith').hide();
-            $('input#'+genome+'ComparedWithRefseq').prop("checked",true);
-            $('input#'+genome+'ComparedWithBed').prop("checked",false);
-            $('input#'+genome+'ComparedWithRandom').prop("checked",false);
-            $('input#'+genome+'ComparedWithRandomx1').prop("checked",false);
-            $('input#'+genome+'ComparedWithRefseq').prop("checked",true);
-            $('input#'+genome+'ComparedWithUserlist').prop("checked",false);
-            $('input#' + genome + 'DistanceUp').val(5000);
-            $('input#' + genome + 'DistanceDown').val(5000);
+          case genome + "ComparedWith":
+            type = $('input[name="comparedWith"]:checked').val();
+            putComparedWith(type);
             break;
-        };
-      });
+        }
+      }
 
-      // compared with
-      $("input[name='comparedWith']").change(function(){
+      function putUserData(type){
         var genome = genomeSelected();
-        switch($(this).val()){
-          case 'rnd':
-            $('.panel-input.rnd').show();
-            $('.panel-input.gene.default-hide').hide();
-            $('.panel-input.bed-input.comparedWith').hide();
+        switch(type){
+          case "bed":
+            getExampleData('/tables/bed/bedA_' + genome + '.bed', genome + 'UserData');
             break;
-          case 'bed':
-            $('.panel-input.rnd').hide();
-            $('.panel-input.bed-input.comparedWith').show();
+          case "gene":
+            getExampleData('/tables/genes/geneA_' + genome + '.txt', genome + 'UserData')
             break;
-          case 'refseq':
-            $('.panel-input.gene.default-hide').show();
-            $('.panel-input.bed-input.comparedWith').hide();
+        }
+      }
+
+      function putComparedWith(type){
+        var genome = genomeSelected();
+        switch(type){
+          case "bed":
+            getExampleData('/tables/bed/bedB_' + genome + '.bed', genome + 'ComparedWith')
             break;
-          case 'userlist':
-            $('.panel-input.bed-input.comparedWith').show();
+          case "userlist":
+            getExampleData('/tables/genes/geneB_' + genome + '.txt', genome + 'ComparedWith')
             break;
+        }
+      }
+
+      function getExampleData(url, textareaId){
+        $.ajax({
+          type: 'GET',
+          url: url,
+          success: function(data){
+            $('textarea#' + textareaId).val(data);
+          }
+        });
+      }
+
+      function positionBed(){
+        var panels = {
+          '.panel-input.bed':                    'show',
+          '.panel-input.rnd':                    'show',
+          '.panel-input.gene.default-hide':      'hide',
+          '.panel-input.distTSS':                'hide',
+          '.panel-input.bed-input.comparedWith': 'hide'
         };
-      });
+        var inputs = {
+          'ComparedWithRandom':   'checked',
+          'ComparedWithRandomx1': 'checked',
+          'ComparedWithBed':      'unchecked',
+          'ComparedWithRefseq':   'unchecked',
+          'ComparedWithUserlist': 'unchecked',
+        };
+        setForms(panels, inputs);
+        setDistance(0);
+      }
+
+      function positionGene(){
+        var panels = {
+          '.panel-input.rnd':                    'show',
+          '.panel-input.distTSS':                'show',
+          '.panel-input.gene.default-hide':      'show',
+          '.panel-input.bed':                    'hide',
+          '.panel-input.bed-input.comparedWith': 'hide'
+        };
+        var inputs = {
+          'ComparedWithRefseq':   "checked",
+          'ComparedWithBed':      "unchecked",
+          'ComparedWithRandom':   "unchecked",
+          'ComparedWithRandomx1': "unchecked",
+          'ComparedWithUserlist': "unchecked",
+        };
+        setForms(panels, inputs);
+        setDistance(5000);
+      }
+
+      function setForms(panels, inputs){
+        $.each(panels, function(id, type){
+          hideAndShow(id, type);
+        });
+        $.each(inputs, function(id, type){
+          inputChange(id, type);
+        });
+      }
+
+      function hideAndShow(element, type){
+        switch(type){
+          case 'show':
+            $(element).show();
+            break;
+          case 'hide':
+            $(element).hide();
+            break;
+        }
+      }
+
+      function inputChange(id, type){
+        var genome = genomeSelected();
+        switch(type){
+          case 'checked':
+            $('input#' + genome + id).prop('checked',true);
+            break;
+          case 'unchecked':
+            $('input#' + genome + id).prop('checked',false);
+            break;
+        }
+      }
+
+      function setDistance(distValue){
+        var genome = genomeSelected();
+        $('input#' + genome + 'DistanceUp').val(distValue);
+        $('input#' + genome + 'DistanceDown').val(distValue);
+      }
+
+      function positionComparedRnd(){
+        var panels = {
+          '.panel-input.rnd': 'show',
+          '.panel-input.gene.default-hide': 'hide',
+          '.panel-input.bed-input.comparedWith': 'hide'
+        };
+        var inputs = {};
+        setForms(panels, inputs);
+      }
+      function positionComparedBed(){
+        var panels = {
+          '.panel-input.rnd': 'hide',
+          '.panel-input.bed-input.comparedWith': 'show'
+        };
+        var inputs = {};
+        setForms(panels, inputs);
+      }
+      function positionComparedRefseq(){
+        var panels = {
+          '.panel-input.gene.default-hide': 'show',
+          '.panel-input.bed-input.comparedWith': 'hide'
+        };
+        var inputs = {};
+        setForms(panels, inputs);
+      }
+      function positionComparedUserlist(){
+        var panels = {
+          '.panel-input.bed-input.comparedWith': 'show'
+        };
+        var inputs = {};
+        setForms(panels, inputs);
+      }
+
+      function retrievePostData(){
+        var genome = genomeSelected();
+        var data = {
+          address:      '',
+          format:       'text',
+          result:       'www',
+          qsubOptions:  '-N test',
+          genome: genome,
+          antigenClass: $('select#' + genome + 'agClass option:selected').val(),
+          cellClass:    $('select#' + genome + 'clClass option:selected').val(),
+          threshold:    $('select#' + genome + 'qval option:selected').val(),
+          typeA:        $('input[name="bedORGene"]:checked').val(),
+          bedAFile:     $('textarea#' + genome + 'UserData').val(),
+          typeB:        $('input[name="comparedWith"]:checked').val(),
+          bedBFile:     retrieveInputData('ComparedWith'),
+          permTime:     $('input[name="numShuf"]:checked').val(),
+          title:        $('input#' + genome + 'ProjectTitle').val(),
+          descriptionA: $('input#' + genome + 'UserDataTitle').val(),
+          descriptionB: $('input#' + genome + 'ComparedWithTitle').val(),
+          distanceUp:   $('input#' + genome + 'DistanceUp').val(),
+          distanceDown: $('input#' + genome + 'DistanceDown').val(),
+        };
+        return data;
+      }
 
       function retrieveInputData(type){
         var genome = genomeSelected();
@@ -419,31 +635,6 @@
           flatfile = inputText;
         }
         return flatfile;
-      }
-
-      function retrievePostData(){
-        var genome = genomeSelected();
-        var data = {
-          genome: genome,
-          antigenClass: $('select#' + genome + 'agClass option:selected').val(),
-          cellClass: $('select#' + genome + 'clClass option:selected').val(),
-          threshold: $('select#' + genome + 'qval option:selected').val(),
-          typeA: $('input[name="bedORGene"]:checked').val(),
-          bedAFile: $('textarea#' + genome + 'UserData').val(),
-          descriptionA: $('input#' + genome + 'UserDataTitle').val(),
-          typeB: $('input[name="comparedWith"]:checked').val(),
-          bedBFile: retrieveInputData('ComparedWith'),
-          descriptionB: $('input#' + genome + 'ComparedWithTitle').val(),
-          permTime: $('input[name="numShuf"]:checked').val(),
-          distanceUp: $('input#' + genome + 'DistanceUp').val(),
-          distanceDown: $('input#' + genome + 'DistanceDown').val(),
-          title: $('input#' + genome + 'ProjectTitle').val(),
-          format: 'text',
-          result: 'www',
-          qsubOptions: '-N test',
-          address: '',
-        };
-        return data;
       }
 
       function evaluateText(data){
@@ -488,43 +679,95 @@
         }
       }
 
-      // send data to wabi api
-      $(function(){
-        $("button#virtual-chip-submit").click(function(){
-          var button = $(this);
-          button.attr("disabled", true);
-          var data = retrievePostData();
-          // evaluate text input and reject if invalid characters are found
-          try{
-            evaluateText(data);
-            $.ajax({
-              type : 'post',
-              url : "#{app_root}/wabi_chipatlas",
-              data: JSON.stringify(data),
-              contentType: 'application/json',
-              dataType: 'json',
-              scriptCharset: 'utf-8',
-              success : function(response) {
-                var requestId = response.requestId;
-                var calcm = $('a#estimated-run-time').text();
-                var redirectUrl = '/in_silico_chip_result?id=' + requestId + '&title=' + data['title'] + '&calcm=' + calcm;
-                window.open(redirectUrl, "_self", "");
-              },
-              error : function(response){
-                alert("Something went bad, or you did it wrong.");
-              },
-              complete: function(){
-                button.attr("disabled", false);
-              }
-            });
-          }catch(e){
-            alert(e.message);
-            button.prop("disabled", false);
-          }
-        })
-      })
+      function post2wabi(button, data){
+        button.attr("disabled", true);
+        // evaluate text input and reject if invalid characters are found
+        try{
+          evaluateText(data);
+          $.ajax({
+            type : 'post',
+            url : "#{app_root}/wabi_chipatlas",
+            data: JSON.stringify(data),
+            contentType: 'application/json',
+            dataType: 'json',
+            scriptCharset: 'utf-8',
+            success : function(response) {
+              var requestId = response.requestId;
+              var calcm = $('a#estimated-run-time').text();
+              var redirectUrl = '/in_silico_chip_result?id=' + requestId + '&title=' + data['title'] + '&calcm=' + calcm;
+              window.open(redirectUrl, "_self", "");
+            },
+            error : function(response){
+              alert("Something went bad, or you did it wrong.");
+            },
+            complete: function(){
+              button.attr("disabled", false);
+            }
+          });
+        }catch(e){
+          alert(e.message);
+          button.prop("disabled", false);
+        }
+      }
 
-      function estimatedTime(numLinesA, numLinesB, numRef, type){
+      function timeCalculate(numRef){
+        var genome = genomeSelected();
+        var userData = $('textarea#' + genome + 'UserData').val();
+        var comparedWith = $('textarea#' + genome + 'ComparedWith').val();
+        var ag = $('select#' + genome + 'agClass').val();
+        var cl = $('select#' + genome + 'clClass').val();
+        var qval = $('select#' + genome + 'qval').val();
+        var qBed = genome + ',' + ag + ',' + cl + ',' + qval;
+        var numRef = numRef[qBed];
+        var est = estimateTime(userData, comparedWith, numRef);
+        $('#estimatedRunTime').html(est);
+      }
+
+      function estimateTime(userData, comparedWith, numRef){
+        var lf = String.fromCharCode(10);
+        var genome = genomeSelected();
+        var numLinesUserData = userData.replace(/\n$/g,'').split(lf).length;
+        var numLinesComparedWith = comparedWith.replace(/\n$/g,'').split(lf).length;
+        switch($('input[name="bedORGene"]:checked').val()){
+          case 'bed':
+            if(numLinesUserData == 1 && !userData.match(/\t/)){ // sequence motif
+              numLinesUserData = genomesize[genome] / Math.pow(4, userData.length);
+            }
+            switch($('input[name="comparedWith"]:checked').val()){
+              case 'rnd':
+                numLinesComparedWith = $('input[name="numShuf"]:checked').val();
+                var seconds = getSeconds(numLinesUserData, numLinesComparedWith, numRef, 'rnd');
+                break;
+              case 'bed':
+                if(numLinesComparedWith == 1 && !comparedWith.match(/\t/)){
+                  numLinesComparedWith = genomesize[genome] / Math.pow(4, comparedWith.length);
+                }
+                var seconds = getSeconds(numLinesUserData, numLinesComparedWith, numRef, 'bed');
+                break;
+            };
+            break;
+          case 'gene':
+            switch($('input[name="comparedWith"]:checked').val()){
+              case 'refseq':
+                numLinesComparedWith = numGenes[genome] - numLinesUserData;
+                var seconds = getSeconds(numLinesUserData, numLinesComparedWith, numRef, 'bed');
+                break;
+              case 'userlist':
+                var seconds = getSeconds(numLinesUserData, numLinesComparedWith, numRef, 'bed');
+                break;
+            };
+            break;
+        };
+        var minutes = Math.round(seconds / 60);
+        if (minutes < 60) {
+          var est = minutes + ' mins';
+        } else {
+          var est = (minutes/60).toFixed(1) + ' hr';
+        }
+        return est;
+      }
+
+      function getSeconds(numLinesA, numLinesB, numRef, type){
         switch(type){
           case 'bed':
             var a = numRef * 8.23e-11 + 1.47e-2;
@@ -541,172 +784,38 @@
         }
       }
 
-      var genomesize = {
-        ce10: 100286070,
-        dm3: 168736537,
-        hg19: 3137161264,
-        mm9: 2725765481,
-        sacCer3: 12157105
-      };
-
-      var numGenes = {
-        ce10: 17958,
-        dm3: 12635,
-        hg19: 18622,
-        mm9: 19909,
-        sacCer3: 5809
-      };
-
-      function estimateTime(userData, comparedWith, numRef){
-        var lf = String.fromCharCode(10);
+      function setInputDefaultValue(id, dvalue){
         var genome = genomeSelected();
-        var numLinesUserData = userData.replace(/\n$/g,'').split(lf).length;
-        var numLinesComparedWith = comparedWith.replace(/\n$/g,'').split(lf).length;
-        switch($('input[name="bedORGene"]:checked').val()){
-          case 'bed':
-            if(numLinesUserData == 1 && !userData.match(/\t/)){ // sequence motif
-              numLinesUserData = genomesize[genome] / Math.pow(4, userData.length);
-            }
-            switch($('input[name="comparedWith"]:checked').val()){
-              case 'rnd':
-                numLinesComparedWith = $('input[name="numShuf"]:checked').val();
-                var seconds = estimatedTime(numLinesUserData, numLinesComparedWith, numRef, 'rnd');
-                break;
-              case 'bed':
-                if(numLinesComparedWith == 1 && !comparedWith.match(/\t/)){
-                  numLinesComparedWith = genomesize[genome] / Math.pow(4, comparedWith.length);
-                }
-                var seconds = estimatedTime(numLinesUserData, numLinesComparedWith, numRef, 'bed');
-                break;
-            };
-            break;
-          case 'gene':
-            switch($('input[name="comparedWith"]:checked').val()){
-              case 'refseq':
-                numLinesComparedWith = numGenes[genome] - numLinesUserData;
-                var seconds = estimatedTime(numLinesUserData, numLinesComparedWith, numRef, 'bed');
-                break;
-              case 'userlist':
-                var seconds = estimatedTime(numLinesUserData, numLinesComparedWith, numRef, 'bed');
-                break;
-            };
-            break;
-        };
-        var minutes = Math.round(seconds / 60);
-        if (minutes < 60) {
-          var est = minutes + ' mins';
-        } else {
-          var est = (minutes/60).toFixed(1) + ' hr';
-        }
-        return est;
+        $('input#' + genome + id).val(dvalue);
       }
 
-      $('*').on({
-        'mousemove || change || keyup': function(){
-          var genome = genomeSelected();
-          var userData = $('textarea#' + genome + 'UserData').val();
-          var comparedWith = $('textarea#' + genome + 'ComparedWith').val();
-          var ag = $('select#' + genome + 'agClass').val();
-          var cl = $('select#' + genome + 'clClass').val();
-          var qval = $('select#' + genome + 'qval').val();
-          var qBed = genome + ',' + ag + ',' + cl + ',' + qval;
-          var data = JSON.parse('#{JSON.dump(@number_of_lines)}');
-          var numRef = data[qBed];
-          var est = estimateTime(userData, comparedWith, numRef);
-          $('#estimatedRunTime').html(est);
+      function putFile2Textarea(event){
+        var genome = genomeSelected();
+        var file = event.target.files;
+        var reader = new FileReader();
+        reader.readAsText(file[0]);
+        reader.onload = function(ev) {
+          if (fileId == genome + 'UserDataFile') {
+            $('textarea#' + genome + 'UserData').val(reader.result);
+          } else if (fileId == genome + 'ComparedWithFile') {
+            $('textarea#' + genome + 'ComparedWith').val(reader.result);
+          }
         }
-      });
+      }
 
-      // iterate for each genomes
-      $.each(#{@list_of_genome}, function(i, genome){
-        // default value for dataset
-        $('input#' + genome + 'UserDataTitle').val("My data");
-        $('input#' + genome + 'ComparedWithTitle').val("Control");
-        $('input#' + genome + 'ProjectTitle').val("My project");
-
-        // set tab controller
-        $('#' + genome + '-tab a').click(function(e){
-          e.preventDefault();
-          $(this).tab('show');
-          defaultPosition();
-        });
-
-        // collapse controller
-        $.each(["ag", "cl"], function(i, type){
-          $('#toggle-' + genome + type + 'SubClass').click(function(){
-            $('#collapse-' + genome + type + 'SubClass').collapse('toggle');
-          });
-        });
-
-        // put file content into the textarea
-        $('input#' + genome + 'UserDataFile, input#' + genome + 'ComparedWithFile').change(function(event) {
-          console.log("file detected");
-          var fileId = $(this).attr('id');
-          var file = event.target.files;
-          var reader = new FileReader();
-          reader.readAsText(file[0]);
-          reader.onload = function(ev) {
-            if (fileId == genome + 'UserDataFile') {
-              $('textarea#' + genome + 'UserData').val(reader.result);
-            } else if (fileId == genome + 'ComparedWithFile') {
-              $('textarea#' + genome + 'ComparedWith').val(reader.result);
-            }
-      		}
-      	});
-      });
-
-      // tab trigger event
-      $('a[data-toggle="tab"]').on('shown.bs.tab', function(e){
-        var activatedTab = e.target;
-        var previousTab = e.relatedTarget;
-        var genome = genomeSelected();
-        $.each(["ag","cl"], function(i, value){
-          $('select#' + genome + value + 'SubClass').empty();
-        })
-      });
-
-      // Q & A
-      $('.infoBtn').click(function(){
-        var altype = $(this).attr('id');
-        var genome = genomeSelected();
-
-        var note1 = 'Gene symbols in accordance with following gene nomenclature databases are acceptable:\n  H. sapiens: HGNC\n  M. musculus: MGI\n  D. melanogaster: FlyBase\n  C. elegans: WormBase\n  S. cerevisiae: SGD\n\nAcceptable example:\n  POU5F1\n  SPI1\n  TP53\n\nBad example:\n  OCT4\n  PU.1\n  p53';
-
-        var note2 = 'Example 1. BED format (tab-delimited columns):\n  chr1\t531435\t543845\n  chr2\t738543\t742321\n\n  Acceptable genome assemblies:\n    hg19 (H. sapiens)\n    mm9 (M. musculus)\n    dm3 (D. melanogaster)\n    ce10 (C. elegans)\n    sacCer3 (S. celevisiae)\n\nExample 2. A sequence motif:\n  ATGCAA\n\nExample 3. A sequence motif with degenerate base symbols (ATGC + WSMKRYBDHVN):\n  ACAMKGTA';
-
-        switch($(this).attr('id')){
-          case genome + 'UserDataBed':
-          	alert('Check this if you search proteins bound to given genomic regions (UCSC BED format) or to a sequence motif.\n\n' + note2);
-            break;
-          case genome + 'UserDataGenes':
-          	alert('Check this if you search proteins bound around given genes.\n\n' + note1);
-            break;
-          case genome + 'ComparedWithRandom':
-            alert('Check this if you compare \'My data\' with random background. In this case, each genomic location of \'My data\' is permuted on a random chromosome at a random position for specified times. Increasing the permutation times will provide a hihgly randomized background, or a high quality of statistical test, but the calcuration time will be longer.');
-            break;
-          case genome + 'ComparedWithBed':
-            alert('Check this if you compare \'My data\' with another data (UCSC BED format or a sequence motif).\n\n' + note2);
-            break;
-          case genome + 'ComparedWithRefseq':
-            alert('Check this if you compare \'My data\' with RefSeq coding genes excluding those listed in \'My data\'.');
-            break;
-          case genome + 'ComparedWithUserlist':
-            alert('Check this if you compare \'My data\' with another gene list.\n\n' + note1);
-            break;
-          case genome + 'TSS':
-            alert('To search protein binding to given genes, specify the distance range from the Transcription Start Sites (TSS).\n\Default is between -5000 and +5000 bp from the TSS.');
-            break;
-          case genome + 'UserDataDesc':
-            alert('Enter a title for the data selected in "4. Select your data".\nAcceptable letters are alphanumeric (a-Z, 0-9), space ( ), underscore (_), period (.) and hyphen (-).');
-            break;
-          case genome + 'ComparedWithDesc':
-            alert('Enter a title for the data selected in "5. Select data to be compared".\nAcceptable letters are alphanumeric (a-Z, 0-9), space ( ), underscore (_), period (.) and hyphen (-).');
-            break;
-          case genome + 'ProjectDesc':
-            alert('Enter a title for this submission.\nAcceptable letters are alphanumeric (a-Z, 0-9), space ( ), underscore (_), period (.) and hyphen (-).');
-            break;
-          case genome + 'DistTSS':
-            alert('To search protein binding to given genes, specify the distance range from the Transcription Start Sites (TSS).\n\Default is between -5000 and +5000 bp from the TSS.');
-            break;
-        };
-      });
+      // should be exported to json file
+      var helpText = {
+        note1: 'Gene symbols in accordance with following gene nomenclature databases are acceptable:\n  H. sapiens: HGNC\n  M. musculus: MGI\n  D. melanogaster: FlyBase\n  C. elegans: WormBase\n  S. cerevisiae: SGD\n\nAcceptable example:\n  POU5F1\n  SPI1\n  TP53\n\nBad example:\n  OCT4\n  PU.1\n  p53',
+        note2: 'Example 1. BED format (tab-delimited columns):\n  chr1\t531435\t543845\n  chr2\t738543\t742321\n\n  Acceptable genome assemblies:\n    hg19 (H. sapiens)\n    mm9 (M. musculus)\n    dm3 (D. melanogaster)\n    ce10 (C. elegans)\n    sacCer3 (S. celevisiae)\n\nExample 2. A sequence motif:\n  ATGCAA\n\nExample 3. A sequence motif with degenerate base symbols (ATGC + WSMKRYBDHVN):\n  ACAMKGTA',
+        userdatabed: 'Check this if you search proteins bound to given genomic regions (UCSC BED format) or to a sequence motif.\n\n',
+        userdatagenes: 'Check this if you search proteins bound around given genes.\n\n',
+        comparedwithrandom: 'Check this if you compare \'My data\' with random background. In this case, each genomic location of \'My data\' is permuted on a random chromosome at a random position for specified times. Increasing the permutation times will provide a hihgly randomized background, or a high quality of statistical test, but the calcuration time will be longer.',
+        comparedwithbed: 'Check this if you compare \'My data\' with another data (UCSC BED format or a sequence motif).\n\n',
+        comparedwithrefseq: 'Check this if you compare \'My data\' with RefSeq coding genes excluding those listed in \'My data\'.',
+        comparedwithuserlist: 'Check this if you compare \'My data\' with another gene list.\n\n',
+        tss: 'To search protein binding to given genes, specify the distance range from the Transcription Start Sites (TSS).\n\Default is between -5000 and +5000 bp from the TSS.',
+        userdatadesc: 'Enter a title for the data selected in "4. Select your data".\nAcceptable letters are alphanumeric (a-Z, 0-9), space ( ), underscore (_), period (.) and hyphen (-).',
+        comparedwithdesc: 'Enter a title for the data selected in "5. Select data to be compared".\nAcceptable letters are alphanumeric (a-Z, 0-9), space ( ), underscore (_), period (.) and hyphen (-).',
+        projectdesc: 'Enter a title for this submission.\nAcceptable letters are alphanumeric (a-Z, 0-9), space ( ), underscore (_), period (.) and hyphen (-).',
+        disttss: 'To search protein binding to given genes, specify the distance range from the Transcription Start Sites (TSS).\n\Default is between -5000 and +5000 bp from the TSS.'
+      };
