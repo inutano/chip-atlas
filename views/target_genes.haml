@@ -279,13 +279,8 @@
           name: 'list',
           source: list
         });
-        typeaheadInput.keyup(function(){ // sync textbox and input field
-          var input = $(this).val();
-          if($.inArray(input,options) > -1){
-            $('select#' + genome + panel + '-select').val(input);
-          }
-        });
-        typeaheadInput.on('typeahead:select', function(){
+        // sync textbox and input field
+        typeaheadInput.on('typeahead:select keyup', function(){
           var input = $(this).val();
           if($.inArray(input,options) > -1){
             $('select#' + genome + panel + '-select').val(input);
