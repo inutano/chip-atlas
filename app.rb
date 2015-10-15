@@ -251,8 +251,10 @@ class PeakJohn < Sinatra::Base
   end
 
   post "/colo" do
+    request.body.rewind
+    json = request.body.read
     content_type "application/json"
-    JSON.dump({ "url" => colo_url(JSON.parse(request.body.read), params[:type]) })
+    JSON.dump({ "url" => colo_url(JSON.parse(json), params[:type]) })
   end
 
   get "/colo_result" do
@@ -266,8 +268,10 @@ class PeakJohn < Sinatra::Base
   end
 
   post "/target_genes" do
+    request.body.rewind
+    json = request.body.read
     content_type "application/json"
-    JSON.dump({ "url" => target_genes_url(JSON.parse(request.body.read), params[:type]) })
+    JSON.dump({ "url" => target_genes_url(JSON.parse(json), params[:type]) })
   end
 
   get "/target_genes_result" do
