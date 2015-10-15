@@ -195,6 +195,8 @@ class PeakJohn < Sinatra::Base
              colo_analysis
            when "target_genes_analysis"
              target_genes_analysis
+           when "number_of_lines"
+             number_of_lines
            end
     content_type "application/json"
     JSON.dump(data)
@@ -238,7 +240,6 @@ class PeakJohn < Sinatra::Base
     @index_all_genome = Experiment.index_all_genome
     @list_of_genome = @index_all_genome.keys
     @qval_range = Bedfile.qval_range
-    @number_of_lines = number_of_lines
     haml :in_silico_chip
   end
 
