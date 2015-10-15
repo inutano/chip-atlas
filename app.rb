@@ -113,7 +113,7 @@ class PeakJohn < Sinatra::Base
         response.code.to_i == 200
       end
     end
-    
+
     def remotefile_available?(url)
       uri = URI(url)
       request = Net::HTTP.new(uri.host, uri.port)
@@ -139,7 +139,7 @@ class PeakJohn < Sinatra::Base
       end
       h
     end
-    
+
     def colo_analysis
       h = {}
       fpath = File.join(app_root, "analysisList.tab")
@@ -147,21 +147,24 @@ class PeakJohn < Sinatra::Base
         cols = line.split("\t")
         antigen = cols[0]
         cell_list = cols[1].split(",")
-        genome = cols[3]
-  
-        h[genome] ||= {}
-        h[genome][:antigen] ||= {}
-        h[genome][:antigen][antigen] = cell_list
-  
-        cell_list.each do |cl|
-          h[genome][:cellline] ||= {}
-          h[genome][:cellline][cl] ||= []
-          h[genome][:cellline][cl] << antigen
+        no_data = cell_list.delete("-")
+
+        if cell_list.size != 0
+          genome = cols[3]
+          h[genome] ||= {}
+          h[genome][:antigen] ||= {}
+          h[genome][:antigen][antigen] = cell_list
+
+          cell_list.each do |cl|
+            h[genome][:cellline] ||= {}
+            h[genome][:cellline][cl] ||= []
+            h[genome][:cellline][cl] << antigen
+          end
         end
       end
       h
     end
-    
+
     def target_genes_analysis
       h = {}
       fpath = File.join(app_root, "analysisList.tab")
@@ -310,7 +313,7 @@ class PeakJohn < Sinatra::Base
     @ncbi  = Experiment.fetch_ncbi_metadata(@expid)
     haml :experiment
   end
-  
+
   not_found do
     haml :not_found
   end
