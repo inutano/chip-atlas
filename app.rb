@@ -276,10 +276,6 @@ class PeakJohn < Sinatra::Base
     end
   end
 
-  get "/documentation" do
-    haml :documentation
-  end
-
   post "/browse" do
     request.body.rewind
     json = request.body.read
