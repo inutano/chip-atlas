@@ -301,14 +301,6 @@
           window.open('/view?id='+expid);
         });
 
-        // example data
-        $('a.dataExample').on('click', function(event){
-          event.preventDefault();
-          event.stopPropagation();
-          var id = $(this).attr("id");
-          putExampleData(id);
-        });
-
         // Form Layout: User Data
         $("input[name='bedORGene']").change(function(){
           var genome = genomeSelected();
@@ -359,7 +351,16 @@
           dataType: 'json',
         }).done(function(json){
           numRef = json;
+          // making change to input, select, textarea to invoke time calculation
           $('input, select, textarea').on('click keyup paste change', function(){
+            timeCalculate(numRef);
+          });
+          // example data
+          $('a.dataExample').on('click', function(event){
+            event.preventDefault();
+            event.stopPropagation();
+            var id = $(this).attr("id");
+            putExampleData(id);
             timeCalculate(numRef);
           });
         });
@@ -699,7 +700,7 @@
             scriptCharset: 'utf-8',
             success : function(response) {
               var requestId = response.requestId;
-              var calcm = $('a#estimated-run-time').text();
+              var calcm = $('a#estimated-run-time').text().replace(/-/g,"");
               var redirectUrl = '/in_silico_chip_result?id=' + requestId + '&title=' + data['title'] + '&calcm=' + calcm;
               window.open(redirectUrl, "_self", "");
             },
