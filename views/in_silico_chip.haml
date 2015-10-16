@@ -655,7 +655,7 @@
         ];
         var allowedChars = {
           bed: "alphanumerics, tab, underscore(_)",
-          desc: "alphanumerics, underscore(_), dot(.), dash(-)",
+          desc: "alphanumerics, space( ), underscore(_), dot(.), dash(-)",
           dist: "integer"
         }
         $.each(descSet, function(i,set){
@@ -673,13 +673,13 @@
             regexp = /[A-Za-z0-9\t_]/g;
             break;
           case "desc":
-            regexp = /[A-Za-z0-9_.-]/g;
+            regexp = /[A-Za-z0-9_.-\s]/g;
             break;
           case "dist":
             regexp = /[0-9]/g;
             break;
         }
-        var filtered = string.replace(regexp, "");
+        var filtered = string.replace(/\n/g,"").replace(regexp, "");
         if(filtered === ""){
           return true
         }
