@@ -192,7 +192,7 @@
             %dl.dl-horizontal
               - if @ncbi[:library_description].values.uniq == [""]
                 %span.italic
-                  No library information are found.
+                  No library information was found.
               - @ncbi[:library_description].each_pair do |k,v|
                 - if v != ""
                   %dt{ style: 'white-space: normal;' }= k.to_s
