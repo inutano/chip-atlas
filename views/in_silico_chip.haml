@@ -717,6 +717,7 @@
       }
 
       function timeCalculate(numRef){
+        console.log('====estimated time calulation invoked====');
         var genome = genomeSelected();
         var userData = $('textarea#' + genome + 'UserData').val();
         var comparedWith = $('textarea#' + genome + 'ComparedWith').val();
@@ -730,15 +731,26 @@
       }
 
       function estimateTime(userData, comparedWith, numRef){
+        // userData: string, text pasted in bottom-left panel
+        // comparedWith: string, text pasted in bottom-right panel
+        // numRef: integer, number calculated for each combination of genome/antigen/cell line in advance
         var lf = String.fromCharCode(10);
         var genome = genomeSelected();
-        var numLinesUserData = userData.replace(/\n$/g,'').split(lf).length;
+
+        // set #lines of user data (bottom-left panel)
+        var numLinesUserData;
         if (userData.length == 0) {
-          var numLinesUserData = 0;
+          numLinesUserData = 0;
+        }else {
+          numLinesUserData = userData.replace(/\n$/g,'').split(lf).length;
         }
-        var numLinesComparedWith = comparedWith.replace(/\n$/g,'').split(lf).length;
+
+        // set #lines of compared with (bottom-right panel)
+        var numLinesComparedWith;
         if (comparedWith.length == 0) {
-          var numLinesComparedWith = 0;
+          numLinesComparedWith = 0;
+        }else {
+          numLinesComparedWith = comparedWith.replace(/\n$/g,'').split(lf).length;
         }
 
         switch($('input[name="bedORGene"]:checked').val()){
@@ -777,23 +789,48 @@
         } else {
           var est = (minutes/60).toFixed(1) + ' hr';
         }
+
+        console.log(seconds+' seconds');
+        console.log(minutes+' minutes');
+
         return est;
       }
 
       function getSeconds(numLinesA, numLinesB, numRef, type){
+
+        console.log('numLinesA: '+numLinesA);
+        console.log('numLinesB: '+numLinesB);
+
+
         switch(type){
           case 'bed':
             var a = numRef * 8.23e-11 + 1.47e-2;
             var b = numRef * 4.72e-11 + 7.24e-3;
             var c = (numLinesA + numLinesB) * 6.75e-11 + 1.02e-6;
             var k = 60;
-            return (k + a*numLinesA + b*numLinesB +c*numRef) * (5/7);
+            var seconds = (k + a*numLinesA + b*numLinesB +c*numRef) * (5/7);
+
+            console.log('this is bed.');
+            console.log('a: '+a);
+            console.log('b: '+b);
+            console.log('c: '+c);
+            console.log('k: '+k);
+            console.log('return k + a*numLinesA + b*numLinesB +c*numRef: ' + seconds);
+
+            return seconds;
           default:
             var a = numRef * 3.02e-12 + 1.13e-4;
             var c = (numLinesA + numLinesA*numLinesB) * 3.02e-12 + 2.06e-6;
             var k = 20;
-            return 1.8 * Math.pow( (k + numLinesA * (Math.pow(0.8*numLinesA, 1.52) + numLinesA*numLinesB) + c*numRef), 0.85 );
-            return 1.8 * Math.pow( (k + a * (Math.pow(0.8*numLinesA, 1.52) + numLinesA*numLinesB) + c*numRef), 0.85 );
+            var seconds = 1.8 * Math.pow( (k + numLinesA * (Math.pow(0.8*numLinesA, 1.52) + numLinesA*numLinesB) + c*numRef), 0.85 );
+
+            console.log('this is not bed.');
+            console.log('a: '+a);
+            console.log('c: '+c);
+            console.log('k: '+k);
+            console.log('return 1.8 * Math.pow( (k + numLinesA * (Math.pow(0.8*numLinesA, 1.52) + numLinesA*numLinesB) + c*numRef), 0.85 ): ' + seconds);
+
+            return seconds;
         }
       }
 
