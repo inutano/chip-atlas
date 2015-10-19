@@ -768,10 +768,12 @@
             }
             switch($('input[name="comparedWith"]:checked').val()){
               case 'rnd':
+                console.log("case bed-rnd, calculation type: default");
                 numLinesComparedWith = $('input[name="numShuf"]:checked').val();
                 var seconds = getSeconds(numLinesUserData, numLinesComparedWith, numRef, 'rnd');
                 break;
               case 'bed':
+                console.log('case bed-bed, calculation type: bed');
                 if(numLinesComparedWith == 1 && !comparedWith.match(/\t/)){
                   numLinesComparedWith = genomesize[genome] / Math.pow(4, comparedWith.length);
                 }
@@ -782,10 +784,12 @@
           case 'gene':
             switch($('input[name="comparedWith"]:checked').val()){
               case 'refseq':
+                console.log('case gene-refseq, calculation type: bed');
                 numLinesComparedWith = numGenes[genome] - numLinesUserData;
                 var seconds = getSeconds(numLinesUserData, numLinesComparedWith, numRef, 'bed');
                 break;
               case 'userlist':
+                console.log('case gene-userlist, calculation type: bed');
                 var seconds = getSeconds(numLinesUserData, numLinesComparedWith, numRef, 'bed');
                 break;
             };
@@ -818,7 +822,6 @@
             var k = 60;
             var seconds = (k + a*numLinesA + b*numLinesB +c*numRef) * (5/7);
 
-            console.log('this is bed.');
             console.log('a: '+a);
             console.log('b: '+b);
             console.log('c: '+c);
@@ -832,7 +835,6 @@
             var k = 20;
             var seconds = 1.8 * Math.pow( (k + numLinesA * (Math.pow(0.8*numLinesA, 1.52) + numLinesA*numLinesB) + c*numRef), 0.85 );
 
-            console.log('this is not bed.');
             console.log('a: '+a);
             console.log('c: '+c);
             console.log('k: '+k);
