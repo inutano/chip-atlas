@@ -645,23 +645,23 @@
 
       function evaluateText(data){
         var descSet = [
-          [data["bedAFile"], "bed"],
-          [data["descriptionA"], "desc"],
-          [data["bedBFile"], "bed"],
-          [data["descriptionB"], "desc"],
-          [data["distanceUp"], "dist"],
-          [data["distanceDown"], "dist"],
-          [data["title"], "desc"]
+          [data["bedAFile"], "bed", "User data bed file"],
+          [data["descriptionA"], "desc", "User data title"],
+          [data["bedBFile"], "bed", "Compared data bed file"],
+          [data["descriptionB"], "desc", "Compared data title"],
+          [data["distanceUp"], "dist", "Distance down range"],
+          [data["distanceDown"], "dist", "Distance up range"],
+          [data["title"], "desc", "Project title"]
         ];
         var allowedChars = {
           bed: "alphanumerics, tab, underscore(_)",
-          desc: "alphanumerics, space( ), underscore(_), dot(.), dash(-)",
-          dist: "integer"
+          desc: "- alphanumerics (abcABC123)\n- space ( )\n- underscore (_)\n- dot (.)\n- dash (-)",
+          dist: "- positive integer (1,2,3,..)"
         }
         $.each(descSet, function(i,set){
           if(isValid(set[0],set[1]) != true){
             //alert("Invalid characters detected. Allowed characters are;\n"+allowedChars(set[0]));
-            throw new Error("Invalid characters detected. Allowed characters are;\n"+allowedChars[set[1]]);
+            throw new Error("Invalid characters are detected in " + set[2] + ". Acceptable characters are:\n" + allowedChars[set[1]]);
           }
         });
       }
@@ -670,7 +670,8 @@
         var regexp;
         switch(type){
           case "bed":
-            regexp = /[A-Za-z0-9\t_]/g;
+            //  regexp = /[A-Za-z0-9\t_]/g;
+            regexp = /.*/g; // currently not filtered
             break;
           case "desc":
             regexp = /[A-Za-z0-9_.-\s]/g;
@@ -685,11 +686,18 @@
         }
       }
 
+      function replaceDataChars(data){
+        data['bedAFile'] = data['bedAFile'].replace(/[^a-zA-Z0-9\t_\n]/g, '_');
+        data['bedBFile'] = data['bedBFile'].replace(/[^a-zA-Z0-9\t_\n]/g, '_');
+        return data;
+      }
+
       function post2wabi(button, data){
         button.attr("disabled", true);
         // evaluate text input and reject if invalid characters are found
         try{
           evaluateText(data);
+          data = replaceDataChars(data);
           $.ajax({
             type : 'post',
             url : "#{app_root}/wabi_chipatlas",
