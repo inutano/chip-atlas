@@ -833,7 +833,7 @@
             var a = numRef * 3.02e-12 + 1.13e-4;
             var c = (numLinesA + numLinesA*numLinesB) * 3.02e-12 + 2.06e-6;
             var k = 20;
-            var seconds = 1.8 * Math.pow( (k + numLinesA * (Math.pow(0.8*numLinesA, 1.52) + numLinesA*numLinesB) + c*numRef), 0.85 );
+            var seconds = 1.8 * Math.pow( (k + a * (Math.pow(0.8*numLinesA, 1.52) + numLinesA*numLinesB) + c*numRef), 0.85 );
 
             console.log('a: '+a);
             console.log('c: '+c);
