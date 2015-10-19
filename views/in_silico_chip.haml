@@ -301,6 +301,9 @@
           window.open('/view?id='+expid);
         });
 
+        // default value for dataset
+        putDefaultTitles();
+
         // Form Layout: User Data
         $("input[name='bedORGene']").change(function(){
           var genome = genomeSelected();
@@ -377,6 +380,7 @@
                 e.preventDefault();
                 $(this).tab('show');
                 positionBed();
+                putDefaultTitles();
               });
 
               // put file content into the textarea
@@ -388,15 +392,16 @@
           });
         });
 
-        // default value for dataset
-        var defaultTitles = {
-          'UserDataTitle':     "My data",
-          'ComparedWithTitle': "Control",
-          'ProjectTitle':      "My project"
-        };
-        $.each(defaultTitles, function(id, dvalue){
-          setInputDefaultValue(id, dvalue);
-        });
+        function putDefaultTitles(){
+          var defaultTitles = {
+            'UserDataTitle':     "My data",
+            'ComparedWithTitle': "Control",
+            'ProjectTitle':      "My project"
+          };
+          $.each(defaultTitles, function(id, dvalue){
+            setInputDefaultValue(id, dvalue);
+          });
+        }
 
         // Q & A
         $('.infoBtn').click(function(){
