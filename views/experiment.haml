@@ -204,7 +204,7 @@
             %dl.dl-horizontal
               - if @ncbi[:platform_information].values.uniq == [""]
                 %span.italic
-                  No platform information are found.
+                  No platform information was found.
               - @ncbi[:platform_information].each_pair do |k,v|
                 - if v != ""
                   %dt{ style: 'white-space: normal;' }= k.to_s
