@@ -363,29 +363,28 @@
             putExampleData(id);
             timeCalculate(numRef);
           });
-        });
+          // iterate for each genomes
+          var genomeList;
+          $.ajax({
+            type: 'GET',
+            url: '/data/list_of_genome.json',
+            dataType: 'json',
+          }).done(function(json){
+            genomeList = json;
+            $.each(genomeList, function(i, genome){
+              // set tab controller
+              $('#' + genome + '-tab a').on('click', function(e){
+                e.preventDefault();
+                $(this).tab('show');
+                positionBed();
+              });
 
-        // iterate for each genomes
-        var genomeList;
-        $.ajax({
-          type: 'GET',
-          url: '/data/list_of_genome.json',
-          dataType: 'json',
-        }).done(function(json){
-          genomeList = json;
-          $.each(genomeList, function(i, genome){
-            // set tab controller
-            $('#' + genome + '-tab a').on('click', function(e){
-              e.preventDefault();
-              $(this).tab('show');
-              positionBed();
+              // put file content into the textarea
+              $('input#' + genome + 'UserDataFile, input#' + genome + 'ComparedWithFile').on('change', function(event) {
+                var fileId = $(this).attr('id');
+                putFile2Textarea(fileId, event, timeCalculate.bind(this, numRef));
+            	});
             });
-
-            // put file content into the textarea
-            $('input#' + genome + 'UserDataFile, input#' + genome + 'ComparedWithFile').on('change', function(event) {
-              var fileId = $(this).attr('id');
-              putFile2Textarea(fileId, event);
-          	});
           });
         });
 
@@ -803,7 +802,7 @@
         $('input#' + genome + id).val(dvalue);
       }
 
-      function putFile2Textarea(fileId, event){
+      function putFile2Textarea(fileId, event, callback){
         var genome = genomeSelected();
         var file = event.target.files;
         var reader = new FileReader();
@@ -814,6 +813,7 @@
           } else if (fileId == genome + 'ComparedWithFile') {
             $('textarea#' + genome + 'ComparedWith').val(reader.result);
           }
+          callback();
         }
       }
 
