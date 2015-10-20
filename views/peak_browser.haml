@@ -379,24 +379,40 @@
         postFormData('button#download', '/download')
       }
 
-      function postFormData(){
-        $("button#submit").on('click', function(){
+      function postFormData(buttonId, url){
+        $(buttonId).on('click', function(){
           var button = $(this);
           button.prop("disable", true);
-          var data = getFormData();
-          $.ajax({
-            type: 'POST',
-            url: '/browse',
-            data: JSON.stringify(data),
-            contentType: 'application/json',
-            dataType: 'json',
-            scriptCharset: 'utf-8'
-          }).done(function(json){
-            window.open(response.url, "_self", "")
-            button.attr("disabled", false);
-          }).fail(function(json){
-            console.log("error!");
-          });
+          if(url == '/browse'){
+            var igvUrl = 'http://127.0.0.1:60151';
+            $.ajax({
+              url: igvUrl,
+              type: 'GET'
+            }).done(function(response){
+              postDataAjax(url);
+            }).fail(function(response){
+              alert("Launch IGV before click 'View on IGV'.");
+            })
+          }else{
+            postDataAjax(url);
+          }
+          button.prop("disable", false);
+        });
+      }
+
+      function postDataAjax(url){
+        var data = getFormData();
+        $.ajax({
+          type: 'POST',
+          url: url,
+          data: JSON.stringify(data),
+          contentType: 'application/json',
+          dataType: 'json',
+          scriptCharset: 'utf-8'
+        }).done(function(response){
+          window.open(response.url, "_self", "")
+        }).fail(function(response){
+          console.log("Error: failed to send/get data. Please contact from github issue");
         });
       }
 
