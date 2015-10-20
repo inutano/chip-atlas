@@ -162,33 +162,143 @@
     / 'code here'
 
     :javascript
-      $('button.go-experiment').on('click', function(event){
-        event.preventDefault();
-        var expid = $('input#jumpToExperiment').val();
-        window.open('/view?id='+expid);
-      });
+      // variables
 
-      // retrieve index
-      //var indexAll = JSON.parse('#{JSON.dump(@index_all_genome)}');
+      // onload
+      $(function(){
+        // experiment search button
+        enableExperimentSearch();
 
-      // generate subclass options
-      // function
-      function activateTypeAhead(genomeSelected, type, options){
-        // activate typeahead
-        var typeaheadInput = $('#' + genomeSelected + type + 'SubClass.typeahead');
-        var subClassList = $.map(options, function(value, key){
-              return key;
+        // generate sub class options by selecting class name
+        setSubClassOptions();
+
+        // tab trigger event
+        tabTriggerEvents();
+
+        // iterate for each genome
+        var genomeList;
+        $.ajax({
+          type: 'GET',
+          url: '/data/list_of_genome.json',
+          dataType: 'json',
+        }).done(function(json){
+          genomeList = json;
+          $.each(genomeList, function(i, genome){
+            tabControl(genome);
+            panelCollapse(genome);
+            selectToHideAnother(genome);
+          })
         });
 
-        // Erase previous data set
-        typeaheadInput.typeahead('destroy');
+        // post form data
+        sendBedToIGV();
+        downloadBed();
+      })
 
+      // functions
+      function genomeSelected(){
+        return $('.genomeTab ul li.active a').attr("source").replace(/[\n\s ]/g, "");
+      }
+
+      function enableExperimentSearch(){
+        $('button.go-experiment').on('click', function(event){
+          event.preventDefault();
+          var expid = $('input#jumpToExperiment').val();
+          window.open('/view?id='+expid);
+        });
+      }
+
+      function tabControl(genome){
+        $('#' + genome + '-tab a').click(function(e){
+          e.preventDefault();
+          $(this).tab('show')
+        })
+      }
+
+      function panelCollapse(genome){
+        $.each(["ag", "cl"], function(i, type){
+          $('#toggle-' + genome + type + 'SubClass').click(function(){
+            $('#collapse-' + genome + type + 'SubClass').collapse('toggle');
+          });
+        });
+      }
+
+      // sub class options
+      function setSubClassOptions(){
+        $('select.classSelect').change(function(){
+          resetSubClassOptions();
+          generateSubClassOptions();
+        });
+      }
+
+      function resetSubClassOptions(){ // Erase existing options and put an option for 'all'
+        var genome = genomeSelected();
+        $.each(['ag', 'cl']], function(i, t){
+          var subClassSelect = $('select#' + genome + t + 'SubClass');
+          subClassSelect.empty();
+          $("<option>")
+            .attr("value", "-")
+            .attr("selected", "true")
+            .append("All")
+            .appendTo(subClassSelect);
+        });
+      }
+
+      function generateSubClassOptions(){
+        var genome = genomeSelected();
+        var agSelected = $('select#' + genome + 'agClass option:selected').val();
+        var clSelected = $('select#' + genome + 'clClass option:selected').val();
+        $.each([['ag', agSelected], ['cl', clSelected]], function(i, set){
+          var url = '/index?' + 'genome=' + genome + '&agClass=' + agSelected + '&clClass=' + clSelected + '&type=' + set[0];
+          $.ajax({
+            type: 'GET',
+            url: url,
+            dataType: 'json'
+          }).done(function(json){
+            var options = json;
+            putSubClassOptions(options)
+            activateTypeAhead(genome, set[0], options);
+          });
+        });
+      }
+
+      function putSubClassOptions(options){
+        $.map(options, function(value, key){
+          return [[key, value]];
+        }).sort().forEach(function(element,index,array){
+          var name = element[0];
+          var count = element[1];
+          appendSubClassOption(name, count);
+        });
+      }
+
+      function appendSubClassOption(name, count){
+        $('<option>')
+          .attr("value", k)
+          .append(k + " (" + v + ")")
+          .appendTo('select#' + genome + set[0] + 'SubClass');
+      }
+
+      // typeahead
+      function activateTypeAhead(panelType, options){
+        var listSubClass = $.map(options, function(value, key){ return key });
+        var genome = genomeSelected();
+        var typeaheadInput = $('#' + genome + panelType + 'SubClass.typeahead');
+        removePreviousTypeahead();
+        enableTypeAhead(listSubClass, typeaheadInput);
+        syncTypeaheadAndInput(listSubClass, typeaheadInput);
+      }
+
+      function removePreviousTypeahead(typeaheadInput){
+        typeaheadInput.typeahead('destroy');
+      }
+
+      function enableTypeAhead(listSubClass, typeaheadInput){
         var list = new Bloodhound({
           datumTokenizer: Bloodhound.tokenizers.whitespace,
           queryTokenizer: Bloodhound.tokenizers.whitespace,
-          local: subClassList
+          local: listSubClass
         });
-
         typeaheadInput.typeahead({
           hint: true,
           highlight: true,
@@ -197,8 +307,10 @@
           name: 'list',
           source: list
         });
+      }
 
-        // sync textbox and input field
+      function syncTypeaheadAndInput(listSubClass, typeaheadInput){
+        var genome = genomeSelected();
         typeaheadInput.on('typeahead:select keyup', function(){
           var input = $(this).val();
           if($.inArray(input,subClassList) > -1){
@@ -207,200 +319,91 @@
         });
       }
 
-      // option generation
-      $('select.classSelect').change(function(){
-        // base variables
-        var types = ['antigen', 'celltype'];
-        var typesShort = ['ag', 'cl'];
-
-        // retrieve values
-        var classChanged = $(this).attr('name');
-        var genomeSelected = $('.genomeTab ul li.active a').attr("source").replace(/[\n\s ]/g, "");
-        var agSelected = $('select#' + genomeSelected + 'agClass option:selected').val();
-        var clSelected = $('select#' + genomeSelected + 'clClass option:selected').val();
-
-        // Erase existing options and put an option for 'all'
-        $.each(typesShort, function(i, t){
-          var subClassSelect = $('select#' + genomeSelected + t + 'SubClass');
-          subClassSelect.empty();
-          $("<option>")
-            .attr("value", "-")
-            .attr("selected", "true")
-            .append("All")
-            .appendTo(subClassSelect);
-        });
-
-        $.each([['ag', agSelected], ['cl', clSelected]], function(i, set){
-          $.ajax({
-            type: 'GET',
-            url: '/index?' + 'genome=' + genomeSelected + '&agClass=' + agSelected + '&clClass=' + clSelected + '&type=' + set[0],
-            dataType: 'json',
-            success: function(json){
-              var options = json;
-              $.map(options, function(value, key){
-                return [[key, value]];
-              }).sort().forEach(function(element,index,array){
-                var k = element[0];
-                var v = element[1];
-                $('<option>')
-                  .attr("value", k)
-                  .append(k + " (" + v + ")")
-                  .appendTo('select#' + genomeSelected + set[0] + 'SubClass');
-              });
-              activateTypeAhead(genomeSelected, set[0], options);
-            }
-          });
-        });
-      });
-
-      // iterate for each genomes
-      $.each(#{@list_of_genome}, function(i, genome){
-        // set tab controller
-        $('#' + genome + '-tab a').click(function(e){
-          e.preventDefault();
-          $(this).tab('show')
-        })
-
-        // collapse controller
-        $.each(["ag", "cl"], function(i, type){
-          $('#toggle-' + genome + type + 'SubClass').click(function(){
-            $('#collapse-' + genome + type + 'SubClass').collapse('toggle');
-          });
-        });
-
-        // hide another subclass when one subclass is selected
-        function disableAnother(thisSelector, genome){
-          // build console.log message object
-          var span = $('<span>').attr("aria-hidden","true").append("×")
-
-          var button = $('<button>').attr("type","button").attr("class","close")
-                .attr("data-dismiss","console.log").attr("aria-label","Close").append(span);
-
-          var message = $('<div>').attr("class","console.log console.log-warning console.log-dismissible fade in")
-                .attr("role","console.log").append(button)
-                .append('Select one SubClass disables another').append('</div>');
-
-          switch(thisSelector.attr("id").replace(genome,"").replace("SubClass","")){
-            case "ag":
-              $('select#' + genome + 'clSubClass').val("-");
-              if($('.panel-message#' + genome + 'agSubClass').is(':empty')){
-                $('.panel-message#' + genome + 'agSubClass').append(message);
-              }
-              break;
-
-            case "cl":
-              $('select#' + genome + 'agSubClass').val("-");
-              if($('.panel-message#' + genome + 'clSubClass').is(':empty')){
-                $('.panel-message#' + genome + 'clSubClass').append(message);
-              }
-              break;
-          };
-        };
-
+      function selectToHideAnother(genome){
         var twoSelectors = ['select#' + genome + 'agSubClass', 'select#' + genome + 'clSubClass'];
         $.each(twoSelectors, function(i, selector){
-          // change by mouse click
-          $(selector).change(function(){
+          $(selector).on('typeahead:select keyup change', function(){
             if($(twoSelectors[0]).val() != "-" && $(twoSelectors[1]).val() != "-"){
               disableAnother($(this), genome);
             };
-          });
-          // change by typeahead
-          $.each([["antigen", "ag"], ["celltype", "cl"]], function(it, type){
-            var genomeSelected = $('.genomeTab ul li.active a').attr("source").replace(/[\n\s ]/g, "");
-            var typeaheadInput = $('#' + genomeSelected + type[1] + 'SubClass.typeahead');
-            typeaheadInput.on('typeahead:select', function(){
-              if($(twoSelectors[0]).val() != "-" && $(twoSelectors[1]).val() != "-"){
-                disableAnother($(this), genome);
-              };
-            });
+          })
+        });
+      }
+
+      function disableAnother(thisSelector){
+        var genome = genomeSelected();
+        var span = $('<span>').attr("aria-hidden","true").append("×")
+        var button = $('<button>').attr("type","button").attr("class","close")
+              .attr("data-dismiss","console.log").attr("aria-label","Close").append(span);
+        var message = $('<div>').attr("class","console.log console.log-warning console.log-dismissible fade in")
+              .attr("role","console.log").append(button)
+              .append('Select one SubClass disables another').append('</div>');
+        switch(thisSelector.attr("id").replace(genome,"").replace("SubClass","")){
+          case "ag":
+            $('select#' + genome + 'clSubClass').val("-");
+            if($('.panel-message#' + genome + 'agSubClass').is(':empty')){
+              $('.panel-message#' + genome + 'agSubClass').append(message);
+            }
+            break;
+
+          case "cl":
+            $('select#' + genome + 'agSubClass').val("-");
+            if($('.panel-message#' + genome + 'clSubClass').is(':empty')){
+              $('.panel-message#' + genome + 'clSubClass').append(message);
+            }
+            break;
+        };
+      };
+
+      function tabTriggerEvents(){
+        $('a[data-toggle="tab"]').on('shown.bs.tab', function(e){
+          var activatedTab = e.target;
+          var previousTab = e.relatedTarget;
+          resetSubClassOptions();
+        });
+      }
+
+      function sendBedToIGV(){
+        postFormData('button#submit', '/browse');
+      }
+
+      function downloadBed(){
+        postFormData('button#download', '/download')
+      }
+
+      function postFormData(){
+        $("button#submit").on('click' function(){
+          var button = $(this);
+          button.prop("disable", true);
+          var data = getFormData();
+          $.ajax({
+            type: 'POST',
+            url: '/browse',
+            data: JSON.stringify(data),
+            contentType: 'application/json',
+            dataType: 'json',
+            scriptCharset: 'utf-8'
+          }).done(function(json){
+            window.open(response.url, "_self", "")
+            button.attr("disabled", false);
+          }.fail(function(json){
+            console.log("error!");
           });
         });
-      });
+      }
 
-      // tab trigger event
-      $('a[data-toggle="tab"]').on('shown.bs.tab', function(e){
-        var activatedTab = e.target;
-        var previousTab = e.relatedTarget;
-        var genome = $('.genomeTab ul li.active a').attr('source').replace(/[\n\s ]/g, "");
-        $.each(["ag","cl"], function(i, value){
-          $('select#' + genome + value + 'SubClass').empty();
-        })
-      });
-
-      // send data to get igv url
-      $(function(){
-        $("button#submit").click(function(){
-          var button = $(this);
-          button.attr("disabled", true);
-
-          var genome = $('.genomeTab ul li.active a').attr('source').replace(/[\n\s ]/g, "");
-          var data = {
-            // igv: $().text
-            condition: {
-              genome: genome,
-              agClass: $('select#' + genome + 'agClass option:selected').val(),
-              agSubClass: $('select#' + genome + 'agSubClass option:selected').val(),
-              clClass: $('select#' + genome + 'clClass option:selected').val(),
-              clSubClass: $('select#' + genome + 'clSubClass option:selected').val(),
-              qval: $('select#' + genome + 'qval option:selected').val()
-            }
-          };
-
-          $.ajax({
-            type : 'post',
-            url : "#{app_root}/browse",
-            data: JSON.stringify(data),
-            contentType: 'application/json',
-            dataType: 'json',
-            scriptCharset: 'utf-8',
-            success : function(response) {
-              window.open(response.url, "_self", "")
-            },
-            error : function(response){
-              console.log("error!");
-            },
-            complete: function(){
-              button.attr("disabled", false);
-            }
-          });
-        })
-      })
-      // download data via javascript
-      $(function(){
-        $("button#download").click(function(){
-          var button = $(this);
-          button.attr("disabled", true);
-
-          var genome = $('.genomeTab ul li.active a').attr('source').replace(/[\n\s ]/g, "");
-          var data = {
-            // igv: $().text
-            condition: {
-              genome: genome,
-              agClass: $('select#' + genome + 'agClass option:selected').val(),
-              agSubClass: $('select#' + genome + 'agSubClass option:selected').val(),
-              clClass: $('select#' + genome + 'clClass option:selected').val(),
-              clSubClass: $('select#' + genome + 'clSubClass option:selected').val(),
-              qval: $('select#' + genome + 'qval option:selected').val()
-            }
-          };
-
-          $.ajax({
-            type : 'post',
-            url : "#{app_root}/download",
-            data: JSON.stringify(data),
-            contentType: 'application/json',
-            dataType: 'json',
-            scriptCharset: 'utf-8',
-            success : function(response) {
-              window.open(response.url, "_self", "")
-            },
-            error : function(response){
-              console.log("error!");
-            },
-            complete: function(){
-              button.attr("disabled", false);
-            }
-          });
-        })
-      })
+      function getFormData(){
+        var genome = genomeSelected();
+        var data = {
+          // igv: $().text
+          condition: {
+            genome: genome,
+            agClass: $('select#' + genome + 'agClass option:selected').val(),
+            agSubClass: $('select#' + genome + 'agSubClass option:selected').val(),
+            clClass: $('select#' + genome + 'clClass option:selected').val(),
+            clSubClass: $('select#' + genome + 'clSubClass option:selected').val(),
+            qval: $('select#' + genome + 'qval option:selected').val()
+          }
+        };
+        return data
+      }
