@@ -211,7 +211,6 @@ class PeakJohn < Sinatra::Base
     cl_class      = params[:clClass]
     subclass_type = params[:type]
     result = Experiment.get_subclass(genome, ag_class, cl_class, subclass_type)
-    p result
     content_type "application/json"
     JSON.dump(result)
   end
