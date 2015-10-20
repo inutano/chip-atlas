@@ -199,13 +199,7 @@
         });
 
         // sync textbox and input field
-        typeaheadInput.keyup(function(){
-          var input = $(this).val();
-          if($.inArray(input, subClassList) > -1){
-            $('select#' + genomeSelected + type + 'SubClass').val(input);
-          }
-        });
-        typeaheadInput.on('typeahead:select', function(){
+        typeaheadInput.on('typeahead:select keyup', function(){
           var input = $(this).val();
           if($.inArray(input,subClassList) > -1){
             $('select#' + genomeSelected + type + 'SubClass').val(input);
