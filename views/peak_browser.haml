@@ -391,7 +391,7 @@
             }).done(function(response){
               postDataAjax(url);
             }).fail(function(response){
-              alert("Launch IGV before click 'View on IGV'.");
+              alert("IGV is not running on your computer.\n\nLaunch IGV and allow an access via port 60151 (View > Preferences... > Advanced > check 'enable port' and set port number 60151) to browse data.\n\nIf you do not installed IGV, download from https://www.broadinstitute.org/igv/download or google 'Integrative Genomics Viewer'");
             })
           }else{
             postDataAjax(url);
