@@ -194,6 +194,8 @@ class PeakJohn < Sinatra::Base
              Experiment.list_of_genome
            when "qval_range"
              Experiment.qval_range
+           when "exp_metadata"
+             Experiment.record_by_expid(params[:expid])
            when "colo_analysis"
              colo_analysis
            when "target_genes_analysis"
