@@ -84,13 +84,13 @@
                   %span.caret
                 %ul.dropdown-menu{ "aria-labelledby" => "igv-dropdown" }
                   %li
-                    %a{ :href => "#{igv_base}#{nbdc_base}/#{genome}/eachData/bw/#{expid}.bw&genome=#{genome}&name=#{fname}" }= "BigWig"
+                    %a.link-igv{ name: "bigwig" }= "BigWig"
                   %li
-                    %a{ :href => "#{igv_base}#{nbdc_base}/#{genome}/eachData/bb05/#{expid}.05.bb&genome=#{genome}&name=#{fname}%20(1E-05)" }= "Peak-call (q < 1E-05)"
+                    %a.link-igv{ name: "bed", value: "05" }= "Peak-call (q < 1E-05)"
                   %li
-                    %a{ :href => "#{igv_base}#{nbdc_base}/#{genome}/eachData/bb10/#{expid}.10.bb&genome=#{genome}&name=#{fname}%20(1E-10)" }= "Peak-call (q < 1E-10)"
+                    %a.link-igv{ name: "bed", value: "10" }= "Peak-call (q < 1E-10)"
                   %li
-                    %a{ :href => "#{igv_base}#{nbdc_base}/#{genome}/eachData/bb20/#{expid}.20.bb&genome=#{genome}&name=#{fname}%20(1E-20)" }= "Peak-call (q < 1E-20)"
+                    %a.link-igv{ name: "bed", value: "20" }= "Peak-call (q < 1E-20)"
             .btn-group{ role: "group" }
               .dropdown
                 .button.btn.btn-primary.btn-lg.dropdown-toggle{ :type => "button", :id => "analysis-dropdown", "data-toggle" => "dropdown", "aria-haspopup" => true, "aria-expanded" => true }
@@ -275,6 +275,7 @@
       $(function(){
         enableExperimentSearch();
         dbLinkOut();
+        browseIgv();
       })
 
       // variables
@@ -285,6 +286,20 @@
         atcc: "http://www.atcc.org/Search_Results.aspx?searchTerms=",
         mesh: "http://www.ncbi.nlm.nih.gov/mesh/?term=",
         rikenbrc: "http://www2.brc.riken.jp/lab/cell/list.cgi?skey="
+      };
+
+      var getUrlParameter = function getUrlParameter(sParam) {
+        var sPageURL = decodeURIComponent(window.location.search.substring(1)),
+          sURLVariables = sPageURL.split('&'),
+          sParameterName,
+          i;
+
+        for (i = 0; i < sURLVariables.length; i++) {
+          sParameterName = sURLVariables[i].split('=');
+          if (sParameterName[0] === sParam) {
+            return sParameterName[1] === undefined ? true : sParameterName[1];
+          }
+        }
       };
 
       // functions
@@ -312,4 +327,71 @@
           };
           window.open(uri);
         });
+      }
+
+      function browseIgv(){
+        var expid = getUrlParameter('id');
+        // retrieve metadata
+        $.ajax({
+          type: 'GET',
+          url: '/data/exp_metadata.json?expid=' + expid,
+          dataType: 'json'
+        }).done(function(json){
+          var metadata = json;
+          openIgvUri(expid, metadata);
+        })
+      }
+
+      function openIgvUri(expid, metadata){
+        var params = getUrlParameters(expid, metadata);
+        $("a.link-igv").on('click', function(){
+          var link = $(this);
+          // check if igv is running
+          var igvUrl = 'http://127.0.0.1:60151';
+          $.ajax({
+            type: 'GET',
+            url: igvUrl
+          }).done(function(response){
+            var url = getLinkOutUrl(link, expid, metadata);
+            window.open(url, "_self", "")
+          }).fail(function(response){
+            alert("Launch IGV before click 'View on IGV'.");
+          })
+        });
+      }
+
+      function getLinkOutUrl(link, expid, metadata){
+        var dType = link.attr("name");
+        var params = getUrlParameters(expid, metadata);
+        var genome = params['genome']
+        var url;
+        switch(dType){
+          case "bigwig":
+            url = params['baseUrl']+'/bw/'+expid+'.bw&genome='+genome+'&name='+params['fname']
+            break;
+          case "bed":
+            var dValue = link.attr("value");
+            url = params['baseUrl']+'/bb'+dValue+'/'+expid+'.'+dValue+'.bb&genome='+genome+'&name='+params['fname']+'%20(1E-'+dValue+')';
+            break;
+        }
+        return url;
+      }
+
+      function getUrlParameters(expid, metadata){
+        var genome = metadata['genome'];
+        var antigen = metadata["agSubClass"];
+        var celltype = metadata["clSubClass"];
+        var antigenEnc = encodeURI(antigen);
+        var celltypeEnc = encodeURI(celltype);
+        var igvUrl = 'http://localhost:60151/load?file=';
+        var nbdcUrl = 'http://dbarchive.biosciencedbc.jp/kyushu-u';
+        var params = {
+          baseUrl: igvUrl+nbdcUrl+"/"+genome+'/eachData',
+          genome: genome,
+          antigen: antigenEnc,
+          celltype: celltypeEnc,
+          fname: encodeURI(antigen+' (@ '+celltype+') '+expid),
+          dfname: genome+'_'+antigenEnc+'_'+celltypeEnc+'_'+expid
+        }
+        return params
       }
