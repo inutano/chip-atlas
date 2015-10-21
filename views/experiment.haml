@@ -271,12 +271,13 @@
 
     / 'code here'
     :javascript
-      $('button.go-experiment').on('click', function(event){
-        event.preventDefault();
-        var expid = $('input#jumpToExperiment').val();
-        window.open('/view?id='+expid);
-      });
+      // onload
+      $(function(){
+        enableExperimentSearch();
+        dbLinkOut();
+      })
 
+      // variables
       var dbNamespace = {
         wikigenes: "https://www.wikigenes.org/?search=",
         posmed: "http://omicspace.riken.jp/PosMed/search?actionType=searchexec&keyword=",
@@ -286,18 +287,29 @@
         rikenbrc: "http://www2.brc.riken.jp/lab/cell/list.cgi?skey="
       };
 
-      $('button').on('click', function(event){
-        event.preventDefault();
-        var namespace = dbNamespace[$(this).attr("id")];
-        switch (true){
-          case $(this).hasClass('antigen'):
-            var id = $('input#queryAntigen').val().replace(/\s/,"+");
-            var uri = namespace + id;
-            break;
-          case $(this).hasClass('celltype'):
-            var id = $('input#queryCelltype').val().replace(/\s/,"+");
-            var uri = namespace + id;
-            break;
-        };
-        window.open(uri);
-      });
+      // functions
+      function enableExperimentSearch(){
+        $('button.go-experiment').on('click', function(event){
+          event.preventDefault();
+          var expid = $('input#jumpToExperiment').val();
+          window.open('/view?id='+expid);
+        });
+      }
+
+      function dbLinkOut(){
+        $('button').on('click', function(event){
+          event.preventDefault();
+          var namespace = dbNamespace[$(this).attr("id")];
+          switch (true){
+            case $(this).hasClass('antigen'):
+              var id = $('input#queryAntigen').val().replace(/\s/,"+");
+              var uri = namespace + id;
+              break;
+            case $(this).hasClass('celltype'):
+              var id = $('input#queryCelltype').val().replace(/\s/,"+");
+              var uri = namespace + id;
+              break;
+          };
+          window.open(uri);
+        });
+      }
