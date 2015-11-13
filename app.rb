@@ -131,7 +131,7 @@ class PeakJohn < Sinatra::Base
     end
 
     def number_of_lines
-      data = open(File.join(app_root, "tables/lineNum.tsv")).read
+      data = open("http://dbarchive.biosciencedbc.jp/kyushu-u/sample/util/lineNum.tsv").read
       h = {}
       data.split("\n").each do |line|
         l = line.split("\t")
@@ -142,7 +142,7 @@ class PeakJohn < Sinatra::Base
 
     def colo_analysis
       h = {}
-      fpath = File.join(app_root, "analysisList.tab")
+      fpath = "http://dbarchive.biosciencedbc.jp/kyushu-u/sample/metadata/analysis.tab"
       open(fpath, "r:UTF-8").read.split("\n").each do |line|
         cols = line.split("\t")
         antigen = cols[0]
@@ -167,7 +167,7 @@ class PeakJohn < Sinatra::Base
 
     def target_genes_analysis
       h = {}
-      fpath = File.join(app_root, "analysisList.tab")
+      fpath = "http://dbarchive.biosciencedbc.jp/kyushu-u/sample/metadata/analysis.tab"
       open(fpath, "r:UTF-8").read.split("\n").each do |line|
         cols = line.split("\t")
         antigen = cols[0]
