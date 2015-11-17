@@ -236,6 +236,24 @@
       .row.mdata
         .col-md-12
           %h3
+            Logs in
+            %a{ :href => "https://github.com/inutano/chip-atlas/wiki#2-primary-processing" }
+              read processing pipeline
+          %hr
+          %dl.dl-horizontal
+            - readinfo = metadata[:readInfo].split(',')
+            %dt{ style: 'white-space: normal;' }= "Number of total reads"
+            %dd= readinfo[0]
+            %dt{ style: 'white-space: normal;' }= "Reads aligned (%)"
+            %dd= readinfo[1]
+            %dt{ style: 'white-space: normal;' }= "Duplicates removed (%)"
+            %dd= readinfo[2]
+            %dt{ style: 'white-space: normal;' }= "Number of peaks"
+            %dd= readinfo[3]
+
+      .row.mdata
+        .col-md-12
+          %h3
             Sequence Quality Data from
             %a{ :href => "http://sra.dbcls.jp" }
               DBCLS SRA
