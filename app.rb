@@ -182,6 +182,12 @@ class PeakJohn < Sinatra::Base
     end
   end
 
+  configure do
+    set :index_all_genome, Experiment.index_all_genome
+    set :list_of_genome, Experiment.list_of_genome
+    set :qval_range, Bedfile.qval_range
+  end
+
   get "/:source.css" do
     sass params[:source].intern
   end
@@ -189,11 +195,11 @@ class PeakJohn < Sinatra::Base
   get "/data/:data.json" do
     data = case params[:data]
            when "index_all_genome"
-             Experiment.index_all_genome
+             settings.index_all_genome
            when "list_of_genome"
-             Experiment.list_of_genome
+             settings.list_of_genome
            when "qval_range"
-             Experiment.qval_range
+             settings.qval_range
            when "exp_metadata"
              Experiment.record_by_expid(params[:expid])
            when "colo_analysis"
@@ -222,28 +228,28 @@ class PeakJohn < Sinatra::Base
   end
 
   get "/peak_browser" do
-    @index_all_genome = Experiment.index_all_genome
+    @index_all_genome = settings.index_all_genome
     @list_of_genome   = @index_all_genome.keys
-    @qval_range       = Bedfile.qval_range
+    @qval_range       = settings.qval_range
     haml :peak_browser
   end
 
   get "/colo" do
-    @index_all_genome = Experiment.index_all_genome
+    @index_all_genome = settings.index_all_genome
     @list_of_genome = @index_all_genome.keys
     haml :colo
   end
 
   get "/target_genes" do
-    @index_all_genome = Experiment.index_all_genome
+    @index_all_genome = settings.index_all_genome
     @list_of_genome = @index_all_genome.keys
     haml :target_genes
   end
 
   get "/in_silico_chip" do
-    @index_all_genome = Experiment.index_all_genome
+    @index_all_genome = settings.index_all_genome
     @list_of_genome = @index_all_genome.keys
-    @qval_range = Bedfile.qval_range
+    @qval_range = settings.qval_range
     haml :in_silico_chip
   end
 
