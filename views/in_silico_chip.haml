@@ -480,11 +480,11 @@
         var type;
         switch(id){
           case genome + "UserData":
-            type = $('input[name="bedORGene"]:checked').val();
+            type = $('#' + genome + '-tab-content input[name="bedORGene"]:checked').val();
             putUserData(type);
             break;
           case genome + "ComparedWith":
-            type = $('input[name="comparedWith"]:checked').val();
+            type = $('#' + genome + '-tab-content input[name="comparedWith"]:checked').val();
             putComparedWith(type);
             break;
         }
@@ -639,6 +639,8 @@
 
       function retrievePostData(){
         var genome = genomeSelected();
+        var permTime = $('#' + genome + '-tab-content input[name="numShuf"]:checked').val();
+        permtime = (permtime > 0) ? permtime : 1;
         var data = {
           address:      '',
           format:       'text',
@@ -648,11 +650,11 @@
           antigenClass: $('select#' + genome + 'agClass option:selected').val(),
           cellClass:    $('select#' + genome + 'clClass option:selected').val(),
           threshold:    $('select#' + genome + 'qval option:selected').val(),
-          typeA:        $('input[name="bedORGene"]:checked').val(),
+          typeA:        $('#' + genome + '-tab-content input[name="bedORGene"]:checked').val(),
           bedAFile:     $('textarea#' + genome + 'UserData').val(),
-          typeB:        $('input[name="comparedWith"]:checked').val(),
+          typeB:        $('#' + genome + '-tab-content input[name="comparedWith"]:checked').val(),
           bedBFile:     retrieveInputData('ComparedWith'),
-          permTime:     $('input[name="numShuf"]:checked').val(),
+          permTime:     permtime,
           title:        $('input#' + genome + 'ProjectTitle').val(),
           descriptionA: $('input#' + genome + 'UserDataTitle').val(),
           descriptionB: $('input#' + genome + 'ComparedWithTitle').val(),
@@ -792,15 +794,15 @@
           numLinesComparedWith = comparedWith.replace(/\n$/g,'').split(lf).length;
         }
 
-        switch($('input[name="bedORGene"]:checked').val()){
+        switch($('#' + genome + '-tab-content input[name="bedORGene"]:checked').val()){
           case 'bed':
             if(numLinesUserData == 1 && !userData.match(/\t/)){ // sequence motif
               numLinesUserData = genomesize[genome] / Math.pow(4, userData.length);
             }
-            switch($('input[name="comparedWith"]:checked').val()){
+            switch($('#' + genome + '-tab-content input[name="comparedWith"]:checked').val()){
               case 'rnd':
                 console.log("case bed-rnd, calculation type: default");
-                numLinesComparedWith = $('input[name="numShuf"]:checked').val();
+                numLinesComparedWith = $('#' + genome + '-tab-content input[name="numShuf"]:checked').val();
                 var seconds = getSeconds(numLinesUserData, numLinesComparedWith, numRef, 'rnd');
                 break;
               case 'bed':
@@ -813,7 +815,7 @@
             };
             break;
           case 'gene':
-            switch($('input[name="comparedWith"]:checked').val()){
+            switch($('#' + genome + '-tab-content input[name="comparedWith"]:checked').val()){
               case 'refseq':
                 console.log('case gene-refseq, calculation type: bed');
                 numLinesComparedWith = numGenes[genome] - numLinesUserData;
