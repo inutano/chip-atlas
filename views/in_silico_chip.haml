@@ -298,9 +298,7 @@
     %script{ :src => "#{app_root}/js/typeahead.bundle.js" }
 
     / 'code here'
-
     :javascript
-
       // variables
       var genomesize = {
         ce10: 100286070,
@@ -309,7 +307,6 @@
         mm9: 2725765481,
         sacCer3: 12157105
       };
-
       var numGenes = {
         ce10: 17958,
         dm3: 12635,
@@ -317,7 +314,6 @@
         mm9: 19909,
         sacCer3: 5809
       };
-
       // onload
       $(function(){
         // search experiment
@@ -326,10 +322,8 @@
           var expid = $('input#jumpToExperiment').val();
           window.open('/view?id='+expid);
         });
-
         // default value for dataset
         putDefaultTitles();
-
         // Form Layout: User Data
         $("input[name='bedORGene']").change(function(){
           var genome = genomeSelected();
@@ -343,7 +337,6 @@
           };
           eraseTextarea(genome + 'UserData');
         });
-
         // Form Layout: Compared With
         $("input[name='comparedWith']").change(function(){
           var genome = genomeSelected();
@@ -363,14 +356,12 @@
           };
           eraseTextarea(genome + 'ComparedWith');
         });
-
         // post to wabi
         $("button#virtual-chip-submit").click(function(){
           var button = $(this);
           var data = retrievePostData();
           post2wabi(button, data);
         });
-
         // calculate estimated running time
         // get reference of #lines of bed files
         var numRef;
@@ -408,7 +399,6 @@
                 positionBed();
                 putDefaultTitles();
               });
-
               // put file content into the textarea
               $('input#' + genome + 'UserDataFile, input#' + genome + 'ComparedWithFile').on('change', function(event) {
                 var fileId = $(this).attr('id');
@@ -417,7 +407,6 @@
             });
           });
         });
-
         function putDefaultTitles(){
           var defaultTitles = {
             'UserDataTitle':     "My data",
@@ -428,7 +417,6 @@
             setInputDefaultValue(id, dvalue);
           });
         }
-
         // Q & A
         $('.infoBtn').click(function(){
           var genome = genomeSelected();
@@ -469,12 +457,10 @@
           };
         });
       });
-
       // functions
       function genomeSelected(){
         return $('.genomeTab ul li.active a').attr('source').replace(/[\n\s ]/g, "");
       }
-
       function putExampleData(id){
         var genome = genomeSelected();
         var type;
@@ -489,7 +475,6 @@
             break;
         }
       }
-
       function putUserData(type){
         var genome = genomeSelected();
         switch(type){
@@ -501,7 +486,6 @@
             break;
         }
       }
-
       function putComparedWith(type){
         var genome = genomeSelected();
         switch(type){
@@ -513,7 +497,6 @@
             break;
         }
       }
-
       function getExampleData(genome, fname, textareaId){
         $.ajax({
           type: 'GET',
@@ -523,7 +506,6 @@
           }
         });
       }
-
       function positionBed(){
         var panels = {
           '.panel-input.bed':                    'show',
@@ -542,7 +524,6 @@
         setForms(panels, inputs);
         setDistance(0);
       }
-
       function positionGene(){
         var panels = {
           '.panel-input.rnd':                    'show',
@@ -561,7 +542,6 @@
         setForms(panels, inputs);
         setDistance(5000);
       }
-
       function setForms(panels, inputs){
         $.each(panels, function(id, type){
           hideAndShow(id, type);
@@ -570,7 +550,6 @@
           inputChange(id, type);
         });
       }
-
       function hideAndShow(element, type){
         switch(type){
           case 'show':
@@ -581,7 +560,6 @@
             break;
         }
       }
-
       function inputChange(id, type){
         var genome = genomeSelected();
         switch(type){
@@ -593,13 +571,11 @@
             break;
         }
       }
-
       function setDistance(distValue){
         var genome = genomeSelected();
         $('input#' + genome + 'DistanceUp').val(distValue);
         $('input#' + genome + 'DistanceDown').val(distValue);
       }
-
       function positionComparedRnd(){
         var panels = {
           '.panel-input.rnd': 'show',
@@ -632,11 +608,9 @@
         var inputs = {};
         setForms(panels, inputs);
       }
-
       function eraseTextarea(textareaId){
         $('textarea#' + textareaId).val('');
       }
-
       function retrievePostData(){
         var genome = genomeSelected();
         var permTime = $('#' + genome + '-tab-content input[name="numShuf"]:checked').val();
@@ -663,7 +637,6 @@
         };
         return data;
       }
-
       function retrieveInputData(type){
         var genome = genomeSelected();
         var flatfile;
@@ -675,7 +648,6 @@
         }
         return flatfile;
       }
-
       function evaluateText(data){
         var descSet = [
           [data["bedAFile"], "bed", "User data bed file"],
@@ -698,7 +670,6 @@
           }
         });
       }
-
       function isValid(string, type){
         var regexp;
         switch(type){
@@ -718,13 +689,11 @@
           return true
         }
       }
-
       function replaceDataChars(data){
         data['bedAFile'] = data['bedAFile'].replace(/[^a-zA-Z0-9\t_\n]/g, '_');
         data['bedBFile'] = data['bedBFile'].replace(/[^a-zA-Z0-9\t_\n]/g, '_');
         return data;
       }
-
       function post2wabi(button, data){
         button.attr("disabled", true);
         // evaluate text input and reject if invalid characters are found
@@ -756,9 +725,7 @@
           button.prop("disabled", false);
         }
       }
-
       function timeCalculate(numRef){
-        console.log('====estimated time calulation invoked====');
         var genome = genomeSelected();
         var userData = $('textarea#' + genome + 'UserData').val();
         var comparedWith = $('textarea#' + genome + 'ComparedWith').val();
@@ -770,14 +737,12 @@
         var est = estimateTime(userData, comparedWith, numRef);
         $('#estimated-run-time').html(est);
       }
-
       function estimateTime(userData, comparedWith, numRef){
         // userData: string, text pasted in bottom-left panel
         // comparedWith: string, text pasted in bottom-right panel
         // numRef: integer, number calculated for each combination of genome/antigen/cell line in advance
         var lf = String.fromCharCode(10);
         var genome = genomeSelected();
-
         // set #lines of user data (bottom-left panel)
         var numLinesUserData;
         if (userData.length == 0) {
@@ -785,7 +750,6 @@
         }else {
           numLinesUserData = userData.replace(/\n$/g,'').split(lf).length;
         }
-
         // set #lines of compared with (bottom-right panel)
         var numLinesComparedWith;
         if (comparedWith.length == 0) {
@@ -793,7 +757,6 @@
         }else {
           numLinesComparedWith = comparedWith.replace(/\n$/g,'').split(lf).length;
         }
-
         switch($('#' + genome + '-tab-content input[name="bedORGene"]:checked').val()){
           case 'bed':
             if(numLinesUserData == 1 && !userData.match(/\t/)){ // sequence motif
@@ -801,12 +764,10 @@
             }
             switch($('#' + genome + '-tab-content input[name="comparedWith"]:checked').val()){
               case 'rnd':
-                console.log("case bed-rnd, calculation type: default");
                 numLinesComparedWith = $('#' + genome + '-tab-content input[name="numShuf"]:checked').val();
                 var seconds = getSeconds(numLinesUserData, numLinesComparedWith, numRef, 'rnd');
                 break;
               case 'bed':
-                console.log('case bed-bed, calculation type: bed');
                 if(numLinesComparedWith == 1 && !comparedWith.match(/\t/)){
                   numLinesComparedWith = genomesize[genome] / Math.pow(4, comparedWith.length);
                 }
@@ -817,12 +778,10 @@
           case 'gene':
             switch($('#' + genome + '-tab-content input[name="comparedWith"]:checked').val()){
               case 'refseq':
-                console.log('case gene-refseq, calculation type: bed');
                 numLinesComparedWith = numGenes[genome] - numLinesUserData;
                 var seconds = getSeconds(numLinesUserData, numLinesComparedWith, numRef, 'bed');
                 break;
               case 'userlist':
-                console.log('case gene-userlist, calculation type: bed');
                 var seconds = getSeconds(numLinesUserData, numLinesComparedWith, numRef, 'bed');
                 break;
             };
@@ -834,19 +793,9 @@
         } else {
           var est = (minutes/60).toFixed(1) + ' hr';
         }
-
-        console.log(seconds+' seconds');
-        console.log(minutes+' minutes');
-
         return est;
       }
-
       function getSeconds(numLinesA, numLinesB, numRef, type){
-
-        console.log('numLinesA: '+numLinesA);
-        console.log('numLinesB: '+numLinesB);
-
-
         switch(type){
           case 'bed':
             var a = numRef * 8.23e-11 + 1.47e-2;
@@ -854,34 +803,19 @@
             var c = (numLinesA + numLinesB) * 6.75e-11 + 1.02e-6;
             var k = 60;
             var seconds = (k + a*numLinesA + b*numLinesB +c*numRef) * (5/7);
-
-            console.log('a: '+a);
-            console.log('b: '+b);
-            console.log('c: '+c);
-            console.log('k: '+k);
-            console.log('return k + a*numLinesA + b*numLinesB +c*numRef: ' + seconds);
-
             return seconds;
           default:
             var a = numRef * 3.02e-12 + 1.13e-4;
             var c = (numLinesA + numLinesA*numLinesB) * 3.02e-12 + 2.06e-6;
             var k = 20;
             var seconds = 1.8 * Math.pow( (k + a * (Math.pow(0.8*numLinesA, 1.52) + numLinesA*numLinesB) + c*numRef), 0.85 );
-
-            console.log('a: '+a);
-            console.log('c: '+c);
-            console.log('k: '+k);
-            console.log('return 1.8 * Math.pow( (k + numLinesA * (Math.pow(0.8*numLinesA, 1.52) + numLinesA*numLinesB) + c*numRef), 0.85 ): ' + seconds);
-
             return seconds;
         }
       }
-
       function setInputDefaultValue(id, dvalue){
         var genome = genomeSelected();
         $('input#' + genome + id).val(dvalue);
       }
-
       function putFile2Textarea(fileId, event, callback){
         var genome = genomeSelected();
         var file = event.target.files;
@@ -896,7 +830,6 @@
           callback();
         }
       }
-
       // should be exported to json file
       var helpText = {
         note1: 'Gene symbols in accordance with following gene nomenclature databases are acceptable:\n  H. sapiens: HGNC\n  M. musculus: MGI\n  D. melanogaster: FlyBase\n  C. elegans: WormBase\n  S. cerevisiae: SGD\n\nAcceptable example:\n  POU5F1\n  SPI1\n  TP53\n\nBad example:\n  OCT4\n  PU.1\n  p53',
