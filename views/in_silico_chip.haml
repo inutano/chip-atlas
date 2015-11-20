@@ -258,7 +258,7 @@
                         %button.btn.btn-primary.btn-lg.btn-block{ :id => "virtual-chip-submit", :type => "button" }= "submit"
                       .estimated-run-time
                         Estimated run time:
-                        %a#estimated-run-time= "-"
+                        %a{ :id => "#{genome}-estimated-run-time" }= "-"
 
 
     %footer.footer
@@ -695,6 +695,7 @@
         return data;
       }
       function post2wabi(button, data){
+        var genome = genomeSelected();
         button.attr("disabled", true);
         // evaluate text input and reject if invalid characters are found
         try{
@@ -709,7 +710,7 @@
             scriptCharset: 'utf-8',
             success : function(response) {
               var requestId = response.requestId;
-              var calcm = $('a#estimated-run-time').text().replace(/-/g,"");
+              var calcm = $('a#' + genome + '-estimated-run-time').text().replace(/-/g,"");
               var redirectUrl = '/in_silico_chip_result?id=' + requestId + '&title=' + data['title'] + '&calcm=' + calcm;
               window.open(redirectUrl, "_self", "");
             },
@@ -735,7 +736,7 @@
         var qBed = genome + ',' + ag + ',' + cl + ',' + qval;
         var numRef = numRef[qBed];
         var est = estimateTime(userData, comparedWith, numRef);
-        $('#estimated-run-time').html(est);
+        $('a#' + genome + '-estimated-run-time').html(est);
       }
       function estimateTime(userData, comparedWith, numRef){
         // userData: string, text pasted in bottom-left panel
