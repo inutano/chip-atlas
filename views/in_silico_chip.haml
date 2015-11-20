@@ -494,10 +494,10 @@
         var genome = genomeSelected();
         switch(type){
           case "bed":
-            getExampleData('/tables/bed/bedA_' + genome + '.bed', genome + 'UserData');
+            getExampleData(genome, 'bedA.txt', genome + 'UserData');
             break;
           case "gene":
-            getExampleData('/tables/genes/geneA_' + genome + '.txt', genome + 'UserData')
+            getExampleData(genome, 'geneA.txt', genome + 'UserData');
             break;
         }
       }
@@ -506,18 +506,18 @@
         var genome = genomeSelected();
         switch(type){
           case "bed":
-            getExampleData('/tables/bed/bedB_' + genome + '.bed', genome + 'ComparedWith')
+            getExampleData(genome, 'bedB.txt', genome + 'ComparedWith');
             break;
           case "userlist":
-            getExampleData('/tables/genes/geneB_' + genome + '.txt', genome + 'ComparedWith')
+            getExampleData(genome, 'geneB.txt', genome + 'ComparedWith');
             break;
         }
       }
 
-      function getExampleData(url, textareaId){
+      function getExampleData(genome, fname, textareaId){
         $.ajax({
           type: 'GET',
-          url: url,
+          url: '/examples/' + genome + '/' + fname,
           success: function(data){
             $('textarea#' + textareaId).val(data);
           }
