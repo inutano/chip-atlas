@@ -640,7 +640,7 @@
       function retrievePostData(){
         var genome = genomeSelected();
         var permTime = $('#' + genome + '-tab-content input[name="numShuf"]:checked').val();
-        permtime = (permtime > 0) ? permtime : 1;
+        permTime = (permTime > 0) ? permTime : 1;
         var data = {
           address:      '',
           format:       'text',
@@ -654,7 +654,7 @@
           bedAFile:     $('textarea#' + genome + 'UserData').val(),
           typeB:        $('#' + genome + '-tab-content input[name="comparedWith"]:checked').val(),
           bedBFile:     retrieveInputData('ComparedWith'),
-          permTime:     permtime,
+          permTime:     permTime,
           title:        $('input#' + genome + 'ProjectTitle').val(),
           descriptionA: $('input#' + genome + 'UserDataTitle').val(),
           descriptionB: $('input#' + genome + 'ComparedWithTitle').val(),
