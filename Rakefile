@@ -1,4 +1,5 @@
 require 'sinatra/activerecord/rake'
+require './app'
 
 PROJ_ROOT = File.expand_path(__dir__)
 
