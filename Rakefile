@@ -8,8 +8,13 @@ Dir["#{PROJ_ROOT}/lib/tasks/**/*.rake"].each do |path|
 end
 
 namespace :pj do
-  desc "load tables into database; require experiment=/path/to/experimentList.tab bedfile=/path/to/fileList.tab"
-  task :load_tables do
-    Rake::Task["table:load_tables"].invoke
+  desc "Download tables from NBDC"
+  task :fetch_metadata do
+    Rake::Task["metadata:fetch"].invoke
+  end
+
+  desc "Load metadata from files into database"
+  task :load_metadata do
+    Rake::Task["metadata:load"].invoke
   end
 end

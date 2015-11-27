@@ -1,3 +1,4 @@
+require 'pj/metadata'
 require 'pj/sra'
 require 'pj/bedfile'
 require 'pj/experiment'
