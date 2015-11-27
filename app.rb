@@ -36,7 +36,7 @@ class PeakJohn < Sinatra::Base
     def bedfile_archive(data)
       condition = data["condition"]
       genome    = condition["genome"]
-      filename = Bedfile.get_filename(condition)
+      filename = PJ::Bedfile.get_filename(condition)
       File.join(archive_base, genome, "assembled", filename + fileformat)
     rescue NameError
       nil
@@ -187,9 +187,9 @@ class PeakJohn < Sinatra::Base
   end
 
   configure do
-    set :index_all_genome, Experiment.index_all_genome
-    set :list_of_genome, Experiment.list_of_genome
-    set :qval_range, Bedfile.qval_range
+    set :index_all_genome, PJ::Experiment.index_all_genome
+    set :list_of_genome, PJ::Experiment.list_of_genome
+    set :qval_range, PJ::Bedfile.qval_range
   end
 
   get "/:source.css" do
@@ -205,7 +205,7 @@ class PeakJohn < Sinatra::Base
            when "qval_range"
              settings.qval_range
            when "exp_metadata"
-             Experiment.record_by_expid(params[:expid])
+             PJ::Experiment.record_by_expid(params[:expid])
            when "colo_analysis"
              colo_analysis
            when "target_genes_analysis"
@@ -222,7 +222,7 @@ class PeakJohn < Sinatra::Base
     ag_class      = params[:agClass]
     cl_class      = params[:clClass]
     subclass_type = params[:type]
-    result = Experiment.get_subclass(genome, ag_class, cl_class, subclass_type)
+    result = PJ::Experiment.get_subclass(genome, ag_class, cl_class, subclass_type)
     content_type "application/json"
     JSON.dump(result)
   end
@@ -324,8 +324,8 @@ class PeakJohn < Sinatra::Base
 
   get "/view" do
     @expid = params[:id]
-    404 if Experiment.id_valid?(@expid)
-    @ncbi  = Experiment.fetch_ncbi_metadata(@expid)
+    404 if PJ::Experiment.id_valid?(@expid)
+    @ncbi  = PJ::Experiment.fetch_ncbi_metadata(@expid)
     haml :experiment
   end
 
