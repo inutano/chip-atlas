@@ -25,13 +25,6 @@ class PeakJohn < Sinatra::Base
       "#{env["rack.url_scheme"]}://#{env["HTTP_HOST"]}#{env["SCRIPT_NAME"]}"
     end
 
-    def igv_browsing_url(data)
-      igv_url   = data["igv"] || "http://localhost:60151"
-      condition = data["condition"]
-      genome    = condition["genome"]
-      "#{igv_url}/load?genome=#{genome}&file=#{PJ::Bedfile.archive_url(data)}"
-    end
-
     def colo_url(data,type)
       condition = data["condition"]
       genome    = condition["genome"]
@@ -282,7 +275,7 @@ class PeakJohn < Sinatra::Base
     request.body.rewind
     json = request.body.read
     content_type "application/json"
-    JSON.dump({ "url" => igv_browsing_url(JSON.parse(json)) })
+    JSON.dump({ "url" => PJ.igv_browsing_url(JSON.parse(json)) })
   end
 
   post "/download" do
