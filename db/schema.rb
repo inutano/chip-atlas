@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20151127141027) do
+ActiveRecord::Schema.define(version: 20151127142537) do
 
   create_table "analyses", force: :cascade do |t|
     t.string  "antigen"
@@ -42,6 +42,20 @@ ActiveRecord::Schema.define(version: 20151127141027) do
   add_index "bedfiles", ["clSubClass"], name: "index_bedfiles_on_clSubClass"
   add_index "bedfiles", ["genome"], name: "index_bedfiles_on_genome"
   add_index "bedfiles", ["qval"], name: "index_bedfiles_on_qval"
+
+  create_table "bedsizes", force: :cascade do |t|
+    t.string  "genome"
+    t.string  "agClass"
+    t.string  "clClass"
+    t.string  "qval"
+    t.integer "number_of_lines"
+  end
+
+  add_index "bedsizes", ["agClass"], name: "index_bedsizes_on_agClass"
+  add_index "bedsizes", ["clClass"], name: "index_bedsizes_on_clClass"
+  add_index "bedsizes", ["genome"], name: "index_bedsizes_on_genome"
+  add_index "bedsizes", ["number_of_lines"], name: "index_bedsizes_on_number_of_lines"
+  add_index "bedsizes", ["qval"], name: "index_bedsizes_on_qval"
 
   create_table "experiments", force: :cascade do |t|
     t.string "expid"
