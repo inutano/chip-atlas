@@ -22,7 +22,7 @@ namespace :metadata do
     PJ::Metadata.fetch(t.name)
   end
 
-  file file_table_fpath => metadata_dir do |t|
+  file bedfile_table_fpath => metadata_dir do |t|
     PJ::Metadata.fetch(t.name)
   end
 
@@ -30,7 +30,7 @@ namespace :metadata do
     PJ::Metadata.fetch(t.name)
   end
 
-  file line_num_fpath => metadata_dir do |t|
+  file bedsize_table_fpath => metadata_dir do |t|
     PJ::Metadata.fetch(t.name)
   end
 
