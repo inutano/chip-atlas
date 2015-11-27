@@ -63,13 +63,13 @@ module PJ
       end
 
       ## Methods to display facets
+      def records_by_genome(genome)
+        self.where(:genome => genome)
+      end
+
       def index_by_genome(genome)
         records = records_by_genome(genome)
         index_all_facets(records)
-      end
-
-      def records_by_genome(genome)
-        self.where(:genome => genome)
       end
 
       def index_all_genome
