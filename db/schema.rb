@@ -11,7 +11,19 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150623061634) do
+ActiveRecord::Schema.define(version: 20151127141027) do
+
+  create_table "analyses", force: :cascade do |t|
+    t.string  "antigen"
+    t.string  "cell_list"
+    t.boolean "target_genes"
+    t.string  "genome"
+  end
+
+  add_index "analyses", ["antigen"], name: "index_analyses_on_antigen"
+  add_index "analyses", ["cell_list"], name: "index_analyses_on_cell_list"
+  add_index "analyses", ["genome"], name: "index_analyses_on_genome"
+  add_index "analyses", ["target_genes"], name: "index_analyses_on_target_genes"
 
   create_table "bedfiles", force: :cascade do |t|
     t.string "filename"
