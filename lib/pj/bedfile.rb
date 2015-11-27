@@ -29,6 +29,34 @@ module PJ
         end
       end
 
+      #
+      # Retrieve archived file url
+      #
+
+      def archive_url(data)
+        condition = data["condition"]
+        genome    = condition["genome"]
+        filename = get_filename(condition)
+        File.join(PJ.archive_base, genome, "assembled", filename + PJ.fileformat)
+      rescue NameError
+        nil
+      end
+
+      def get_filename(condition)
+        results = filesearch(condition)
+        raise NameError if results.size != 1
+        results.first.filename
+      end
+
+      def filesearch(condition)
+        self.where(:genome => condition["genome"])
+          .where(:agClass => condition["agClass"])
+          .where(:agSubClass => condition["agSubClass"] || "-")
+          .where(:clClass => condition["clClass"])
+          .where(:clSubClass => condition["clSubClass"] || "-")
+          .where(:qval => condition["qval"])
+      end
+
       def list_of_facets
         [ :agClass, :agSubClass, :clClass, :clSubClass, :qval ]
       end
@@ -81,21 +109,6 @@ module PJ
         index
       end
 
-      def get_filename(condition)
-        results = filesearch(condition)
-        raise NameError if results.size != 1
-        results.first.filename
-      end
-      # http://localhost:60151/load?file=http://dbarchive.biosciencedbc.jp/kyushu-u/hg19/assembled/#{fname}&genome=hg19
-
-      def filesearch(condition)
-        self.where(:genome => condition["genome"])
-          .where(:agClass => condition["agClass"])
-          .where(:agSubClass => condition["agSubClass"] || "-")
-          .where(:clClass => condition["clClass"])
-          .where(:clSubClass => condition["clSubClass"] || "-")
-          .where(:qval => condition["qval"])
-      end
     end
   end
 end

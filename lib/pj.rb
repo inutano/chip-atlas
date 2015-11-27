@@ -4,6 +4,16 @@ require 'pj/bedfile'
 require 'pj/experiment'
 
 module PJ
+  class << self
+    def archive_base
+      "http://dbarchive.biosciencedbc.jp/kyushu-u/"
+    end
+
+    def fileformat
+      ".bed"
+    end
+  end
+
   def initialize(expid)
     @expid = expid
   end

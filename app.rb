@@ -25,28 +25,11 @@ class PeakJohn < Sinatra::Base
       "#{env["rack.url_scheme"]}://#{env["HTTP_HOST"]}#{env["SCRIPT_NAME"]}"
     end
 
-    def archive_base
-      "http://dbarchive.biosciencedbc.jp/kyushu-u/"
-    end
-
-    def fileformat
-      ".bed"
-    end
-
-    def bedfile_archive(data)
-      condition = data["condition"]
-      genome    = condition["genome"]
-      filename = PJ::Bedfile.get_filename(condition)
-      File.join(archive_base, genome, "assembled", filename + fileformat)
-    rescue NameError
-      nil
-    end
-
     def igv_browsing_url(data)
       igv_url   = data["igv"] || "http://localhost:60151"
       condition = data["condition"]
       genome    = condition["genome"]
-      "#{igv_url}/load?genome=#{genome}&file=#{bedfile_archive(data)}"
+      "#{igv_url}/load?genome=#{genome}&file=#{PJ::Bedfile.archive_url(data)}"
     end
 
     def colo_url(data,type)
@@ -306,7 +289,7 @@ class PeakJohn < Sinatra::Base
     request.body.rewind
     json = request.body.read
     content_type "application/json"
-    JSON.dump({ "url" => bedfile_archive(JSON.parse(json)) })
+    JSON.dump({ "url" => PJ::Bedfile.archive_url(JSON.parse(json)) })
   end
 
   get "/wabi_chipatlas" do
