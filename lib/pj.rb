@@ -1,3 +1,4 @@
+require 'pj/sra'
 require 'pj/bedfile'
 require 'pj/experiment'
 
