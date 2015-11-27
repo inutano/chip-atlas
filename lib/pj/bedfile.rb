@@ -3,6 +3,32 @@ require 'sinatra/activerecord'
 module PJ
   class Bedfile < ActiveRecord::Base
     class << self
+      def load(table_path)
+        open(table_path, "r:UTF-8").readlines.each do |line_n|
+          line = line_n.chomp.split("\t")
+
+          filename    = line[0]
+          genome      = line[1]
+          ag_class    = line[2]
+          ag_subclass = line[3]
+          cl_class    = line[4]
+          cl_subclass = line[5]
+          qvalue      = line[6]
+          experiments = line[7]
+
+          bed = PJ::Bedfile.new
+          bed.filename    = filename
+          bed.genome      = genome
+          bed.agClass     = ag_class
+          bed.agSubClass  = ag_subclass
+          bed.clClass     = cl_class
+          bed.clSubClass  = cl_subclass
+          bed.qval        = qvalue
+          bed.experiments = experiments
+          bed.save
+        end
+      end
+
       def list_of_facets
         [ :agClass, :agSubClass, :clClass, :clSubClass, :qval ]
       end
