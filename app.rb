@@ -187,9 +187,9 @@ class PeakJohn < Sinatra::Base
   end
 
   configure do
-    set :index_all_genome, PJ::Experiment.index_all_genome
-    set :list_of_genome, PJ::Experiment.list_of_genome
-    set :qval_range, PJ::Bedfile.qval_range
+    #set :index_all_genome, PJ::Experiment.index_all_genome
+    #set :list_of_genome, PJ::Experiment.list_of_genome
+    #set :qval_range, PJ::Bedfile.qval_range
   end
 
   get "/:source.css" do
