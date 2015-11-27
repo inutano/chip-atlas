@@ -1,7 +1,5 @@
 # Rakefile to manage local files
 
-require PROJ_ROOT + '/lib/peakjohn'
-
 namespace :metadata do
   task :load do
     # path to files

@@ -1,5 +1,9 @@
 # :)
 
+# add current directory and lib directory to load path
+$LOAD_PATH << __dir__
+$LOAD_PATH << File.join(__dir__, "lib")
+
 require 'sinatra'
 require 'sinatra/activerecord'
 require 'haml'
@@ -8,7 +12,7 @@ require 'open-uri'
 require 'net/http'
 require 'json'
 require 'nokogiri'
-require './lib/peakjohn'
+require 'lib/pj'
 
 ENV["DATABASE_URL"] ||= "sqlite3:database.sqlite"
 
