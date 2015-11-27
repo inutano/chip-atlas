@@ -4,23 +4,6 @@ require 'pj/bedfile'
 require 'pj/experiment'
 
 module PJ
-  class << self
-    def archive_base
-      "http://dbarchive.biosciencedbc.jp/kyushu-u/"
-    end
-
-    def fileformat
-      ".bed"
-    end
-
-    def igv_browsing_url(data)
-      igv_url   = data["igv"] || "http://localhost:60151"
-      condition = data["condition"]
-      genome    = condition["genome"]
-      "#{igv_url}/load?genome=#{genome}&file=#{PJ::Bedfile.archive_url(data)}"
-    end
-  end
-
   def initialize(expid)
     @expid = expid
   end

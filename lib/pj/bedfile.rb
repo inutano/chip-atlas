@@ -30,17 +30,8 @@ module PJ
       end
 
       #
-      # Retrieve archived file url
+      # Retrieve filename from search condition
       #
-
-      def archive_url(data)
-        condition = data["condition"]
-        genome    = condition["genome"]
-        filename = get_filename(condition)
-        File.join(PJ.archive_base, genome, "assembled", filename + PJ.fileformat)
-      rescue NameError
-        nil
-      end
 
       def get_filename(condition)
         results = filesearch(condition)
