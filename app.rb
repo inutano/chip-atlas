@@ -24,61 +24,6 @@ class PeakJohn < Sinatra::Base
     def app_root
       "#{env["rack.url_scheme"]}://#{env["HTTP_HOST"]}#{env["SCRIPT_NAME"]}"
     end
-
-    def get_fastqc_image(run_id) ## :( ##
-      head = run_id.sub(/...$/,"")
-      path = File.join("http://data.dbcls.jp/~inutano/fastqc", head, run_id)
-      save_path = "./public/images/fastqc/#{head}/#{run_id}"
-
-      files = ["_fastqc","_1_fastqc","_2_fastqc"].map do |read|
-        File.join(app_root, "images/fastqc/#{head}/#{run_id}", run_id+read, "Images/per_base_quality.png")
-      end
-
-      fstatus = files.map do |url|
-        uri = URI(url)
-        request = Net::HTTP.new(uri.host, uri.port)
-        response = request.request_head(uri.path)
-        response.code.to_i
-      end
-
-      if !fstatus.include?(200)
-        FileUtils.mkdir_p(save_path) if !File.exist?(save_path)
-        Net::HTTP.start("data.dbcls.jp") do |http|
-          ["_fastqc.zip","_1_fastqc.zip","_2_fastqc.zip"].each do |suffix|
-            fname = run_id + suffix
-            resp = http.get("/~inutano/fastqc/#{head}/#{run_id}/#{fname}")
-            open(File.join(save_path,fname), "wb") do |file|
-              file.write(resp.body)
-            end
-          end
-        end
-        `unzip -d "#{save_path}" "#{save_path}/*zip"`
-      end
-
-      return files.select do |url|
-        uri = URI(url)
-        request = Net::HTTP.new(uri.host, uri.port)
-        response = request.request_head(uri.path)
-        response.code.to_i == 200
-      end
-    end
-
-    def remotefile_available?(url)
-      uri = URI(url)
-      request = Net::HTTP.new(uri.host, uri.port)
-      response = request.request_head(uri.path)
-      response.code.to_i == 200
-    end
-
-    def exp2run(exp_id)
-      h = open(File.join(app_root, "tables/exp2run.json")){|f| JSON.load(f) }
-      h[exp_id]
-    end
-
-    def get_images_path(exp_id)
-      exp2run(exp_id).map{|id| get_fastqc_image(id) }.flatten
-    end
-
   end
 
   configure do
