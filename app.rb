@@ -57,19 +57,15 @@ class PeakJohn < Sinatra::Base
              settings.bedsizes
            when "fastqc_images"
              PJ::FastQC.get_images_url(params[:expid], app_root)
+           when "index_subclass"
+             genome        = params[:genome]
+             ag_class      = params[:agClass]
+             cl_class      = params[:clClass]
+             subclass_type = params[:type]
+             PJ::Experiment.get_subclass(genome, ag_class, cl_class, subclass_type)
            end
     content_type "application/json"
     JSON.dump(data)
-  end
-
-  get "/index" do
-    genome        = params[:genome]
-    ag_class      = params[:agClass]
-    cl_class      = params[:clClass]
-    subclass_type = params[:type]
-    result = PJ::Experiment.get_subclass(genome, ag_class, cl_class, subclass_type)
-    content_type "application/json"
-    JSON.dump(result)
   end
 
   get "/" do

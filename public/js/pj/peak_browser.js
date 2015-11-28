@@ -61,7 +61,7 @@ function generateSubClassOptions(){
   var agSelected = $('select#' + genome + 'agClass option:selected').val();
   var clSelected = $('select#' + genome + 'clClass option:selected').val();
   $.each([['ag', agSelected], ['cl', clSelected]], function(i, set){
-    var url = '/index?' + 'genome=' + genome + '&agClass=' + agSelected + '&clClass=' + clSelected + '&type=' + set[0];
+    var url = '/data/index_subclass.json?' + 'genome=' + genome + '&agClass=' + agSelected + '&clClass=' + clSelected + '&type=' + set[0];
     $.ajax({
       type: 'GET',
       url: url,
