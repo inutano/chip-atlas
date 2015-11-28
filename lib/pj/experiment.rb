@@ -32,6 +32,28 @@ module PJ
         end
       end
 
+      def id_valid?(exp_id)
+        !self.where(:expid => exp_id).empty?
+      end
+
+      def record_by_expid(exp_id)
+        records = self.where(:expid => exp_id)
+        raise NameError if records.size > 1
+        record = records.first
+        {
+          :expid      => exp_id,
+          :genome     => record.genome,
+          :agClass    => record.agClass,
+          :agSubClass => record.agSubClass,
+          :clClass    => record.clClass,
+          :clSubClass => record.clSubClass,
+          :title      => record.title,
+          :attributes => record.additional_attributes,
+          :readInfo   => record.readInfo,
+          :clSubClassInfo => record.clSubClassInfo,
+         }
+      end
+
       def list_of_facets
         [ :agClass, :agSubClass, :clClass, :clSubClass ]
       end

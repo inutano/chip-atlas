@@ -1,32 +1,13 @@
-require 'pj/metadata'
-require 'pj/sra'
+require 'pj/analysis'
 require 'pj/bedfile'
+require 'pj/bedsize'
 require 'pj/experiment'
+require 'pj/fastqc'
+require 'pj/location'
+require 'pj/metadata'
+require 'pj/run'
+require 'pj/sra'
 
 module PJ
-  def initialize(expid)
-    @expid = expid
-  end
-
-  def id_valid?
-    !self.where(:expid => @expid).empty?
-  end
-
-  def record_by_expid
-    records = PJ::Experiment.where(:expid => @expid)
-    raise NameError if records.size > 1
-    record = records.first
-    {
-      :expid      => @expid,
-      :genome     => record.genome,
-      :agClass    => record.agClass,
-      :agSubClass => record.agSubClass,
-      :clClass    => record.clClass,
-      :clSubClass => record.clSubClass,
-      :title      => record.title,
-      :attributes => record.additional_attributes,
-      :readInfo   => record.readInfo,
-      :clSubClassInfo => record.clSubClassInfo,
-     }
-  end
+  # Something goes here..
 end
