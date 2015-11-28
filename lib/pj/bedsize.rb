@@ -22,6 +22,15 @@ module PJ
           bedsize.save
         end
       end
+
+      def dump
+        result = {}
+        self.all.each do |record|
+          fname = [record.genome, record.agClass, record.clClass, record.qval].join(",")
+          result[fname] = record.number_of_lines
+        end
+        result
+      end
     end
   end
 end

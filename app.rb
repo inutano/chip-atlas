@@ -79,15 +79,6 @@ class PeakJohn < Sinatra::Base
       exp2run(exp_id).map{|id| get_fastqc_image(id) }.flatten
     end
 
-    def number_of_lines
-      data = open("http://dbarchive.biosciencedbc.jp/kyushu-u/util/lineNum.tsv").read
-      h = {}
-      data.split("\n").each do |line|
-        l = line.split("\t")
-        h[l[0..3].join(",")] = l[4]
-      end
-      h
-    end
   end
 
   configure do
@@ -96,6 +87,7 @@ class PeakJohn < Sinatra::Base
     #set :qval_range, PJ::Bedfile.qval_range
     #set :colo_analysis, PJ::Analysis.results(:colo)
     #set :target_genes_analysis, PJ::Analysis.results(:target_genes)
+    #set :bedsizes, PJ::Bedsize.dump
   end
 
   get "/:source.css" do
@@ -117,7 +109,7 @@ class PeakJohn < Sinatra::Base
            when "target_genes_analysis"
              settings.target_genes_analysis
            when "number_of_lines"
-             number_of_lines
+             settings.bedsizes
            end
     content_type "application/json"
     JSON.dump(data)
