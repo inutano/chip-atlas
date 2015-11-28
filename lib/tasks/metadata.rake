@@ -17,7 +17,7 @@ namespace :metadata do
   bedfile_table_fpath     = File.join(metadata_dir, "fileList.tab")
   analysis_table_fpath    = File.join(metadata_dir, "analysisList.tab")
   bedsize_table_fpath     = File.join(metadata_dir, "lineNum.tsv")
-  run_members_table_fpath = File.join(metadata_dir, "SRA_Accessions.tab")
+  run_members_table_fpath = File.join(metadata_dir, "SRA_Run_Members.tab")
 
   file experiment_table_fpath => metadata_dir do |t|
     PJ::Metadata.fetch(t.name)
