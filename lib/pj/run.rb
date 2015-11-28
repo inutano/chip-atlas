@@ -22,6 +22,12 @@ module PJ
           run.save
         end
       end
+
+      def exp2run(exp_id)
+        self.where(:expid => exp_id).map do |record|
+          record.runid
+        end
+      end
     end
   end
 end

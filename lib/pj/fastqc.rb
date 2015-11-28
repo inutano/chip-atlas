@@ -17,13 +17,8 @@ module PJ
       end
 
       def get_images_url(exp_id, app_root)
-        run_ids = exp2run(exp_id)
+        run_ids = PJ::Run.exp2run(exp_id)
         run_ids.map{|runid| PJ::FastQC.new(run_id, app_root).images_url }.flatten
-      end
-
-      def exp2run(exp_id)
-        h = open(File.join(app_root, "tables/exp2run.json")){|f| JSON.load(f) }
-        h[exp_id]
       end
     end
 
