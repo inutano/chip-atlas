@@ -199,7 +199,7 @@ class PeakJohn < Sinatra::Base
     request.body.rewind
     json = request.body.read
     content_type "application/json"
-    JSON.dump({ "url" => PJ.igv_browsing_url(JSON.parse(json)) })
+    JSON.dump({ "url" => PJ::Location.igv_browsing_url(JSON.parse(json)) })
   end
 
   post "/download" do
