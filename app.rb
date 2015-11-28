@@ -88,47 +88,6 @@ class PeakJohn < Sinatra::Base
       end
       h
     end
-
-    def colo_analysis
-      h = {}
-      fpath = "http://dbarchive.biosciencedbc.jp/kyushu-u/metadata/analysisList.tab"
-      open(fpath, "r:UTF-8").read.split("\n").each do |line|
-        cols = line.split("\t")
-        antigen = cols[0]
-        cell_list = cols[1].split(",")
-        no_data = cell_list.delete("-")
-
-        if cell_list.size != 0
-          genome = cols[3]
-          h[genome] ||= {}
-          h[genome][:antigen] ||= {}
-          h[genome][:antigen][antigen] = cell_list
-
-          cell_list.each do |cl|
-            h[genome][:cellline] ||= {}
-            h[genome][:cellline][cl] ||= []
-            h[genome][:cellline][cl] << antigen
-          end
-        end
-      end
-      h
-    end
-
-    def target_genes_analysis
-      h = {}
-      fpath = "http://dbarchive.biosciencedbc.jp/kyushu-u/metadata/analysisList.tab"
-      open(fpath, "r:UTF-8").read.split("\n").each do |line|
-        cols = line.split("\t")
-        antigen = cols[0]
-        status = cols[2]
-        genome = cols[3]
-        if status == "+"
-          h[genome] ||= []
-          h[genome] << antigen
-        end
-      end
-      h
-    end
   end
 
   configure do
@@ -152,9 +111,9 @@ class PeakJohn < Sinatra::Base
            when "exp_metadata"
              PJ::Experiment.record_by_expid(params[:expid])
            when "colo_analysis"
-             colo_analysis
+             PJ::Analysis.results(:colo)
            when "target_genes_analysis"
-             target_genes_analysis
+             PJ::Analysis.results(:target_genes)
            when "number_of_lines"
              number_of_lines
            end
