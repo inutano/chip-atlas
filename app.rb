@@ -55,6 +55,8 @@ class PeakJohn < Sinatra::Base
              settings.target_genes_analysis
            when "number_of_lines"
              settings.bedsizes
+           when "fastqc_images"
+             PJ::FastQC.get_images_url(params[:expid], app_root)
            end
     content_type "application/json"
     JSON.dump(data)
