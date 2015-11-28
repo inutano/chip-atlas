@@ -6,7 +6,7 @@ module PJ
       def fetch(dest_fname)
         base  = "ftp.ncbi.nlm.nih.gov/sra/reports/Metadata"
         fname = "SRA_Run_Members.tab"
-        `lftp "open #{base} && pget -n 8 -o #{dest_fname} #{fname}"`
+        `lftp -c "open #{base} && pget -n 8 -o #{dest_fname} #{fname}"`
       end
 
       def load(table_path)
