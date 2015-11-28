@@ -13,10 +13,11 @@ namespace :metadata do
   # Download metadata tables from NBDC
   #
 
-  experiment_table_fpath = File.join(metadata_dir, "experimentList.tab")
-  bedfile_table_fpath    = File.join(metadata_dir, "fileList.tab")
-  analysis_table_fpath   = File.join(metadata_dir, "analysisList.tab")
-  bedsize_table_fpath    = File.join(metadata_dir, "lineNum.tsv")
+  experiment_table_fpath  = File.join(metadata_dir, "experimentList.tab")
+  bedfile_table_fpath     = File.join(metadata_dir, "fileList.tab")
+  analysis_table_fpath    = File.join(metadata_dir, "analysisList.tab")
+  bedsize_table_fpath     = File.join(metadata_dir, "lineNum.tsv")
+  run_members_table_fpath = File.join(metadata_dir, "SRA_Accessions.tab")
 
   file experiment_table_fpath => metadata_dir do |t|
     PJ::Metadata.fetch(t.name)
@@ -34,6 +35,10 @@ namespace :metadata do
     PJ::Metadata.fetch(t.name)
   end
 
+  file run_members_table_fpath => metadata_dir do |t|
+    PJ::Run.fetch(t.name)
+  end
+
   #
   # Metadata table loading task
   #
@@ -42,7 +47,8 @@ namespace :metadata do
     :load_experiment,
     :load_bedfile,
     :load_analysis,
-    :load_bedsize
+    :load_bedsize,
+    :load_run
   ]
 
   task :load_experiment => experiment_table_fpath do |t|
@@ -59,5 +65,9 @@ namespace :metadata do
 
   task :load_bedsize => bedsize_table_fpath do |t|
     PJ::Bedsize.load(bedsize_table_fpath)
+  end
+
+  task :load_run => run_members_table_fpath do |t|
+    PJ::Run.load(run_members_table_fpath)
   end
 end

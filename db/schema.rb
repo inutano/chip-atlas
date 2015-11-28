@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20151127142537) do
+ActiveRecord::Schema.define(version: 20151128015049) do
 
   create_table "analyses", force: :cascade do |t|
     t.string  "antigen"
@@ -75,5 +75,13 @@ ActiveRecord::Schema.define(version: 20151127142537) do
   add_index "experiments", ["clClass"], name: "index_experiments_on_clClass"
   add_index "experiments", ["clSubClass"], name: "index_experiments_on_clSubClass"
   add_index "experiments", ["expid"], name: "index_experiments_on_expid"
+
+  create_table "runs", force: :cascade do |t|
+    t.string "runid"
+    t.string "expid"
+  end
+
+  add_index "runs", ["expid"], name: "index_runs_on_expid"
+  add_index "runs", ["runid"], name: "index_runs_on_runid"
 
 end
