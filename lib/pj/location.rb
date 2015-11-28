@@ -37,13 +37,12 @@ module PJ
     # Generate URL to browse co-localization analysis result
     #
 
-    def colo_url(data,type)
+    def colo_url(type)
       antigen   = @condition["antigen"]
       cellline  = @condition["cellline"].gsub("\s","_")
       colo_base = File.join(archive_base, @genome, "colo")
       case type
       when "submit"
-        # "#{app_root}/target_genes_result?base=#{base}/#{antigen}.#{distance}.html"
         "#{colo_base}/#{antigen}.#{cellline}.html"
       when "tsv"
         "#{colo_base}/#{antigen}.#{cellline}.tsv"
@@ -52,7 +51,23 @@ module PJ
       end
     end
 
-    
+    #
+    # Generate URL to browse target genes analysis result
+    #
+
+    def target_genes_url(type)
+      antigen  = @condition["antigen"]
+      distance = @condition["distance"]
+      target_genes_base = File.join(archive_base, @genome, target)
+      fext = case type
+             when "submit"
+               "html"
+             when "tsv"
+               "tsv"
+             end
+      "#{target_genes_base}/#{antigen}.#{distance}.#{ftext}"
+    end
+
 
   end
 end

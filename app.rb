@@ -25,20 +25,6 @@ class PeakJohn < Sinatra::Base
       "#{env["rack.url_scheme"]}://#{env["HTTP_HOST"]}#{env["SCRIPT_NAME"]}"
     end
 
-    def target_genes_url(data,type)
-      condition = data["condition"]
-      genome    = condition["genome"]
-      antigen   = condition["antigen"]
-      distance  = condition["distance"]
-      base = "http://dbarchive.biosciencedbc.jp/kyushu-u/#{genome}/target"
-      case type
-      when "submit"
-        "#{app_root}/target_genes_result?base=#{base}/#{antigen}.#{distance}.html"
-      when "tsv"
-        "#{base}/#{antigen}.#{distance}.tsv"
-      end
-    end
-
     def get_fastqc_image(run_id) ## :( ##
       head = run_id.sub(/...$/,"")
       path = File.join("http://data.dbcls.jp/~inutano/fastqc", head, run_id)
@@ -224,7 +210,8 @@ class PeakJohn < Sinatra::Base
     request.body.rewind
     json = request.body.read
     content_type "application/json"
-    JSON.dump({ "url" => PJ::Loacation.colo_url(JSON.parse(json), params[:type]) })
+    colo_url = PJ::Location.new(JSON.parse(json)).colo_url(params[:type])
+    JSON.dump({ "url" => colo_url })
   end
 
   get "/colo_result" do
@@ -241,7 +228,8 @@ class PeakJohn < Sinatra::Base
     request.body.rewind
     json = request.body.read
     content_type "application/json"
-    JSON.dump({ "url" => target_genes_url(JSON.parse(json), params[:type]) })
+    target_genes_url = PJ::Loacation.new(JSON.parse(json)).target_genes_url(params[:type])
+    JSON.dump({ "url" => target_genes_url })
   end
 
   get "/target_genes_result" do
