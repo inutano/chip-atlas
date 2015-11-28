@@ -140,12 +140,5 @@
     %script{ :src => "#{app_root}/js/liquidmetal.js" }
     %script{ :src => "#{app_root}/js/jquery.flexselect.js" }
     %script{ :src => "#{app_root}/js/typeahead.bundle.js" }
-
-    / 'code here'
-
-    :javascript
-      $('button.go-experiment').on('click', function(event){
-        event.preventDefault();
-        var expid = $('input#jumpToExperiment').val();
-        window.open('/view?id='+expid);
-      });
+    %script{ :src => "#{app_root}/js/pj/pj.js" }
+    
