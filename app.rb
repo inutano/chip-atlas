@@ -94,6 +94,8 @@ class PeakJohn < Sinatra::Base
     #set :index_all_genome, PJ::Experiment.index_all_genome
     #set :list_of_genome, PJ::Experiment.list_of_genome
     #set :qval_range, PJ::Bedfile.qval_range
+    #set :colo_analysis, PJ::Analysis.results(:colo)
+    #set :target_genes_analysis, PJ::Analysis.results(:target_genes)
   end
 
   get "/:source.css" do
@@ -111,9 +113,9 @@ class PeakJohn < Sinatra::Base
            when "exp_metadata"
              PJ::Experiment.record_by_expid(params[:expid])
            when "colo_analysis"
-             PJ::Analysis.results(:colo)
+             settings.colo_analysis
            when "target_genes_analysis"
-             PJ::Analysis.results(:target_genes)
+             settings.target_genes_analysis
            when "number_of_lines"
              number_of_lines
            end
