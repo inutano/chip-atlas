@@ -9,7 +9,7 @@ module PJ
 
           antigen      = line[0]
           cell_list    = line[1]
-          target_genes = if line[2] == "+"
+          target_genes = line[2] == "+"
           genome       = line[3]
 
           analysis = PJ::Analysis.new
