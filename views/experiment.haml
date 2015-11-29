@@ -257,6 +257,9 @@
             Sequence Quality Data from
             %a{ :href => "http://sra.dbcls.jp" }
               DBCLS SRA
+          .sequence_quality
+            %hr
+            .row
           - get_images_path(@expid).each_slice(3) do |items|
             %hr
             .row
@@ -309,11 +312,45 @@
     /
       Bootstrap Core Javascript
       =========================
-      %script{ :src => "#{app_root}/js/jquery.min.js" }
-      %script{ :src => "#{app_root}/js/bootstrap.min.js" }
-      %script{ :src => "#{app_root}/js/ie10-viewport-bug-workaround.js" }
-      %script{ :src => "#{app_root}/js/liquidmetal.js" }
-      %script{ :src => "#{app_root}/js/jquery.flexselect.js" }
-      %script{ :src => "#{app_root}/js/typeahead.bundle.js" }
-      %script{ :src => "#{app_root}/js/pj/pj.js" }
-      %script{ :src => "#{app_root}/js/pj/experiment.js" }
+    %script{ :src => "#{app_root}/js/jquery.min.js" }
+    %script{ :src => "#{app_root}/js/bootstrap.min.js" }
+    %script{ :src => "#{app_root}/js/ie10-viewport-bug-workaround.js" }
+    %script{ :src => "#{app_root}/js/liquidmetal.js" }
+    %script{ :src => "#{app_root}/js/jquery.flexselect.js" }
+    %script{ :src => "#{app_root}/js/typeahead.bundle.js" }
+    %script{ :src => "#{app_root}/js/pj/pj.js" }
+    %script{ :src => "#{app_root}/js/pj/experiment.js" }
+    
+    :javascript
+      $(function(){
+        startLoading();
+        var expid = getUrlParameter('id');
+        $.ajax({
+          url: "/data/fastqc_images.json?exp_id=" + expid,
+          type: 'GET',
+          dataType: 'json',
+        }).done(function(json){
+          var images_url = json;
+          putImages(images_url);
+          removeLoading();
+        });
+      })
+      
+      function putImages(images_url){
+        var target = $(".sequence_quality")
+        $.each(images_url, function(i, url){
+          var image = $("<img>").attr("src",url).attr("width",350)
+          var alink = $("<a>").attr("href",url).append(image).append("</a>")
+          var head = $("<h4>").append(url).append("</h4>");
+          $("<div>")
+            .attr("class", "col-md-3")
+            .append(head)
+            .append(alink)
+            .append("</div>")
+            .appendTo(target)
+        });
+      }
+      
+      function startLoading(){}
+      function removeLoading(){}
+     
