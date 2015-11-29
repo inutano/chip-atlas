@@ -57,7 +57,7 @@
                       Enter an SRA experimental ID beginning with SRX, DRX or ERX
 
     .container
-      - metadata = Experiment.record_by_expid(@expid)
+      - metadata = PJ::Experiment.record_by_expid(@expid)
       .row
         .col-md-10
           .page-header
@@ -320,7 +320,7 @@
     %script{ :src => "#{app_root}/js/typeahead.bundle.js" }
     %script{ :src => "#{app_root}/js/pj/pj.js" }
     %script{ :src => "#{app_root}/js/pj/experiment.js" }
-    
+
     :javascript
       $(function(){
         startLoading();
@@ -335,7 +335,7 @@
           removeLoading();
         });
       })
-      
+
       function putImages(images_url){
         var target = $(".sequence_quality")
         $.each(images_url, function(i, url){
@@ -350,7 +350,6 @@
             .appendTo(target)
         });
       }
-      
+
       function startLoading(){}
       function removeLoading(){}
-     
