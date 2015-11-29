@@ -2,6 +2,7 @@
 $(function(){
   dbLinkOut();
   browseIgv();
+  loadImages();
 })
 
 // variables
@@ -113,3 +114,36 @@ function getUrlParameters(expid, metadata){
   }
   return params
 }
+
+// Loading fastqc images
+function loadImages(){
+  startLoading();
+  var expid = getUrlParameter('id');
+  $.ajax({
+    url: "/data/fastqc_images.json?exp_id=" + expid,
+    type: 'GET',
+    dataType: 'json',
+  }).done(function(json){
+    var images_url = json;
+    putImages(images_url);
+    removeLoading();
+  });
+}
+
+function putImages(images_url){
+  var target = $(".sequence_quality")
+  $.each(images_url, function(i, url){
+    var image = $("<img>").attr("src",url).attr("width",350)
+    var alink = $("<a>").attr("href",url).append(image).append("</a>")
+    var head = $("<h4>").append(url).append("</h4>");
+    $("<div>")
+      .attr("class", "col-md-3")
+      .append(head)
+      .append(alink)
+      .append("</div>")
+      .appendTo(target)
+  });
+}
+
+function startLoading(){}
+function removeLoading(){}
