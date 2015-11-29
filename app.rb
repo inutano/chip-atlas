@@ -124,7 +124,7 @@ class PeakJohn < Sinatra::Base
     request.body.rewind
     json = request.body.read
     content_type "application/json"
-    target_genes_url = PJ::Loacation.new(JSON.parse(json)).target_genes_url(params[:type])
+    target_genes_url = PJ::Location.new(JSON.parse(json)).target_genes_url(params[:type])
     JSON.dump({ "url" => target_genes_url })
   end
 
