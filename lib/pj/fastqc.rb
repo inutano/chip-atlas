@@ -80,7 +80,7 @@ module PJ
       FileUtils.mkdir_p(local_run_dir) if !File.exist?(local_run_dir)
       Net::HTTP.start(PJ::FastQC.domain) do |http|
         reads_suffix.each do |suffix|
-          read_fname = @run_id + suffix
+          read_fname = @run_id + suffix + ".zip"
           resp = http.get(File.join(PJ::FastQC.path, @fpath, read_fname))
           open(File.join(local_run_dir,read_fname), "wb") do |file|
             file.write(resp.body)
