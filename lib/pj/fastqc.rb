@@ -37,8 +37,12 @@ module PJ
       File.join(PJ::FastQC.fastqc_base, @fpath)
     end
 
+    def project_root
+      File.join(File.dirname(__FILE__), "..", "..")
+    end
+
     def local_run_dir
-      File.join(PROJ_ROOT, "public/images/fastqc", @fpath)
+      File.join(project_root, "public/images/fastqc", @fpath)
     end
 
     def reads_suffix
