@@ -18,7 +18,7 @@ module PJ
 
       def get_images_url(exp_id, app_root)
         run_ids = PJ::Run.exp2run(exp_id)
-        run_ids.map{|runid| PJ::FastQC.new(run_id, app_root).images_url }.flatten
+        run_ids.map{|runid| PJ::FastQC.new(runid, app_root).images_url }.flatten
       end
     end
 
