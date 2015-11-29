@@ -146,14 +146,16 @@ class PeakJohn < Sinatra::Base
     request.body.rewind
     json = request.body.read
     content_type "application/json"
-    JSON.dump({ "url" => PJ::Location.igv_browsing_url(JSON.parse(json)) })
+    url = PJ::Location.new(JSON.parse(json)).igv_browsing_url
+    JSON.dump({ "url" => url })
   end
 
   post "/download" do
     request.body.rewind
     json = request.body.read
     content_type "application/json"
-    JSON.dump({ "url" => PJ::Bedfile.archive_url(JSON.parse(json)) })
+    url = PJ::Location.new(JSON.parse(json)).archived_bed_url
+    JSON.dump({ "url" => url })
   end
 
   get "/wabi_chipatlas" do
