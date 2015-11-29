@@ -27,12 +27,16 @@ class PeakJohn < Sinatra::Base
   end
 
   configure do
-    set :index_all_genome, PJ::Experiment.index_all_genome
-    set :list_of_genome, PJ::Experiment.list_of_genome
-    set :qval_range, PJ::Bedfile.qval_range
-    set :colo_analysis, PJ::Analysis.results(:colo)
-    set :target_genes_analysis, PJ::Analysis.results(:target_genes)
-    set :bedsizes, PJ::Bedsize.dump
+    begin
+      set :index_all_genome, PJ::Experiment.index_all_genome
+      set :list_of_genome, PJ::Experiment.list_of_genome
+      set :qval_range, PJ::Bedfile.qval_range
+      set :colo_analysis, PJ::Analysis.results(:colo)
+      set :target_genes_analysis, PJ::Analysis.results(:target_genes)
+      set :bedsizes, PJ::Bedsize.dump
+    rescue ActiveRecord::StatementInvalid
+      # Ignore Statement Invalid error when the database is not yet prepared
+    end
   end
 
   get "/:source.css" do
