@@ -13,7 +13,7 @@ $(function(){
     dataType: 'json',
     success: function(json){
       analysis = json;
-      var genome = genomeSelected;
+      var genome = genomeSelected();
       $("input#"+genome+"dataTypeAntigen").attr("checked","checked");
       setPanel('PrimaryPanel', analysis);
       setPanel('SecondaryPanel', analysis);
