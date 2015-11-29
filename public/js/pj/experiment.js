@@ -135,7 +135,8 @@ function putImages(images_url){
   $.each(images_url, function(i, url){
     var image = $("<img>").attr("src",url).attr("width",350)
     var alink = $("<a>").attr("href",url).append(image).append("</a>")
-    var head = $("<h4>").append(url).append("</h4>");
+    var title = url.split("/")[9];
+    var head = $("<h4>").append(title).append("</h4>");
     $("<div>")
       .attr("class", "col-md-3")
       .append(head)
