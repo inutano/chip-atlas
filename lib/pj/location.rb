@@ -58,14 +58,14 @@ module PJ
     def target_genes_url(type)
       antigen  = @condition["antigen"]
       distance = @condition["distance"]
-      target_genes_base = File.join(archive_base, @genome, target)
+      target_genes_base = File.join(archive_base, @genome, "target")
       fext = case type
              when "submit"
                "html"
              when "tsv"
                "tsv"
              end
-      "#{target_genes_base}/#{antigen}.#{distance}.#{ftext}"
+      "#{target_genes_base}/#{antigen}.#{distance}.#{fext}"
     end
 
 
