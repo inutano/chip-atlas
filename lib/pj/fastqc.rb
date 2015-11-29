@@ -51,7 +51,7 @@ module PJ
 
     def local_images_url
       reads_suffix.map do |read|
-        File.join(@app_root, "public/images/fastqc", @fpath, @run_id+read, "Images", "per_base_quality.png")
+        File.join(@app_root, "images/fastqc", @fpath, @run_id+read, "Images", "per_base_quality.png")
       end
     end
 
