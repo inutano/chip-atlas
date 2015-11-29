@@ -260,29 +260,6 @@
           .sequence_quality
             %hr
             .row
-          - get_images_path(@expid).each_slice(3) do |items|
-            %hr
-            .row
-              .col-md-3
-                - entry = items[0]
-                %h4= entry.split("/")[7]
-                %a{ :href => entry }
-                  %img{ :src => entry, :width => 350 }
-              .col-md-3
-                - if items[1]
-                  - entry = items[1]
-                  %h4= entry.split("/")[7]
-                  %a{ :href => entry }
-                    %img{ :src => entry }
-              .col-md-3
-                - if items[2]
-                  - entry = items[2]
-                  %h4= entry.split("/")[7]
-                  %a{ :href => entry }
-                    %img{ :src => entry }
-
-
-
 
     %footer.footer
       .container
