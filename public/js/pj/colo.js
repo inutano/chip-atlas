@@ -165,7 +165,7 @@ $(function(){
 
     $.ajax({
       type : 'post',
-      url : "#{app_root}/colo?type="+suffix,
+      url : "/colo?type="+suffix,
       data: JSON.stringify(retrievePostData()),
       contentType: 'application/json',
       dataType: 'json',

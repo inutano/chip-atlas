@@ -53,7 +53,7 @@ $(function(){
 
     $.ajax({
       type : 'post',
-      url : "#{app_root}/target_genes?type="+suffix,
+      url : "/target_genes?type="+suffix,
       data: JSON.stringify(retrievePostData()),
       contentType: 'application/json',
       dataType: 'json',

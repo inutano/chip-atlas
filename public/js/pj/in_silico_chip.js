@@ -422,7 +422,7 @@ function post2wabi(button, data){
     data = replaceDataChars(data);
     $.ajax({
       type : 'post',
-      url : "#{app_root}/wabi_chipatlas",
+      url : "/wabi_chipatlas",
       data: JSON.stringify(data),
       contentType: 'application/json',
       dataType: 'json',
