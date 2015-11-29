@@ -27,12 +27,12 @@ class PeakJohn < Sinatra::Base
   end
 
   configure do
-    #set :index_all_genome, PJ::Experiment.index_all_genome
-    #set :list_of_genome, PJ::Experiment.list_of_genome
-    #set :qval_range, PJ::Bedfile.qval_range
-    #set :colo_analysis, PJ::Analysis.results(:colo)
-    #set :target_genes_analysis, PJ::Analysis.results(:target_genes)
-    #set :bedsizes, PJ::Bedsize.dump
+    set :index_all_genome, PJ::Experiment.index_all_genome
+    set :list_of_genome, PJ::Experiment.list_of_genome
+    set :qval_range, PJ::Bedfile.qval_range
+    set :colo_analysis, PJ::Analysis.results(:colo)
+    set :target_genes_analysis, PJ::Analysis.results(:target_genes)
+    set :bedsizes, PJ::Bedsize.dump
   end
 
   get "/:source.css" do
@@ -168,7 +168,7 @@ class PeakJohn < Sinatra::Base
   get "/view" do
     @expid = params[:id]
     404 if PJ::Experiment.id_valid?(@expid)
-    @ncbi  = PJ::Experiment.fetch_ncbi_metadata(@expid)
+    @ncbi  = PJ::SRA.new(@expid).fetch
     haml :experiment
   end
 
