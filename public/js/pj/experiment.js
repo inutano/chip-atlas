@@ -120,7 +120,7 @@ function loadImages(){
   startLoading();
   var expid = getUrlParameter('id');
   $.ajax({
-    url: "/data/fastqc_images.json?exp_id=" + expid,
+    url: "/data/fastqc_images.json?expid=" + expid,
     type: 'GET',
     dataType: 'json',
   }).done(function(json){
