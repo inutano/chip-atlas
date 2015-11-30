@@ -33,6 +33,11 @@ module PJ
       cached_images
     end
 
+    def read_quality_dir
+      fetch if !cached?
+      local_dir_url
+    end
+
     def remote_run_dir
       File.join(PJ::FastQC.fastqc_base, @fpath)
     end
@@ -52,6 +57,12 @@ module PJ
     def local_images_url
       reads_suffix.map do |read|
         File.join(@app_root, "images/fastqc", @fpath, @run_id+read, "Images", "per_base_quality.png")
+      end
+    end
+
+    def local_dir_url
+      reads_suffix.map do |read|
+        File.join(@app_root, "images/fastqc", @fpath, @run_id+read)
       end
     end
 
