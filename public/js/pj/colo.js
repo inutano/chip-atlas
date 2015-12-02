@@ -25,37 +25,35 @@ function retrieveAnalysisHash(){
     dataType: 'json',
     success: function(json){
       analysis = json;
-      var genome = genomeSelected();
-      $("input#"+genome+"dataTypeAntigen").attr("checked","checked");
+      setPanelsByDefault(analysis);
+      changePanelsByRadioButton(analysis);
+      changePanelBySelectPrimary(analysis);
+    }
+  });
+}
+
+function setPanelsByDefault(analysis){
+  var genome = genomeSelected();
+  $("input#"+genome+"dataTypeAntigen").attr("checked","checked");
+  setPanel('PrimaryPanel', analysis);
+  setPanel('SecondaryPanel', analysis);
+}
+
+function changePanelsByRadioButton(analysis){
+  var genome = genomeSelected();
+  $.each(["Antigen","CellType"], function(i, type){
+    $('input[name="'+genome+'datatypeoption"]:radio').change(function(){
       setPanel('PrimaryPanel', analysis);
       setPanel('SecondaryPanel', analysis);
+    })
+  });
+}
 
-      // iterate for each genome
-      var genomeList;
-      $.ajax({
-        type: 'GET',
-        url: '/data/list_of_genome.json',
-        dataType: 'json',
-      }).done(function(json){
-        genomeList = json;
-        $.each(genomeList, function(i, genome){
-          tabControl(genome);
-
-          // change primary type radio button
-          $.each(["Antigen","CellType"], function(i, type){
-            $('input[name="'+genome+'datatypeoption"]:radio').change(function(){
-              setPanel('PrimaryPanel', analysis);
-              setPanel('SecondaryPanel', analysis);
-            })
-          });
-
-          // generate secondary options
-          $('select#' + genome + 'PrimaryPanel-select').change(function(){
-            setPanel('SecondaryPanel', analysis)
-          });
-        })
-      });
-    }
+function changePanelBySelectPrimary(analysis){
+  // generate secondary options
+  var genome = genomeSelected();
+  $('select#' + genome + 'PrimaryPanel-select').change(function(){
+    setPanel('SecondaryPanel', analysis)
   });
 }
 
