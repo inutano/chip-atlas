@@ -4,7 +4,7 @@ $(function(){
   setSubClassOptions();
 
   // tab trigger event
-  tabTriggerEvents();
+  peakBrowserTabTriggerEvents();
 
   // iterate for each genome
   var genomeList;
@@ -27,6 +27,14 @@ $(function(){
 })
 
 // functions
+function peakBrowserTabTriggerEvents(){
+  $('a[data-toggle="tab"]').on('shown.bs.tab', function(e){
+    var activatedTab = e.target;
+    var previousTab = e.relatedTarget;
+    resetSubClassOptions();
+  });
+}
+
 function panelCollapse(genome){
   $.each(["ag", "cl"], function(i, type){
     $('#toggle-' + genome + type + 'SubClass').click(function(){

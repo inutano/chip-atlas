@@ -22,7 +22,6 @@ function tabTriggerEvents(){
   $('a[data-toggle="tab"]').on('shown.bs.tab', function(e){
     var activatedTab = e.target;
     var previousTab = e.relatedTarget;
-    resetSubClassOptions();
   });
 }
 
