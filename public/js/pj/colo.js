@@ -19,9 +19,10 @@ function coloTabTriggerEvents(){
 
 function retrieveAnalysisHash(){
   // retrieve hash
+  var genome = genomeSelected();
   $.ajax({
     type: 'GET',
-    url: '/data/colo_analysis.json',
+    url: '/data/colo_analysis.json?genome=' + genome,
     dataType: 'json',
     success: function(json){
       analysis = json;

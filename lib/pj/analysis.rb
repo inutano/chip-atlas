@@ -30,6 +30,26 @@ module PJ
         end
       end
 
+      def colo_result_by_genome(genome)
+        result = {}
+        result[genome] = {}
+        self.where(:genome => genome).each do |record|
+          cell_list = record.cell_list.split(",")
+          next if cell_list.size == 0
+
+          antigen   = record.antigen
+          result[genome][:antigen] ||= {}
+          result[genome][:antigen][antigen] = cell_list
+
+          cell_list.each do |cl|
+            result[genome][:cellline] ||= {}
+            result[genome][:cellline][cl] ||= []
+            result[genome][:cellline][cl] << antigen
+          end
+        end
+        result
+      end
+
       def colo_result
         result = {}
         self.all.each do |record|

@@ -54,7 +54,8 @@ class PeakJohn < Sinatra::Base
            when "exp_metadata"
              PJ::Experiment.record_by_expid(params[:expid])
            when "colo_analysis"
-             settings.colo_analysis
+             # settings.colo_analysis
+             PJ::Analysis.colo_result_by_genome(params[:genome])
            when "target_genes_analysis"
              settings.target_genes_analysis
            when "number_of_lines"
