@@ -4,8 +4,20 @@ var analysis;
 // onload
 $(function(){
   // tab trigger event
-  tabTriggerEvents();
+  retrieveAnalysisHash();
+  coloTabTriggerEvents();
+});
 
+// functions
+function coloTabTriggerEvents(){
+  $('a[data-toggle="tab"]').on('shown.bs.tab', function(e){
+    var activatedTab = e.target;
+    var previousTab = e.relatedTarget;
+    retrieveAnalysisHash();
+  });
+}
+
+function retrieveAnalysisHash(){
   // retrieve hash
   $.ajax({
     type: 'GET',
@@ -45,9 +57,8 @@ $(function(){
       });
     }
   });
-});
+}
 
-// functions
 function setPanel(panel, analysis){
   changePanelTitle();
   removeCurrentOptions(panel);
