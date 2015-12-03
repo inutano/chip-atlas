@@ -13,6 +13,7 @@ require 'net/http'
 require 'json'
 require 'nokogiri'
 require 'lib/pj'
+require 'fileutils'
 
 ENV["DATABASE_URL"] ||= "sqlite3:database.sqlite"
 
@@ -36,6 +37,18 @@ class PeakJohn < Sinatra::Base
       set :bedsizes, PJ::Bedsize.dump
     rescue ActiveRecord::StatementInvalid
       # Ignore Statement Invalid error when the database is not yet prepared
+    end
+  end
+
+  before do
+    rack_input = request.env["rack.input"].read
+    if !rack_input.empty?
+      posted_data = JSON.parse(rack_input)
+      log = [Time.now, request.ip, request.path_info, posted_data].join("\t")
+      logfile = "./log/access_log"
+      logdir = File.dirname(logfile)
+      FileUtils.mkdir(logdir) if !File.exist?(logdir)
+      open(logfile,"a"){|f| f.puts(log) }
     end
   end
 
