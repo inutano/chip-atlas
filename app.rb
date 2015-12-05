@@ -181,6 +181,7 @@ class PeakJohn < Sinatra::Base
   end
 
   post "/wabi_chipatlas" do
+    request.body.rewind
     # json_headers = {"Content-Type" => "application/json", "Accept" => "application/json"}
     res = Net::HTTP.post_form(URI.parse('http://ddbj.nig.ac.jp/wabi/chipatlas/'), JSON.parse(request.body.read))
     id = res.body.split("\n").select{|n| n =~ /^requestId/ }.first.split("\s").last
