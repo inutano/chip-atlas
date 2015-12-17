@@ -434,7 +434,7 @@ function post2wabi(button, data){
         window.open(redirectUrl, "_self", "");
       },
       error : function(response){
-        alert("Something went bad, or you did it wrong.");
+        alert("Error: DDBJ supercomputer now unavailable: http://www.ddbj.nig.ac.jp/whatsnew/wn151201-j.html");
       },
       complete: function(){
         button.attr("disabled", false);
