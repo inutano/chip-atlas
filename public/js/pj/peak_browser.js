@@ -165,7 +165,7 @@ function disableAnother(thisSelector, genome){
         .attr("class","alert alert-warning alert-dismissible fade in")
         .attr("role","alert")
         .append(button)
-        .append('Select one SubClass disables another')
+        .append('Both Antigen and Cell type are not selected at once.')
         .append('</div>');
   switch(thisSelector.attr("id").replace(genome,"").replace("SubClass","")){
     case "ag":
