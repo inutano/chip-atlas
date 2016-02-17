@@ -315,7 +315,7 @@ A header and column 4 or later can be included, but they are ignored for the ana
 - mm9 (*M. musculus*)
 - dm3 (*D. melanogaster*)
 - ce10 (*C. elegans*)
-- sacCer3 (*S. celevisiae*)
+- sacCer3 (*S. cerevisiae*)
 
 If the BED file is in other genome assembly, convert it to proper assembly with [UCSC liftOver tool][liftOver].
 
