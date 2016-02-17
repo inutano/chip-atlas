@@ -565,11 +565,11 @@ var helpText = {
   userdatagenes: 'Check this to search for proteins bound around given genes.\n\n',
   comparedwithrandom: 'Check this to compare \‘My data\’ with a random background. In this case, each genomic location of \‘My data\’ is permuted on a random chromosome at a random position for the specified times. Increasing the permutation times will provide a highly randomized background, or a high quality of statistical test, but the calculation time will be longer.',
   comparedwithbed: 'Check this to compare \'My data\' with another dataset (UCSC BED format or a sequence motif).\n\n',
-  comparedwithrefseq: 'Check this if you compare \'My data\' with RefSeq coding genes excluding those listed in \'My data\'.',
-  comparedwithuserlist: 'Check this if you compare \'My data\' with another gene list.\n\n',
-  tss: 'To search protein binding to given genes, specify the distance range from the Transcription Start Sites (TSS).\n\Default is between -5000 and +5000 bp from the TSS.',
+  comparedwithrefseq: 'Check this to compare \'My data\' with RefSeq coding genes, excluding those listed in \'My data\'.',
+  comparedwithuserlist: 'Check this to compare \'My data\' with another gene list.\n\n',
+  tss: 'To search for protein binding to given genes, specify the distance range from the Transcription Start Sites (TSS).\n\Default is between -5000 and +5000 bp from the TSS.',
   userdatadesc: 'Enter a title for the data selected in "4. Select your data".\nAcceptable letters are alphanumeric (a-Z, 0-9), space ( ), underscore (_), period (.) and hyphen (-).',
   comparedwithdesc: 'Enter a title for the data selected in "5. Select data to be compared".\nAcceptable letters are alphanumeric (a-Z, 0-9), space ( ), underscore (_), period (.) and hyphen (-).',
   projectdesc: 'Enter a title for this submission.\nAcceptable letters are alphanumeric (a-Z, 0-9), space ( ), underscore (_), period (.) and hyphen (-).',
-  disttss: 'To search protein binding to given genes, specify the distance range from the Transcription Start Sites (TSS).\n\Default is between -5000 and +5000 bp from the TSS.'
+  disttss: 'To search for protein binding to given genes, specify the distance range from the Transcription Start Sites (TSS).\n\Default is between -5000 and +5000 bp from the TSS.'
 };
