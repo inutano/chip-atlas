@@ -559,12 +559,12 @@ function putFile2Textarea(fileId, event, callback){
 
 // should be exported to json file
 var helpText = {
-  note1: 'Gene symbols in accordance with following gene nomenclature databases are acceptable:\n  H. sapiens: HGNC\n  M. musculus: MGI\n  D. melanogaster: FlyBase\n  C. elegans: WormBase\n  S. cerevisiae: SGD\n\nAcceptable example:\n  POU5F1\n  SPI1\n  TP53\n\nBad example:\n  OCT4\n  PU.1\n  p53',
-  note2: 'Example 1. BED format (tab-delimited columns):\n  chr1\t531435\t543845\n  chr2\t738543\t742321\n\n  Acceptable genome assemblies:\n    hg19 (H. sapiens)\n    mm9 (M. musculus)\n    dm3 (D. melanogaster)\n    ce10 (C. elegans)\n    sacCer3 (S. celevisiae)\n\nExample 2. A sequence motif:\n  ATGCAA\n\nExample 3. A sequence motif with degenerate base symbols (ATGC + WSMKRYBDHVN):\n  ACAMKGTA',
-  userdatabed: 'Check this if you search proteins bound to given genomic regions (UCSC BED format) or to a sequence motif.\n\n',
-  userdatagenes: 'Check this if you search proteins bound around given genes.\n\n',
-  comparedwithrandom: 'Check this if you compare \'My data\' with random background. In this case, each genomic location of \'My data\' is permuted on a random chromosome at a random position for specified times. Increasing the permutation times will provide a hihgly randomized background, or a high quality of statistical test, but the calcuration time will be longer.',
-  comparedwithbed: 'Check this if you compare \'My data\' with another data (UCSC BED format or a sequence motif).\n\n',
+  note1: 'Gene symbols in accordance with following gene nomenclature databases are acceptable:\n  H. sapiens: HGNC\n  M. musculus: MGI\n  D. melanogaster: FlyBase\n  C. elegans: WormBase\n  S. cerevisiae: SGD\n\nAcceptable examples:\n  POU5F1\n  SPI1\n  TP53\n\nUnacceptable examples:\n  OCT4\n  PU.1\n  p53',
+  note2: 'Example 1. BED format (tab-delimited columns):\n  chr1\t531435\t543845\n  chr2\t738543\t742321\n\n  Acceptable genome assemblies:\n    hg19 (H. sapiens)\n    mm9 (M. musculus)\n    dm3 (D. melanogaster)\n    ce10 (C. elegans)\n    sacCer3 (S. cerevisiae)\n\nExample 2. A sequence motif:\n  ATGCAA\n\nExample 3. A sequence motif with degenerate base symbols (ATGC + WSMKRYBDHVN):\n  ACAMKGTA',
+  userdatabed: 'Check this to search for proteins bound to given genomic regions (UCSC BED format) or to a sequence motif.\n\n',
+  userdatagenes: 'Check this to search for proteins bound around given genes.\n\n',
+  comparedwithrandom: 'Check this to compare \‘My data\’ with a random background. In this case, each genomic location of \‘My data\’ is permuted on a random chromosome at a random position for the specified times. Increasing the permutation times will provide a highly randomized background, or a high quality of statistical test, but the calculation time will be longer.',
+  comparedwithbed: 'Check this to compare \'My data\' with another dataset (UCSC BED format or a sequence motif).\n\n',
   comparedwithrefseq: 'Check this if you compare \'My data\' with RefSeq coding genes excluding those listed in \'My data\'.',
   comparedwithuserlist: 'Check this if you compare \'My data\' with another gene list.\n\n',
   tss: 'To search protein binding to given genes, specify the distance range from the Transcription Start Sites (TSS).\n\Default is between -5000 and +5000 bp from the TSS.',
