@@ -563,7 +563,7 @@ var helpText = {
   note2: 'Example 1. BED format (tab-delimited columns):\n  chr1\t531435\t543845\n  chr2\t738543\t742321\n\n  Acceptable genome assemblies:\n    hg19 (H. sapiens)\n    mm9 (M. musculus)\n    dm3 (D. melanogaster)\n    ce10 (C. elegans)\n    sacCer3 (S. cerevisiae)\n\nExample 2. A sequence motif:\n  ATGCAA\n\nExample 3. A sequence motif with degenerate base symbols (ATGC + WSMKRYBDHVN):\n  ACAMKGTA',
   userdatabed: 'Check this to search for proteins bound to given genomic regions (UCSC BED format) or to a sequence motif.\n\n',
   userdatagenes: 'Check this to search for proteins bound around given genes.\n\n',
-  comparedwithrandom: 'Check this to compare \‘My data\’ with a random background. In this case, each genomic location of \‘My data\’ is permuted on a random chromosome at a random position for the specified times. Increasing the permutation times will provide a highly randomized background, or a high quality of statistical test, but the calculation time will be longer.',
+  comparedwithrandom: 'Check this to compare \‘My data\’ with a random background. In this case, each genomic location of \‘My data\’ is permuted on a random chromosome at a random position for the specified times. Increasing the permutation times will provide a highly randomized background, or a high quality statistical test, but the calculation time will be longer.',
   comparedwithbed: 'Check this to compare \'My data\' with another dataset (UCSC BED format or a sequence motif).\n\n',
   comparedwithrefseq: 'Check this to compare \'My data\' with RefSeq coding genes, excluding those listed in \'My data\'.',
   comparedwithuserlist: 'Check this to compare \'My data\' with another gene list.\n\n',
