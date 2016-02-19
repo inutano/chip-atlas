@@ -1,19 +1,40 @@
 require 'open-uri'
 require 'nokogiri'
+require 'json'
 
 module PJ
   class SRA
     def initialize(expid)
       @expid = expid
+      @uid = get_uid
       @experiment = Nokogiri::XML(open(efetch_url))
     end
 
+    def eutils_base
+      "http://eutils.ncbi.nlm.nih.gov/entrez/eutils"
+    end
+
     def efetch_base
-      "http://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi"
+      eutils_base + "/efetch.fcgi"
+    end
+
+    def esearch_base
+      eutils_base + "/esearch.fcgi"
+    end
+
+    def esearch_url
+      esearch_base + "?db=sra&term=#{@expid}&retmode=json"
+    end
+
+    def get_uid
+      uid = JSON.load(open(esearch_url).read)["esearchresult"]["idlist"]
+      if uid.size == 1
+        uid.first
+      end
     end
 
     def efetch_url
-      efetch_base + "?db=sra&id=#{@expid}"
+      efetch_base + "?db=sra&id=#{@uid}"
     end
 
     def fetch
