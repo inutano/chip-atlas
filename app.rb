@@ -190,7 +190,7 @@ class PeakJohn < Sinatra::Base
 
   get "/view" do
     @expid = params[:id]
-    redirect "not_found", 404 if PJ::Experiment.id_valid?(@expid)
+    redirect "not_found", 404 if !PJ::Experiment.id_valid?(@expid)
     @ncbi  = PJ::SRA.new(@expid).fetch
     haml :experiment
   end
