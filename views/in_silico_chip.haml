@@ -257,7 +257,7 @@
                           bp
 
                       .button-submit
-                        %button.btn.btn-primary.btn-lg.btn-block{ :id => "virtual-chip-submit", :type => "button" }= "submit"
+                        %button.btn.btn-primary.btn-lg.btn-block{ :id => "virtual-chip-submit", :type => "button", :disabled => true }= "submit"
                       .estimated-run-time
                         Estimated run time:
                         %a{ :id => "#{genome}-estimated-run-time" }= "-"

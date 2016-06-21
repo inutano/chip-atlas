@@ -53,11 +53,14 @@ $(function(){
     eraseTextarea(genome + 'ComparedWith');
   });
 
+  // unavailable due to maintenance
+  alert("in silico ChIP is not available during DDBJ supercomputer maintenance. Maintenance schedule is available at NIG website https://www.nig.ac.jp");
+
   // post to wabi
   $("button#virtual-chip-submit").click(function(){
     var button = $(this);
     var data = retrievePostData();
-    post2wabi(button, data);
+    //post2wabi(button, data);
   });
 
   // calculate estimated running time

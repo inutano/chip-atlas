@@ -62,6 +62,10 @@ $(function(){
 
 // checking status
 $(function(){
+  //checkStatus();
+});
+
+function checkStatus(){
   var tdStatus = $('td#status');
   var interval = setInterval(function(){
     $.get("/wabi_chipatlas?id="+reqId, function(status){
@@ -74,4 +78,4 @@ $(function(){
       }
     });
   }, 10000);
-});
+}
