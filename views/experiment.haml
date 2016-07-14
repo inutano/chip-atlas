@@ -98,15 +98,8 @@
                 .button.btn.btn-primary.btn-lg.dropdown-toggle{ :type => "button", :id => "analysis-dropdown", "data-toggle" => "dropdown", "aria-haspopup" => true, "aria-expanded" => true }
                   View Analysis
                   %span.caret
-                %ul.dropdown-menu{ "aria-labelledby" => "analysis-dropdown" }
-                  %li
-                    %a{ :href => "#{nbdc_base}/#{genome}/colo/#{expid}.html" }= "Colocalization"
-                  %li
-                    %a{ :href => "#{nbdc_base}/#{genome}/target/#{expid}.1.html" }= "Target Genes (TSS ± 1kb)"
-                  %li
-                    %a{ :href => "#{nbdc_base}/#{genome}/target/#{expid}.5.html" }= "Target Genes (TSS ± 5kb)"
-                  %li
-                    %a{ :href => "#{nbdc_base}/#{genome}/target/#{expid}.10.html" }= "Target Genes (TSS ± 10kb)"
+                %ul.dropdown-menu#analysisLinkOut{ "aria-labelledby" => "analysis-dropdown" }
+                  // li items with a linkout to analysis page goes here..
             .btn-group{ role: "group" }
               .dropdown
                 .button.btn.btn-primary.btn-lg.dropdown-toggle{ :type => "button", :id => "download-dropdown", "data-toggle" => "dropdown", "aria-haspopup" => true, "aria-expanded" => true }
