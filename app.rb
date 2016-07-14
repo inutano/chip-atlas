@@ -10,6 +10,7 @@ require 'haml'
 require 'sass'
 require 'open-uri'
 require 'net/http'
+require 'uri'
 require 'json'
 require 'nokogiri'
 require 'lib/pj'
@@ -193,6 +194,14 @@ class PeakJohn < Sinatra::Base
     redirect "not_found", 404 if !PJ::Experiment.id_valid?(@expid)
     @ncbi  = PJ::SRA.new(@expid).fetch
     haml :experiment
+  end
+
+  get "/api/remoteUrlStatus" do
+    uri = URI.parse(params[:url])
+    http = Net::HTTP.new(uri.host, uri.port)
+    request = Net::HTTP::Get.new(uri.request_uri)
+    res = http.request(request)
+    status res.code.to_i
   end
 
   not_found do

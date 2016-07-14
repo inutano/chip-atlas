@@ -60,7 +60,19 @@ $(function(){
       scriptCharset: 'utf-8',
       success : function(response) {
         // alert(JSON.stringify(response));
-        window.open(response.url, "_self", "")
+        var url = response.url
+        $.ajax({
+          url: "/api/remoteUrlStatus?url="+url,
+          type: 'GET',
+          complete: function(transport){
+            console.log(transport.status);
+            if(transport.status == 200){
+              window.open(url, "_self", "");
+            }else{
+              alert("No data found:\n\nTarget gene analysis data is not available with this condition. Please change the distance from TSS or select another antigen.");
+            }
+          }
+        });
       },
       error : function(response){
         // alert(JSON.stringify(response));
