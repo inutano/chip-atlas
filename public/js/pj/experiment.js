@@ -72,7 +72,7 @@ function analysisLinkOut(){
         url: "/api/remoteUrlStatus?url=" + url,
         complete: function(transport){
           if(transport.status == 200){
-            $('ul#analysisLinkOut').append("<li><a href='>" + url + "'>" + text + "</a></li>");
+            $('ul#analysisLinkOut').append("<li><a href='" + url + "'>" + text + "</a></li>");
           }
           if (i == urlList.length-1){
             if ($('ul#analysisLinkOut').children().length == 0) {
