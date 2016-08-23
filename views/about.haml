@@ -64,8 +64,7 @@
       .container
         %h1
           ChIP-Atlas
-        %p.main-desc
-          ChIP-Atlas is an integrative and comprehensive database for visualizing and making use of public ChIP-seq data. ChIP-Atlas covers almost all public ChIP-seq data submitted to the SRA (Sequence Read Archives) in NCBI, DDBJ, or ENA, and is based on over 44,000 experiments.
+        %p.main-desc= "ChIP-Atlas is an integrative and comprehensive database for visualizing and making use of public ChIP-seq data. ChIP-Atlas covers almost all public ChIP-seq data submitted to the SRA (Sequence Read Archives) in NCBI, DDBJ, or ENA, and is based on over #{@number_of_experiments} experiments."
         %p.main-desc
           %a{ :href => "https://youtu.be/xbYpE9GE_rY", :target => "_blank" }
             Watch movie introduction
