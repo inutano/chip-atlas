@@ -1,0 +1,15 @@
+User-agent: *
+Disallow: /view
+Disallow: /data
+
+# too many repeated hits, too quick
+User-agent: litefinder
+Disallow: /
+
+# Yahoo. too many repeated hits, too quick
+User-agent: Slurp
+Disallow: /
+
+# too many repeated hits, too quick
+User-agent: Baidu
+Disallow: /
