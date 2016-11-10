@@ -12,7 +12,7 @@ var dbNamespace = {
   posmed: "http://omicspace.riken.jp/PosMed/search?actionType=searchexec&keyword=",
   pdbj: "http://pdbj.org/mine/search?query=",
   atcc: "http://www.atcc.org/Search_Results.aspx?searchTerms=",
-  mesh: "http://www.ncbi.nlm.nih.gov/mesh/?term=",
+  mesh: "https://www.ncbi.nlm.nih.gov/mesh/?term=",
   rikenbrc: "http://www2.brc.riken.jp/lab/cell/list.cgi?skey="
 };
 

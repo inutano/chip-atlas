@@ -11,7 +11,7 @@ module PJ
     end
 
     def eutils_base
-      "http://eutils.ncbi.nlm.nih.gov/entrez/eutils"
+      "https://eutils.ncbi.nlm.nih.gov/entrez/eutils"
     end
 
     def efetch_base
