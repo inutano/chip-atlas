@@ -29,8 +29,30 @@ module PJ
     end
 
     def images_url
-      fetch if !cached?
-      cached_images
+      published_images
+      # Comment out above and uncomment below to fetch data from data.dbcls.jp
+      # fetch if !cached?
+      # cached_images
+    end
+
+    def published_images_path
+      ["", "_1", "_2"].map do |sfx|
+        File.join(
+          "http://sra.dbcls.jp/fastqc",
+          @run_id.slice(0,3),
+          @run_id.slice(0,4),
+          @run_id.sub(/...$/,""),
+          @run_id,
+          @run_id + sfx,
+          @run_id + sfx + "_fastqc",
+          "Images",
+          "per_base_quality.png"
+        )
+      end
+    end
+
+    def published_images
+      published_images_path.select{|url| Net::HTTP.get_response(URI.parse(url)).code == "200" }.compact
     end
 
     def read_quality_dir
