@@ -77,7 +77,7 @@ class PeakJohn < Sinatra::Base
              settings.bedsizes
            when "fastqc_images"
              PJ::FastQC.get_images_url(params[:expid], app_root)
-           when "fastqc_dir"
+           when "fastqc_dir" # seems not to be used anywhere
              PJ::FastQC.new(params[:runid], app_root).read_quality_dir
            when "index_subclass"
              genome        = params[:genome]
