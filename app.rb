@@ -199,11 +199,7 @@ class PeakJohn < Sinatra::Base
   end
 
   get "/api/remoteUrlStatus" do
-    uri = URI.parse(params[:url])
-    http = Net::HTTP.new(uri.host, uri.port)
-    request = Net::HTTP::Get.new(uri.request_uri)
-    res = http.request(request)
-    status res.code.to_i
+    Net::HTTP.get_response(URI.parse(params[:url])).code.to_i
   end
 
   not_found do
