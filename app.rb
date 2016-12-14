@@ -182,7 +182,11 @@ class PeakJohn < Sinatra::Base
     if Net::HTTP.get_response(URI.parse(url)).code == "200"
       if !open(url).read.empty?
         "finished"
+      else
+        "running"
       end
+    else
+      "queued"
     end
   end
 
