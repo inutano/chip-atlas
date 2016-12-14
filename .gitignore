@@ -7,3 +7,4 @@ public/images/fastqc
 public/tables/*tab
 metadata
 log
+tmp

@@ -12,6 +12,8 @@ gem 'rack-protection'
 
 gem 'nokogiri'
 
+gem 'unicorn'
+
 group :development do
   gem 'sqlite3'
 
