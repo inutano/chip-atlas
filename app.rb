@@ -178,9 +178,12 @@ class PeakJohn < Sinatra::Base
   end
 
   get "/wabi_chipatlas" do
-    id = params[:id]
-    uge_log = open("http://ddbj.nig.ac.jp/wabi/chipatlas/"+id).read
-    uge_log.split("\n").select{|l| l =~ /^status/ }[0].split(": ")[1]
+    url = "http://ddbj.nig.ac.jp/wabi/chipatlas/" + params[:id] + "?info=result&format=html"
+    if Net::HTTP.get_response(URI.parse(url)).code == "200"
+      if !open(url).read.empty?
+        "finished"
+      end
+    end
   end
 
   post "/wabi_chipatlas" do
