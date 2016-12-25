@@ -1,8 +1,3 @@
-User-agent: *
-Disallow: /view
-Disallow: /data
-Disallow: /images
-
 # too many repeated hits, too quick
 User-agent: litefinder
 Disallow: /
