@@ -59,7 +59,7 @@ module PJ
       end
 
       def list_of_genome
-        [ "hg19", "mm9", "dm3", "ce10", "sacCer3"]
+        [ "hg19", "mm9", "rn6", "dm3", "ce10", "sacCer3", ]
         # self.all.map{|r| r.genome }.uniq
       end
 

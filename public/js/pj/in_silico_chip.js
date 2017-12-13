@@ -4,14 +4,16 @@ var genomesize = {
   dm3: 168736537,
   hg19: 3137161264,
   mm9: 2725765481,
-  sacCer3: 12157105
+  sacCer3: 12157105,
+  rn6: 2870182909
 };
 var numGenes = {
   ce10: 17958,
   dm3: 12635,
   hg19: 18622,
   mm9: 19909,
-  sacCer3: 5809
+  sacCer3: 5809,
+  rn6: 23425
 };
 
 // onload

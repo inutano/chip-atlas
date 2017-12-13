@@ -84,7 +84,7 @@
           - @list_of_genome.each.with_index do |genome, i|
             %li{ :role => "presentation", :class => "#{(i == 0) ? 'active' : '' }", :id => "#{genome}-tab" }
               %a{ :href => "##{genome}-tab-content", "aria-controls" => "#{genome}-tab-content", :role => "tab", "data-toggle" => "tab", "source" => genome }
-                - genome_sp = { "hg19" => "H. sapiens", "mm9" => "M. musculus", "dm3" => "D. melanogaster", "ce10" => "C. elegans", "sacCer3" => "S. cerevisiae"}
+                - genome_sp = { "hg19" => "H. sapiens", "mm9" => "M. musculus", "rn6" => "R. norvegicus", "dm3" => "D. melanogaster", "ce10" => "C. elegans", "sacCer3" => "S. cerevisiae"}
                 = "#{genome_sp[genome]}"
 
         // Contents
