@@ -15,6 +15,7 @@ require 'json'
 require 'nokogiri'
 require 'lib/pj'
 require 'fileutils'
+require 'redcarpet'
 
 ENV["DATABASE_URL"] ||= "sqlite3:database.sqlite"
 
@@ -207,6 +208,10 @@ class PeakJohn < Sinatra::Base
 
   get "/api/remoteUrlStatus" do
     Net::HTTP.get_response(URI.parse(params[:url])).code.to_i
+  end
+
+  get "/publications" do
+    haml :publications
   end
 
   not_found do

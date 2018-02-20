@@ -62,57 +62,25 @@
                         Keyword search
 
 
-    .jumbotron
-      .container
-        %h1
-          ChIP-Atlas
-        %p.main-desc= "ChIP-Atlas is an integrative and comprehensive database for visualizing and making use of public ChIP-seq data. ChIP-Atlas covers almost all public ChIP-seq data submitted to the SRA (Sequence Read Archives) in NCBI, DDBJ, or ENA, and is based on over #{@number_of_experiments} experiments."
-        %p.main-desc
-          %a{ :href => "https://youtu.be/xbYpE9GE_rY", :target => "_blank" }
-            Watch movie introduction
     .container
       .row
-        %h4
-          The four main features of ChIP-Atlas are:
+        .col-md-12
+          .panel.panel-default
+            .panel-heading
+              %h2= "Citing ChIP-Atlas"
+            .panel-body.panel-body-desc
+              .panel-input
+                ~ markdown(:publication_list, layout: false, fenced_code_blocks: true)
+
       .row
-        .col-md-3
-          %h2
-            %a{ :href => "#{app_root}/peak_browser" }
-              Peak Browser
-          %p.main-desc
-            graphically visualizes protein binding on given genomic loci with genome browser (IGV).
-          %p.main-desc
-            %a{ :href => "https://youtu.be/qKNOkK-8hDo", :target => "_blank" }
-              Watch Movie
-        .col-md-3
-          %h2
-            %a{ :href => "#{app_root}/target_genes" }
-              Target Genes
-          %p.main-desc
-            predicts target genes bound by given transcription factors.
-          %p.main-desc
-            %a{ :href => "https://youtu.be/Sp9DUAuKkvQ", :target => "_blank" }
-              Watch Movie
-        .col-md-3
-          %h2
-            %a{ :href => "#{app_root}/colo" }
-              Colocalization
-          %p.main-desc
-            predicts partner proteins colocalizing with given transcription factors.
-          %p.main-desc
-            %a{ :href => "https://youtu.be/jhLnWNCe_No", :target => "_blank" }
-              Watch Movie
-        .col-md-3
-          %h2
-            %a{ :href => "#{app_root}/in_silico_chip" }
-              %span.italic
-                in silico
-              ChIP
-          %p.main-desc
-            predicts proteins bound to given genomic loci and genes.
-          %p.main-desc
-            %a{ :href => "https://youtu.be/JBOB2PX5_-0", :target => "_blank"  }
-              Watch Movie
+        .col-md-12
+          .panel.panel-default
+            .panel-heading
+              %h2= "Publications that reference ChIP-Atlas"
+            .panel-body.panel-body-desc
+              .panel-input
+                ~ markdown(:publication_citedby, layout: false, fenced_code_blocks: true)
+
 
     %footer.footer
       .container
