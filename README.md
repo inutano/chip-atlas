@@ -20,8 +20,10 @@ Each individual data entry has its sequencing quality data imported from [Quanto
 
 ### Citation
 
-We are currently preparing publication of ChIP-Atlas. Please cite the website or the data archived in LSDC Archive (doi assigned) for the time being.
+The ChIP-Atlas paper is now available on bioRxiv. You can also cite our database via the doi assigned to the data deposited in the National Bioscience Database Center.
 
+- Preprint
+  - Shinya Oki, Tazro Ohta, et al. Integrative analysis of transcription factor occupancy at enhancers and disease risk loci in noncoding genomic regions. bioRxiv 262899; doi: https://doi.org/10.1101/262899
 - Website
   - Oki, S; Ohta, T (2015): ChIP-Atlas. http://chip-atlas.org
 - Database
