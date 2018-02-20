@@ -64,23 +64,8 @@
 
     .container
       .row
-        .col-md-12
-          .panel.panel-default
-            .panel-heading
-              %h2= "Citing ChIP-Atlas"
-            .panel-body.panel-body-desc
-              .panel-input
-                ~ markdown(:publication_list, layout: false, fenced_code_blocks: true)
-
-      .row
-        .col-md-12
-          .panel.panel-default
-            .panel-heading
-              %h2= "Publications that reference ChIP-Atlas"
-            .panel-body.panel-body-desc
-              .panel-input
-                ~ markdown(:publication_citedby, layout: false, fenced_code_blocks: true)
-
+        .col-md-8.col-md-offset-2.publication_list
+          ~ markdown(:publication, layout: false, fenced_code_blocks: true)
 
     %footer.footer
       .container

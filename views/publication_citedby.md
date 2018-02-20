@@ -1,1 +1,0 @@
-- John Peak, et al. Super cool results found from ChIP-Atlas. Journal of ultra high impact factor; doi: https://doi.org/
