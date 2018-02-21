@@ -1,6 +1,4 @@
-## Citing ChIP-Atlas
-
-To cite your use of ChIP-Atlas in your publication:
+## To cite ChIP-Atlas in your publication:
 
 - Preprint
   - Shinya Oki, Tazro Ohta, et al. Integrative analysis of transcription factor occupancy at enhancers and disease risk loci in noncoding genomic regions. bioRxiv 262899; doi: https://doi.org/10.1101/262899
@@ -9,7 +7,7 @@ To cite your use of ChIP-Atlas in your publication:
 
 ---
 
-## Publications citing ChIP-Atlas
+## Publications citing ChIP-Atlas:
 
 1. F. Mao et al., EpiDenovo: a platform for linking regulatory de novo mutations to developmental epigenetics and diseases. __Nucleic Acids Res.__. 46, D92–D99 (2018), [Link](https://doi.org/doi:10.1093/nar/gkx918).
 2. T. Chishima, J. Iwakiri, M. Hamada, Identification of Transposable Elements Contributing to Tissue-Specific Expression of Long Non-Coding RNAs. __Genes (Basel).__. 9, 23 (2018), [Link](https://doi.org/doi:10.3390/genes9010023).
