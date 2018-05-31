@@ -103,16 +103,18 @@ function openIgvUri(expid, metadata){
   $("a.link-igv").on('click', function(){
     var link = $(this);
     // check if igv is running
-    var igvUrl = 'http://127.0.0.1:60151';
-    $.ajax({
-      type: 'GET',
-      url: igvUrl
-    }).done(function(response){
-      var url = getLinkOutUrl(link, expid, metadata);
-      window.open(url, "_self", "")
-    }).fail(function(response){
-        alert("IGV is not running on your computer.\n\nLaunch IGV and allow an access via port 60151 (View > Preferences... > Advanced > check 'enable port' and set port number 60151) to browse data.\n\n If you have not installed IGV, visit  https://www.broadinstitute.org/igv/download or google 'Integrative Genomics Viewer' to download the software.");
-    })
+    var url = getLinkOutUrl(link, expid, metadata);
+    window.open(url, "_self", "")
+    // var igvUrl = 'http://127.0.0.1:60151';
+    // $.ajax({
+    //   type: 'GET',
+    //   url: igvUrl
+    // }).done(function(response){
+    //   var url = getLinkOutUrl(link, expid, metadata);
+    //   window.open(url, "_self", "")
+    // }).fail(function(response){
+    //     alert("IGV is not running on your computer.\n\nLaunch IGV and allow an access via port 60151 (View > Preferences... > Advanced > check 'enable port' and set port number 60151) to browse data.\n\n If you have not installed IGV, visit  https://www.broadinstitute.org/igv/download or google 'Integrative Genomics Viewer' to download the software.");
+    // })
   });
 }
 

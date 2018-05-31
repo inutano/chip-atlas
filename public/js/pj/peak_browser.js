@@ -196,15 +196,16 @@ function postFormData(buttonId, url){
     var button = $(this);
     button.prop("disable", true);
     if(url == '/browse'){
-      var igvUrl = 'http://127.0.0.1:60151';
-      $.ajax({
-        url: igvUrl,
-        type: 'GET'
-      }).done(function(response){
-        postDataAjax(url);
-      }).fail(function(response){
-        alert("IGV is not running on your computer.\n\nLaunch IGV and allow an access via port 60151 (View > Preferences... > Advanced > check 'enable port' and set port number 60151) to browse data.\n\n If you have not installed IGV, visit  https://www.broadinstitute.org/igv/download or google 'Integrative Genomics Viewer' to download the software.");
-      })
+      postDataAjax(url);
+      // var igvUrl = 'http://127.0.0.1:60151';
+      // $.ajax({
+      //   url: igvUrl,
+      //   type: 'GET'
+      // }).done(function(response){
+      //   postDataAjax(url);
+      // }).fail(function(response){
+      //   alert("IGV is not running on your computer.\n\nLaunch IGV and allow an access via port 60151 (View > Preferences... > Advanced > check 'enable port' and set port number 60151) to browse data.\n\n If you have not installed IGV, visit  https://www.broadinstitute.org/igv/download or google 'Integrative Genomics Viewer' to download the software.");
+      // })
     }else{
       postDataAjax(url);
     }
