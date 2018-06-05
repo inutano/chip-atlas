@@ -1,15 +1,24 @@
 # too many repeated hits, too quick
 User-agent: litefinder
-Disallow: /
+Crawl-delay: 120
 
 # Yahoo. too many repeated hits, too quick
 User-agent: Slurp
-Disallow: /
+Crawl-delay: 120
 
 # too many repeated hits, too quick
 User-agent: Baidu
-Disallow: /
+Crawl-delay: 120
 
 # too many repeated hits, too quick
 User-agent: baiduspider
-Disallow: /
+Crawl-delay: 120
+
+# Restrict all agents from visiting api/data URI
+User-agent: *
+Crawl-delay: 30
+Disallow: /api
+Disallow: /data
+Disallow: /browse
+Disallow: /download
+Disallow: /wabi_chipatlas
