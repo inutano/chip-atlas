@@ -115,15 +115,15 @@ class PeakJohn < Sinatra::Base
     haml :target_genes
   end
 
-  get "/in_silico_chip" do
+  get "/enrichment_analysis" do
     @index_all_genome = settings.index_all_genome
     @list_of_genome = @index_all_genome.keys
     @qval_range = settings.qval_range
-    haml :in_silico_chip
+    haml :enrichment_analysis
   end
 
-  get "/in_silico_chip_result" do
-    haml :in_silico_chip_result
+  get "/enrichment_analysis_result" do
+    haml :enrichment_analysis_result
   end
 
   post "/colo" do

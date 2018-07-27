@@ -432,7 +432,7 @@ function post2wabi(button, data){
       success : function(response) {
         var requestId = response.requestId;
         var calcm = $('a#' + genome + '-estimated-run-time').text().replace(/-/g,"");
-        var redirectUrl = '/in_silico_chip_result?id=' + requestId + '&title=' + data['title'] + '&calcm=' + calcm;
+        var redirectUrl = '/enrichment_analysis_result?id=' + requestId + '&title=' + data['title'] + '&calcm=' + calcm;
         window.open(redirectUrl, "_self", "");
       },
       error : function(response){
