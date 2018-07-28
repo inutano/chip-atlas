@@ -1,5 +1,6 @@
 require 'open-uri'
 require 'net/http'
+require 'zip'
 
 module PJ
   class FastQC
@@ -29,10 +30,10 @@ module PJ
     end
 
     def images_url
-      published_images
+      #published_images
       # Comment out above and uncomment below to fetch data from data.dbcls.jp
-      # fetch if !cached?
-      # cached_images
+      fetch if !cached?
+      cached_images
     end
 
     def published_images_path
@@ -120,7 +121,19 @@ module PJ
           end
         end
       end
-      `unzip -d "#{local_run_dir}" "#{local_run_dir}/*zip"`
+      Dir.glob("#{local_run_dir}/*zip").each do |fastqc_zip|
+        begin
+          Zip::File.open(fastqc_zip) do |zipfile|
+            entry = zipfile.glob("**/per_base_quality.png").first
+            dest_fpath = File.join(local_run_dir, entry.name)
+            FileUtils.mkdir_p(File.dirname(dest_fpath))
+            entry.extract(dest_fpath)
+          end
+        rescue Zip::Error
+          # do nothing with invalid zip file but remove
+        end
+        FileUtils.rm(fastqc_zip)
+      end
     end
   end
 end
