@@ -130,6 +130,8 @@
                       .panel-heading{ :id => "heading-#{genome}qval"}
                         %h4.panel-title
                           3. Threshold for Significance
+                          %a.infoBtn{ :value => "info", :id => "#{genome}Threshold" }
+                            &#x24D8;
                       .panel-body
                         %select.form-control{ :id => "#{genome}qval", :size => 5 }
                           - @qval_range.sort.each.with_index do |qv, i|

@@ -2,6 +2,7 @@
 $(function(){
   dbLinkOut();
   analysisLinkOut();
+  showHelp();
   browseIgv();
   loadImages();
 })
@@ -187,3 +188,18 @@ function putImages(images_url){
 
 function startLoading(){}
 function removeLoading(){}
+
+function showHelp(){
+  $('.infoBtn').click(function(){
+    switch($(this).attr('id')){
+      case 'viewOnIGV':
+        alert(helpText["viewOnIGV"]);
+        break;
+    };
+  });
+}
+
+var helpText = {
+  threshold: 'Set the threshold for statistical significance values calculated by peak-caller MACS2 (-10*Log10[MACS2 Q-value]). If 50 is set here, peaks with Q value < 1E-05 are shown on genome browser IGV.',
+  viewOnIGV: 'IGV must be running on your computer before clicking the button.\n\nIf your browser shows "cannot open the page" error, launch IGV and allow an access via port 60151 (from the menu bar of IGV, View > Preferences... > Advanced > "enable port" and set port number 60151) to browse the data. If you have not installed IGV on your computer, visit https://www.broadinstitute.org/igv/download or google "Integrative Genomics Viewer" to download the software.'
+};

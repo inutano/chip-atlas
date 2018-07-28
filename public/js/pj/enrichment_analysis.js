@@ -157,6 +157,9 @@ $(function(){
       case genome + 'DistTSS':
         alert(helpText["disttss"]);
         break;
+      case genome + 'Threshold':
+        alert(helpText["threshold"]);
+        break;
     };
   });
 });
@@ -573,5 +576,6 @@ var helpText = {
   userdatadesc: 'Enter a title for the data selected in "4. Select your data".\nAcceptable letters are alphanumeric (a-Z, 0-9), space ( ), underscore (_), period (.) and hyphen (-).',
   comparedwithdesc: 'Enter a title for the data selected in "5. Select data to be compared".\nAcceptable letters are alphanumeric (a-Z, 0-9), space ( ), underscore (_), period (.) and hyphen (-).',
   projectdesc: 'Enter a title for this submission.\nAcceptable letters are alphanumeric (a-Z, 0-9), space ( ), underscore (_), period (.) and hyphen (-).',
-  disttss: 'To search for proteins binding to given genes, specify the distance range from the Transcription Start Sites (TSS).\n\Default is between -5000 and +5000 bp from the TSS.'
+  disttss: 'To search for proteins binding to given genes, specify the distance range from the Transcription Start Sites (TSS).\n\Default is between -5000 and +5000 bp from the TSS.',
+  threshold: 'Set the threshold for statistical significance values calculated by peak-caller MACS2 (-10*Log10[MACS2 Q-value]). If 50 is set here, peaks with Q value < 1E-05 are shown on genome browser IGV.'
 };

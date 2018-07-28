@@ -85,6 +85,8 @@
           - fname = URI.escape("#{metadata[:agSubClass]} (@ #{metadata[:clSubClass]}) #{expid}")
           - dfname = "#{genome}_#{antigen}_#{celltype}_#{expid}"
 
+          %a.infoBtn{ :value => "info", :id => "viewOnIGV" }
+            &#x24D8;
           .btn-toolbar{ role: "toolbar" }
             .btn-group{ role: "group" }
               .dropdown
