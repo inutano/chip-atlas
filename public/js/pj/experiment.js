@@ -186,8 +186,18 @@ function putImages(images_url){
   });
 }
 
-function startLoading(){}
-function removeLoading(){}
+function startLoading(){
+  var target = $(".sequence_quality");
+  $("<p>")
+    .attr("id","loadingImages")
+    .append("loading images..")
+    .append("</p>")
+    .appendTo(target);
+}
+
+function removeLoading(){
+  $("#loadingImages").remove();
+}
 
 function showHelp(){
   $('.infoBtn').click(function(){
