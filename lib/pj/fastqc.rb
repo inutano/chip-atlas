@@ -90,13 +90,7 @@ module PJ
     end
 
     def cached?
-      status_list = local_images_url.map do |url|
-        uri = URI(url)
-        request = Net::HTTP.new(uri.host, uri.port)
-        response = request.request_head(uri.path)
-        response.code.to_i
-      end
-      status_list.include?(200)
+      !cached_images.empty?
     end
 
     def cached_images
@@ -106,8 +100,11 @@ module PJ
     def remotefile_available?(url)
       uri = URI(url)
       request = Net::HTTP.new(uri.host, uri.port)
+      request.open_timeout = 3
       response = request.request_head(uri.path)
       response.code.to_i == 200
+    rescue Net::OpenTimeout
+      false
     end
 
     def fetch
