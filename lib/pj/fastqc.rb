@@ -100,7 +100,7 @@ module PJ
     def remotefile_available?(url)
       uri = URI(url)
       request = Net::HTTP.new(uri.host, uri.port)
-      request.open_timeout = 3
+      request.open_timeout = 1
       response = request.request_head(uri.path)
       response.code.to_i == 200
     rescue Net::OpenTimeout
