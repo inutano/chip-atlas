@@ -1,3 +1,14 @@
+## To cite ChIP-Atlas in your publication:
+
+- Paper
+  - Shinya Oki, Tazro Ohta, et al. ChIP‐Atlas: a data‐mining suite powered by full integration of public ChIP‐seq data. EMBO Rep. (2018) e46255; doi: https://doi.org/10.15252/embr.201846255
+- Database
+  - Oki, S; Ohta, T (2015): ChIP-Atlas. http://dx.doi.org/10.18908/lsdba.nbdc01558-000
+- Web tool
+  - Oki, S; Ohta, T (2015): ChIP-Atlas. http://chip-atlas.org
+
+## Publications citing ChIP-Atlas:
+
 1. Y. Chen et al., PHLDA1, another PHLDA family protein that inhibits Akt. __Cancer Sci__. 109, 3532–3542 (2018), [Link](https://doi.org/doi:10.1111/cas.13796).
 2. M. Lizio et al., Update of the FANTOM web resource: expansion to provide additional transcriptome atlases. __Nucleic Acids Res.__ (2018), [Link](https://doi.org/doi:10.1093/nar/gky1099).
 3. K. Khetchoumian et al., Cell-autonomous transcriptional mechanism for enhancement of translation capacity in secretory cells. __bioRxiv__, 454421 (2018), [Link](https://doi.org/doi:10.1101/454421).
