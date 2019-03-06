@@ -439,7 +439,7 @@ function post2wabi(button, data){
         window.open(redirectUrl, "_self", "");
       },
       error : function(response){
-        alert("Something went wrong: Please let us know to fix the problem, click 'contact us' below this page.")
+        alert("Something went wrong: Please let us know to fix the problem, click 'contact us' below this page." + JSON.stringify(response));
         //alert("Error: DDBJ supercomputer now unavailable: http://www.ddbj.nig.ac.jp/whatsnew");
       },
       complete: function(){

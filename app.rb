@@ -193,10 +193,14 @@ class PeakJohn < Sinatra::Base
 
   post "/wabi_chipatlas" do
     request.body.rewind
-    # json_headers = {"Content-Type" => "application/json", "Accept" => "application/json"}
-    res = Net::HTTP.post_form(URI.parse('http://ddbj.nig.ac.jp/wabi/chipatlas/'), JSON.parse(request.body.read))
-    id = res.body.split("\n").select{|n| n =~ /^requestId/ }.first.split("\s").last
-    JSON.dump({ "requestId" => id })
+    wabi_response = Net::HTTP.post_form(URI.parse('http://ddbj.nig.ac.jp/wabi/chipatlas/'), JSON.parse(request.body.read))
+    wabi_response_body = wabi_response.body
+    if wabi_response_body
+      id = wabi_response_body.split("\n").select{|n| n =~ /^requestId/ }.first.split("\s").last
+      JSON.dump({ "requestId" => id })
+    else
+      JSON.dump({ "request_body" => wabi_request_body })
+    end
   end
 
   get "/view" do
