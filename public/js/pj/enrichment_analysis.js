@@ -1,5 +1,5 @@
 // variables
-var genomesize = {
+const genomesize = {
   ce10: 100286070,
   dm3: 168736537,
   hg19: 3137161264,
@@ -7,13 +7,59 @@ var genomesize = {
   sacCer3: 12157105,
   rn6: 2870182909
 };
-var numGenes = {
+
+const numGenes = {
   ce10: 17958,
   dm3: 12635,
   hg19: 18622,
   mm9: 19909,
   sacCer3: 5809,
   rn6: 23425
+};
+
+const taxidMap = {
+  9606: {
+    organismName: "Homo sapiens",
+    displayName: "H. sapiens",
+    genomeVersions: [
+      "hg19"
+    ]
+  },
+  10090: {
+    organismName: "Mus musculus",
+    displayName: "M. musculus",
+    genomeVersions: [
+      "mm9"
+    ]
+  },
+  10116: {
+    organismName: "Rattus norvegicus",
+    displayName: "R. norvegicus",
+    genomeVersions: [
+      "rn6"
+    ]
+  },
+  7227: {
+    organismName: "Drosophila melanogaster",
+    displayName: "D. melanogaster",
+    genomeVersions: [
+      "dm3"
+    ]
+  },
+  6239: {
+    organismName: "Caenorhabditis elegans",
+    displayName: "C. elegans",
+    genomeVersions: [
+      "ce10"
+    ]
+  },
+  4932: {
+    organismName: "Saccharomyces cerevisiae",
+    displayName: "S. cerevisiae",
+    genomeVersions: [
+      "sacCer3"
+    ]
+  }
 };
 
 // onload
@@ -109,17 +155,6 @@ $(function(){
     });
   });
 
-  function putDefaultTitles(){
-    var defaultTitles = {
-      'UserDataTitle':     "My data",
-      'ComparedWithTitle': "Control",
-      'ProjectTitle':      "My project"
-    };
-    $.each(defaultTitles, function(id, dvalue){
-      setInputDefaultValue(id, dvalue);
-    });
-  }
-
   // Q & A
   $('.infoBtn').click(function(){
     var genome = genomeSelected();
@@ -162,9 +197,31 @@ $(function(){
         break;
     };
   });
+
+  const params = JSON.parse($('#ea_params').html());
+  const genes = decodeURI(params["genes"]);
+  const taxid = params["taxonomy"];
+  const taxonomy = taxidMap[taxid]["genomeVersions"][0];
+
+  if (genes !== "" && taxonomy !== "") {
+    $('[href="#' + taxonomy + '-tab-content"]').tab('show');
+    $("input[id='" + taxonomy + "UserDataGenes']").prop('checked', true);
+    $("textarea[id='" + taxonomy + "UserData']").append(genes);
+  }
 });
 
 // functions
+function putDefaultTitles(){
+  var defaultTitles = {
+    'UserDataTitle':     "My data",
+    'ComparedWithTitle': "Control",
+    'ProjectTitle':      "My project"
+  };
+  $.each(defaultTitles, function(id, dvalue){
+    setInputDefaultValue(id, dvalue);
+  });
+}
+
 function putExampleData(id){
   var genome = genomeSelected();
   var type;

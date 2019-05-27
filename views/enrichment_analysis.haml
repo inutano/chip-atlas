@@ -308,4 +308,10 @@
     %script{ :src => "#{app_root}/js/jquery.flexselect.js" }
     %script{ :src => "#{app_root}/js/typeahead.bundle.js" }
     %script{ :src => "#{app_root}/js/pj/pj.js" }
+    %script{ :type => "application/json", :id => "ea_params" }
+      :plain
+        {
+          "genes": "#{@genes}",
+          "taxonomy": "#{@taxonomy}"
+        }
     %script{ :src => "#{app_root}/js/pj/enrichment_analysis.js" }

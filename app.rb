@@ -46,12 +46,14 @@ class PeakJohn < Sinatra::Base
   before do
     rack_input = request.env["rack.input"].read
     if !rack_input.empty?
-      posted_data = JSON.parse(rack_input)
-      log = [Time.now, request.ip, request.path_info, posted_data].join("\t")
-      logfile = "./log/access_log"
-      logdir = File.dirname(logfile)
-      FileUtils.mkdir(logdir) if !File.exist?(logdir)
-      open(logfile,"a"){|f| f.puts(log) }
+      posted_data = JSON.parse(rack_input) rescue nil
+      if posted_data
+        log = [Time.now, request.ip, request.path_info, posted_data].join("\t")
+        logfile = "./log/access_log"
+        logdir = File.dirname(logfile)
+        FileUtils.mkdir(logdir) if !File.exist?(logdir)
+        open(logfile,"a"){|f| f.puts(log) }
+      end
     end
   end
 
@@ -119,6 +121,21 @@ class PeakJohn < Sinatra::Base
     @index_all_genome = settings.index_all_genome
     @list_of_genome = @index_all_genome.keys
     @qval_range = settings.qval_range
+    haml :enrichment_analysis
+  end
+
+  post "/enrichment_analysis" do
+    request.body.rewind
+    params_raw = request.body.read
+    params_arr = params_raw.split("&").map{|k_v| k_v.split("=") }
+    params = Hash[params_arr]
+    @genes = params["genes"]
+    @taxonomy = params["taxonomy"]
+
+    @index_all_genome = settings.index_all_genome
+    @list_of_genome = @index_all_genome.keys
+    @qval_range = settings.qval_range
+
     haml :enrichment_analysis
   end
 
