@@ -125,9 +125,17 @@ class PeakJohn < Sinatra::Base
   end
 
   post "/enrichment_analysis" do
+    request.body.rewind
+    params_raw = request.body.read
+    params_arr = params_raw.split("&").map{|k_v| k_v.split("=") }
+    params = Hash[params_arr]
+    @genes = params["genes"]
+    @taxonomy = params["taxonomy"]
+
     @index_all_genome = settings.index_all_genome
     @list_of_genome = @index_all_genome.keys
     @qval_range = settings.qval_range
+
     haml :enrichment_analysis
   end
 

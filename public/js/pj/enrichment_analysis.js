@@ -198,9 +198,9 @@ $(function(){
     };
   });
 
-  const params = new URLSearchParams(window.location.search);
-  const genes = params.get("genes");
-  const taxid = params.get("taxonomy");
+  const params = JSON.parse($('#ea_params').html());
+  const genes = decodeURI(params["genes"]);
+  const taxid = params["taxonomy"];
   const taxonomy = taxidMap[taxid]["genomeVersions"][0];
 
   if (genes !== "" && taxonomy !== "") {
