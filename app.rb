@@ -129,8 +129,11 @@ class PeakJohn < Sinatra::Base
     params_raw = request.body.read
     params_arr = params_raw.split("&").map{|k_v| k_v.split("=") }
     params = Hash[params_arr]
-    @genes = params["genes"]
+
     @taxonomy = params["taxonomy"]
+    @genes = params["genes"]
+    @genesetA = params["genesetA"]
+    @genesetB = params["genesetB"]
 
     @index_all_genome = settings.index_all_genome
     @list_of_genome = @index_all_genome.keys
