@@ -200,13 +200,27 @@ $(function(){
 
   const params = JSON.parse($('#ea_params').html());
   const genes = decodeURI(params["genes"]);
+  const genesetA = decodeURI(params["genesetA"]);
+  const genesetB = decodeURI(params["genesetB"]);
   const taxid = params["taxonomy"];
   const taxonomy = taxidMap[taxid]["genomeVersions"][0];
 
-  if (genes !== "" && taxonomy !== "") {
+  if (taxonomy !== "") {
     $('[href="#' + taxonomy + '-tab-content"]').tab('show');
-    $("input[id='" + taxonomy + "UserDataGenes']").prop('checked', true);
-    $("textarea[id='" + taxonomy + "UserData']").append(genes);
+    if (genes !== "") {
+      $("input[id='" + taxonomy + "UserDataGenes']").prop('checked', true);
+      positionGene();
+      $("textarea[id='" + taxonomy + "UserData']").append(genes);
+    } else if (genesetA !== "" && genesetB !== "") {
+      // Check "Gene list" in panel 4, change layout, append gene list
+      $("input[id='" + taxonomy + "UserDataGenes']").prop('checked', true);
+      positionGene();
+      $("textarea[id='" + taxonomy + "UserData']").append(genesetA);
+      // Check "Gene list" in panel 5, change layout, append gene list
+      $("input[id='" + taxonomy + "ComparedWithUserlist']").prop('checked', true);
+      positionComparedUserlist();
+      $("textarea[id='" + taxonomy + "ComparedWith']").append(genesetB);
+    }
   }
 });
 
