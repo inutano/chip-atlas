@@ -6,7 +6,7 @@ gem 'activerecord', "< 5.0.0"
 gem 'sinatra-activerecord'
 gem 'rack-protection'
 gem 'pg'
-gem 'sqlite3'
+gem 'sqlite3', "~> 1.3.6"
 gem 'haml'
 gem 'sass'
 gem 'redcarpet'
