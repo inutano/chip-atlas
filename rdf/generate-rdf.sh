@@ -16,9 +16,9 @@ threshold=(
 )
 for genome in ${genome_references[@]}; do
   for th in ${threshold[@]}; do
-    sp=$(echo ${genome} | cut -f 1)
+    sp=$(echo -e "${genome}" | cut -f 1)
 
-    genome_version=$(echo ${genome} | cut -f 2)
+    genome_version=$(echo -e "${genome}" | cut -f 2)
     data_version=$(date "+%Y%m%d-%H%M")
     ttl_fname="chip-atlas.${genome_version}.${data_version}.${th}.ttl"
 
