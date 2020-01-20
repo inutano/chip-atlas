@@ -6,7 +6,7 @@
 #  License: MIT
 #
 # Usage:
-#  $ bed2ttl -v data_version=$data_version genome_version=$genome_version <a ChIP-Atlas light-version all-peak bed file>
+#  $ bed2ttl -v data_version=$data_version -v genome_version=$genome_version <a ChIP-Atlas light-version all-peak bed file>
 #
 BEGIN {
   FS=OFS="\t"
@@ -26,20 +26,21 @@ BEGIN {
 }
 
 {
-  print "chipatlasres:" data_version "/" $4 "/" NR is_binding
+  print "<http://chip-atlas.org/resource/" data_version "/" $4 "/" NR ">" is_binding
   print " chipatlasont:bind_at ["
   print "  a faldo:Region;"
   print "  faldo:begin ["
   print "    a faldo:ExactPosition;"
-  print "    faldo:reference hco:" genome_version "#" $1 ";"
-  print "    faldo:position " $2;
+  print "    faldo:reference hco:" genome_version "\\#" $1 " ;"
+  print "    faldo:position " $2
   print "  ];"
   print "  faldo:end ["
   print "    a faldo:ExactPosition;"
-  print "    faldo:reference hco:" genome_version "#" $1 ";"
-  print "    faldo:position " $2;
+  print "    faldo:reference hco:" genome_version "\\#" $1 " ;"
+  print "    faldo:position " $3
   print "  ];"
+  print " ];"
   print " chipatlasont:macs2score " $5 ";"
-  print " chipatlasont:found_in insdc:" $4 "."
+  print " chipatlasont:found_in insdc:" $4 " ."
   print ""
 }
