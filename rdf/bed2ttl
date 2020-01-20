@@ -1,0 +1,24 @@
+#!/usr/bin/env awk -f
+#
+# bed2ttl
+#  a script to generate RDF-turtle from ChIP-Atlas bed file
+#  Author: Tazro Inutano Ohta inutano@gmail.com
+#  License: MIT
+#
+BEGIN {
+  FS=OFS="\t"
+
+  print "@prefix chipatlasres: <http://chip-atlas.org/resource/> ."
+  print "@prefix chipatlasont: <http://chip-atlas.org/ontology/> ."
+  print "@prefix insdc: <http://identifiers.org/insdc.sra/> ."
+  print "@prefix faldo: <http://biohackathon.org/resource/faldo/> ."
+  print "@prefix hco: <http://identifiers.org/hco/> ."
+
+  print "@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> ."
+  print "@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> ."
+  print ""
+}
+
+{
+  print "chipatlasres:" $4 ""
+}
