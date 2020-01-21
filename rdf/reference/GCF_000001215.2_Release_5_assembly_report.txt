@@ -1,0 +1,40 @@
+# Assembly name:  Release 5
+# Organism name:  Drosophila melanogaster (fruit fly)
+# Taxid:          7227
+# BioProject:     PRJNA164
+# Submitter:      The FlyBase Consortium/Berkeley Drosophila Genome Project/Celera Genomics
+# Date:           2007-10-22
+# Assembly type:  haploid
+# Release type:   major
+# Assembly level: Chromosome
+# Genome representation: full
+# WGS project:    AABU01
+# GenBank assembly accession: GCA_000001215.2
+# RefSeq assembly accession: GCF_000001215.2
+# RefSeq assembly and GenBank assemblies identical: no
+#
+## Assembly-Units:
+## GenBank Unit Accession	RefSeq Unit Accession	Assembly-Unit name
+## GCA_000001625.2	GCF_000001625.2	Primary Assembly
+## 	GCF_000184385.1	non-nuclear
+#
+# Ordered by chromosome/plasmid; the chromosomes/plasmids are followed by
+# unlocalized scaffolds.
+# Unplaced scaffolds are listed at the end.
+# RefSeq is equal or derived from GenBank object.
+#
+# Sequence-Name	Sequence-Role	Assigned-Molecule	Assigned-Molecule-Location/Type	GenBank-Accn	Relationship	RefSeq-Accn	Assembly-Unit	Sequence-Length	UCSC-style-name
+X	assembled-molecule	X	Chromosome	AE014298.4	=	NC_004354.3	Primary Assembly	22422827	na
+2L	assembled-molecule	2L	Chromosome	AE014134.5	=	NT_033779.4	Primary Assembly	23011544	na
+2R	assembled-molecule	2R	Chromosome	AE013599.4	=	NT_033778.3	Primary Assembly	21146708	na
+3L	assembled-molecule	3L	Chromosome	AE014296.4	=	NT_037436.3	Primary Assembly	24543557	na
+3R	assembled-molecule	3R	Chromosome	AE014297.2	=	NT_033777.2	Primary Assembly	27905053	na
+4	assembled-molecule	4	Chromosome	AE014135.3	=	NC_004353.3	Primary Assembly	1351857	na
+Un	pseudo-scaffold	Un	na	FA000001.1	=	NS_000188.1	Primary Assembly	na	na
+XHet	unlocalized-scaffold	X	Chromosome	CM000460.1	=	NW_001848859.1	Primary Assembly	204112	na
+2LHet	unlocalized-scaffold	2L	Chromosome	CM000456.1	=	NW_001848855.1	Primary Assembly	368872	na
+2RHet	unlocalized-scaffold	2R	Chromosome	CM000457.1	=	NW_001848856.1	Primary Assembly	3288761	na
+3LHet	unlocalized-scaffold	3L	Chromosome	CM000458.1	=	NW_001848857.1	Primary Assembly	2555491	na
+3RHet	unlocalized-scaffold	3R	Chromosome	CM000459.1	=	NW_001848858.1	Primary Assembly	2517507	na
+YHet	unlocalized-scaffold	Y	Chromosome	CM000461.1	=	NW_001848860.1	Primary Assembly	347038	na
+MT	assembled-molecule	MT	Mitochondrion	na	<>	NC_001709.1	non-nuclear	19517	na

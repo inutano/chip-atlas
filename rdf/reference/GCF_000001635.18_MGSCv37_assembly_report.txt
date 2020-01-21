@@ -1,0 +1,345 @@
+# Assembly name:  MGSCv37
+# Organism name:  Mus musculus (house mouse)
+# Infraspecific name:  strain=C57BL/6J
+# Taxid:          10090
+# BioProject:     PRJNA169
+# Submitter:      Genome Reference Consortium
+# Date:           2010-10-21
+# Synonyms:       mm9	
+# Assembly type:  haploid-with-alt-loci
+# Release type:   major
+# Assembly level: Chromosome
+# Genome representation: full
+# GenBank assembly accession: GCA_000001635.1
+# RefSeq assembly accession: GCF_000001635.18
+# RefSeq assembly and GenBank assemblies identical: yes
+#
+## Assembly-Units:
+## GenBank Unit Accession	RefSeq Unit Accession	Assembly-Unit name
+## GCA_000000055.1	GCF_000000055.16	Primary Assembly (C57BL/6J)
+## GCA_000000415.1	GCF_000000415.1	129/J
+## GCA_000000435.1	GCF_000000435.2	129/Sv
+## GCA_000000395.1	GCF_000000395.3	129/SvEvTac
+## GCA_000000445.1	GCF_000000445.2	129/SvJ
+## GCA_000000495.1	GCF_000000495.3	129P2/OlaHsd
+## GCA_000000485.1	GCF_000000485.2	129S7/SvEv
+## GCA_000000325.1	GCF_000000325.5	A/J
+## GCA_000000425.1	GCF_000000425.1	AKR/J
+## GCA_000000335.1	GCF_000000335.8	Balb/c
+## GCA_000000465.1	GCF_000000465.2	Cast/Ei
+## GCA_000000355.1	GCF_000000355.8	NOD
+## GCA_000000505.1	GCF_000000505.1	Spret/Ei
+## GCA_000000385.1	GCF_000000385.9	unknown strain
+## GCA_000004175.1	GCF_000004175.1	non-nuclear
+#
+# Ordered by chromosome/plasmid; the chromosomes/plasmids are followed by
+# unlocalized scaffolds.
+# Unplaced scaffolds are listed at the end.
+# RefSeq is equal or derived from GenBank object.
+#
+# Sequence-Name	Sequence-Role	Assigned-Molecule	Assigned-Molecule-Location/Type	GenBank-Accn	Relationship	RefSeq-Accn	Assembly-Unit	Sequence-Length	UCSC-style-name
+1	assembled-molecule	1	Chromosome	CM000994.1	=	NC_000067.5	C57BL/6J	197195432	chr1
+2	assembled-molecule	2	Chromosome	CM000995.1	=	NC_000068.6	C57BL/6J	181748087	chr2
+3	assembled-molecule	3	Chromosome	CM000996.1	=	NC_000069.5	C57BL/6J	159599783	chr3
+4	assembled-molecule	4	Chromosome	CM000997.1	=	NC_000070.5	C57BL/6J	155630120	chr4
+5	assembled-molecule	5	Chromosome	CM000998.1	=	NC_000071.5	C57BL/6J	152537259	chr5
+6	assembled-molecule	6	Chromosome	CM000999.1	=	NC_000072.5	C57BL/6J	149517037	chr6
+7	assembled-molecule	7	Chromosome	CM001000.1	=	NC_000073.5	C57BL/6J	152524553	chr7
+8	assembled-molecule	8	Chromosome	CM001001.1	=	NC_000074.5	C57BL/6J	131738871	chr8
+9	assembled-molecule	9	Chromosome	CM001002.1	=	NC_000075.5	C57BL/6J	124076172	chr9
+10	assembled-molecule	10	Chromosome	CM001003.1	=	NC_000076.5	C57BL/6J	129993255	chr10
+11	assembled-molecule	11	Chromosome	CM001004.1	=	NC_000077.5	C57BL/6J	121843856	chr11
+12	assembled-molecule	12	Chromosome	CM001005.1	=	NC_000078.5	C57BL/6J	121257530	chr12
+13	assembled-molecule	13	Chromosome	CM001006.1	=	NC_000079.5	C57BL/6J	120284312	chr13
+14	assembled-molecule	14	Chromosome	CM001007.1	=	NC_000080.5	C57BL/6J	125194864	chr14
+15	assembled-molecule	15	Chromosome	CM001008.1	=	NC_000081.5	C57BL/6J	103494974	chr15
+16	assembled-molecule	16	Chromosome	CM001009.1	=	NC_000082.5	C57BL/6J	98319150	chr16
+17	assembled-molecule	17	Chromosome	CM001010.1	=	NC_000083.5	C57BL/6J	95272651	chr17
+18	assembled-molecule	18	Chromosome	CM001011.1	=	NC_000084.5	C57BL/6J	90772031	chr18
+19	assembled-molecule	19	Chromosome	CM001012.1	=	NC_000085.5	C57BL/6J	61342430	chr19
+X	assembled-molecule	X	Chromosome	CM001013.1	=	NC_000086.6	C57BL/6J	166650296	chrX
+Y	assembled-molecule	Y	Chromosome	CM001014.1	=	NC_000087.6	C57BL/6J	15902555	chrY
+Mm1_163268_37	unlocalized-scaffold	1	Chromosome	GL456209.1	=	NT_165754.2	C57BL/6J	427279	na
+Mm1_163454_37	unlocalized-scaffold	1	Chromosome	GL456210.1	=	NT_166280.1	C57BL/6J	169725	na
+Mm1_163455_37	unlocalized-scaffold	1	Chromosome	GL456211.1	=	NT_166281.1	C57BL/6J	241735	na
+Mm1_163456_37	unlocalized-scaffold	1	Chromosome	GL456212.1	=	NT_166282.1	C57BL/6J	153618	na
+Mm1_163457_37	unlocalized-scaffold	1	Chromosome	GL456213.1	=	NT_166283.1	C57BL/6J	39340	na
+Mm3_163460_37	unlocalized-scaffold	3	Chromosome	GL456214.1	=	NT_166286.1	C57BL/6J	41899	na
+Mm4_163464_37	unlocalized-scaffold	4	Chromosome	GL456215.1	=	NT_166290.1	C57BL/6J	43921	na
+Mm4_163465_37	unlocalized-scaffold	4	Chromosome	GL456216.1	=	NT_166291.1	C57BL/6J	66673	na
+Mm5_108189_37	unlocalized-scaffold	5	Chromosome	GL456217.1	=	NT_109319.4	C57BL/6J	147415	na
+Mm5_163477_37	unlocalized-scaffold	5	Chromosome	GL456218.1	=	NT_166303.1	C57BL/6J	159935	na
+Mm7_163481_37	unlocalized-scaffold	7	Chromosome	GL456219.1	=	NT_166307.1	C57BL/6J	175968	na
+Mm7_163482_37	unlocalized-scaffold	7	Chromosome	GL456220.1	=	NT_166308.1	C57BL/6J	136522	na
+Mm8_160455_37	unlocalized-scaffold	8	Chromosome	GL456221.1	=	NT_162750.1	C57BL/6J	206961	na
+Mm8_163483_37	unlocalized-scaffold	8	Chromosome	GL456222.1	=	NT_166309.1	C57BL/6J	140215	na
+Mm8_163484_37	unlocalized-scaffold	8	Chromosome	GL456223.1	=	NT_166310.1	C57BL/6J	177422	na
+Mm8_163485_37	unlocalized-scaffold	8	Chromosome	GL456224.1	=	NT_166311.1	C57BL/6J	174995	na
+Mm9_163487_37	unlocalized-scaffold	9	Chromosome	GL456225.1	=	NT_166313.1	C57BL/6J	243717	na
+Mm9_163488_37	unlocalized-scaffold	9	Chromosome	GL456226.1	=	NT_166314.1	C57BL/6J	155686	na
+Mm13_109727_37	unlocalized-scaffold	13	Chromosome	GL456227.1	=	NT_110857.1	C57BL/6J	163442	na
+Mm13_163497_37	unlocalized-scaffold	13	Chromosome	GL456228.1	=	NT_166323.1	C57BL/6J	186869	na
+Mm16_163499_37	unlocalized-scaffold	16	Chromosome	GL456229.1	=	NT_166325.1	C57BL/6J	3994	na
+Mm17_163500_37	unlocalized-scaffold	17	Chromosome	GL456230.1	=	NT_166326.1	C57BL/6J	219732	na
+Mm17_163501_37	unlocalized-scaffold	17	Chromosome	GL456231.1	=	NT_166327.1	C57BL/6J	113338	na
+Mm17_163502_37	unlocalized-scaffold	17	Chromosome	GL456232.1	=	NT_166328.1	C57BL/6J	195669	na
+MmX_163303_37	unlocalized-scaffold	X	Chromosome	GL456233.1	=	NT_165789.2	C57BL/6J	336933	na
+MmX_163507_37	unlocalized-scaffold	X	Chromosome	GL456234.1	=	NT_166333.1	C57BL/6J	224892	na
+MmX_163508_37	unlocalized-scaffold	X	Chromosome	GL456235.1	=	NT_166334.1	C57BL/6J	41585	na
+MmX_163509_37	unlocalized-scaffold	X	Chromosome	GL456236.1	=	NT_166335.1	C57BL/6J	37892	na
+MmX_163510_37	unlocalized-scaffold	X	Chromosome	GL456237.1	=	NT_166336.1	C57BL/6J	42081	na
+MmX_163511_37	unlocalized-scaffold	X	Chromosome	GL456238.1	=	NT_166337.1	C57BL/6J	28067	na
+MmX_163512_37	unlocalized-scaffold	X	Chromosome	GL456239.1	=	NT_166338.1	C57BL/6J	40056	na
+MmX_163513_37	unlocalized-scaffold	X	Chromosome	GL456240.1	=	NT_166339.1	C57BL/6J	43916	na
+MmX_163514_37	unlocalized-scaffold	X	Chromosome	GL456241.1	=	NT_166340.1	C57BL/6J	40620	na
+MmX_163515_37	unlocalized-scaffold	X	Chromosome	GL456242.1	=	NT_166341.1	C57BL/6J	228029	na
+MmX_163516_37	unlocalized-scaffold	X	Chromosome	GL456243.1	=	NT_166342.1	C57BL/6J	221004	na
+MmY_159574_37	unlocalized-scaffold	Y	Chromosome	GL456244.1	=	NT_161866.3	C57BL/6J	968830	na
+MmY_159576_37	unlocalized-scaffold	Y	Chromosome	GL456245.1	=	NT_161868.3	C57BL/6J	444793	na
+MmY_159580_37	unlocalized-scaffold	Y	Chromosome	GL456246.1	=	NT_161872.3	C57BL/6J	1067071	na
+MmY_159583_37	unlocalized-scaffold	Y	Chromosome	GL456247.1	=	NT_161875.3	C57BL/6J	836589	na
+MmY_159585_37	unlocalized-scaffold	Y	Chromosome	GL456248.1	=	NT_161877.3	C57BL/6J	584021	na
+MmY_159587_37	unlocalized-scaffold	Y	Chromosome	GL456249.1	=	NT_161879.3	C57BL/6J	278854	na
+MmY_159593_37	unlocalized-scaffold	Y	Chromosome	GL456250.1	=	NT_161885.3	C57BL/6J	554635	na
+MmY_159600_37	unlocalized-scaffold	Y	Chromosome	GL456251.1	=	NT_161892.3	C57BL/6J	637478	na
+MmY_159603_37	unlocalized-scaffold	Y	Chromosome	GL456252.1	=	NT_161895.2	C57BL/6J	778608	na
+MmY_159605_37	unlocalized-scaffold	Y	Chromosome	GL456253.1	=	NT_161897.3	C57BL/6J	968691	na
+MmY_159606_37	unlocalized-scaffold	Y	Chromosome	GL456254.1	=	NT_161898.2	C57BL/6J	407439	na
+MmY_159610_37	unlocalized-scaffold	Y	Chromosome	GL456255.1	=	NT_161902.3	C57BL/6J	1169891	na
+MmY_159612_37	unlocalized-scaffold	Y	Chromosome	GL456256.1	=	NT_161904.2	C57BL/6J	503568	na
+MmY_159614_37	unlocalized-scaffold	Y	Chromosome	GL456257.1	=	NT_161906.3	C57BL/6J	622640	na
+MmY_159619_37	unlocalized-scaffold	Y	Chromosome	GL456258.1	=	NT_161911.3	C57BL/6J	904934	na
+MmY_159621_37	unlocalized-scaffold	Y	Chromosome	GL456259.1	=	NT_161913.2	C57BL/6J	306608	na
+MmY_159624_37	unlocalized-scaffold	Y	Chromosome	GL456260.1	=	NT_161916.3	C57BL/6J	804555	na
+MmY_159627_37	unlocalized-scaffold	Y	Chromosome	GL456261.1	=	NT_161919.3	C57BL/6J	284418	na
+MmY_159631_37	unlocalized-scaffold	Y	Chromosome	GL456262.1	=	NT_161923.3	C57BL/6J	1434722	na
+MmY_159632_37	unlocalized-scaffold	Y	Chromosome	GL456263.1	=	NT_161924.3	C57BL/6J	473985	na
+MmY_159633_37	unlocalized-scaffold	Y	Chromosome	GL456264.1	=	NT_161925.3	C57BL/6J	458262	na
+MmY_159634_37	unlocalized-scaffold	Y	Chromosome	GL456265.1	=	NT_161926.3	C57BL/6J	320322	na
+MmY_159636_37	unlocalized-scaffold	Y	Chromosome	GL456266.1	=	NT_161928.3	C57BL/6J	280181	na
+MmY_159645_37	unlocalized-scaffold	Y	Chromosome	GL456267.1	=	NT_161937.3	C57BL/6J	1520328	na
+MmY_163304_37	unlocalized-scaffold	Y	Chromosome	GL456268.1	=	NT_165790.2	C57BL/6J	655320	na
+MmY_163305_37	unlocalized-scaffold	Y	Chromosome	GL456269.1	=	NT_165791.2	C57BL/6J	538816	na
+MmY_163306_37	unlocalized-scaffold	Y	Chromosome	GL456270.1	=	NT_165792.1	C57BL/6J	459333	na
+MmY_163307_37	unlocalized-scaffold	Y	Chromosome	GL456271.1	=	NT_165793.2	C57BL/6J	449061	na
+MmY_163308_37	unlocalized-scaffold	Y	Chromosome	GL456272.1	=	NT_165794.2	C57BL/6J	565186	na
+MmY_163309_37	unlocalized-scaffold	Y	Chromosome	GL456273.1	=	NT_165795.2	C57BL/6J	480750	na
+MmY_163310_37	unlocalized-scaffold	Y	Chromosome	GL456274.1	=	NT_165796.2	C57BL/6J	500241	na
+MmY_163312_37	unlocalized-scaffold	Y	Chromosome	GL456275.1	=	NT_165798.2	C57BL/6J	511239	na
+MmY_163518_37	unlocalized-scaffold	Y	Chromosome	GL456276.1	=	NT_166344.1	C57BL/6J	697133	na
+MmY_163519_37	unlocalized-scaffold	Y	Chromosome	GL456277.1	=	NT_166345.1	C57BL/6J	323089	na
+MmY_163520_37	unlocalized-scaffold	Y	Chromosome	GL456278.1	=	NT_166346.1	C57BL/6J	564397	na
+MmY_163521_37	unlocalized-scaffold	Y	Chromosome	GL456279.1	=	NT_166347.1	C57BL/6J	806929	na
+MmY_163522_37	unlocalized-scaffold	Y	Chromosome	GL456280.1	=	NT_166348.1	C57BL/6J	392298	na
+MmY_163523_37	unlocalized-scaffold	Y	Chromosome	GL456281.1	=	NT_166349.1	C57BL/6J	620043	na
+MmY_163524_37	unlocalized-scaffold	Y	Chromosome	GL456282.1	=	NT_166350.1	C57BL/6J	496830	na
+MmY_163525_37	unlocalized-scaffold	Y	Chromosome	GL456283.1	=	NT_166351.1	C57BL/6J	586359	na
+MmY_163526_37	unlocalized-scaffold	Y	Chromosome	GL456284.1	=	NT_166352.1	C57BL/6J	455988	na
+MmY_163527_37	unlocalized-scaffold	Y	Chromosome	GL456285.1	=	NT_166353.1	C57BL/6J	664146	na
+MmY_163528_37	unlocalized-scaffold	Y	Chromosome	GL456286.1	=	NT_166354.1	C57BL/6J	489409	na
+MmY_163530_37	unlocalized-scaffold	Y	Chromosome	GL456287.1	=	NT_166356.1	C57BL/6J	265762	na
+MmY_163531_37	unlocalized-scaffold	Y	Chromosome	GL456288.1	=	NT_166357.1	C57BL/6J	270730	na
+MmY_163532_37	unlocalized-scaffold	Y	Chromosome	GL456289.1	=	NT_166358.1	C57BL/6J	305955	na
+MmY_163533_37	unlocalized-scaffold	Y	Chromosome	GL456290.1	=	NT_166359.1	C57BL/6J	255238	na
+MmY_163534_37	unlocalized-scaffold	Y	Chromosome	GL456291.1	=	NT_166360.1	C57BL/6J	251163	na
+MmY_163535_37	unlocalized-scaffold	Y	Chromosome	GL456292.1	=	NT_166361.1	C57BL/6J	385484	na
+MmY_163536_37	unlocalized-scaffold	Y	Chromosome	GL456293.1	=	NT_166362.1	C57BL/6J	426327	na
+MmY_163537_37	unlocalized-scaffold	Y	Chromosome	GL456294.1	=	NT_166363.1	C57BL/6J	439176	na
+MmY_163538_37	unlocalized-scaffold	Y	Chromosome	GL456295.1	=	NT_166364.1	C57BL/6J	189961	na
+MmY_163539_37	unlocalized-scaffold	Y	Chromosome	GL456296.1	=	NT_166365.1	C57BL/6J	294954	na
+MmY_163540_37	unlocalized-scaffold	Y	Chromosome	GL456297.1	=	NT_166366.1	C57BL/6J	429889	na
+MmY_163541_37	unlocalized-scaffold	Y	Chromosome	GL456298.1	=	NT_166367.1	C57BL/6J	291116	na
+MmY_163542_37	unlocalized-scaffold	Y	Chromosome	GL456299.1	=	NT_166368.1	C57BL/6J	338747	na
+MmY_163543_37	unlocalized-scaffold	Y	Chromosome	GL456300.1	=	NT_166369.1	C57BL/6J	401276	na
+MmY_163544_37	unlocalized-scaffold	Y	Chromosome	GL456301.1	=	NT_166370.1	C57BL/6J	510396	na
+MmY_163545_37	unlocalized-scaffold	Y	Chromosome	GL456302.1	=	NT_166371.1	C57BL/6J	723459	na
+MmY_163546_37	unlocalized-scaffold	Y	Chromosome	GL456303.1	=	NT_166372.1	C57BL/6J	213804	na
+MmY_163547_37	unlocalized-scaffold	Y	Chromosome	GL456304.1	=	NT_166373.1	C57BL/6J	382094	na
+MmY_163548_37	unlocalized-scaffold	Y	Chromosome	GL456305.1	=	NT_166374.1	C57BL/6J	189228	na
+MmY_163549_37	unlocalized-scaffold	Y	Chromosome	GL456306.1	=	NT_166375.1	C57BL/6J	171164	na
+MmY_163550_37	unlocalized-scaffold	Y	Chromosome	GL456307.1	=	NT_166376.1	C57BL/6J	233724	na
+MmY_163551_37	unlocalized-scaffold	Y	Chromosome	GL456308.1	=	NT_166377.1	C57BL/6J	572634	na
+MmY_163552_37	unlocalized-scaffold	Y	Chromosome	GL456309.1	=	NT_166378.1	C57BL/6J	314566	na
+MmY_163553_37	unlocalized-scaffold	Y	Chromosome	GL456310.1	=	NT_166379.1	C57BL/6J	296609	na
+MmY_163554_37	unlocalized-scaffold	Y	Chromosome	GL456311.1	=	NT_166380.1	C57BL/6J	250067	na
+MmY_163555_37	unlocalized-scaffold	Y	Chromosome	GL456312.1	=	NT_166381.1	C57BL/6J	285414	na
+MmY_163556_37	unlocalized-scaffold	Y	Chromosome	GL456313.1	=	NT_166382.1	C57BL/6J	319093	na
+MmY_163557_37	unlocalized-scaffold	Y	Chromosome	GL456314.1	=	NT_166383.1	C57BL/6J	425545	na
+MmY_163558_37	unlocalized-scaffold	Y	Chromosome	GL456315.1	=	NT_166384.1	C57BL/6J	272030	na
+MmY_163559_37	unlocalized-scaffold	Y	Chromosome	GL456316.1	=	NT_166385.1	C57BL/6J	331801	na
+MmY_163560_37	unlocalized-scaffold	Y	Chromosome	GL456317.1	=	NT_166386.1	C57BL/6J	259253	na
+MmY_163561_37	unlocalized-scaffold	Y	Chromosome	GL456318.1	=	NT_166387.1	C57BL/6J	234682	na
+MmY_163562_37	unlocalized-scaffold	Y	Chromosome	GL456319.1	=	NT_166388.1	C57BL/6J	282555	na
+MmY_163563_37	unlocalized-scaffold	Y	Chromosome	GL456320.1	=	NT_166389.1	C57BL/6J	199146	na
+MmY_163564_37	unlocalized-scaffold	Y	Chromosome	GL456321.1	=	NT_166390.1	C57BL/6J	358802	na
+MmY_163565_37	unlocalized-scaffold	Y	Chromosome	GL456322.1	=	NT_166391.1	C57BL/6J	626512	na
+MmY_163566_37	unlocalized-scaffold	Y	Chromosome	GL456323.1	=	NT_166392.1	C57BL/6J	293589	na
+MmY_163576_37	unlocalized-scaffold	Y	Chromosome	GL456324.1	=	NT_166402.1	C57BL/6J	106482	na
+MmY_163577_37	unlocalized-scaffold	Y	Chromosome	GL456325.1	=	NT_166403.1	C57BL/6J	1095286	na
+MmY_163578_37	unlocalized-scaffold	Y	Chromosome	GL456326.1	=	NT_166404.1	C57BL/6J	781042	na
+MmY_163579_37	unlocalized-scaffold	Y	Chromosome	GL456327.1	=	NT_166405.1	C57BL/6J	356262	na
+MmY_163580_37	unlocalized-scaffold	Y	Chromosome	GL456328.1	=	NT_166406.1	C57BL/6J	293661	na
+MmY_163581_37	unlocalized-scaffold	Y	Chromosome	GL456329.1	=	NT_166407.1	C57BL/6J	447005	na
+MmY_163582_37	unlocalized-scaffold	Y	Chromosome	GL456330.1	=	NT_166408.1	C57BL/6J	589374	na
+MmY_163583_37	unlocalized-scaffold	Y	Chromosome	GL456331.1	=	NT_166409.1	C57BL/6J	974025	na
+MmY_163584_37	unlocalized-scaffold	Y	Chromosome	GL456332.1	=	NT_166410.1	C57BL/6J	419830	na
+MmY_163586_37	unlocalized-scaffold	Y	Chromosome	GL456333.1	=	NT_166412.1	C57BL/6J	458539	na
+MmY_163587_37	unlocalized-scaffold	Y	Chromosome	GL456334.1	=	NT_166413.1	C57BL/6J	786124	na
+MmY_163588_37	unlocalized-scaffold	Y	Chromosome	GL456335.1	=	NT_166414.1	C57BL/6J	1178213	na
+MmY_163589_37	unlocalized-scaffold	Y	Chromosome	GL456336.1	=	NT_166415.1	C57BL/6J	641485	na
+MmY_163590_37	unlocalized-scaffold	Y	Chromosome	GL456337.1	=	NT_166416.1	C57BL/6J	1192330	na
+MmY_163591_37	unlocalized-scaffold	Y	Chromosome	GL456338.1	=	NT_166417.1	C57BL/6J	410407	na
+MmY_163592_37	unlocalized-scaffold	Y	Chromosome	GL456339.1	=	NT_166418.1	C57BL/6J	579338	na
+MmY_163593_37	unlocalized-scaffold	Y	Chromosome	GL456340.1	=	NT_166419.1	C57BL/6J	793467	na
+MmY_163594_37	unlocalized-scaffold	Y	Chromosome	GL456341.1	=	NT_166420.1	C57BL/6J	660980	na
+MmY_163595_37	unlocalized-scaffold	Y	Chromosome	GL456342.1	=	NT_166421.1	C57BL/6J	1403841	na
+MmY_163596_37	unlocalized-scaffold	Y	Chromosome	GL456343.1	=	NT_166422.1	C57BL/6J	476795	na
+MmY_163597_37	unlocalized-scaffold	Y	Chromosome	GL456344.1	=	NT_166423.1	C57BL/6J	271800	na
+MmY_163598_37	unlocalized-scaffold	Y	Chromosome	GL456345.1	=	NT_166424.1	C57BL/6J	556240	na
+MmUn_53691_37	unplaced-scaffold	na	na	GL456346.1	=	NT_053651.2	C57BL/6J	46492	na
+MmUn_72908_37	unplaced-scaffold	na	na	GL456347.1	=	NT_072868.2	C57BL/6J	37324	na
+MmUn_110870_37	unplaced-scaffold	na	na	GL456348.1	=	NT_112000.1	C57BL/6J	160410	na
+MmUn_163607_37	unplaced-scaffold	na	na	GL456349.1	=	NT_166433.1	C57BL/6J	83612	na
+MmUn_163608_37	unplaced-scaffold	na	na	GL456350.1	=	NT_166434.1	C57BL/6J	227966	na
+MmUn_163609_37	unplaced-scaffold	na	na	GL456351.1	=	NT_166435.1	C57BL/6J	225720	na
+MmUn_163610_37	unplaced-scaffold	na	na	GL456352.1	=	NT_166436.1	C57BL/6J	211301	na
+MmUn_163611_37	unplaced-scaffold	na	na	GL456353.1	=	NT_166437.1	C57BL/6J	187641	na
+MmUn_163612_37	unplaced-scaffold	na	na	GL456354.1	=	NT_166438.1	C57BL/6J	195993	na
+MmUn_163613_37	unplaced-scaffold	na	na	GL456355.1	=	NT_166439.1	C57BL/6J	191473	na
+MmUn_163614_37	unplaced-scaffold	na	na	GL456356.1	=	NT_166440.1	C57BL/6J	215781	na
+MmUn_163615_37	unplaced-scaffold	na	na	GL456357.1	=	NT_166441.1	C57BL/6J	253441	na
+MmUn_163616_37	unplaced-scaffold	na	na	GL456358.1	=	NT_166442.1	C57BL/6J	41376	na
+MmUn_163617_37	unplaced-scaffold	na	na	GL456359.1	=	NT_166443.1	C57BL/6J	22974	na
+MmUn_163618_37	unplaced-scaffold	na	na	GL456360.1	=	NT_166444.1	C57BL/6J	31704	na
+MmUn_163619_37	unplaced-scaffold	na	na	GL456361.1	=	NT_166445.1	C57BL/6J	24859	na
+MmUn_163620_37	unplaced-scaffold	na	na	GL456362.1	=	NT_166446.1	C57BL/6J	34669	na
+MmUn_163621_37	unplaced-scaffold	na	na	GL456363.1	=	NT_166447.1	C57BL/6J	48471	na
+MmUn_163622_37	unplaced-scaffold	na	na	GL456364.1	=	NT_166448.1	C57BL/6J	21285	na
+MmUn_163623_37	unplaced-scaffold	na	na	GL456365.1	=	NT_166449.1	C57BL/6J	27486	na
+MmUn_163624_37	unplaced-scaffold	na	na	GL456366.1	=	NT_166450.1	C57BL/6J	47073	na
+MmUn_163625_37	unplaced-scaffold	na	na	GL456367.1	=	NT_166451.1	C57BL/6J	42057	na
+MmUn_163626_37	unplaced-scaffold	na	na	GL456368.1	=	NT_166452.1	C57BL/6J	20208	na
+MmUn_163627_37	unplaced-scaffold	na	na	GL456369.1	=	NT_166453.1	C57BL/6J	32978	na
+MmUn_163628_37	unplaced-scaffold	na	na	GL456370.1	=	NT_166454.1	C57BL/6J	26764	na
+MmUn_163629_37	unplaced-scaffold	na	na	GL456371.1	=	NT_166455.1	C57BL/6J	64854	na
+MmUn_163630_37	unplaced-scaffold	na	na	GL456372.1	=	NT_166456.1	C57BL/6J	28664	na
+MmUn_163631_37	unplaced-scaffold	na	na	GL456373.1	=	NT_166457.1	C57BL/6J	25984	na
+MmUn_163632_37	unplaced-scaffold	na	na	GL456374.1	=	NT_166458.1	C57BL/6J	21807	na
+MmUn_163633_37	unplaced-scaffold	na	na	GL456375.1	=	NT_166459.1	C57BL/6J	28367	na
+MmUn_163634_37	unplaced-scaffold	na	na	GL456376.1	=	NT_166460.1	C57BL/6J	54607	na
+MmUn_163635_37	unplaced-scaffold	na	na	GL456377.1	=	NT_166461.1	C57BL/6J	29394	na
+MmUn_163636_37	unplaced-scaffold	na	na	GL456378.1	=	NT_166462.1	C57BL/6J	31602	na
+MmUn_163637_37	unplaced-scaffold	na	na	GL456379.1	=	NT_166463.1	C57BL/6J	72385	na
+MmUn_163638_37	unplaced-scaffold	na	na	GL456380.1	=	NT_166464.1	C57BL/6J	20190	na
+MmUn_163639_37	unplaced-scaffold	na	na	GL456381.1	=	NT_166465.1	C57BL/6J	25871	na
+MmUn_163640_37	unplaced-scaffold	na	na	GL456382.1	=	NT_166466.1	C57BL/6J	23158	na
+MmUn_163641_37	unplaced-scaffold	na	na	GL456383.1	=	NT_166467.1	C57BL/6J	38659	na
+MmUn_163642_37	unplaced-scaffold	na	na	GL456384.1	=	NT_166468.1	C57BL/6J	50955	na
+MmUn_163643_37	unplaced-scaffold	na	na	GL456385.1	=	NT_166469.1	C57BL/6J	35240	na
+MmUn_163644_37	unplaced-scaffold	na	na	GL456386.1	=	NT_166470.1	C57BL/6J	26207	na
+MmUn_163645_37	unplaced-scaffold	na	na	GL456387.1	=	NT_166471.1	C57BL/6J	24685	na
+MmUn_163646_37	unplaced-scaffold	na	na	GL456388.1	=	NT_166472.1	C57BL/6J	27144	na
+MmUn_163647_37	unplaced-scaffold	na	na	GL456389.1	=	NT_166473.1	C57BL/6J	28772	na
+MmUn_163648_37	unplaced-scaffold	na	na	GL456390.1	=	NT_166474.1	C57BL/6J	24668	na
+MmUn_163649_37	unplaced-scaffold	na	na	GL456391.1	=	NT_166475.1	C57BL/6J	31401	na
+MmUn_163650_37	unplaced-scaffold	na	na	GL456392.1	=	NT_166476.1	C57BL/6J	23629	na
+MmUn_163651_37	unplaced-scaffold	na	na	GL456393.1	=	NT_166477.1	C57BL/6J	55711	na
+MmUn_163652_37	unplaced-scaffold	na	na	GL456394.1	=	NT_166478.1	C57BL/6J	24323	na
+MmUn_163653_37	unplaced-scaffold	na	na	GL456395.1	=	NT_166479.1	C57BL/6J	23934	na
+MmUn_163654_37	unplaced-scaffold	na	na	GL456396.1	=	NT_166480.1	C57BL/6J	21240	na
+MmUn_163655_37	unplaced-scaffold	na	na	GL456397.1	=	NT_166481.1	C57BL/6J	27849	na
+Mm12_112699_37	alt-scaffold	12	Chromosome	GL456074.1	=	NT_114988.1	129/J	84250	na
+Mm2_39263_37	alt-scaffold	2	Chromosome	GL456024.1	=	NT_039223.2	129/Sv	370505	na
+Mm6_39413_37	alt-scaffold	6	Chromosome	GL456025.1	=	NT_039373.1	129/Sv	145152	na
+Mm6_39422_37	alt-scaffold	6	Chromosome	GL456026.1	=	NT_039382.3	129/Sv	636098	na
+Mm14_39653_37	alt-scaffold	14	Chromosome	GL456027.1	=	NT_039613.3	129/Sv	503103	na
+Mm16_39670_37	alt-scaffold	16	Chromosome	GL456028.1	=	NT_039630.4	129/Sv	1312151	na
+Mm17_39704_37	alt-scaffold	17	Chromosome	GL456029.1	=	NT_039664.1	129/Sv	65870	na
+Mm17_39705_37	alt-scaffold	17	Chromosome	GL456030.1	=	NT_039665.1	129/Sv	158414	na
+MmX_110790_37	alt-scaffold	X	Chromosome	GL456031.1	=	NT_111920.1	129/Sv	247850	na
+MmX_39784_37	alt-scaffold	X	Chromosome	GL456032.1	=	NT_039744.2	129/Sv	194271	na
+MmX_39787_37	alt-scaffold	X	Chromosome	GL456033.1	=	NT_039747.3	129/Sv	78785	na
+Mm1_39232_37	alt-scaffold	1	Chromosome	GL455991.1	=	NT_039192.2	129/SvEvTac	281255	na
+Mm1_39234_37	alt-scaffold	1	Chromosome	GL455992.1	=	NT_039194.4	129/SvEvTac	235763	na
+Mm1_39238_37	alt-scaffold	1	Chromosome	GL455993.1	=	NT_039198.1	129/SvEvTac	272653	na
+Mm4_39331_37	alt-scaffold	4	Chromosome	GL455994.1	=	NT_039291.1	129/SvEvTac	170592	na
+Mm5_39374_37	alt-scaffold	5	Chromosome	GL455995.1	=	NT_039334.1	129/SvEvTac	262166	na
+Mm8_39509_37	alt-scaffold	8	Chromosome	GL455996.1	=	NT_039469.1	129/SvEvTac	183135	na
+Mm8_39510_37	alt-scaffold	8	Chromosome	GL455997.1	=	NT_039470.1	129/SvEvTac	251056	na
+Mm11_78748_37	alt-scaffold	11	Chromosome	GL455998.1	=	NT_078683.1	129/SvEvTac	170397	na
+Mm13_39634_37	alt-scaffold	13	Chromosome	GL455999.1	=	NT_039594.2	129/SvEvTac	138434	na
+Mm15_39662_37	alt-scaffold	15	Chromosome	GL456000.1	=	NT_039622.1	129/SvEvTac	88442	na
+Mm16_39674_37	alt-scaffold	16	Chromosome	GL456001.1	=	NT_039634.3	129/SvEvTac	1351377	na
+Mm17_39706_37	alt-scaffold	17	Chromosome	GL456002.1	=	NT_039666.1	129/SvEvTac	615654	na
+MmX_39779_37	alt-scaffold	X	Chromosome	GL456003.1	=	NT_039739.1	129/SvEvTac	328187	na
+MmX_98661_37	alt-scaffold	X	Chromosome	GL456004.1	=	NT_099024.1	129/SvEvTac	123835	na
+Mm1_39235_37	alt-scaffold	1	Chromosome	GL456005.1	=	NT_039195.1	129/SvJ	154284	na
+Mm3_39288_37	alt-scaffold	3	Chromosome	GL456006.1	=	NT_039248.1	129/SvJ	320308	na
+Mm3_39296_37	alt-scaffold	3	Chromosome	GL456007.1	=	NT_039256.1	129/SvJ	273369	na
+Mm3_80254_37	alt-scaffold	3	Chromosome	GL456008.1	=	NT_080257.1	129/SvJ	124933	na
+Mm4_108188_37	alt-scaffold	4	Chromosome	GL456009.1	=	NT_109318.2	129/SvJ	240498	na
+Mm4_39336_37	alt-scaffold	4	Chromosome	GL456010.1	=	NT_039296.1	129/SvJ	76099	na
+Mm5_108469_37	alt-scaffold	5	Chromosome	GL456011.1	=	NT_109599.1	129/SvJ	180394	na
+Mm6_39412_37	alt-scaffold	6	Chromosome	GL456012.1	=	NT_039372.1	129/SvJ	162691	na
+Mm7_39483_37	alt-scaffold	7	Chromosome	GL456013.1	=	NT_039443.1	129/SvJ	34498	na
+Mm7_78637_37	alt-scaffold	7	Chromosome	GL456014.1	=	NT_078572.1	129/SvJ	91251	na
+Mm10_78716_37	alt-scaffold	10	Chromosome	GL456015.1	=	NT_078651.1	129/SvJ	77891	na
+Mm11_39565_37	alt-scaffold	11	Chromosome	GL456016.1	=	NT_039525.1	129/SvJ	161334	na
+Mm12_112696_37	alt-scaffold	12	Chromosome	GL456017.1	=	NT_114985.2	129/SvJ	1380717	na
+Mm12_39612_37	alt-scaffold	12	Chromosome	GL456018.1	=	NT_039572.1	129/SvJ	124254	na
+Mm14_39654_37	alt-scaffold	14	Chromosome	GL456019.1	=	NT_039614.1	129/SvJ	1666365	na
+Mm14_96434_37	alt-scaffold	14	Chromosome	GL456020.1	=	NT_096797.1	129/SvJ	105813	na
+Mm17_39701_37	alt-scaffold	17	Chromosome	GL456021.1	=	NT_039661.3	129/SvJ	1281122	na
+Mm17_39702_37	alt-scaffold	17	Chromosome	GL456022.1	=	NT_039662.2	129/SvJ	1736643	na
+Mm17_39703_37	alt-scaffold	17	Chromosome	GL456023.1	=	NT_039663.1	129/SvJ	226594	na
+129P2/OLAHSD_MMCHR19_CTG1	alt-scaffold	19	Chromosome	GL456079.1	=	NT_039697.1	129P2/OlaHsd	46440	na
+Mm4_163467_37	alt-scaffold	4	Chromosome	GL456075.1	=	NT_166293.1	129S7/SvEv	264822	na
+Mm4_163468_37	alt-scaffold	4	Chromosome	GL456076.1	=	NT_166294.1	129S7/SvEv	191695	na
+Mm4_163469_37	alt-scaffold	4	Chromosome	GL456077.1	=	NT_166295.1	129S7/SvEv	83218	na
+Mm12_163496_37	alt-scaffold	12	Chromosome	GL456078.1	=	NT_166322.1	129S7/SvEv	99963	na
+A/J_MMCHR13_CTG1	alt-scaffold	13	Chromosome	GL455990.1	=	NT_039593.1	A/J	100803	na
+AKR/J_MMCHRY_CTG1	alt-scaffold	Y	Chromosome	GL456080.1	=	NT_166394.1	AKR/J	191521	na
+AKR/J_MMCHRY_CTG2	alt-scaffold	Y	Chromosome	GL456081.1	=	NT_166397.1	AKR/J	185346	na
+AKR/J_MMCHRY_CTG3	alt-scaffold	Y	Chromosome	GL456082.1	=	NT_166400.1	AKR/J	209635	na
+Mm7_95171_36	alt-scaffold	7	Chromosome	GL455989.1	=	NT_095534.1	Balb/c	55856	na
+MmY_163570_37	alt-scaffold	Y	Chromosome	GL456071.1	=	NT_166396.1	Cast/Ei	189119	na
+MmY_163572_37	alt-scaffold	Y	Chromosome	GL456072.1	=	NT_166398.1	Cast/Ei	204663	na
+MmY_163573_37	alt-scaffold	Y	Chromosome	GL456073.1	=	NT_166399.1	Cast/Ei	196014	na
+Mm1_163271_37	alt-scaffold	1	Chromosome	GL456036.1	=	NT_165757.1	NOD	456798	na
+Mm1_39237_37	alt-scaffold	1	Chromosome	GL456037.1	=	NT_039197.1	NOD	187142	na
+Mm1_39239_37	alt-scaffold	1	Chromosome	GL456038.1	=	NT_039199.1	NOD	289662	na
+Mm1_39240_37	alt-scaffold	1	Chromosome	GL456039.1	=	NT_039200.1	NOD	177519	na
+Mm1_39241_37	alt-scaffold	1	Chromosome	GL456040.1	=	NT_039201.1	NOD	199536	na
+Mm3_108181_37	alt-scaffold	3	Chromosome	GL456041.1	=	NT_109311.1	NOD	141661	na
+Mm3_111968_37	alt-scaffold	3	Chromosome	GL456042.1	=	NT_114257.3	NOD	689363	na
+Mm3_111969_37	alt-scaffold	3	Chromosome	GL456043.1	=	NT_114258.1	NOD	194230	na
+Mm3_163461_37	alt-scaffold	3	Chromosome	GL456044.1	=	NT_166287.1	NOD	325555	na
+Mm3_39287_37	alt-scaffold	3	Chromosome	GL456045.1	=	NT_039247.1	NOD	161821	na
+Mm3_39290_37	alt-scaffold	3	Chromosome	GL456046.1	=	NT_039250.1	NOD	509460	na
+Mm3_39291_37	alt-scaffold	3	Chromosome	GL456047.1	=	NT_039251.2	NOD	402204	na
+Mm3_39292_37	alt-scaffold	3	Chromosome	GL456048.1	=	NT_039252.1	NOD	292416	na
+Mm3_39297_37	alt-scaffold	3	Chromosome	GL456049.1	=	NT_039257.3	NOD	243366	na
+Mm3_80253_37	alt-scaffold	3	Chromosome	GL456050.1	=	NT_080256.1	NOD	142341	na
+Mm4_163471_37	alt-scaffold	4	Chromosome	GL456051.1	=	NT_166297.1	NOD	140602	na
+Mm4_163472_37	alt-scaffold	4	Chromosome	GL456052.1	=	NT_166298.1	NOD	165559	na
+Mm4_163473_37	alt-scaffold	4	Chromosome	GL456053.1	=	NT_166299.1	NOD	160228	na
+Mm6_163479_37	alt-scaffold	6	Chromosome	GL456054.1	=	NT_166305.1	NOD	231326	na
+Mm11_109495_37	alt-scaffold	11	Chromosome	GL456055.1	=	NT_110625.3	NOD	472026	na
+Mm11_109496_37	alt-scaffold	11	Chromosome	GL456056.1	=	NT_110626.2	NOD	288542	na
+Mm11_112593_37	alt-scaffold	11	Chromosome	GL456057.1	=	NT_114882.1	NOD	10755	na
+Mm11_112594_37	alt-scaffold	11	Chromosome	GL456058.1	=	NT_114883.1	NOD	218726	na
+Mm11_163288_37	alt-scaffold	11	Chromosome	GL456059.1	=	NT_165774.1	NOD	114510	na
+Mm11_163491_37	alt-scaffold	11	Chromosome	GL456060.1	=	NT_166317.1	NOD	159511	na
+Mm17_163295_37	alt-scaffold	17	Chromosome	GL456061.1	=	NT_165781.2	NOD	893685	na
+Mm17_163296_37	alt-scaffold	17	Chromosome	GL456062.1	=	NT_165782.2	NOD	671861	na
+Mm17_163503_37	alt-scaffold	17	Chromosome	GL456063.1	=	NT_166329.1	NOD	258652	na
+MmY_163567_37	alt-scaffold	Y	Chromosome	GL456034.1	=	NT_166393.1	Spret/Ei	179651	na
+MmY_163569_37	alt-scaffold	Y	Chromosome	GL456035.1	=	NT_166395.1	Spret/Ei	168299	na
+Mm4_39332_37	alt-scaffold	4	Chromosome	GL456064.1	=	NT_039292.1	unknown strain	138473	na
+Mm6_39407_37	alt-scaffold	6	Chromosome	GL456065.1	=	NT_039367.1	unknown strain	198515	na
+Mm12_163493_37	alt-scaffold	12	Chromosome	GL456066.1	=	NT_166319.1	unknown strain	149371	na
+Mm12_163494_37	alt-scaffold	12	Chromosome	GL456067.1	=	NT_166320.1	unknown strain	152217	na
+Mm12_95992_37	alt-scaffold	12	Chromosome	GL456068.1	=	NT_096355.1	unknown strain	59641	na
+Mm17_96973_37	alt-scaffold	17	Chromosome	GL456069.1	=	NT_097336.1	unknown strain	138490	na
+Mm18_163298_37	alt-scaffold	18	Chromosome	GL456070.1	=	NT_165784.1	unknown strain	85548	na
+MT	assembled-molecule	MT	Mitochondrion	AY172335.1	=	NC_005089.1	non-nuclear	16299	chrM
