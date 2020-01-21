@@ -6,41 +6,47 @@
 #  License: MIT
 #
 # Usage:
-#  $ bed2ttl -v data_version=$data_version -v genome_version=$genome_version <a ChIP-Atlas light-version all-peak bed file>
+#  $ bed2ttl -v data_version=$data_version <a ChIP-Atlas light-version all-peak bed file>
 #
 BEGIN {
   FS=OFS="\t"
-  is_binding=" rdf:type chipatlasont:Binding;"
-  bind_at=" chipatlasont:bind_at [\n  a faido:Region;"
-
 
   print "@prefix chipatlasres: <http://chip-atlas.org/resource/> ."
   print "@prefix chipatlasont: <http://chip-atlas.org/ontology/> ."
-  print "@prefix insdc: <http://identifiers.org/insdc.sra/> ."
+  print "@prefix sra: <http://identifiers.org/insdc.sra/> ."
+  print "@prefix insdc: <http://identifiers.org/insdc/> ."
   print "@prefix faldo: <http://biohackathon.org/resource/faldo/> ."
   print "@prefix hco: <http://identifiers.org/hco/> ."
 
   print "@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> ."
   print "@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> ."
+  print "@prefix pav: <http://purl.org/pav/> ."
+  print ""
+
+  print "chipatlasres:ChIPAtla-TFBS-" data_version " rdf:type chipatlasont:Release;"
+  print "  pav:version \"" data_version "\" ."
   print ""
 }
 
 {
-  print "<http://chip-atlas.org/resource/" data_version "/" $4 "/" NR ">" is_binding
-  print " chipatlasont:bind_at ["
-  print "  a faldo:Region;"
-  print "  faldo:begin ["
-  print "    a faldo:ExactPosition;"
-  print "    faldo:reference hco:" genome_version "\\#" $1 " ;"
-  print "    faldo:position " $2
-  print "  ];"
-  print "  faldo:end ["
-  print "    a faldo:ExactPosition;"
-  print "    faldo:reference hco:" genome_version "\\#" $1 " ;"
-  print "    faldo:position " $3
-  print "  ];"
-  print " ];"
-  print " chipatlasont:macs2score " $5 ";"
-  print " chipatlasont:found_in insdc:" $4 " ."
+  id="ChIPAtlas-TFBS-"data_version"-"$4"-"NR
+  print "chipatlasres:" id " rdf:type chipatlasont:Binding;"
+  print "  rdfs:label \"ChIP-Atlas TFBS at " $6 ":" $2 "-" $3 "\" ;"
+  print "  dcterms:identifier " id ";"
+  print "  chipatlasont:macs2score " $5 ";"
+  print "  chipatlasont:found_in insdc:" $4 " ."
+  print "  chipatlasont:bind_at ["
+  print "    a faldo:Region;"
+  print "    faldo:begin ["
+  print "      a faldo:ExactPosition;"
+  print "      faldo:reference " $1 " ;"
+  print "      faldo:position " $2
+  print "    ];"
+  print "    faldo:end ["
+  print "      a faldo:ExactPosition;"
+  print "      faldo:reference " $1 " ;"
+  print "      faldo:position " $3
+  print "    ];"
+  print "  ]."
   print ""
 }

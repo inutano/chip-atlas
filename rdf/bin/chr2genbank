@@ -39,12 +39,14 @@ BEGIN {
       break
   }
 
-  while (getline < assembly_report) {
-    split($0, line, "\t");
-    if (length(line) == 10) {
-      chr=line[1];
-      genbankid=line[5];
-      chr_arr[chr]=genbankid;
+  if (genome_version != "hg19") {
+    while (getline < assembly_report) {
+      split($0, line, "\t");
+      if (length(line) == 10) {
+        chr=line[1];
+        genbankid=line[5];
+        chr_arr[chr]=genbankid;
+      }
     }
   }
 }
@@ -53,13 +55,16 @@ BEGIN {
   switch (genome_version) {
     case "hg19":
       # case-body
+      $6=$1
       sub("chr","",$1)
-      $1="<http://identifiers.org/hco/GRCh37\\#>"$1
+      $1="hco:GRCh37\\#"$1
       print $0
+      break
     default:
       #default-body
+      $6=$1
       sub("chr","",$1)
-      $1="http://identifiers.org/insdc/"chr_arr[$1]
+      $1="insdc:"chr_arr[$1]
       print $0
   }
 }
