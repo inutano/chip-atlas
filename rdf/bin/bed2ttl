@@ -11,41 +11,44 @@
 BEGIN {
   FS=OFS="\t"
 
-  print "@prefix chipatlasres: <http://chip-atlas.org/resource/> ."
-  print "@prefix chipatlasont: <http://chip-atlas.org/ontology/> ."
+  print "@prefix res: <http://chip-atlas.org/resource/> ."
+  print "@prefix ont: <http://chip-atlas.org/ontology/> ."
+
   print "@prefix sra: <http://identifiers.org/insdc.sra/> ."
   print "@prefix insdc: <http://identifiers.org/insdc/> ."
-  print "@prefix faldo: <http://biohackathon.org/resource/faldo/> ."
+  print "@prefix f: <http://biohackathon.org/resource/faldo/> ."
   print "@prefix hco: <http://identifiers.org/hco/> ."
 
   print "@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> ."
   print "@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> ."
   print "@prefix pav: <http://purl.org/pav/> ."
+  print "@prefix dct: <http://purl.org/dc/terms/> ."
+
   print ""
 
-  print "chipatlasres:ChIPAtla-TFBS-" data_version " rdf:type chipatlasont:Release;"
+  print "res:ChIPAtlas-TFBS-" data_version " rdf:type ont:Release;"
   print "  pav:version \"" data_version "\" ."
   print ""
 }
 
 {
   id="ChIPAtlas-TFBS-"data_version"-"$4"-"NR
-  print "chipatlasres:" id " rdf:type chipatlasont:Binding;"
+  print "res:" id " rdf:type ont:Binding;"
   print "  rdfs:label \"ChIP-Atlas TFBS at " $6 ":" $2 "-" $3 "\" ;"
-  print "  dcterms:identifier " id ";"
-  print "  chipatlasont:macs2score " $5 ";"
-  print "  chipatlasont:found_in insdc:" $4 " ."
-  print "  chipatlasont:bind_at ["
-  print "    a faldo:Region;"
-  print "    faldo:begin ["
-  print "      a faldo:ExactPosition;"
-  print "      faldo:reference " $1 " ;"
-  print "      faldo:position " $2
+  print "  dct:identifier " id ";"
+  print "  ont:macs2score " $5 ";"
+  print "  ont:found_in sra:" $4 " ."
+  print "  ont:bind_at ["
+  print "    a f:Region;"
+  print "    f:begin ["
+  print "      a f:ExactPosition;"
+  print "      f:reference " $1 " ;"
+  print "      f:position " $2
   print "    ];"
-  print "    faldo:end ["
-  print "      a faldo:ExactPosition;"
-  print "      faldo:reference " $1 " ;"
-  print "      faldo:position " $3
+  print "    f:end ["
+  print "      a f:ExactPosition;"
+  print "      f:reference " $1 " ;"
+  print "      f:position " $3
   print "    ];"
   print "  ]."
   print ""
