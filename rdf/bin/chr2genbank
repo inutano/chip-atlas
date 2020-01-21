@@ -1,0 +1,65 @@
+#!/usr/bin/env gawk -f
+#
+# chr2genbankid
+#  a script to convert chromosome column of a bed file to genbank id
+#  Author: Tazro Inutano Ohta inutano@gmail.com
+#  License: MIT
+#
+# Usage:
+#  $ chr2genbankid -v ref=<full path to reference directory> -v genome_version=genome_version <a bed file>
+#
+function usage() {
+  print "Usage:"
+  print "  $ chr2genbankid -v ref=<full path to reference directory> -v genome_version=genome_version <a bed file>"
+}
+
+BEGIN {
+  FS=OFS="\t"
+
+  switch (genome_version) {
+    case "hg19":
+      break
+    case "mm9":
+      assembly_report=(ref "/GCF_000001635.18_MGSCv37_assembly_report.txt");
+      break
+    case "rn6":
+      assembly_report=(ref "/GCF_000001895.5_Rnor_6.0_assembly_report.txt");
+      break
+    case "dm3":
+      assembly_report=(ref "/GCF_000001215.2_Release_5_assembly_report.txt");
+      break
+    case "ce10":
+      assembly_report=(ref "/GCF_000002985.5_WBcel215_assembly_report.txt");
+      break
+    case "sacCer3":
+      assembly_report=(ref "/GCF_000146045.2_R64_assembly_report.txt");
+      break
+    default:
+      usage();
+      break
+  }
+
+  while (getline < assembly_report) {
+    split($0, line, "\t");
+    if (length(line) == 10) {
+      chr=line[1];
+      genbankid=line[5];
+      chr_arr[chr]=genbankid;
+    }
+  }
+}
+
+{
+  switch (genome_version) {
+    case "hg19":
+      # case-body
+      sub("chr","",$1)
+      $1="<http://identifiers.org/hco/GRCh37\\#>"$1
+      print $0
+    default:
+      #default-body
+      sub("chr","",$1)
+      $1="http://identifiers.org/insdc/"chr_arr[$1]
+      print $0
+  }
+}
