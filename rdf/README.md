@@ -8,6 +8,6 @@
 
 ```
 $ git clone https://github.com/inutano/chip-atlas
-$ cd chip-atlas
-$ ./rdf/bed2ttl allPeaks_light_hg19.05.bed.gz
+$ cd chip-atlas/rdf
+$ ./generate-rdf
 ```
