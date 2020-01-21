@@ -33,11 +33,11 @@ BEGIN {
 
 {
   id="ChIPAtlas-TFBS-"data_version"-"$4"-"NR
-  print "res:" id " rdf:type ont:Binding;"
+  print "res:" id " rdf:type ont:BindingSite;"
   print "  rdfs:label \"ChIP-Atlas TFBS at " $6 ":" $2 "-" $3 "\" ;"
   print "  dct:identifier " id ";"
   print "  ont:macs2score " $5 ";"
-  print "  ont:found_in sra:" $4 " ."
+  print "  ont:found_by sra:" $4 " ."
   print "  ont:bind_at ["
   print "    a f:Region;"
   print "    f:begin ["
