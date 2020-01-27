@@ -15,30 +15,32 @@ BEGIN {
   print "@prefix ont: <http://chip-atlas.org/ontology/> ."
 
   print "@prefix sra: <http://identifiers.org/insdc.sra/> ."
+  print "@prefix idont: <http://rdf.identifiers.org/ontology/> ."
   print "@prefix insdc: <http://identifiers.org/insdc/> ."
   print "@prefix f: <http://biohackathon.org/resource/faldo/> ."
   print "@prefix hco: <http://identifiers.org/hco/> ."
+  print "@prefix obo: <http://purl.obolibrary.org/obo/> ."
+  print "@prefix sio: <https://semanticscience.org/resource/> ."
 
-  print "@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> ."
   print "@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> ."
   print "@prefix pav: <http://purl.org/pav/> ."
   print "@prefix dct: <http://purl.org/dc/terms/> ."
 
   print ""
 
-  print "res:ChIPAtlas-TFBS-" data_version " rdf:type ont:Release;"
+  print "res:ChIPAtlas-bed-" data_version " a sio:SIO_000089;"
   print "  pav:version \"" data_version "\" ."
   print ""
 }
 
 {
-  id="ChIPAtlas-TFBS-"data_version"-"$4"-"NR
-  print "res:" id " rdf:type ont:BindingSite;"
-  print "  rdfs:label \"ChIP-Atlas TFBS at " $6 ":" $2 "-" $3 "\" ;"
+  id="ChIPAtlas-bed-"data_version"-"$4"-"NR
+  print "res:" id " a obo:SO_0001411;"
+  print "  rdfs:label \"ChIP-Atlas feature at " $6 ":" $2 "-" $3 "\" ;"
   print "  dct:identifier " id ";"
   print "  ont:macs2score " $5 ";"
-  print "  ont:found_by sra:" $4 " ."
-  print "  ont:bind_at ["
+  print "  idont:link sra:" $4 ", res:ChIPAtlas-bed-" data_version " ."
+  print "  f:location ["
   print "    a f:Region;"
   print "    f:begin ["
   print "      a f:ExactPosition;"
