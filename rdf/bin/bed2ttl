@@ -25,11 +25,13 @@ BEGIN {
   print "@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> ."
   print "@prefix pav: <http://purl.org/pav/> ."
   print "@prefix dct: <http://purl.org/dc/terms/> ."
+  print "@prefix dctype: <http://purl.org/dc/dcmitype/> ."
 
   print ""
 
-  print "res:ChIPAtlas-bed-" data_version " a sio:SIO_000089;"
+  print "res:ChIPAtlas-bed-" data_version " a dctype:Dataset;"
   print "  pav:version \"" data_version "\" ."
+
   print ""
 }
 
@@ -37,9 +39,12 @@ BEGIN {
   id="ChIPAtlas-bed-"data_version"-"$4"-"NR
   print "res:" id " a obo:SO_0001411;"
   print "  rdfs:label \"ChIP-Atlas feature at " $6 ":" $2 "-" $3 "\" ;"
-  print "  dct:identifier " id ";"
-  print "  ont:macs2score " $5 ";"
-  print "  idont:link sra:" $4 ", res:ChIPAtlas-bed-" data_version " ."
+  print "  dct:identifier \"" id "\";"
+  print "  sio:SIO_000216 ["
+  print "    a ont:macs2_qvalue_display_score;"
+  print "    sio:SIO_000300 " $5 ";"
+  print "  ];"
+  print "  idont:link sra:" $4 ", res:ChIPAtlas-bed-" data_version " ;"
   print "  f:location ["
   print "    a f:Region;"
   print "    f:begin ["
