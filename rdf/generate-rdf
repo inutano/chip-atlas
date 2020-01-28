@@ -18,13 +18,13 @@ threshold=(
 )
 for genome in ${genome_references[@]}; do
   for th in ${threshold[@]}; do
-    data_version=$(date "+%Y%m%d-%H%M")
-    ttl_fname="ChIPAtlas-TFBS-${data_version}.${genome}.${th}.ttl"
-
     url_base="http://dbarchive.biosciencedbc.jp/kyushu-u/${genome}/allPeaks_light"
     fname="allPeaks_light.${genome}.${th}.bed.gz"
-
     wget -nc -P "./data/bed" "${url_base}/${fname}"
+
+    data_version="$(openssl md5 ${fname} | cut -d " " -f 2)-$(date "+%Y%m%d-%H%M")"
+    ttl_fname="ChIPAtlas-${data_version}.${genome}.${th}.ttl"
+
     gunzip -c "./data/bed/${fname}" |\
       gawk -f ./bin/chr2genbank -v ref=$(pwd -P)/reference -v genome_version=${genome} |\
       gawk -f ./bin/bed2ttl -v data_version=${data_version} \
