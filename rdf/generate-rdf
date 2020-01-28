@@ -16,18 +16,38 @@ threshold=(
   "20"
   "50"
 )
+
+get_bed() {
+  local genome=${1}
+  local th=${2}
+  url_base="http://dbarchive.biosciencedbc.jp/kyushu-u/${genome}/allPeaks_light"
+  fname="allPeaks_light.${genome}.${th}.bed.gz"
+  wget -nc -P "./data/bed" "${url_base}/${fname}"
+  echo "${fname}"
+}
+
+generate_ttl() {
+  local genome=${1}
+  local th=${2}
+  local fname=$(get_bed ${genome} ${th})
+  data_version="$(openssl md5 ./data/bed/${fname} | cut -d " " -f 2 | cut -c -7)_$(date "+%Y%m%d-%H%M")"
+  ttl_fname="ChIPAtlas.${data_version}.${genome}.${th}.ttl"
+
+  gunzip -c "./data/bed/${fname}" |\
+    gawk -f ./bin/chr2genbank -v ref=$(pwd -P)/reference -v genome_version=${genome} |\
+    gawk -f ./bin/bed2ttl -v data_version=${data_version} \
+    > "./data/ttl/${ttl_fname}"
+
+  echo "RDF-turtle generated for ${genome}/${th}: $(pwd -P)/data/ttl/${ttl_fname}"
+}
+
+if [[ $# -ne 0 ]]; then
+  generate_ttl "sacCer3" "50"
+  exit
+fi
+
 for genome in ${genome_references[@]}; do
   for th in ${threshold[@]}; do
-    url_base="http://dbarchive.biosciencedbc.jp/kyushu-u/${genome}/allPeaks_light"
-    fname="allPeaks_light.${genome}.${th}.bed.gz"
-    wget -nc -P "./data/bed" "${url_base}/${fname}"
-
-    data_version="$(openssl md5 ${fname} | cut -d " " -f 2)-$(date "+%Y%m%d-%H%M")"
-    ttl_fname="ChIPAtlas-${data_version}.${genome}.${th}.ttl"
-
-    gunzip -c "./data/bed/${fname}" |\
-      gawk -f ./bin/chr2genbank -v ref=$(pwd -P)/reference -v genome_version=${genome} |\
-      gawk -f ./bin/bed2ttl -v data_version=${data_version} \
-      > "./data/ttl/${ttl_fname}"
+    generate_ttl ${genome} ${th}
   done
 done
