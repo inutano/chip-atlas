@@ -29,7 +29,7 @@ BEGIN {
 
   print ""
 
-  print "res:ChIPAtlas-bed-" data_version " a dctype:Dataset;"
+  print "res:ChIPAtlas-bed-" data_version " a dctype:Dataset ;"
   print "  pav:version \"" data_version "\" ."
 
   print ""
@@ -37,26 +37,27 @@ BEGIN {
 
 {
   id="ChIPAtlas-bed-"data_version"-"$4"-"NR
-  print "res:" id " a obo:SO_0001411;"
+  print "res:" id " a obo:SO_0001411 ;"
   print "  rdfs:label \"ChIP-Atlas feature at " $6 ":" $2 "-" $3 "\" ;"
-  print "  dct:identifier \"" id "\";"
+  print "  dct:identifier \"" id "\" ;"
   print "  sio:SIO_000216 ["
-  print "    a ont:macs2_qvalue_display_score;"
-  print "    sio:SIO_000300 " $5 ";"
-  print "  ];"
+  print "    a ont:macs2_qvalue_display_score ;"
+  print "    sio:SIO_000300 " $5
+  print "  ] ;"
   print "  idont:link sra:" $4 ", res:ChIPAtlas-bed-" data_version " ;"
   print "  f:location ["
-  print "    a f:Region;"
+  print "    a f:Region ;"
+  print "    rdfs:label \"" $7 " " $6 ":" $2 "-" $3 "\" ;"
   print "    f:begin ["
-  print "      a f:ExactPosition;"
+  print "      a f:ExactPosition ;"
   print "      f:reference " $1 " ;"
   print "      f:position " $2
-  print "    ];"
+  print "    ] ;"
   print "    f:end ["
-  print "      a f:ExactPosition;"
+  print "      a f:ExactPosition ;"
   print "      f:reference " $1 " ;"
   print "      f:position " $3
-  print "    ];"
-  print "  ]."
+  print "    ]"
+  print "  ] ."
   print ""
 }

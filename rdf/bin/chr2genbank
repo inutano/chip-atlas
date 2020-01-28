@@ -56,6 +56,7 @@ BEGIN {
     case "hg19":
       # case-body
       $6=$1
+      $7=genome_version
       sub("chr","",$1)
       $1="hco:GRCh37\\#"$1
       print $0
@@ -63,6 +64,7 @@ BEGIN {
     default:
       #default-body
       $6=$1
+      $7=genome_version
       sub("chr","",$1)
       $1="insdc:"chr_arr[$1]
       print $0
