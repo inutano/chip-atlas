@@ -15,8 +15,8 @@ GEM
       tzinfo (~> 1.1)
     arel (6.0.4)
     builder (3.2.4)
-    concurrent-ruby (1.1.5)
-    ffi (1.11.3)
+    concurrent-ruby (1.1.6)
+    ffi (1.12.2)
     haml (5.1.2)
       temple (>= 0.8.0)
       tilt
@@ -24,13 +24,13 @@ GEM
       concurrent-ruby (~> 1.0)
     kgio (2.11.3)
     mini_portile2 (2.4.0)
-    minitest (5.13.0)
+    minitest (5.14.0)
     mustermann (1.1.1)
       ruby2_keywords (~> 0.0.1)
-    nokogiri (1.10.7)
+    nokogiri (1.10.9)
       mini_portile2 (~> 2.4.0)
     pg (1.2.2)
-    rack (2.0.8)
+    rack (2.2.2)
     rack-protection (2.0.8.1)
       rack
     raindrops (0.19.1)
@@ -40,7 +40,7 @@ GEM
       ffi (~> 1.0)
     redcarpet (3.5.0)
     ruby2_keywords (0.0.2)
-    rubyzip (2.0.0)
+    rubyzip (2.2.0)
     sass (3.7.4)
       sass-listen (~> 4.0.0)
     sass-listen (4.0.0)
@@ -60,7 +60,7 @@ GEM
     tilt (2.0.10)
     tzinfo (1.2.6)
       thread_safe (~> 0.1)
-    unicorn (5.5.2)
+    unicorn (5.5.3)
       kgio (~> 2.6)
       raindrops (~> 0.7)
 
@@ -83,4 +83,4 @@ DEPENDENCIES
   unicorn
 
 BUNDLED WITH
-   2.1.4
+   1.17.2
