@@ -1,37 +1,31 @@
 # ChIP-Atlas
 
-ChIP-Atlas is the database of the processed data and analysis results of the public ChIP-Seq/DNase-Seq data archived in Sequence Read Archive (SRA). It also provides online data analysis function based on ChIP-Atlas's peak-call database. This repository contains the code of the web application and the documentation of the database.
+[ChIP-Atlas](https://chip-atlas.org) is a database collecting the bed files calculated from the ChIP-Seq and DNase-Seq data archived in Sequence Read Archive (SRA). The database has a web interface to explore the analysis results from the calculated peak call data. This repository contains the webapp code and the documentation of the database.
 
-### Web application
+## Downtime of Enrichment Analysis function
 
-ChIP-Atlas is providing its full features on [chip-atlas.org](http://chip-atlas.org).
+ChIP-Atlas is providing online enrichment analysis function on [ChIP-Atlas - Enrichment Analysis](https://chip-atlas.org/enrichment_analysis). The background calculation relies on the [NIG supercomputer system](http://sc.ddbj.nig.ac.jp), hosted by [DNA Data Bank of Japan, National Institute of Genetics](http://ddbj.nig.ac.jp), while the webapp is hosted on its own cloud instance. Therefore, Enrichment Analysis may go down during the maintenance of the NIG supercomputer system. We announce when the function goes down, but if you encountered any trouble other than that period, please inform us from the issue page.
 
-#### *in silico* ChIP
+## Data availability
 
-ChIP-Atlas is providing online enrichment analysis feature on [ChIP-Atlas - *in silico* ChIP](http://chip-atlas.org/in_silico_chip). The feature is based on the [NIG supercomputer system](http://sc.ddbj.nig.ac.jp), hosted by [DNA Data Bank of Japan, National Institute of Genetics](http://ddbj.nig.ac.jp). The feature depends on the computational resources provided by this shared computing cluster while the web application itself is running on the cloud, thus *in silico* ChIP may go down during the maintenance of the platform.
+Processed data including the peak-call data in bed, bigBed or bigWig format is available to download via web application interface ([example](http://chip-atlas.org/view?id=SRX018625)). We also provide the bulk download via [LSDB Archive](http://dx.doi.org/10.18908/lsdba.nbdc01558-000) maintained by the [National Bioscience Database Center](https://biosciencedbc.jp/en/). We provide individual bed/wig data for each experiment and data assembled by the curated metadata. See more details in [Wiki](https://github.com/inutano/chip-atlas/wiki#downloads_doc).
 
-### Data availability
+## Disclaimer
 
-Processed data including the peak-call data in bed, bigBed or bigWig format is available to download via web application interface ([example](http://chip-atlas.org/view?id=SRX018625)). We also offer the bulk download of the data via [LSDB Archive](http://dx.doi.org/10.18908/lsdba.nbdc01558-000). We provide individual data for each experiment and data assembled by the curated metadata. See more details about downloading data in [Wiki](https://github.com/inutano/chip-atlas/wiki#downloads_doc).
+We use the google analytics to analyze the visitor information to improve our web service and report the summarized web access status to our funding agencies. The web server records the queries just for solving issues such as server error. We will not open or distribute those information without an announcement to the users.
 
-### Sequencing quality information
+## Citation
 
-Each individual data entry has its sequencing quality data imported from [Quanto project](https://github.com/inutano/sra-quanto), which calculated sequencing quality of data submitted to Sequence Read Archive by [FastQC](http://www.bioinformatics.babraham.ac.uk/projects/fastqc/).
-
-### Citation
-
-The ChIP-Atlas paper is now available on bioRxiv. You can also cite our database via the doi assigned to the data deposited in the National Bioscience Database Center.
-
-- Preprint
-  - Shinya Oki, Tazro Ohta, et al. Integrative analysis of transcription factor occupancy at enhancers and disease risk loci in noncoding genomic regions. bioRxiv 262899; doi: https://doi.org/10.1101/262899
+- Publication
+  - Oki S, Ohta T, Shioi G, Hatanaka H, Ogasawara O, Okuda Y, Kawaji H, Nakaki R, Sese J, Meno C. ChIP‐Atlas: a data‐mining suite powered by full integration of public ChIP‐seq data. EMBO reports 2018 Nov 9;19(12). http://dx.doi.org/10.15252/embr.201846255
 - Website
   - Oki, S; Ohta, T (2015): ChIP-Atlas. http://chip-atlas.org
 - Database
   - Oki, S; Ohta, T (2015): ChIP-Atlas. http://dx.doi.org/10.18908/lsdba.nbdc01558-000
 
-### Contributors
+## Contributors
 
-- Shinya Oki, Kyushu University
+- Shinya Oki, Kyoto University
   - Metadata curation
   - Workflow management and execution
 - Tazro Ohta, Database Center for Life Science (DBCLS)
@@ -42,6 +36,6 @@ The ChIP-Atlas paper is now available on bioRxiv. You can also cite our database
 - Hideki Hatanaka, National Bioscience Database Center (NBDC)
   - Support data archive on [LSDB Archive](http://dbarchive.biosciencedbc.jp)
 
-### Copyright
+## Copyright
 
 See LICENSE.txt for details of copyright of code provided under this repository. Copyright for the data can be browsed at the LSDB Archive website  [here](https://dbarchive.biosciencedbc.jp/en/chip-atlas/lic.html).
