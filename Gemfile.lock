@@ -29,7 +29,6 @@ GEM
       ruby2_keywords (~> 0.0.1)
     nokogiri (1.10.9)
       mini_portile2 (~> 2.4.0)
-    pg (1.2.2)
     rack (2.2.2)
     rack-protection (2.0.8.1)
       rack
@@ -71,7 +70,6 @@ DEPENDENCIES
   activerecord (< 5.0.0)
   haml
   nokogiri
-  pg
   rack-protection
   rake
   redcarpet
