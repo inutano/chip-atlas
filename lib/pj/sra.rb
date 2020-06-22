@@ -7,7 +7,7 @@ module PJ
     def initialize(expid)
       @expid = expid
       @uid = get_uid
-      @experiment = Nokogiri::XML(open(efetch_url))
+      @experiment = ncbi_experiment_data
     end
 
     def eutils_base
@@ -31,22 +31,60 @@ module PJ
       if uid.size == 1
         uid.first
       end
+    rescue OpenURI::HTTPError
+      nil
     end
 
     def efetch_url
       efetch_base + "?db=sra&id=#{@uid}"
     end
 
+    def ncbi_experiment_data
+      if @uid
+        Nokogiri::XML(open(efetch_url))
+      else
+        nil
+      end
+    rescue OpenURI::HTTPError
+      nil
+    end
+
     def fetch
-      {
-        expid: @expid,
-        library_description: library_description,
-        platform_information: platform_information,
-      }.merge(
-        platform
-      ).merge(
-        lib_layout
-      )
+      if @experiment
+        {
+          expid: @expid,
+          library_description: library_description,
+          platform_information: platform_information,
+        }.merge(
+          platform
+        ).merge(
+          lib_layout
+        )
+      else
+        {
+          expid: @expid,
+          library_description: {
+            library_name:                  "ERROR: cannot retrieve data from NCBI: too many requests",
+            library_strategy:              "ERROR: cannot retrieve data from NCBI: too many requests",
+            library_source:                "ERROR: cannot retrieve data from NCBI: too many requests",
+            library_selection:             "ERROR: cannot retrieve data from NCBI: too many requests",
+            library_construction_protocol: "ERROR: cannot retrieve data from NCBI: too many requests",
+          },
+          platform_information: {
+            instrument_model: "ERROR: cannot retrieve data from NCBI: too many requests",
+            cycle_sequence:   "ERROR: cannot retrieve data from NCBI: too many requests",
+            cycle_count:      "ERROR: cannot retrieve data from NCBI: too many requests",
+            flow_sequence:    "ERROR: cannot retrieve data from NCBI: too many requests",
+            flow_count:       "ERROR: cannot retrieve data from NCBI: too many requests",
+            key_sequence:     "ERROR: cannot retrieve data from NCBI: too many requests",
+          },
+          platform:               "ERROR: cannot retrieve data from NCBI: too many requests",
+          library_layout:         "ERROR: cannot retrieve data from NCBI: too many requests",
+          library_orientation:    "ERROR: cannot retrieve data from NCBI: too many requests",
+          library_nominal_length: "ERROR: cannot retrieve data from NCBI: too many requests",
+          library_nominal_sdev:   "ERROR: cannot retrieve data from NCBI: too many requests",
+        }
+      end
     end
 
     def library_description
