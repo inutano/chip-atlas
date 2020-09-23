@@ -38,8 +38,8 @@ module PJ
 
       def record_by_expid(exp_id)
         records = self.where(:expid => exp_id)
-        raise NameError if records.size > 1
-        record = records.first
+        #raise NameError if records.size > 1
+        record = records.select{|r| list_of_genome.include?(r.genome) }.first
         {
           :expid      => exp_id,
           :genome     => record.genome,
