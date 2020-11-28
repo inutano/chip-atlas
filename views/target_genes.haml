@@ -118,15 +118,15 @@
                       %form{ :id => "#{panel}-form" }
                         .radio
                           %label
-                            %input{ :type => "radio", :id => "", :value => "1", :name => genome +  "DistanceOption", checked: true }
+                            %input{ :type => "radio", :id => genome + "Distance1k", :value => "1", :name => genome +  "DistanceOption", checked: true }
                             = " ±1k "
                         .radio
                           %label
-                            %input{ :type => "radio", :id => "", :value => "5", :name => genome + "DistanceOption" }
+                            %input{ :type => "radio", :id => genome + "Distance5k", :value => "5", :name => genome + "DistanceOption" }
                             = " ±5k "
                         .radio
                           %label
-                            %input{ :type => "radio", :id => "", :value => "10", :name => genome +  "DistanceOption" }
+                            %input{ :type => "radio", :id => genome + "Distance10k", :value => "10", :name => genome +  "DistanceOption" }
                             = " ±10k "
 
               .row
