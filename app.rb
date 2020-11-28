@@ -100,26 +100,26 @@ class PeakJohn < Sinatra::Base
 
   get "/peak_browser" do
     @index_all_genome = settings.index_all_genome
-    @list_of_genome   = @index_all_genome.keys
+    @list_of_genome   = settings.list_of_genome
     @qval_range       = settings.qval_range
     haml :peak_browser
   end
 
   get "/colo" do
     @index_all_genome = settings.index_all_genome
-    @list_of_genome = @index_all_genome.keys
+    @list_of_genome = settings.list_of_genome
     haml :colo
   end
 
   get "/target_genes" do
     @index_all_genome = settings.index_all_genome
-    @list_of_genome = @index_all_genome.keys
+    @list_of_genome = settings.list_of_genome
     haml :target_genes
   end
 
   get "/enrichment_analysis" do
     @index_all_genome = settings.index_all_genome
-    @list_of_genome = @index_all_genome.keys
+    @list_of_genome = settings.list_of_genome
     @qval_range = settings.qval_range
     haml :enrichment_analysis
   end
