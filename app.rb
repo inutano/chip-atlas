@@ -66,7 +66,7 @@ class PeakJohn < Sinatra::Base
            when "index_all_genome"
              settings.index_all_genome
            when "list_of_genome"
-             settings.list_of_genome
+             settings.list_of_genome.keys
            when "qval_range"
              settings.qval_range
            when "exp_metadata"
@@ -136,7 +136,7 @@ class PeakJohn < Sinatra::Base
     @genesetB = params["genesetB"]
 
     @index_all_genome = settings.index_all_genome
-    @list_of_genome = @index_all_genome.keys
+    @list_of_genome = settings.list_of_genome
     @qval_range = settings.qval_range
 
     haml :enrichment_analysis
