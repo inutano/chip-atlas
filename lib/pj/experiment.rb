@@ -38,20 +38,20 @@ module PJ
 
       def record_by_expid(exp_id)
         records = self.where(:expid => exp_id)
-        #raise NameError if records.size > 1
-        record = records.select{|r| list_of_genome.keys.include?(r.genome) }.first
-        {
-          :expid      => exp_id,
-          :genome     => record.genome,
-          :agClass    => record.agClass,
-          :agSubClass => record.agSubClass,
-          :clClass    => record.clClass,
-          :clSubClass => record.clSubClass,
-          :title      => record.title,
-          :attributes => record.additional_attributes,
-          :readInfo   => record.readInfo,
-          :clSubClassInfo => record.clSubClassInfo,
-         }
+        records.map do |record|
+          {
+            :expid      => exp_id,
+            :genome     => record.genome,
+            :agClass    => record.agClass,
+            :agSubClass => record.agSubClass,
+            :clClass    => record.clClass,
+            :clSubClass => record.clSubClass,
+            :title      => record.title,
+            :attributes => record.additional_attributes,
+            :readInfo   => record.readInfo,
+            :clSubClassInfo => record.clSubClassInfo,
+           }
+        end
       end
 
       def list_of_facets
