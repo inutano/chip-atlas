@@ -215,9 +215,10 @@ $(function(){
   const genesetA = decodeURI(params["genesetA"]);
   const genesetB = decodeURI(params["genesetB"]);
   const taxid = params["taxonomy"];
-  const taxonomy = taxidMap[taxid]["genomeVersions"][0]; // TODO: Add genome assembly parameter for POST option
 
-  if (taxonomy !== "") {
+  if (taxid !== "") {
+    const taxonomy = taxidMap[taxid]["genomeVersions"][0]; // TODO: Add genome assembly parameter for POST option
+
     $('[href="#' + taxonomy + '-tab-content"]').tab('show');
     if (genes !== "") {
       $("input[id='" + taxonomy + "UserDataGenes']").prop('checked', true);
