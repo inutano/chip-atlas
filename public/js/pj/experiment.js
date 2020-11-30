@@ -56,31 +56,34 @@ function analysisLinkOut(){
     type: 'GET',
     url: '/data/exp_metadata.json?expid=' + expid,
     dataType: 'json'
-  }).done(function(json){
-    var genome = json['genome'];
-    var dbarc = "http://dbarchive.biosciencedbc.jp/kyushu-u/" + genome;
-    var urlList = [
-      ["Colocalization", dbarc + "/colo/" + expid + ".html"],
-      ["Target Genes (TSS ± 1kb)", dbarc + "/target/" + expid + ".1.html"],
-      ["Target Genes (TSS ± 5kb)", dbarc + "/target/" + expid + ".5.html"],
-      ["Target Genes (TSS ± 10kb)", dbarc + "/target/" + expid + ".10.html"]
-    ];
-    $.each(urlList, function(i, kv){
-      var text = kv[0];
-      var url = kv[1];
-      $.ajax({
-        type: 'GET',
-        url: "/api/remoteUrlStatus?url=" + url,
-        complete: function(transport){
-          if(transport.status == 200){
-            $('ul#analysisLinkOut').append("<li><a href='" + url + "'>" + text + "</a></li>");
-          }
-          if (i == urlList.length-1){
-            if ($('ul#analysisLinkOut').children().length == 0) {
-              $('ul#analysisLinkOut').append("<li class='dropdown-header'>No data available for this record</li>");
+  }).done(function(records){
+    $.each(records, function(i, record){
+      var genome = record['genome'];
+      var dbarc = "http://dbarchive.biosciencedbc.jp/kyushu-u/" + genome;
+      var urlList = [
+        ["Colocalization", dbarc + "/colo/" + expid + ".html"],
+        ["Target Genes (TSS ± 1kb)", dbarc + "/target/" + expid + ".1.html"],
+        ["Target Genes (TSS ± 5kb)", dbarc + "/target/" + expid + ".5.html"],
+        ["Target Genes (TSS ± 10kb)", dbarc + "/target/" + expid + ".10.html"]
+      ];
+
+      $.each(urlList, function(i, kv){
+        var text = kv[0];
+        var url = kv[1];
+        $.ajax({
+          type: 'GET',
+          url: "/api/remoteUrlStatus?url=" + url,
+          complete: function(transport){
+            if(transport.status == 200){
+              $('ul#analysisLinkOut.' + genome).append("<li><a href='" + url + "'>" + text + "</a></li>");
+            }
+            if (i == urlList.length-1){
+              if ($('ul#analysisLinkOut.' + genome).children().length == 0) {
+                $('ul#analysisLinkOut.' + genome).append("<li class='dropdown-header'>No data available for this record</li>");
+              }
             }
           }
-        }
+        });
       });
     });
   });

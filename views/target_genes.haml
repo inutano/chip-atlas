@@ -89,15 +89,14 @@
 
         // Tabs
         %ul.nav.nav-tabs{ :role => "tablist" }
-          - @list_of_genome.each.with_index do |genome, i|
+          - @list_of_genome.keys.each.with_index do |genome, i|
             %li{ :role => "presentation", :class => "#{(i == 0) ? 'active' : '' }", :id => "#{genome}-tab" }
               %a{ :href => "##{genome}-tab-content", "aria-controls" => "#{genome}-tab-content", :role => "tab", "data-toggle" => "tab", "source" => genome }
-                - genome_sp = { "hg19" => "H. sapiens", "mm9" => "M. musculus", "rn6" => "R. norvegicus", "dm3" => "D. melanogaster", "ce10" => "C. elegans", "sacCer3" => "S. cerevisiae"}
-                = "#{genome_sp[genome]}"
+                = "#{@list_of_genome[genome]}"
 
         // Contents
         .tab-content
-          - @list_of_genome.each.with_index do |genome, i|
+          - @list_of_genome.keys.each.with_index do |genome, i|
             .tab-pane.fade{ :role => "tabpanel", :id => "#{genome}-tab-content", :class => "#{(i == 0) ? 'in active' : ''}" }
               .row
                 .col-md-3
@@ -119,15 +118,15 @@
                       %form{ :id => "#{panel}-form" }
                         .radio
                           %label
-                            %input{ :type => "radio", :id => "", :value => "1", :name => genome +  "DistanceOption", checked: true }
+                            %input{ :type => "radio", :id => genome + "Distance1k", :value => "1", :name => genome +  "DistanceOption", checked: true }
                             = " ±1k "
                         .radio
                           %label
-                            %input{ :type => "radio", :id => "", :value => "5", :name => genome + "DistanceOption" }
+                            %input{ :type => "radio", :id => genome + "Distance5k", :value => "5", :name => genome + "DistanceOption" }
                             = " ±5k "
                         .radio
                           %label
-                            %input{ :type => "radio", :id => "", :value => "10", :name => genome +  "DistanceOption" }
+                            %input{ :type => "radio", :id => genome + "Distance10k", :value => "10", :name => genome +  "DistanceOption" }
                             = " ±10k "
 
               .row

@@ -38,20 +38,20 @@ module PJ
 
       def record_by_expid(exp_id)
         records = self.where(:expid => exp_id)
-        #raise NameError if records.size > 1
-        record = records.select{|r| list_of_genome.include?(r.genome) }.first
-        {
-          :expid      => exp_id,
-          :genome     => record.genome,
-          :agClass    => record.agClass,
-          :agSubClass => record.agSubClass,
-          :clClass    => record.clClass,
-          :clSubClass => record.clSubClass,
-          :title      => record.title,
-          :attributes => record.additional_attributes,
-          :readInfo   => record.readInfo,
-          :clSubClassInfo => record.clSubClassInfo,
-         }
+        records.map do |record|
+          {
+            :expid      => exp_id,
+            :genome     => record.genome,
+            :agClass    => record.agClass,
+            :agSubClass => record.agSubClass,
+            :clClass    => record.clClass,
+            :clSubClass => record.clSubClass,
+            :title      => record.title,
+            :attributes => record.additional_attributes,
+            :readInfo   => record.readInfo,
+            :clSubClassInfo => record.clSubClassInfo,
+           }
+        end
       end
 
       def list_of_facets
@@ -59,7 +59,18 @@ module PJ
       end
 
       def list_of_genome
-        [ "hg19", "mm9", "rn6", "dm3", "ce10", "sacCer3", ]
+        {
+          "hg19" => "H. sapiens (hg19)",
+          "hg38" => "H.sapiens (hg38)",
+          "mm9" => "M. musculus (mm9)",
+          "mm10" => "M. musculus (mm10)",
+          "rn6" => "R. norvegicus (rn6)",
+          "dm3" => "D. melanogaster (dm3)",
+          "dm6" => "D. melanogaster (dm6)",
+          "ce10" => "C. elegans (ce10)",
+          "ce11" => "C. elegans (ce11)",
+          "sacCer3" => "S. cerevisiae (sacCer3)"
+        }
         # self.all.map{|r| r.genome }.uniq
       end
 
@@ -96,7 +107,7 @@ module PJ
 
       def index_all_genome
         result = Hash.new
-        list_of_genome.map do |genome|
+        list_of_genome.keys.map do |genome|
           result[genome] = index_by_genome(genome)
         end
         result

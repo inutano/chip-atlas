@@ -1,18 +1,26 @@
 // variables
 const genomesize = {
   ce10: 100286070,
+  ce11: 100286070,
   dm3: 168736537,
+  dm6: 168736537,
   hg19: 3137161264,
+  hg38: 3137161264,
   mm9: 2725765481,
+  mm10: 2725765481,
   sacCer3: 12157105,
   rn6: 2870182909
 };
 
 const numGenes = {
   ce10: 17958,
+  ce11: 17958,
   dm3: 12635,
+  dm6: 12635,
   hg19: 18622,
+  hg38: 18622,
   mm9: 19909,
+  mm10: 19909,
   sacCer3: 5809,
   rn6: 23425
 };
@@ -22,14 +30,16 @@ const taxidMap = {
     organismName: "Homo sapiens",
     displayName: "H. sapiens",
     genomeVersions: [
-      "hg19"
+      "hg19",
+      "hg38"
     ]
   },
   10090: {
     organismName: "Mus musculus",
     displayName: "M. musculus",
     genomeVersions: [
-      "mm9"
+      "mm9",
+      "mm10"
     ]
   },
   10116: {
@@ -43,14 +53,16 @@ const taxidMap = {
     organismName: "Drosophila melanogaster",
     displayName: "D. melanogaster",
     genomeVersions: [
-      "dm3"
+      "dm3",
+      "dm6"
     ]
   },
   6239: {
     organismName: "Caenorhabditis elegans",
     displayName: "C. elegans",
     genomeVersions: [
-      "ce10"
+      "ce10",
+      "ce11"
     ]
   },
   4932: {
@@ -203,9 +215,10 @@ $(function(){
   const genesetA = decodeURI(params["genesetA"]);
   const genesetB = decodeURI(params["genesetB"]);
   const taxid = params["taxonomy"];
-  const taxonomy = taxidMap[taxid]["genomeVersions"][0];
 
-  if (taxonomy !== "") {
+  if (taxid !== "") {
+    const taxonomy = taxidMap[taxid]["genomeVersions"][0]; // TODO: Add genome assembly parameter for POST option
+
     $('[href="#' + taxonomy + '-tab-content"]').tab('show');
     if (genes !== "") {
       $("input[id='" + taxonomy + "UserDataGenes']").prop('checked', true);

@@ -65,8 +65,9 @@
                       %a{ href: "http://dbarchive.biosciencedbc.jp/kyushu-u/metadata/refineSearchList.html" }
                         Keyword search
 
+    - records = PJ::Experiment.record_by_expid(@expid)
+    - metadata = records[0]
     .container
-      - metadata = PJ::Experiment.record_by_expid(@expid)
       .row
         .col-md-10
           .page-header
@@ -74,77 +75,40 @@
               = @expid
               .small
                 = metadata[:title] != "-" ? metadata[:title] : "no title"
-      .row
+      .row.linkout
         .col-md-10
-          - igv_base = "http://localhost:60151/load?file="
-          - nbdc_base = "http://dbarchive.biosciencedbc.jp/kyushu-u"
-          - expid = @expid
-          - genome = metadata[:genome]
           - antigen = URI.escape(metadata[:agSubClass])
           - celltype = URI.escape(metadata[:clSubClass])
-          - fname = URI.escape("#{metadata[:agSubClass]} (@ #{metadata[:clSubClass]}) #{expid}")
-          - dfname = "#{genome}_#{antigen}_#{celltype}_#{expid}"
 
-          %a.infoBtn{ :value => "info", :id => "viewOnIGV" }
-            &#x24D8;
+          %h3
+            LinkOut
           .btn-toolbar{ role: "toolbar" }
             .btn-group{ role: "group" }
               .dropdown
-                .button.btn.btn-primary.btn-lg.dropdown-toggle{ :type => "button", :id => "igv-dropdown", "data-toggle" => "dropdown", "aria-haspopup" => true, "aria-expanded" => true }
-                  View on IGV
+                .button.btn.btn-primary.btn-lg.dropdown-toggle{ :type => "button", :id => "linkout-dropdown", "data-toggle" => "dropdown", "aria-haspopup" => true, "aria-expanded" => true }
+                  SRA Experiment
                   %span.caret
-                %ul.dropdown-menu{ "aria-labelledby" => "igv-dropdown" }
+                %ul.dropdown-menu{ "aria-labelledby" => "linkout-dropdown" }
                   %li
-                    %a.link-igv{ name: "bigwig" }= "BigWig"
+                    %a{ :href => "http://sra.dbcls.jp/details.html?db=sra&accession=#{@expid}" }= "DBCLS SRA"
                   %li
-                    %a.link-igv{ name: "bed", value: "05" }= "Peak-call (q < 1E-05)"
-                  %li
-                    %a.link-igv{ name: "bed", value: "10" }= "Peak-call (q < 1E-10)"
-                  %li
-                    %a.link-igv{ name: "bed", value: "20" }= "Peak-call (q < 1E-20)"
-            .btn-group{ role: "group" }
-              .dropdown
-                .button.btn.btn-primary.btn-lg.dropdown-toggle{ :type => "button", :id => "analysis-dropdown", "data-toggle" => "dropdown", "aria-haspopup" => true, "aria-expanded" => true }
-                  View Analysis
-                  %span.caret
-                %ul.dropdown-menu#analysisLinkOut{ "aria-labelledby" => "analysis-dropdown" }
-                  // li items with a linkout to analysis page goes here..
-            .btn-group{ role: "group" }
-              .dropdown
-                .button.btn.btn-primary.btn-lg.dropdown-toggle{ :type => "button", :id => "download-dropdown", "data-toggle" => "dropdown", "aria-haspopup" => true, "aria-expanded" => true }
-                  Download
-                  %span.caret
-                %ul.dropdown-menu{ "aria-labelledby" => "download-dropdown" }
-                  %li
-                    %a{ :href => "#{nbdc_base}/#{genome}/eachData/bw/#{expid}.bw", :download => "#{dfname}.bw" }= "BigWig"
-                  %li
-                    %a{ :href => "#{nbdc_base}/#{genome}/eachData/bed05/#{expid}.05.bed", :download => "#{dfname}.05.bb" }= "Peak-call (q < 1E-05)"
-                  %li
-                    %a{ :href => "#{nbdc_base}/#{genome}/eachData/bed10/#{expid}.10.bed", :download => "#{dfname}.10.bb" }= "Peak-call (q < 1E-10)"
-                  %li
-                    %a{ :href => "#{nbdc_base}/#{genome}/eachData/bed20/#{expid}.20.bed", :download => "#{dfname}.20.bb" }= "Peak-call (q < 1E-20)"
+                    %a{ :href => "https://www.ncbi.nlm.nih.gov/sra/?term=#{@expid}" }= "NCBI SRA"
             .btn-group{ role: "group" }
               .dropdown
                 .button.btn.btn-primary.btn-lg.dropdown-toggle{ :type => "button", :id => "linkout-dropdown", "data-toggle" => "dropdown", "aria-haspopup" => true, "aria-expanded" => true }
-                  Link Out
+                  = 'Antigen: ' + antigen
                   %span.caret
                 %ul.dropdown-menu{ "aria-labelledby" => "linkout-dropdown" }
-                  %li.dropdown-header
-                    SRA Experiment
-                  %li
-                    %a{ :href => "http://sra.dbcls.jp/search/search?search_query=#{@expid}" }= "DBCLS SRA"
-                  %li
-                    %a{ :href => "https://www.ncbi.nlm.nih.gov/sra/?term=#{@expid}" }= "NCBI SRA"
-                  %li.dropdown-header
-                    = 'Antigen: ' + antigen
                   %li
                     %a{ :href => "https://www.wikigenes.org/?search=#{antigen}" }= "wikigenes"
                   %li
-                    %a{ :href => "http://omicspace.riken.jp/PosMed/search?actionType=searchexec&keyword=#{antigen}" }= "PosMed"
-                  %li
                     %a{ :href => "http://pdbj.org/mine/search?query=#{antigen}" }= "PDBj"
-                  %li.dropdown-header
-                    = 'CellType: ' + "#{celltype}"
+            .btn-group{ role: "group" }
+              .dropdown
+                .button.btn.btn-primary.btn-lg.dropdown-toggle{ :type => "button", :id => "linkout-dropdown", "data-toggle" => "dropdown", "aria-haspopup" => true, "aria-expanded" => true }
+                  = 'CellType: ' + "#{metadata[:clSubClass]}"
+                  %span.caret
+                %ul.dropdown-menu{ "aria-labelledby" => "linkout-dropdown" }
                   %li
                     %a{ :href => "http://www.atcc.org/Search_Results.aspx?searchTerms=#{celltype}" }= "ATCC"
                   %li
@@ -152,13 +116,64 @@
                   %li
                     %a{ :href => "http://www2.brc.riken.jp/lab/cell/list.cgi?skey=#{celltype}" }= "RIKEN BRC"
 
+      .row.buttonviewdata
+        - records.each do |record|
+          .col-md-10
+            - igv_base = "http://localhost:60151/load?file="
+            - nbdc_base = "http://dbarchive.biosciencedbc.jp/kyushu-u"
+            - expid = @expid
+            - genome = record[:genome]
+            - antigen = URI.escape(record[:agSubClass])
+            - celltype = URI.escape(record[:clSubClass])
+            - fname = URI.escape("#{record[:agSubClass]} (@ #{record[:clSubClass]}) #{expid}")
+            - dfname = "#{genome}_#{antigen}_#{celltype}_#{expid}"
+
+            %h3= "For assembly: " + genome
+            .btn-toolbar{ role: "toolbar" }
+              .btn-group{ role: "group" }
+                .dropdown
+                  .button.btn.btn-primary.btn-lg.dropdown-toggle{ :type => "button", :id => "igv-dropdown", "data-toggle" => "dropdown", "aria-haspopup" => true, "aria-expanded" => true }
+                    View on IGV
+                    %span.caret
+                  %ul.dropdown-menu{ "aria-labelledby" => "igv-dropdown" }
+                    %li
+                      %a.link-igv{ name: "bigwig" }= "BigWig"
+                    %li
+                      %a.link-igv{ name: "bed", value: "05" }= "Peak-call (q < 1E-05)"
+                    %li
+                      %a.link-igv{ name: "bed", value: "10" }= "Peak-call (q < 1E-10)"
+                    %li
+                      %a.link-igv{ name: "bed", value: "20" }= "Peak-call (q < 1E-20)"
+              .btn-group{ role: "group" }
+                .dropdown
+                  .button.btn.btn-primary.btn-lg.dropdown-toggle{ :type => "button", :id => "analysis-dropdown", "data-toggle" => "dropdown", "aria-haspopup" => true, "aria-expanded" => true }
+                    View Analysis
+                    %span.caret
+                  %ul.dropdown-menu#analysisLinkOut{ "aria-labelledby" => "analysis-dropdown", "class" => genome }
+                    // li items with a linkout to analysis page goes here..
+              .btn-group{ role: "group" }
+                .dropdown
+                  .button.btn.btn-primary.btn-lg.dropdown-toggle{ :type => "button", :id => "download-dropdown", "data-toggle" => "dropdown", "aria-haspopup" => true, "aria-expanded" => true }
+                    Download
+                    %span.caret
+                  %ul.dropdown-menu{ "aria-labelledby" => "download-dropdown" }
+                    %li
+                      %a{ :href => "#{nbdc_base}/#{genome}/eachData/bw/#{expid}.bw", :download => "#{dfname}.bw" }= "BigWig"
+                    %li
+                      %a{ :href => "#{nbdc_base}/#{genome}/eachData/bed05/#{expid}.05.bed", :download => "#{dfname}.05.bb" }= "Peak-call (q < 1E-05)"
+                    %li
+                      %a{ :href => "#{nbdc_base}/#{genome}/eachData/bed10/#{expid}.10.bed", :download => "#{dfname}.10.bb" }= "Peak-call (q < 1E-10)"
+                    %li
+                      %a{ :href => "#{nbdc_base}/#{genome}/eachData/bed20/#{expid}.20.bed", :download => "#{dfname}.20.bb" }= "Peak-call (q < 1E-20)"
+            %a.infoBtn{ :value => "info", :id => "viewOnIGV" }
+              Error connecting to IGV?
+            %hr
+
       .row.mdata
         .col-md-12
           %h3= "Curated Sample Data"
           %hr
           %dl.dl-horizontal
-            %dt{ style: 'white-space: normal;' }= "Genome"
-            %dd= metadata[:genome]
             %dt{ style: 'white-space: normal;' }= "Antigen Class"
             %dd= metadata[:agClass]
             %dt{ style: 'white-space: normal;' }= "Antigen"
@@ -244,16 +259,18 @@
             %a{ :href => "https://github.com/inutano/chip-atlas/wiki#2-primary-processing" }
               read processing pipeline
           %hr
-          %dl.dl-horizontal
-            - readinfo = metadata[:readInfo].split(',')
-            %dt{ style: 'white-space: normal;' }= "Number of total reads"
-            %dd= readinfo[0]
-            %dt{ style: 'white-space: normal;' }= "Reads aligned (%)"
-            %dd= readinfo[1]
-            %dt{ style: 'white-space: normal;' }= "Duplicates removed (%)"
-            %dd= readinfo[2]
-            %dt{ style: 'white-space: normal;' }= "Number of peaks"
-            %dd= readinfo[3] + " (qval < 1E-05)"
+          - records.each do |record|
+            - readinfo = record[:readInfo].split(',')
+            %h4= record[:genome]
+            %dl.dl-horizontal
+              %dt{ style: 'white-space: normal;' }= "Number of total reads"
+              %dd= readinfo[0]
+              %dt{ style: 'white-space: normal;' }= "Reads aligned (%)"
+              %dd= readinfo[1]
+              %dt{ style: 'white-space: normal;' }= "Duplicates removed (%)"
+              %dd= readinfo[2]
+              %dt{ style: 'white-space: normal;' }= "Number of peaks"
+              %dd= readinfo[3] + " (qval < 1E-05)"
 
       .row.mdata
         .col-md-12
