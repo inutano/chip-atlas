@@ -90,7 +90,7 @@
                   %span.caret
                 %ul.dropdown-menu{ "aria-labelledby" => "linkout-dropdown" }
                   %li
-                    %a{ :href => "http://sra.dbcls.jp/search/search?search_query=#{@expid}" }= "DBCLS SRA"
+                    %a{ :href => "http://sra.dbcls.jp/details.html?db=sra&accession=#{@expid}" }= "DBCLS SRA"
                   %li
                     %a{ :href => "https://www.ncbi.nlm.nih.gov/sra/?term=#{@expid}" }= "NCBI SRA"
             .btn-group{ role: "group" }
