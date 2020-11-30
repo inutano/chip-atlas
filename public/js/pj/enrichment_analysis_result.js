@@ -71,6 +71,9 @@ $(function(){
         $('a#result-url').attr('href', resultUrl+"&format=html");
         $('a#download-tsv').attr('href', resultUrl+"&format=tsv");
         clearInterval(interval);
+      } else if (status == "unavailable") {
+        alert("No response from the DDBJ supercomputer system: please note the result URL to access later. It is possible that your job has been interrupted by the system error, in that case you may need to run the analysis again.");
+        clearInterval(interval);
       }
     });
   }, 10000);
