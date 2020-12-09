@@ -121,6 +121,7 @@
           .col-md-10
             - igv_base = "http://localhost:60151/load?file="
             - nbdc_base = "http://dbarchive.biosciencedbc.jp/kyushu-u"
+            - igv_linkout_base = "#{igv_base}#{nbdc_base}"
             - expid = @expid
             - genome = record[:genome]
             - antigen = URI.escape(record[:agSubClass])
@@ -137,13 +138,11 @@
                     %span.caret
                   %ul.dropdown-menu{ "aria-labelledby" => "igv-dropdown" }
                     %li
-                      %a.link-igv{ name: "bigwig" }= "BigWig"
-                    %li
-                      %a.link-igv{ name: "bed", value: "05" }= "Peak-call (q < 1E-05)"
-                    %li
-                      %a.link-igv{ name: "bed", value: "10" }= "Peak-call (q < 1E-10)"
-                    %li
-                      %a.link-igv{ name: "bed", value: "20" }= "Peak-call (q < 1E-20)"
+                      %a{ href: "#{igv_linkout_base}/#{genome}/eachData/bw/#{expid}.bw&genome=#{genome}&name=#{fname}" }= "BigWig"
+                    - ["05", "10", "20"].each do |dVal|
+                      %li
+                        %a{ href: "#{igv_linkout_base}/#{genome}/eachData/bb#{dVal}/#{expid}.#{dVal}.bb&genome=#{genome}&name=#{fname}%20(1E-#{dVal})" }= "Peak-call (q < 1E-#{dVal})"
+
               .btn-group{ role: "group" }
                 .dropdown
                   .button.btn.btn-primary.btn-lg.dropdown-toggle{ :type => "button", :id => "analysis-dropdown", "data-toggle" => "dropdown", "aria-haspopup" => true, "aria-expanded" => true }

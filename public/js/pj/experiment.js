@@ -3,7 +3,7 @@ $(function(){
   dbLinkOut();
   analysisLinkOut();
   showHelp();
-  browseIgv();
+  //browseIgv();
   loadImages();
 })
 
