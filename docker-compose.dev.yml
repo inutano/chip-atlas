@@ -1,0 +1,10 @@
+version: "3"
+services:
+  app:
+    container_name: chip-atlas
+    image: ruby:2.6.5-slim
+    volumes:
+      - ${PWD}:/app
+    ports:
+      - 9292:9292
+    command: bash -c "apt-get update -y && apt-get install -y libffi-dev build-essential libpq-dev libsqlite3-dev && tail -f /dev/null"
