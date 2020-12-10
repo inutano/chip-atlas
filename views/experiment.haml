@@ -237,13 +237,13 @@
         .col-md-10.col-md-offset-1
           .panel.panel-default
             .panel-heading
+              %p.pull-right
+                %a{ href: "https://github.com/inutano/chip-atlas/wiki#user-content-tables-summarizing-metadata-and-files" }
+                  Where can I get the processing logs?
               %h3.panel-title
                 %a{ :href => "https://github.com/inutano/chip-atlas/wiki#2-primary-processing" }
                   Read processing pipeline
                 log
-              %p
-                %a{ href: "https://github.com/inutano/chip-atlas/wiki#user-content-tables-summarizing-metadata-and-files" }
-                  Download processing log information
             .panel-body.mdata
               - records.each.with_index do |record,i|
                 - readinfo = record[:readInfo].split(',')
