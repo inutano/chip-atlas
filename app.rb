@@ -39,6 +39,7 @@ class PeakJohn < Sinatra::Base
       set :target_genes_analysis, PJ::Analysis.results(:target_genes)
       set :bedsizes, PJ::Bedsize.dump
       set :experiment_list, JSON.load(open("http://dbarchive.biosciencedbc.jp/kyushu-u/metadata/ExperimentList.json"))
+      set :experiment_list_adv, JSON.load(open("http://dbarchive.biosciencedbc.jp/kyushu-u/metadata/ExperimentList_adv.json"))
     rescue ActiveRecord::StatementInvalid
       # Ignore Statement Invalid error when the database is not yet prepared
     end
@@ -91,6 +92,8 @@ class PeakJohn < Sinatra::Base
              PJ::Experiment.get_subclass(genome, ag_class, cl_class, subclass_type)
            when "ExperimentList"
              settings.experiment_list
+           when "ExperimentList_adv"
+             settings.experiment_list_adv
            end
     content_type "application/json"
     JSON.dump(data)
