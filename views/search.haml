@@ -5,13 +5,15 @@
     %meta{ "http-equiv" => "X-UA-Compatible", :content => "IE=edge" }
     %meta{ :name => "viewport", :content => "width=device-width, initial-scale=1" }
 
-    %meta{ :name => "description", :content => "Browse and analyse the public ChIP-Seq/DNase-Seq data on your browser." }
+    %meta{ :name => "description", :content => "Search ChIP-Atlas dataset by keywords." }
     %meta{ :name => "author", :content => "Shinya Oki, Tazro Ohta" }
 
-    %title= "ChIP-Atlas"
+    %title= "ChIP-Atlas: Dataset Search"
 
     // Bootstrap core and typeahead CSS
     %link{ :href => "#{app_root}/css/bootstrap.min.css", :rel => "stylesheet" }
+    %link{:href => "https://cdn.datatables.net/1.10.16/css/jquery.dataTables.min.css", :rel => "stylesheet", :type => "text/css"}
+    %link{:href => "https://cdn.datatables.net/buttons/1.5.1/css/buttons.dataTables.min.css", :rel => "stylesheet", :type => "text/css"}
 
     // Custom style for this website
     %link{ :href => "#{app_root}/style.css", :rel => "stylesheet"}
@@ -44,66 +46,33 @@
               %a{ :href => "#{app_root}/colo" }= "Colocalization"
             %li
               %a{ :href => "#{app_root}/enrichment_analysis" }= "Enrichment Analysis"
-            %li
+            %li.active
               %a{ :href => "#{app_root}/search" }= "Dataset Search"
             %li
               %a{ :href => "https://github.com/inutano/chip-atlas/wiki" }= "Documentation"
             %li
               %a{ :href => "#{app_root}/publications" }= "Publications"
 
-
-    .jumbotron
-      .container
-        %h1
-          ChIP-Atlas
-        %p.main-desc= "ChIP-Atlas is an integrative and comprehensive database for visualizing and making use of public ChIP-seq data. ChIP-Atlas covers almost all public ChIP-seq data submitted to the SRA (Sequence Read Archives) in NCBI, DDBJ, or ENA, and is based on over #{@number_of_experiments} experiments."
-        %p.main-desc
-          %a{ :href => "https://youtu.be/xbYpE9GE_rY", :target => "_blank" }
-            Watch movie introduction
     .container
       .row
-        %h4
-          The four main features of ChIP-Atlas are:
-      .row
-        .col-md-3
-          %h2
-            %a{ :href => "#{app_root}/peak_browser" }
-              Peak Browser
-          %p.main-desc
-            graphically visualizes protein binding on given genomic loci with genome browser (IGV).
-          %p.main-desc
-            %a{ :href => "https://youtu.be/qKNOkK-8hDo", :target => "_blank" }
-              Watch Movie
-        .col-md-3
-          %h2
-            %a{ :href => "#{app_root}/target_genes" }
-              Target Genes
-          %p.main-desc
-            predicts target genes bound by given transcription factors.
-          %p.main-desc
-            %a{ :href => "https://youtu.be/Sp9DUAuKkvQ", :target => "_blank" }
-              Watch Movie
-        .col-md-3
-          %h2
-            %a{ :href => "#{app_root}/colo" }
-              Colocalization
-          %p.main-desc
-            predicts partner proteins colocalizing with given transcription factors.
-          %p.main-desc
-            %a{ :href => "https://youtu.be/jhLnWNCe_No", :target => "_blank" }
-              Watch Movie
-        .col-md-3
-          %h2
-            %a{ :href => "#{app_root}/enrichment_analysis" }
-              Enrichment Analysis
-          %p.main-desc
-            predicts proteins bound to given genomic loci and genes (formerly known as
-            %span.italic
-              in silico
-            ChIP).
-          %p.main-desc
-            %a{ :href => "https://youtu.be/JBOB2PX5_-0", :target => "_blank"  }
-              Watch Movie
+        .col-md-10
+          .header
+            %h1= "ChIP-Atlas: Dataset Search"
+            %p= "Search Experiments by keywords."
+
+      .searchTab{ :role => "tabpanel"}
+        %ul.nav.nav-tabs{ :role => "tablist" }
+          - ["Simple", "Advanced"].each.with_index do |stype, i|
+            %li{ :role => "presentation", :class => "#{(i == 0) ? 'active' : '' }", :id => "#{stype}-tab" }
+              %a{ :href => "##{stype}-tab-content", "aria-controls" => "#{stype}-tab-content", :role => "tab", "data-toggle" => "tab", "source" => stype }
+                = "#{stype} search"
+
+        .tab-content
+          - ["Simple", "Advanced"].each.with_index do |stype, i|
+            .tab-pane.fade{ :role => "tabpanel", :id => "#{stype}-tab-content", :class => "#{(i == 0) ? 'in active' : ''}" }
+              .row
+                .col-md-12
+                  %table.table.table-striped{ id: "#{stype}SearchDataTable" }
 
     %footer.footer
       .container
@@ -136,6 +105,14 @@
       Bootstrap Core Javascript
       =========================
     %script{ :src => "#{app_root}/js/jquery.min.js" }
+    -# %script{ :src => "https://code.jquery.com/jquery-1.12.4.js" }
     %script{ :src => "#{app_root}/js/bootstrap.min.js" }
     %script{ :src => "#{app_root}/js/ie10-viewport-bug-workaround.js" }
     %script{ :src => "#{app_root}/js/pj/pj.js" }
+    %script{ :src => "#{app_root}/js/pj/search.js" }
+
+    %script{ :src => "https://www.datatables.net/release-datatables/media/js/jquery.js" }
+    %script{ :src => "https://cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js" }
+    %script{ :src => "https://cdn.datatables.net/buttons/1.5.1/js/dataTables.buttons.min.js" }
+    %script{ :src => "https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js" }
+    %script{ :src => "https://cdn.datatables.net/buttons/1.5.1/js/buttons.html5.min.js" }
