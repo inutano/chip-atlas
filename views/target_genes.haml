@@ -5,10 +5,10 @@
     %meta{ "http-equiv" => "X-UA-Compatible", :content => "IE=edge" }
     %meta{ :name => "viewport", :content => "width=device-width, initial-scale=1" }
 
-    %meta{ :name => "description", :content => "A web interface to support browsing public ChIP-Seq data via IGV." }
+    %meta{ :name => "description", :content => "Prediction of potential target genes of transcription factors based on experimental results." }
     %meta{ :name => "author", :content => "Shinya Oki, Tazro Ohta" }
 
-    %title= "ChIP-Atlas"
+    %title= "ChIP-Atlas: Target Genes"
 
     // Bootstrap core and typeahead CSS
     %link{ :href => "#{app_root}/css/bootstrap.min.css", :rel => "stylesheet" }
@@ -46,31 +46,17 @@
             %li
               %a{ :href => "#{app_root}/enrichment_analysis" }= "Enrichment Analysis"
             %li
+              %a{ :href => "#{app_root}/search" }= "Dataset Search"
+            %li
               %a{ :href => "https://github.com/inutano/chip-atlas/wiki" }= "Documentation"
             %li
               %a{ :href => "#{app_root}/publications" }= "Publications"
-          %ul.nav.navbar-nav.navbar-right
-            %li.dropdown
-              %a.dropdown-toggle{ "data-toggle" => "dropdown", role: "button", "aria-haspopup" => true, "aria-expanded" => false }
-                Find an experiment
-                %span.caret
-              %ul.dropdown-menu{ style: "padding:12px;" }
-                %li
-                  %form.form-inline
-                    .form-group
-                      %input.form-control#jumpToExperiment{ type: "text", value: "SRX018625", "aria-describedby" => "exp-help" }
-                    %button.btn.btn-default.go-experiment{ type: 'submit' }
-                      Go
-                    %p.help-block#exp-help
-                      Enter an SRA experimental ID beginning with SRX, DRX, or ERX.
-                      %a{ href: "http://dbarchive.biosciencedbc.jp/kyushu-u/metadata/refineSearchList.html" }
-                        Keyword search
 
     .container
       .row
         .col-md-10
           .header
-            %h1= "ChIP-Atlas - Target Genes"
+            %h1= "ChIP-Atlas: Target Genes"
             %p= "Predict potential target genes of TFs."
         .col-md-2
           .dropdown-help
