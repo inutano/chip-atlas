@@ -168,22 +168,38 @@ function loadImages(){
     dataType: 'json',
   }).done(function(json){
     var images_url = json;
-    putImages(images_url);
-    removeLoading();
+    if (images_url.length) {
+      putImages(images_url);
+      removeLoading();
+    } else {
+      removeLoading();
+      imageNotFound();
+    }
   });
 }
 
 function putImages(images_url){
   var target = $(".sequence_quality")
   $.each(images_url, function(i, url){
-    var image = $("<img>").attr("src",url).attr("width",350)
-    var alink = $("<a>").attr("href",url).append(image).append("</a>")
+    // contents
     var title = url.split("/")[9];
     var head = $("<h4>").append(title).append("</h4>");
+
+    var image = $("<img>").attr("src",url).attr("width",350)
+    var alink = $("<a>").attr("href",url).append(image).append("</a>")
+
+    // column
+    var col = $("<div>")
+                .addClass("col-md-8")
+                .addClass("mdata")
+                .append(head)
+                .append(alink)
+                .append("</div>")
+
+    // row
     $("<div>")
-      .attr("class", "col-md-3")
-      .append(head)
-      .append(alink)
+      .attr("class", "row")
+      .append(col)
       .append("</div>")
       .appendTo(target)
   });
@@ -200,6 +216,15 @@ function startLoading(){
 
 function removeLoading(){
   $("#loadingImages").remove();
+}
+
+function imageNotFound(){
+  var target = $(".sequence_quality");
+  $("<p>")
+    .attr("id","noImages")
+    .append("Sorry, no quality data is available for this dataset.")
+    .append("</p>")
+    .appendTo(target);
 }
 
 function showHelp(){

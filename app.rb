@@ -40,6 +40,7 @@ class PeakJohn < Sinatra::Base
       set :bedsizes, PJ::Bedsize.dump
       set :experiment_list, JSON.load(open("http://dbarchive.biosciencedbc.jp/kyushu-u/metadata/ExperimentList.json"))
       set :experiment_list_adv, JSON.load(open("http://dbarchive.biosciencedbc.jp/kyushu-u/metadata/ExperimentList_adv.json"))
+      set :gsm_to_srx, Hash[settings.experiment_list["data"].map{|a| [a[2], a[0]] }]
     rescue ActiveRecord::StatementInvalid
       # Ignore Statement Invalid error when the database is not yet prepared
     end
@@ -235,6 +236,9 @@ class PeakJohn < Sinatra::Base
 
   get "/view" do
     @expid = params[:id]
+    if @expid =~ /^GSM/
+      redirect "/view?id=#{settings.gsm_to_srx[@expid]}"
+    end
     redirect "not_found", 404 if !PJ::Experiment.id_valid?(@expid)
     @ncbi  = PJ::SRA.new(@expid).fetch
     haml :experiment

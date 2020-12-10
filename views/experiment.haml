@@ -26,7 +26,7 @@
 
   %body
     %nav.navbar.navbar-inverse.navbar-fixed-top
-      .container
+      .container-fluid
         .navbar-header
           %button.navbar-toggle.collapsed{ :type => "button", "data-toggle" => "collapse", "data-target" => "#navbar", "aria-expanded" => "false", "aria-controls" => "navbar" }
             %span.sr-only Toggle navigation
@@ -50,222 +50,228 @@
               %a{ :href => "https://github.com/inutano/chip-atlas/wiki" }= "Documentation"
             %li
               %a{ :href => "#{app_root}/publications" }= "Publications"
+          %form.navbar-form.navbar-right{ role: "search" }
+            .form-group
+              %input.form-control#jumpToExperiment{ type: "text", value: "SRX018625", }
+            %button.btn.btn-default.go-experiment{ type: "submit", }= "Go"
+          %p.navbar-text.navbar-right
+            Search by SRX/GSM ID
 
     - records = PJ::Experiment.record_by_expid(@expid)
     - metadata = records[0]
     .container
       .row
-        .col-md-10
+        .col-md-10.col-md-offset-1
           .page-header
+            .btn-toolbar.pull-right{ role: "toolbar" }
+              // View on IGV button
+              .btn-group{ role: "group" }
+                .button.btn.btn-primary.dropdown-toggle{ type: "button", id: "view-igv-dropdown", "data-toggle" => "dropdown", "aria-haspopup" => true, "aria-expanded" => true }
+                  Peak Browser
+                  %span.caret
+                %ul.dropdown-menu{ "aria-labelledby" => "igv-dropdown" }
+                  - igv_linkout_base = "http://localhost:60151/load?file=http://dbarchive.biosciencedbc.jp/kyushu-u"
+                  - records.each_with_index do |record, i|
+                    - genome = record[:genome]
+                    - fname = URI.escape("#{record[:agSubClass]} (@ #{record[:clSubClass]}) #{@expid}")
+                    %li.dropdown-header{ role: "presentation" }= "For #{genome}"
+                    %li
+                      %a{ href: "#{igv_linkout_base}/#{genome}/eachData/bw/#{@expid}.bw&genome=#{genome}&name=#{fname}" }= "BigWig"
+                    - ["05", "10", "20"].each do |dVal|
+                      %li
+                        %a{ href: "#{igv_linkout_base}/#{genome}/eachData/bb#{dVal}/#{@expid}.#{dVal}.bb&genome=#{genome}&name=#{fname}%20(1E-#{dVal})" }= "Peak-call (q < 1E-#{dVal})"
+                    %li.divider
+                  %li.dropdown-header{ role: "presentation" }
+                    %a.infoBtn{ :value => "info", :id => "viewOnIGV" }
+                      Error connecting to IGV?
+
+              // View Analysis button
+              .btn-group{ role: "group" }
+                .button.btn.btn-primary.dropdown-toggle{ type: "button", id: "view-igv-dropdown", "data-toggle" => "dropdown", "aria-haspopup" => true, "aria-expanded" => true }
+                  Analysis
+                  %span.caret
+                %ul.dropdown-menu{ "aria-labelledby" => "igv-dropdown" }
+                  - nbdc_base = "http://dbarchive.biosciencedbc.jp/kyushu-u"
+                  - records.each_with_index do |record, i|
+                    - genome = record[:genome]
+                    %li.dropdown-header{ role: "presentation" }= "For #{genome}"
+                    %li
+                      %a{ href: "#{nbdc_base}/#{genome}/colo/#{@expid}.html" }= "Colocalization"
+                    - ["1", "5", "10"].each do |thr|
+                      %li
+                        %a{ href: "#{nbdc_base}/#{genome}/target/#{@expid}.#{thr}.html" }= "Target Genes (TSS ± #{thr}kb)"
+                    - if i != (records.size - 1)
+                      %li.divider
+
+              // View Analysis button
+              .btn-group{ role: "group" }
+                .button.btn.btn-primary.dropdown-toggle{ :type => "button", :id => "download-dropdown", "data-toggle" => "dropdown", "aria-haspopup" => true, "aria-expanded" => true }
+                  Download
+                  %span.caret
+                %ul.dropdown-menu{ "aria-labelledby" => "download-dropdown" }
+                  - nbdc_base = "http://dbarchive.biosciencedbc.jp/kyushu-u"
+                  - records.each_with_index do |record, i|
+                    - genome = record[:genome]
+                    - dfname = "#{genome}_#{URI.escape(record[:agSubClass])}_#{URI.escape(record[:clSubClass])}_#{@expid}"
+                    %li.dropdown-header{ role: "presentation" }= "For #{genome}"
+                    %li
+                      %a{ :href => "#{nbdc_base}/#{genome}/eachData/bw/#{@expid}.bw", :download => "#{dfname}.bw" }= "BigWig"
+                    - ["05", "10", "20"].each do |dVal|
+                      %li
+                        %a{ :href => "#{nbdc_base}/#{genome}/eachData/bed#{dVal}/#{@expid}.#{dVal}.bed", :download => "#{dfname}.#{dVal}.bb" }= "Peak-call (q < 1E-#{dVal})"
+                    - if i != (records.size - 1)
+                      %li.divider
+
+              // SRA linkout button
+              .btn-group{ role: "group" }
+                .button.btn.btn-primary.dropdown-toggle{ :type => "button", :id => "linkout-dropdown", "data-toggle" => "dropdown", "aria-haspopup" => true, "aria-expanded" => true }
+                  Link Out
+                  %span.caret
+                %ul.dropdown-menu{ "aria-labelledby" => "linkout-dropdown" }
+                  - antigen = metadata[:agSubClass]
+                  - celltype = metadata[:clSubClass]
+                  %li.dropdown-header
+                    Sequence Read Archive
+                  %li
+                    %a{ :href => "http://sra.dbcls.jp/details.html?db=sra&accession=#{@expid}", target: "_blank" }= "DBCLS SRA"
+                  %li
+                    %a{ :href => "https://www.ncbi.nlm.nih.gov/sra/?term=#{@expid}", target: "_blank" }= "NCBI SRA"
+                  %li
+                    %a{ :href => "https://www.ebi.ac.uk/ena/browser/view/#{@expid}", target: "_blank" }= "ENA"
+                  %li.divider
+                  %li.dropdown-header
+                    = "Antigen: #{antigen}"
+                  %li
+                    %a{ :href => "https://www.wikigenes.org/?search=#{antigen}", target: "_blank" }= "wikigenes"
+                  %li
+                    %a{ :href => "http://pdbj.org/mine/search?query=#{antigen}", target: "_blank" }= "PDBj"
+                  %li.divider
+                  %li.dropdown-header
+                    = "CellType: #{celltype}"
+                  %li
+                    %a{ :href => "http://www.atcc.org/Search_Results.aspx?searchTerms=#{celltype}", target: "_blank" }= "ATCC"
+                  %li
+                    %a{ :href => "https://www.ncbi.nlm.nih.gov/mesh/?term=#{celltype}", target: "_blank" }= "MeSH"
+                  %li
+                    %a{ :href => "http://www2.brc.riken.jp/lab/cell/list.cgi?skey=#{celltype}", target: "_blank" }= "RIKEN BRC"
+                  - if metadata[:genome] == "hg19" || metadata[:genome] == "hg38"
+                    %li.divider
+                    %li.dropdown-header
+                      Variation
+                    %li
+                      %a{ :href => "https://togovar.biosciencedbc.jp/?term=#{URI.escape(metadata[:agSubClass])}", target: "_blank" }= "TogoVar"
+
             %h2
               = @expid
               .small
                 = metadata[:title] != "-" ? metadata[:title] : "no title"
-      .row.linkout
-        .col-md-10
-          - antigen = URI.escape(metadata[:agSubClass])
-          - celltype = URI.escape(metadata[:clSubClass])
 
-          %h3
-            LinkOut
-          .btn-toolbar{ role: "toolbar" }
-            .btn-group{ role: "group" }
-              .dropdown
-                .button.btn.btn-primary.btn-lg.dropdown-toggle{ :type => "button", :id => "linkout-dropdown", "data-toggle" => "dropdown", "aria-haspopup" => true, "aria-expanded" => true }
-                  SRA Experiment
-                  %span.caret
-                %ul.dropdown-menu{ "aria-labelledby" => "linkout-dropdown" }
-                  %li
-                    %a{ :href => "http://sra.dbcls.jp/details.html?db=sra&accession=#{@expid}" }= "DBCLS SRA"
-                  %li
-                    %a{ :href => "https://www.ncbi.nlm.nih.gov/sra/?term=#{@expid}" }= "NCBI SRA"
-            .btn-group{ role: "group" }
-              .dropdown
-                .button.btn.btn-primary.btn-lg.dropdown-toggle{ :type => "button", :id => "linkout-dropdown", "data-toggle" => "dropdown", "aria-haspopup" => true, "aria-expanded" => true }
-                  = 'Antigen: ' + antigen
-                  %span.caret
-                %ul.dropdown-menu{ "aria-labelledby" => "linkout-dropdown" }
-                  %li
-                    %a{ :href => "https://www.wikigenes.org/?search=#{antigen}" }= "wikigenes"
-                  %li
-                    %a{ :href => "http://pdbj.org/mine/search?query=#{antigen}" }= "PDBj"
-            .btn-group{ role: "group" }
-              .dropdown
-                .button.btn.btn-primary.btn-lg.dropdown-toggle{ :type => "button", :id => "linkout-dropdown", "data-toggle" => "dropdown", "aria-haspopup" => true, "aria-expanded" => true }
-                  = 'CellType: ' + "#{metadata[:clSubClass]}"
-                  %span.caret
-                %ul.dropdown-menu{ "aria-labelledby" => "linkout-dropdown" }
-                  %li
-                    %a{ :href => "http://www.atcc.org/Search_Results.aspx?searchTerms=#{celltype}" }= "ATCC"
-                  %li
-                    %a{ :href => "https://www.ncbi.nlm.nih.gov/mesh/?term=#{celltype}" }= "MeSH"
-                  %li
-                    %a{ :href => "http://www2.brc.riken.jp/lab/cell/list.cgi?skey=#{celltype}" }= "RIKEN BRC"
+      .row
+        .col-md-10.col-md-offset-1
+          .panel.panel-default
+            .panel-heading
+              %h3.panel-title
+                Sample information curated by ChIP-Atlas
+            .panel-body.mdata
+              %h2
+                .small
+                  Antigen
+              %dl.dl-horizontal
+                %dt{ style: 'white-space: normal;' }= "Antigen Class"
+                %dd= metadata[:agClass]
+                %dt{ style: 'white-space: normal;' }= "Antigen"
+                %dd= metadata[:agSubClass]
+              %hr
+              %h2
+                .small
+                  Cell type
+              %dl.dl-horizontal
+                %dt{ style: 'white-space: normal;' }= "Cell type Class"
+                %dd= metadata[:clClass]
+                %dt{ style: 'white-space: normal;' }= "Cell type"
+                %dd= metadata[:clSubClass]
+                - metadata[:clSubClassInfo].split("|").each do |kv|
+                  %dt{ style: 'white-space: normal;' }= kv.split("=").first
+                  %dd= kv.split("=").last
 
-      .row.buttonviewdata
-        - records.each do |record|
-          .col-md-10
-            - igv_base = "http://localhost:60151/load?file="
-            - nbdc_base = "http://dbarchive.biosciencedbc.jp/kyushu-u"
-            - igv_linkout_base = "#{igv_base}#{nbdc_base}"
-            - expid = @expid
-            - genome = record[:genome]
-            - antigen = URI.escape(record[:agSubClass])
-            - celltype = URI.escape(record[:clSubClass])
-            - fname = URI.escape("#{record[:agSubClass]} (@ #{record[:clSubClass]}) #{expid}")
-            - dfname = "#{genome}_#{antigen}_#{celltype}_#{expid}"
+      .row
+        .col-md-10.col-md-offset-1
+          .panel.panel-default
+            .panel-heading
+              %h3.panel-title
+                Attributes by original data submitter
+            .panel-body.mdata
+              %h2
+                .small
+                  Sample
+              %dl.dl-horizontal
+                - metadata[:attributes].split("\t").each do |kv|
+                  %dt{ style: 'white-space: normal;' }= kv.split("=").first
+                  %dd= kv.split("=").last
+              %hr
+              %h2
+                .small
+                  Sequenced DNA Library
+              %dl.dl-horizontal
+                - if @ncbi[:library_description].values.uniq == [""]
+                  %span.italic
+                    No library information was found.
+                - @ncbi[:library_description].each_pair do |k,v|
+                  - if v != ""
+                    %dt{ style: 'white-space: normal;' }= k.to_s
+                    %dd= v.to_s
+              %hr
+              %h2
+                .small
+                  Sequencing Platform
+              %dl.dl-horizontal
+                - if @ncbi[:platform_information].values.uniq == [""]
+                  %span.italic
+                    No platform information was found.
+                - @ncbi[:platform_information].each_pair do |k,v|
+                  - if v != ""
+                    %dt{ style: 'white-space: normal;' }= k.to_s
+                    %dd= v.to_s
 
-            %h3= "For assembly: " + genome
-            .btn-toolbar{ role: "toolbar" }
-              .btn-group{ role: "group" }
-                .dropdown
-                  .button.btn.btn-primary.btn-lg.dropdown-toggle{ :type => "button", :id => "igv-dropdown", "data-toggle" => "dropdown", "aria-haspopup" => true, "aria-expanded" => true }
-                    View on IGV
-                    %span.caret
-                  %ul.dropdown-menu{ "aria-labelledby" => "igv-dropdown" }
-                    %li
-                      %a{ href: "#{igv_linkout_base}/#{genome}/eachData/bw/#{expid}.bw&genome=#{genome}&name=#{fname}" }= "BigWig"
-                    - ["05", "10", "20"].each do |dVal|
-                      %li
-                        %a{ href: "#{igv_linkout_base}/#{genome}/eachData/bb#{dVal}/#{expid}.#{dVal}.bb&genome=#{genome}&name=#{fname}%20(1E-#{dVal})" }= "Peak-call (q < 1E-#{dVal})"
+      .row
+        .col-md-10.col-md-offset-1
+          .panel.panel-default
+            .panel-heading
+              %h3.panel-title
+                %a{ :href => "https://github.com/inutano/chip-atlas/wiki#2-primary-processing" }
+                  Read processing pipeline
+                log
+              %p
+                %a{ href: "https://github.com/inutano/chip-atlas/wiki#user-content-tables-summarizing-metadata-and-files" }
+                  Download processing log information
+            .panel-body.mdata
+              - records.each.with_index do |record,i|
+                - readinfo = record[:readInfo].split(',')
+                %h2
+                  .small= record[:genome]
+                %dl.dl-horizontal
+                  %dt{ style: 'white-space: normal;' }= "Number of total reads"
+                  %dd= readinfo[0]
+                  %dt{ style: 'white-space: normal;' }= "Reads aligned (%)"
+                  %dd= readinfo[1]
+                  %dt{ style: 'white-space: normal;' }= "Duplicates removed (%)"
+                  %dd= readinfo[2]
+                  %dt{ style: 'white-space: normal;' }= "Number of peaks"
+                  %dd= readinfo[3] + " (qval < 1E-05)"
+                - if i != (records.size - 1)
+                  %hr
 
-              .btn-group{ role: "group" }
-                .dropdown
-                  .button.btn.btn-primary.btn-lg.dropdown-toggle{ :type => "button", :id => "analysis-dropdown", "data-toggle" => "dropdown", "aria-haspopup" => true, "aria-expanded" => true }
-                    View Analysis
-                    %span.caret
-                  %ul.dropdown-menu#analysisLinkOut{ "aria-labelledby" => "analysis-dropdown", "class" => genome }
-                    // li items with a linkout to analysis page goes here..
-              .btn-group{ role: "group" }
-                .dropdown
-                  .button.btn.btn-primary.btn-lg.dropdown-toggle{ :type => "button", :id => "download-dropdown", "data-toggle" => "dropdown", "aria-haspopup" => true, "aria-expanded" => true }
-                    Download
-                    %span.caret
-                  %ul.dropdown-menu{ "aria-labelledby" => "download-dropdown" }
-                    %li
-                      %a{ :href => "#{nbdc_base}/#{genome}/eachData/bw/#{expid}.bw", :download => "#{dfname}.bw" }= "BigWig"
-                    %li
-                      %a{ :href => "#{nbdc_base}/#{genome}/eachData/bed05/#{expid}.05.bed", :download => "#{dfname}.05.bb" }= "Peak-call (q < 1E-05)"
-                    %li
-                      %a{ :href => "#{nbdc_base}/#{genome}/eachData/bed10/#{expid}.10.bed", :download => "#{dfname}.10.bb" }= "Peak-call (q < 1E-10)"
-                    %li
-                      %a{ :href => "#{nbdc_base}/#{genome}/eachData/bed20/#{expid}.20.bed", :download => "#{dfname}.20.bb" }= "Peak-call (q < 1E-20)"
-            %a.infoBtn{ :value => "info", :id => "viewOnIGV" }
-              Error connecting to IGV?
-            %hr
 
-      .row.mdata
-        .col-md-12
-          %h3= "Curated Sample Data"
-          %hr
-          %dl.dl-horizontal
-            %dt{ style: 'white-space: normal;' }= "Antigen Class"
-            %dd= metadata[:agClass]
-            %dt{ style: 'white-space: normal;' }= "Antigen"
-            %dd= metadata[:agSubClass]
-            %dt{ style: 'white-space: normal;' }= "Cell type Class"
-            %dd= metadata[:clClass]
-            %dt{ style: 'white-space: normal;' }= "Cell type"
-            %dd= metadata[:clSubClass]
-
-      .row.mdata
-        .col-md-12
-          %h3= "Cell type information"
-          %hr
-          %dl.dl-horizontal
-            - metadata[:clSubClassInfo].split("|").each do |kv|
-              %dt{ style: 'white-space: normal;' }= kv.split("=").first
-              %dd= kv.split("=").last
-
-      .row.mdata
-        .col-md-12
-          %h3= "Attributes by Original Data Submitter"
-          %hr
-          %dl.dl-horizontal
-            - metadata[:attributes].split("\t").each do |kv|
-              %dt{ style: 'white-space: normal;' }= kv.split("=").first
-              %dd= kv.split("=").last
-
-      .row.mdata
-        .col-md-12
-          %h3= "Metadata from Sequence Read Archive"
-
-          .mdata
-            %h4= "Library Description"
-            %hr
-            %dl.dl-horizontal
-              - if @ncbi[:library_description].values.uniq == [""]
-                %span.italic
-                  No library information was found.
-              - @ncbi[:library_description].each_pair do |k,v|
-                - if v != ""
-                  %dt{ style: 'white-space: normal;' }= k.to_s
-                  %dd= v.to_s
-
-          .mdata
-            %h4= "Platform Information"
-            %hr
-            %dl.dl-horizontal
-              - if @ncbi[:platform_information].values.uniq == [""]
-                %span.italic
-                  No platform information was found.
-              - @ncbi[:platform_information].each_pair do |k,v|
-                - if v != ""
-                  %dt{ style: 'white-space: normal;' }= k.to_s
-                  %dd= v.to_s
-
-      .row.mdata
-        .col-md-12
-          %h3= "External Database Query"
-          %p
-            %form.form-inline
-              .form-group
-                %label{ :for => 'queryAntigen' }
-                  Query antigen
-                %input.form-control{ :type => "text", :id => "queryAntigen", :value => "#{metadata[:agSubClass]}"}
-              %button.btn.btn-primary.antigen{ :type => "submit", :id => "wikigenes" }= "WikiGenes"
-              %button.btn.btn-primary.antigen{ :type => "submit", :id => "posmed" }= "PosMed"
-              %button.btn.btn-primary.antigen{ :type => "submit", :id => "pdbj" }= "PDBj"
-
-          %p
-            %form.form-inline
-              .form-group
-                %label{ :for => 'queryCelltype' }
-                  Query cell-type
-                %input.form-control{ :type => "text", :id => "queryCelltype", :value => "#{metadata[:clSubClass]}"}
-              %button.btn.btn-primary.celltype{ :type => "submit", :id => "atcc" }= "ATCC"
-              %button.btn.btn-primary.celltype{ :type => "submit", :id => "mesh" }= "MeSH"
-              %button.btn.btn-primary.celltype{ :type => "submit", :id => "rikenbrc" }= "RIKEN BRC"
-
-      .row.mdata
-        .col-md-12
-          %h3
-            Logs in
-            %a{ :href => "https://github.com/inutano/chip-atlas/wiki#2-primary-processing" }
-              read processing pipeline
-          %hr
-          - records.each do |record|
-            - readinfo = record[:readInfo].split(',')
-            %h4= record[:genome]
-            %dl.dl-horizontal
-              %dt{ style: 'white-space: normal;' }= "Number of total reads"
-              %dd= readinfo[0]
-              %dt{ style: 'white-space: normal;' }= "Reads aligned (%)"
-              %dd= readinfo[1]
-              %dt{ style: 'white-space: normal;' }= "Duplicates removed (%)"
-              %dd= readinfo[2]
-              %dt{ style: 'white-space: normal;' }= "Number of peaks"
-              %dd= readinfo[3] + " (qval < 1E-05)"
-
-      .row.mdata
-        .col-md-12
-          %h3
-            Sequence Quality Data from
-            %a{ :href => "http://sra.dbcls.jp" }
-              DBCLS SRA
-          .sequence_quality
-            %hr
-            .row
+      .row
+        .col-md-10.col-md-offset-1
+          .panel.panel-default
+            .panel-heading
+              %h3.panel-title
+                Base call quality data from
+                %a{ :href => "http://sra.dbcls.jp" }
+                  DBCLS SRA
+            .panel-body
+              .sequence_quality
 
     %footer.footer
       .container
