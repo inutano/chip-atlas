@@ -58,19 +58,6 @@
         .col-md-12
           .page-header
             .btn-toolbar.pull-right{ role: "toolbar" }
-              // SRA linkout button
-              .btn-group{ role: "group" }
-                .button.btn.btn-primary.btn-lg.dropdown-toggle{ :type => "button", :id => "linkout-dropdown", "data-toggle" => "dropdown", "aria-haspopup" => true, "aria-expanded" => true }
-                  Browse in SRA
-                  %span.caret
-                %ul.dropdown-menu{ "aria-labelledby" => "linkout-dropdown" }
-                  %li
-                    %a{ :href => "http://sra.dbcls.jp/details.html?db=sra&accession=#{@expid}", target: "_blank" }= "DBCLS SRA"
-                  %li
-                    %a{ :href => "https://www.ncbi.nlm.nih.gov/sra/?term=#{@expid}", target: "_blank" }= "NCBI SRA"
-                  %li
-                    %a{ :href => "https://www.ebi.ac.uk/ena/browser/view/#{@expid}", target: "_blank" }= "ENA"
-
               // View on IGV button
               .btn-group{ role: "group" }
                 .button.btn.btn-primary.btn-lg.dropdown-toggle{ type: "button", id: "view-igv-dropdown", "data-toggle" => "dropdown", "aria-haspopup" => true, "aria-expanded" => true }
@@ -129,125 +116,137 @@
                     - if i != (records.size - 1)
                       %li.divider
 
+              // SRA linkout button
+              .btn-group{ role: "group" }
+                .button.btn.btn-primary.btn-lg.dropdown-toggle{ :type => "button", :id => "linkout-dropdown", "data-toggle" => "dropdown", "aria-haspopup" => true, "aria-expanded" => true }
+                  Browse External DB
+                  %span.caret
+                %ul.dropdown-menu{ "aria-labelledby" => "linkout-dropdown" }
+                  - antigen = metadata[:agSubClass]
+                  - celltype = metadata[:clSubClass]
+                  %li.dropdown-header
+                    Sequence Read Archive
+                  %li
+                    %a{ :href => "http://sra.dbcls.jp/details.html?db=sra&accession=#{@expid}", target: "_blank" }= "DBCLS SRA"
+                  %li
+                    %a{ :href => "https://www.ncbi.nlm.nih.gov/sra/?term=#{@expid}", target: "_blank" }= "NCBI SRA"
+                  %li
+                    %a{ :href => "https://www.ebi.ac.uk/ena/browser/view/#{@expid}", target: "_blank" }= "ENA"
+                  %li.dropdown-header
+                    = "Antigen: #{antigen}"
+                  %li
+                    %a{ :href => "https://www.wikigenes.org/?search=#{antigen}", target: "_blank" }= "wikigenes"
+                  %li
+                    %a{ :href => "http://pdbj.org/mine/search?query=#{antigen}", target: "_blank" }= "PDBj"
+                  %li.dropdown-header
+                    = "CellType: #{celltype}"
+                  %li
+                    %a{ :href => "http://www.atcc.org/Search_Results.aspx?searchTerms=#{celltype}", target: "_blank" }= "ATCC"
+                  %li
+                    %a{ :href => "https://www.ncbi.nlm.nih.gov/mesh/?term=#{celltype}", target: "_blank" }= "MeSH"
+                  %li
+                    %a{ :href => "http://www2.brc.riken.jp/lab/cell/list.cgi?skey=#{celltype}", target: "_blank" }= "RIKEN BRC"
+                  - if metadata[:genome] == "hg19" || metadata[:genome] == "hg38"
+                    %li.dropdown-header
+                      Variation
+                    %li
+                      %a{ :href => "https://togovar.biosciencedbc.jp/?term=#{URI.escape(metadata[:agSubClass])}", target: "_blank" }= "TogoVar"
 
             %h2
               = @expid
               .small
                 = metadata[:title] != "-" ? metadata[:title] : "no title"
 
+      .row.mdata
+        .col-md-6
+          .panel.panel-default
+            .panel-heading
+              %h4
+                Sample information curated by ChIP-Atlas
+            .panel-body
+              %h4
+                Antigen
+              %dl.dl-horizontal
+                %dt{ style: 'white-space: normal;' }= "Antigen Class"
+                %dd= metadata[:agClass]
+                %dt{ style: 'white-space: normal;' }= "Antigen"
+                %dd= metadata[:agSubClass]
+              %h4
+                Cell type
+              %dl.dl-horizontal
+                %dt{ style: 'white-space: normal;' }= "Cell type Class"
+                %dd= metadata[:clClass]
+                %dt{ style: 'white-space: normal;' }= "Cell type"
+                %dd= metadata[:clSubClass]
+                - metadata[:clSubClassInfo].split("|").each do |kv|
+                  %dt{ style: 'white-space: normal;' }= kv.split("=").first
+                  %dd= kv.split("=").last
 
+        .col-md-6
+          .panel.panel-default
+            .panel-heading
+              %h4
+                Attributes by original data submitter
+            .panel-body
+              %h4
+                Sample
+              %dl.dl-horizontal
+                - metadata[:attributes].split("\t").each do |kv|
+                  %dt{ style: 'white-space: normal;' }= kv.split("=").first
+                  %dd= kv.split("=").last
+              %h4
+                Sequenced DNA Library
+              %dl.dl-horizontal
+                - if @ncbi[:library_description].values.uniq == [""]
+                  %span.italic
+                    No library information was found.
+                - @ncbi[:library_description].each_pair do |k,v|
+                  - if v != ""
+                    %dt{ style: 'white-space: normal;' }= k.to_s
+                    %dd= v.to_s
+              %h4
+                Sequencing Platform
+              %dl.dl-horizontal
+                - if @ncbi[:platform_information].values.uniq == [""]
+                  %span.italic
+                    No platform information was found.
+                - @ncbi[:platform_information].each_pair do |k,v|
+                  - if v != ""
+                    %dt{ style: 'white-space: normal;' }= k.to_s
+                    %dd= v.to_s
 
       .row.mdata
-        .col-md-12
-          %h3= "Curated Sample Data"
-          %hr
-          %dl.dl-horizontal
-            %dt{ style: 'white-space: normal;' }= "Antigen Class"
-            %dd= metadata[:agClass]
-            %dt{ style: 'white-space: normal;' }= "Antigen"
-            %dd= metadata[:agSubClass]
-            %dt{ style: 'white-space: normal;' }= "Cell type Class"
-            %dd= metadata[:clClass]
-            %dt{ style: 'white-space: normal;' }= "Cell type"
-            %dd= metadata[:clSubClass]
+        .col-md-6
+          .panel.panel-default
+            .panel-heading
+              %h4
+                %a{ :href => "https://github.com/inutano/chip-atlas/wiki#2-primary-processing" }
+                  Read processing pipeline
+                log
+            .panel-body
+              - records.each do |record|
+                - readinfo = record[:readInfo].split(',')
+                %h4= record[:genome]
+                %dl.dl-horizontal
+                  %dt{ style: 'white-space: normal;' }= "Number of total reads"
+                  %dd= readinfo[0]
+                  %dt{ style: 'white-space: normal;' }= "Reads aligned (%)"
+                  %dd= readinfo[1]
+                  %dt{ style: 'white-space: normal;' }= "Duplicates removed (%)"
+                  %dd= readinfo[2]
+                  %dt{ style: 'white-space: normal;' }= "Number of peaks"
+                  %dd= readinfo[3] + " (qval < 1E-05)"
 
-      .row.mdata
-        .col-md-12
-          %h3= "Cell type information"
-          %hr
-          %dl.dl-horizontal
-            - metadata[:clSubClassInfo].split("|").each do |kv|
-              %dt{ style: 'white-space: normal;' }= kv.split("=").first
-              %dd= kv.split("=").last
-
-      .row.mdata
-        .col-md-12
-          %h3= "Attributes by Original Data Submitter"
-          %hr
-          %dl.dl-horizontal
-            - metadata[:attributes].split("\t").each do |kv|
-              %dt{ style: 'white-space: normal;' }= kv.split("=").first
-              %dd= kv.split("=").last
-
-      .row.mdata
-        .col-md-12
-          %h3= "Metadata from Sequence Read Archive"
-
-          .mdata
-            %h4= "Library Description"
-            %hr
-            %dl.dl-horizontal
-              - if @ncbi[:library_description].values.uniq == [""]
-                %span.italic
-                  No library information was found.
-              - @ncbi[:library_description].each_pair do |k,v|
-                - if v != ""
-                  %dt{ style: 'white-space: normal;' }= k.to_s
-                  %dd= v.to_s
-
-          .mdata
-            %h4= "Platform Information"
-            %hr
-            %dl.dl-horizontal
-              - if @ncbi[:platform_information].values.uniq == [""]
-                %span.italic
-                  No platform information was found.
-              - @ncbi[:platform_information].each_pair do |k,v|
-                - if v != ""
-                  %dt{ style: 'white-space: normal;' }= k.to_s
-                  %dd= v.to_s
-
-      .row.mdata
-        .col-md-12
-          %h3= "External Database Query"
-          %p
-            %form.form-inline
-              .form-group
-                %label{ :for => 'queryAntigen' }
-                  Query antigen
-                %input.form-control{ :type => "text", :id => "queryAntigen", :value => "#{metadata[:agSubClass]}"}
-              %button.btn.btn-primary.antigen{ :type => "submit", :id => "wikigenes" }= "WikiGenes"
-              %button.btn.btn-primary.antigen{ :type => "submit", :id => "pdbj" }= "PDBj"
-
-          %p
-            %form.form-inline
-              .form-group
-                %label{ :for => 'queryCelltype' }
-                  Query cell-type
-                %input.form-control{ :type => "text", :id => "queryCelltype", :value => "#{metadata[:clSubClass]}"}
-              %button.btn.btn-primary.celltype{ :type => "submit", :id => "atcc" }= "ATCC"
-              %button.btn.btn-primary.celltype{ :type => "submit", :id => "mesh" }= "MeSH"
-              %button.btn.btn-primary.celltype{ :type => "submit", :id => "rikenbrc" }= "RIKEN BRC"
-
-      .row.mdata
-        .col-md-12
-          %h3
-            Logs in
-            %a{ :href => "https://github.com/inutano/chip-atlas/wiki#2-primary-processing" }
-              read processing pipeline
-          %hr
-          - records.each do |record|
-            - readinfo = record[:readInfo].split(',')
-            %h4= record[:genome]
-            %dl.dl-horizontal
-              %dt{ style: 'white-space: normal;' }= "Number of total reads"
-              %dd= readinfo[0]
-              %dt{ style: 'white-space: normal;' }= "Reads aligned (%)"
-              %dd= readinfo[1]
-              %dt{ style: 'white-space: normal;' }= "Duplicates removed (%)"
-              %dd= readinfo[2]
-              %dt{ style: 'white-space: normal;' }= "Number of peaks"
-              %dd= readinfo[3] + " (qval < 1E-05)"
-
-      .row.mdata
-        .col-md-12
-          %h3
-            Sequence Quality Data from
-            %a{ :href => "http://sra.dbcls.jp" }
-              DBCLS SRA
-          .sequence_quality
-            %hr
-            .row
+        .col-md-6
+          .panel.panel-default
+            .panel-heading
+              %h4
+                Sequence Quality Data from
+                %a{ :href => "http://sra.dbcls.jp" }
+                  DBCLS SRA
+            .panel-body
+              .sequence_quality
+                .row
 
     %footer.footer
       .container
