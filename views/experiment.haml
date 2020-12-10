@@ -55,24 +55,13 @@
     - metadata = records[0]
     .container
       .row
-        .col-md-10
+        .col-md-12
           .page-header
-            %h2
-              = @expid
-              .small
-                = metadata[:title] != "-" ? metadata[:title] : "no title"
-      .row.linkout
-        .col-md-10
-          - antigen = URI.escape(metadata[:agSubClass])
-          - celltype = URI.escape(metadata[:clSubClass])
-
-          %h3
-            LinkOut
-          .btn-toolbar{ role: "toolbar" }
-            .btn-group{ role: "group" }
-              .dropdown
+            .btn-toolbar.pull-right{ role: "toolbar" }
+              // SRA linkout button
+              .btn-group{ role: "group" }
                 .button.btn.btn-primary.btn-lg.dropdown-toggle{ :type => "button", :id => "linkout-dropdown", "data-toggle" => "dropdown", "aria-haspopup" => true, "aria-expanded" => true }
-                  Browse Experiment in SRA
+                  Browse in SRA
                   %span.caret
                 %ul.dropdown-menu{ "aria-labelledby" => "linkout-dropdown" }
                   %li
@@ -82,57 +71,71 @@
                   %li
                     %a{ :href => "https://www.ebi.ac.uk/ena/browser/view/#{@expid}", target: "_blank" }= "ENA"
 
-      .row.buttonviewdata
-        - records.each do |record|
-          .col-md-10
-            - igv_base = "http://localhost:60151/load?file="
-            - nbdc_base = "http://dbarchive.biosciencedbc.jp/kyushu-u"
-            - igv_linkout_base = "#{igv_base}#{nbdc_base}"
-            - expid = @expid
-            - genome = record[:genome]
-            - antigen = URI.escape(record[:agSubClass])
-            - celltype = URI.escape(record[:clSubClass])
-            - fname = URI.escape("#{record[:agSubClass]} (@ #{record[:clSubClass]}) #{expid}")
-            - dfname = "#{genome}_#{antigen}_#{celltype}_#{expid}"
-
-            %h3= "For assembly: " + genome
-            .btn-toolbar{ role: "toolbar" }
+              // View on IGV button
               .btn-group{ role: "group" }
-                .dropdown
-                  .button.btn.btn-primary.btn-lg.dropdown-toggle{ :type => "button", :id => "igv-dropdown", "data-toggle" => "dropdown", "aria-haspopup" => true, "aria-expanded" => true }
-                    View on IGV
-                    %span.caret
-                  %ul.dropdown-menu{ "aria-labelledby" => "igv-dropdown" }
+                .button.btn.btn-primary.btn-lg.dropdown-toggle{ type: "button", id: "view-igv-dropdown", "data-toggle" => "dropdown", "aria-haspopup" => true, "aria-expanded" => true }
+                  View on IGV
+                  %span.caret
+                %ul.dropdown-menu{ "aria-labelledby" => "igv-dropdown" }
+                  - igv_linkout_base = "http://localhost:60151/load?file=http://dbarchive.biosciencedbc.jp/kyushu-u"
+                  - records.each_with_index do |record, i|
+                    - genome = record[:genome]
+                    - fname = URI.escape("#{record[:agSubClass]} (@ #{record[:clSubClass]}) #{@expid}")
+                    %li.dropdown-header{ role: "presentation" }= "For #{genome}"
                     %li
-                      %a{ href: "#{igv_linkout_base}/#{genome}/eachData/bw/#{expid}.bw&genome=#{genome}&name=#{fname}" }= "BigWig"
+                      %a{ href: "#{igv_linkout_base}/#{genome}/eachData/bw/#{@expid}.bw&genome=#{genome}&name=#{fname}" }= "BigWig"
                     - ["05", "10", "20"].each do |dVal|
                       %li
-                        %a{ href: "#{igv_linkout_base}/#{genome}/eachData/bb#{dVal}/#{expid}.#{dVal}.bb&genome=#{genome}&name=#{fname}%20(1E-#{dVal})" }= "Peak-call (q < 1E-#{dVal})"
+                        %a{ href: "#{igv_linkout_base}/#{genome}/eachData/bb#{dVal}/#{@expid}.#{dVal}.bb&genome=#{genome}&name=#{fname}%20(1E-#{dVal})" }= "Peak-call (q < 1E-#{dVal})"
+                    %li.divider
+                  %li.dropdown-header{ role: "presentation" }
+                    %a.infoBtn{ :value => "info", :id => "viewOnIGV" }
+                      Error connecting to IGV?
 
+              // View Analysis button
               .btn-group{ role: "group" }
-                .dropdown
-                  .button.btn.btn-primary.btn-lg.dropdown-toggle{ :type => "button", :id => "analysis-dropdown", "data-toggle" => "dropdown", "aria-haspopup" => true, "aria-expanded" => true }
-                    View Analysis
-                    %span.caret
-                  %ul.dropdown-menu#analysisLinkOut{ "aria-labelledby" => "analysis-dropdown", "class" => genome }
-                    // li items with a linkout to analysis page goes here..
+                .button.btn.btn-primary.btn-lg.dropdown-toggle{ type: "button", id: "view-igv-dropdown", "data-toggle" => "dropdown", "aria-haspopup" => true, "aria-expanded" => true }
+                  View Analysis
+                  %span.caret
+                %ul.dropdown-menu{ "aria-labelledby" => "igv-dropdown" }
+                  - nbdc_base = "http://dbarchive.biosciencedbc.jp/kyushu-u"
+                  - records.each_with_index do |record, i|
+                    - genome = record[:genome]
+                    %li.dropdown-header{ role: "presentation" }= "For #{genome}"
+                    %li
+                      %a{ href: "#{nbdc_base}/#{genome}/colo/#{@expid}.html" }= "Colocalization"
+                    - ["1", "5", "10"].each do |thr|
+                      %li
+                        %a{ href: "#{nbdc_base}/#{genome}/target/#{@expid}.#{thr}.html" }= "Target Genes (TSS ± #{thr}kb)"
+                    - if i != (records.size - 1)
+                      %li.divider
+
+              // View Analysis button
               .btn-group{ role: "group" }
-                .dropdown
-                  .button.btn.btn-primary.btn-lg.dropdown-toggle{ :type => "button", :id => "download-dropdown", "data-toggle" => "dropdown", "aria-haspopup" => true, "aria-expanded" => true }
-                    Download
-                    %span.caret
-                  %ul.dropdown-menu{ "aria-labelledby" => "download-dropdown" }
+                .button.btn.btn-primary.btn-lg.dropdown-toggle{ :type => "button", :id => "download-dropdown", "data-toggle" => "dropdown", "aria-haspopup" => true, "aria-expanded" => true }
+                  Download
+                  %span.caret
+                %ul.dropdown-menu{ "aria-labelledby" => "download-dropdown" }
+                  - nbdc_base = "http://dbarchive.biosciencedbc.jp/kyushu-u"
+                  - records.each_with_index do |record, i|
+                    - genome = record[:genome]
+                    - dfname = "#{genome}_#{URI.escape(record[:agSubClass])}_#{URI.escape(record[:clSubClass])}_#{@expid}"
+                    %li.dropdown-header{ role: "presentation" }= "For #{genome}"
                     %li
-                      %a{ :href => "#{nbdc_base}/#{genome}/eachData/bw/#{expid}.bw", :download => "#{dfname}.bw" }= "BigWig"
-                    %li
-                      %a{ :href => "#{nbdc_base}/#{genome}/eachData/bed05/#{expid}.05.bed", :download => "#{dfname}.05.bb" }= "Peak-call (q < 1E-05)"
-                    %li
-                      %a{ :href => "#{nbdc_base}/#{genome}/eachData/bed10/#{expid}.10.bed", :download => "#{dfname}.10.bb" }= "Peak-call (q < 1E-10)"
-                    %li
-                      %a{ :href => "#{nbdc_base}/#{genome}/eachData/bed20/#{expid}.20.bed", :download => "#{dfname}.20.bb" }= "Peak-call (q < 1E-20)"
-            %a.infoBtn{ :value => "info", :id => "viewOnIGV" }
-              Error connecting to IGV?
-            %hr
+                      %a{ :href => "#{nbdc_base}/#{genome}/eachData/bw/#{@expid}.bw", :download => "#{dfname}.bw" }= "BigWig"
+                    - ["05", "10", "20"].each do |dVal|
+                      %li
+                        %a{ :href => "#{nbdc_base}/#{genome}/eachData/bed#{dVal}/#{@expid}.#{dVal}.bed", :download => "#{dfname}.#{dVal}.bb" }= "Peak-call (q < 1E-#{dVal})"
+                    - if i != (records.size - 1)
+                      %li.divider
+
+
+            %h2
+              = @expid
+              .small
+                = metadata[:title] != "-" ? metadata[:title] : "no title"
+
+
 
       .row.mdata
         .col-md-12
