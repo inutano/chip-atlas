@@ -168,8 +168,13 @@ function loadImages(){
     dataType: 'json',
   }).done(function(json){
     var images_url = json;
-    putImages(images_url);
-    removeLoading();
+    if (images_url.length) {
+      putImages(images_url);
+      removeLoading();
+    } else {
+      removeLoading();
+      imageNotFound();
+    }
   });
 }
 
@@ -211,6 +216,15 @@ function startLoading(){
 
 function removeLoading(){
   $("#loadingImages").remove();
+}
+
+function imageNotFound(){
+  var target = $(".sequence_quality");
+  $("<p>")
+    .attr("id","noImages")
+    .append("Sorry, no quality data is available for this dataset.")
+    .append("</p>")
+    .appendTo(target);
 }
 
 function showHelp(){
