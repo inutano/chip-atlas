@@ -26,7 +26,7 @@
 
   %body
     %nav.navbar.navbar-inverse.navbar-fixed-top
-      .container
+      .container-fluid
         .navbar-header
           %button.navbar-toggle.collapsed{ :type => "button", "data-toggle" => "collapse", "data-target" => "#navbar", "aria-expanded" => "false", "aria-controls" => "navbar" }
             %span.sr-only Toggle navigation
@@ -50,7 +50,12 @@
               %a{ :href => "https://github.com/inutano/chip-atlas/wiki" }= "Documentation"
             %li
               %a{ :href => "#{app_root}/publications" }= "Publications"
-
+          %form.navbar-form.navbar-right{ role: "search" }
+            .form-group
+              %input.form-control#jumpToExperiment{ type: "text", value: "SRX018625", }
+            %button.btn.btn-default.go-experiment{ type: "submit", }= "Go"
+          %p.navbar-text.navbar-right
+            Search by SRX/GSM ID
 
     .jumbotron
       .container
@@ -62,48 +67,82 @@
             Watch movie introduction
     .container
       .row
-        %h4
-          The four main features of ChIP-Atlas are:
+        .col-md-12
+          %h3
+            What's new
+          %ul
+            %li
+              Dataset search function is now available from navbar, updated layout: Top page, navigation bar, experiment detail, etc. (2020/12/10)
+            %li
+              Data updated and new genome assemblies are available: hg38, mm10, dm6, ce11. Happy holidays! (2020/12/01)
+
+      %hr.introduction
       .row
-        .col-md-3
+        .col-md-12
+          %a{ :href => "https://youtu.be/qKNOkK-8hDo", :target => "_blank" }
+            %img.pull-right{ src: "https://img.youtube.com/vi/qKNOkK-8hDo/mq3.jpg" }
           %h2
             %a{ :href => "#{app_root}/peak_browser" }
               Peak Browser
           %p.main-desc
-            graphically visualizes protein binding on given genomic loci with genome browser (IGV).
+            Visualizes protein binding on given genomic loci with
+            %a{ href: "http://software.broadinstitute.org/software/igv/home", target: "_blank" }
+              IGV genome browser
           %p.main-desc
             %a{ :href => "https://youtu.be/qKNOkK-8hDo", :target => "_blank" }
-              Watch Movie
-        .col-md-3
+              Watch tutorial movie
+
+      %hr.introduction
+      .row
+        .col-md-12
+          %a{ :href => "https://youtu.be/Sp9DUAuKkvQ", :target => "_blank" }
+            %img.pull-right{ src: "https://img.youtube.com/vi/Sp9DUAuKkvQ/mq3.jpg" }
           %h2
             %a{ :href => "#{app_root}/target_genes" }
               Target Genes
           %p.main-desc
-            predicts target genes bound by given transcription factors.
+            Predict target genes bound by given transcription factors
           %p.main-desc
             %a{ :href => "https://youtu.be/Sp9DUAuKkvQ", :target => "_blank" }
-              Watch Movie
-        .col-md-3
+              Watch tutorial movie
+
+      %hr.introduction
+      .row
+        .col-md-12
+          %a{ :href => "https://youtu.be/jhLnWNCe_No", :target => "_blank" }
+            %img.pull-right{ src: "https://img.youtube.com/vi/jhLnWNCe_No/mq2.jpg" }
           %h2
             %a{ :href => "#{app_root}/colo" }
               Colocalization
           %p.main-desc
-            predicts partner proteins colocalizing with given transcription factors.
+            Predict partner proteins colocalizing with given transcription factors
           %p.main-desc
             %a{ :href => "https://youtu.be/jhLnWNCe_No", :target => "_blank" }
-              Watch Movie
-        .col-md-3
+              Watch tutorial movie
+
+      %hr.introduction
+      .row
+        .col-md-12
+          %a{ :href => "https://youtu.be/JBOB2PX5_-0", :target => "_blank" }
+            %img.pull-right{ src: "https://img.youtube.com/vi/JBOB2PX5_-0/mq2.jpg" }
           %h2
             %a{ :href => "#{app_root}/enrichment_analysis" }
               Enrichment Analysis
           %p.main-desc
-            predicts proteins bound to given genomic loci and genes (formerly known as
-            %span.italic
-              in silico
-            ChIP).
+            Predict proteins bound to given genomic loci and genes
           %p.main-desc
             %a{ :href => "https://youtu.be/JBOB2PX5_-0", :target => "_blank"  }
-              Watch Movie
+              Watch tutorial movie
+
+      %hr.introduction
+      .row
+        .col-md-12
+          %h2
+            %a{ :href => "#{app_root}/search" }
+              Dataset Search
+          %p.main-desc
+            Find calculated public dataset with SRA experiment/GEO Sample IDs and attributes
+
 
     %footer.footer
       .container
