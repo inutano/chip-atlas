@@ -55,13 +55,13 @@
     - metadata = records[0]
     .container
       .row
-        .col-md-12
+        .col-md-10.col-md-offset-1
           .page-header
             .btn-toolbar.pull-right{ role: "toolbar" }
               // View on IGV button
               .btn-group{ role: "group" }
-                .button.btn.btn-primary.btn-lg.dropdown-toggle{ type: "button", id: "view-igv-dropdown", "data-toggle" => "dropdown", "aria-haspopup" => true, "aria-expanded" => true }
-                  View on IGV
+                .button.btn.btn-primary.dropdown-toggle{ type: "button", id: "view-igv-dropdown", "data-toggle" => "dropdown", "aria-haspopup" => true, "aria-expanded" => true }
+                  Peak Browser
                   %span.caret
                 %ul.dropdown-menu{ "aria-labelledby" => "igv-dropdown" }
                   - igv_linkout_base = "http://localhost:60151/load?file=http://dbarchive.biosciencedbc.jp/kyushu-u"
@@ -81,8 +81,8 @@
 
               // View Analysis button
               .btn-group{ role: "group" }
-                .button.btn.btn-primary.btn-lg.dropdown-toggle{ type: "button", id: "view-igv-dropdown", "data-toggle" => "dropdown", "aria-haspopup" => true, "aria-expanded" => true }
-                  View Analysis
+                .button.btn.btn-primary.dropdown-toggle{ type: "button", id: "view-igv-dropdown", "data-toggle" => "dropdown", "aria-haspopup" => true, "aria-expanded" => true }
+                  Analysis
                   %span.caret
                 %ul.dropdown-menu{ "aria-labelledby" => "igv-dropdown" }
                   - nbdc_base = "http://dbarchive.biosciencedbc.jp/kyushu-u"
@@ -99,7 +99,7 @@
 
               // View Analysis button
               .btn-group{ role: "group" }
-                .button.btn.btn-primary.btn-lg.dropdown-toggle{ :type => "button", :id => "download-dropdown", "data-toggle" => "dropdown", "aria-haspopup" => true, "aria-expanded" => true }
+                .button.btn.btn-primary.dropdown-toggle{ :type => "button", :id => "download-dropdown", "data-toggle" => "dropdown", "aria-haspopup" => true, "aria-expanded" => true }
                   Download
                   %span.caret
                 %ul.dropdown-menu{ "aria-labelledby" => "download-dropdown" }
@@ -118,8 +118,8 @@
 
               // SRA linkout button
               .btn-group{ role: "group" }
-                .button.btn.btn-primary.btn-lg.dropdown-toggle{ :type => "button", :id => "linkout-dropdown", "data-toggle" => "dropdown", "aria-haspopup" => true, "aria-expanded" => true }
-                  Browse External DB
+                .button.btn.btn-primary.dropdown-toggle{ :type => "button", :id => "linkout-dropdown", "data-toggle" => "dropdown", "aria-haspopup" => true, "aria-expanded" => true }
+                  Link Out
                   %span.caret
                 %ul.dropdown-menu{ "aria-labelledby" => "linkout-dropdown" }
                   - antigen = metadata[:agSubClass]
@@ -132,12 +132,14 @@
                     %a{ :href => "https://www.ncbi.nlm.nih.gov/sra/?term=#{@expid}", target: "_blank" }= "NCBI SRA"
                   %li
                     %a{ :href => "https://www.ebi.ac.uk/ena/browser/view/#{@expid}", target: "_blank" }= "ENA"
+                  %li.divider
                   %li.dropdown-header
                     = "Antigen: #{antigen}"
                   %li
                     %a{ :href => "https://www.wikigenes.org/?search=#{antigen}", target: "_blank" }= "wikigenes"
                   %li
                     %a{ :href => "http://pdbj.org/mine/search?query=#{antigen}", target: "_blank" }= "PDBj"
+                  %li.divider
                   %li.dropdown-header
                     = "CellType: #{celltype}"
                   %li
@@ -147,6 +149,7 @@
                   %li
                     %a{ :href => "http://www2.brc.riken.jp/lab/cell/list.cgi?skey=#{celltype}", target: "_blank" }= "RIKEN BRC"
                   - if metadata[:genome] == "hg19" || metadata[:genome] == "hg38"
+                    %li.divider
                     %li.dropdown-header
                       Variation
                     %li
@@ -157,22 +160,25 @@
               .small
                 = metadata[:title] != "-" ? metadata[:title] : "no title"
 
-      .row.mdata
-        .col-md-6
+      .row
+        .col-md-10.col-md-offset-1
           .panel.panel-default
             .panel-heading
-              %h4
+              %h3.panel-title
                 Sample information curated by ChIP-Atlas
-            .panel-body
-              %h4
-                Antigen
+            .panel-body.mdata
+              %h2
+                .small
+                  Antigen
               %dl.dl-horizontal
                 %dt{ style: 'white-space: normal;' }= "Antigen Class"
                 %dd= metadata[:agClass]
                 %dt{ style: 'white-space: normal;' }= "Antigen"
                 %dd= metadata[:agSubClass]
-              %h4
-                Cell type
+              %hr
+              %h2
+                .small
+                  Cell type
               %dl.dl-horizontal
                 %dt{ style: 'white-space: normal;' }= "Cell type Class"
                 %dd= metadata[:clClass]
@@ -182,20 +188,24 @@
                   %dt{ style: 'white-space: normal;' }= kv.split("=").first
                   %dd= kv.split("=").last
 
-        .col-md-6
+      .row
+        .col-md-10.col-md-offset-1
           .panel.panel-default
             .panel-heading
-              %h4
+              %h3.panel-title
                 Attributes by original data submitter
-            .panel-body
-              %h4
-                Sample
+            .panel-body.mdata
+              %h2
+                .small
+                  Sample
               %dl.dl-horizontal
                 - metadata[:attributes].split("\t").each do |kv|
                   %dt{ style: 'white-space: normal;' }= kv.split("=").first
                   %dd= kv.split("=").last
-              %h4
-                Sequenced DNA Library
+              %hr
+              %h2
+                .small
+                  Sequenced DNA Library
               %dl.dl-horizontal
                 - if @ncbi[:library_description].values.uniq == [""]
                   %span.italic
@@ -204,8 +214,10 @@
                   - if v != ""
                     %dt{ style: 'white-space: normal;' }= k.to_s
                     %dd= v.to_s
-              %h4
-                Sequencing Platform
+              %hr
+              %h2
+                .small
+                  Sequencing Platform
               %dl.dl-horizontal
                 - if @ncbi[:platform_information].values.uniq == [""]
                   %span.italic
@@ -215,21 +227,22 @@
                     %dt{ style: 'white-space: normal;' }= k.to_s
                     %dd= v.to_s
 
-      .row.mdata
-        .col-md-6
+      .row
+        .col-md-10.col-md-offset-1
           .panel.panel-default
             .panel-heading
-              %h4
+              %h3.panel-title
                 %a{ :href => "https://github.com/inutano/chip-atlas/wiki#2-primary-processing" }
                   Read processing pipeline
                 log
               %p
                 %a{ href: "https://github.com/inutano/chip-atlas/wiki#user-content-tables-summarizing-metadata-and-files" }
                   Download processing log information
-            .panel-body
-              - records.each do |record|
+            .panel-body.mdata
+              - records.each.with_index do |record,i|
                 - readinfo = record[:readInfo].split(',')
-                %h4= record[:genome]
+                %h2
+                  .small= record[:genome]
                 %dl.dl-horizontal
                   %dt{ style: 'white-space: normal;' }= "Number of total reads"
                   %dd= readinfo[0]
@@ -239,17 +252,20 @@
                   %dd= readinfo[2]
                   %dt{ style: 'white-space: normal;' }= "Number of peaks"
                   %dd= readinfo[3] + " (qval < 1E-05)"
+                - if i != (records.size - 1)
+                  %hr
 
-        .col-md-6
+
+      .row
+        .col-md-10.col-md-offset-1
           .panel.panel-default
             .panel-heading
-              %h4
-                Sequence Quality Data from
+              %h3.panel-title
+                Base call quality data from
                 %a{ :href => "http://sra.dbcls.jp" }
                   DBCLS SRA
             .panel-body
               .sequence_quality
-                .row
 
     %footer.footer
       .container
