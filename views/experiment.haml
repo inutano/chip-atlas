@@ -223,6 +223,9 @@
                 %a{ :href => "https://github.com/inutano/chip-atlas/wiki#2-primary-processing" }
                   Read processing pipeline
                 log
+              %p
+                %a{ href: "https://github.com/inutano/chip-atlas/wiki#tables-summarizing-metadata-and-files" }
+                  Where can I get these information?
             .panel-body
               - records.each do |record|
                 - readinfo = record[:readInfo].split(',')
