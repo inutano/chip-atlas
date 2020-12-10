@@ -79,28 +79,6 @@
                     %a{ :href => "http://sra.dbcls.jp/details.html?db=sra&accession=#{@expid}" }= "DBCLS SRA"
                   %li
                     %a{ :href => "https://www.ncbi.nlm.nih.gov/sra/?term=#{@expid}" }= "NCBI SRA"
-            .btn-group{ role: "group" }
-              .dropdown
-                .button.btn.btn-primary.btn-lg.dropdown-toggle{ :type => "button", :id => "linkout-dropdown", "data-toggle" => "dropdown", "aria-haspopup" => true, "aria-expanded" => true }
-                  = 'Antigen: ' + antigen
-                  %span.caret
-                %ul.dropdown-menu{ "aria-labelledby" => "linkout-dropdown" }
-                  %li
-                    %a{ :href => "https://www.wikigenes.org/?search=#{antigen}" }= "wikigenes"
-                  %li
-                    %a{ :href => "http://pdbj.org/mine/search?query=#{antigen}" }= "PDBj"
-            .btn-group{ role: "group" }
-              .dropdown
-                .button.btn.btn-primary.btn-lg.dropdown-toggle{ :type => "button", :id => "linkout-dropdown", "data-toggle" => "dropdown", "aria-haspopup" => true, "aria-expanded" => true }
-                  = 'CellType: ' + "#{metadata[:clSubClass]}"
-                  %span.caret
-                %ul.dropdown-menu{ "aria-labelledby" => "linkout-dropdown" }
-                  %li
-                    %a{ :href => "http://www.atcc.org/Search_Results.aspx?searchTerms=#{celltype}" }= "ATCC"
-                  %li
-                    %a{ :href => "https://www.ncbi.nlm.nih.gov/mesh/?term=#{celltype}" }= "MeSH"
-                  %li
-                    %a{ :href => "http://www2.brc.riken.jp/lab/cell/list.cgi?skey=#{celltype}" }= "RIKEN BRC"
 
       .row.buttonviewdata
         - records.each do |record|
