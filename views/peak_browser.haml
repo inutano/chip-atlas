@@ -123,17 +123,15 @@
                       .panel.panel-default
                         - sclass_id = "#{genome}#{set[0]}SubClass"
                         .panel-heading{ :id => "heading-#{sclass_id}" }
-                          %h4.panel-title
-                            %a{ "data-toggle" => "collapse", "aria-controls" => "collapse-#{sclass_id}", :id => "toggle-#{sclass_id}" }= "#{set[1]}"
-                        .collapse{ :id => "collapse-#{sclass_id}" }
-                          .panel-body
-                            .panel-message{ :id => "#{sclass_id}" }
+                          %h4.panel-title= "#{set[1]}"
+                        .panel-body
+                          .panel-message{ :id => "#{sclass_id}" }
 
-                            // input box for typeahead
-                            %input.typeahead.form-control{ :type => "text", :placeholder => "type to search", :id => "#{sclass_id}" }
+                          // input box for typeahead
+                          %input.typeahead.form-control{ :type => "text", :placeholder => "type to search", :id => "#{sclass_id}" }
 
-                            %select.form-control.flexselect{ :id => "#{sclass_id}", :size => 8 }
-                              %option{ :value => "-", "selected" => true }= "All"
+                          %select.form-control.flexselect{ :id => "#{sclass_id}", :size => 8 }
+                            %option{ :value => "-", "selected" => true }= "All"
 
                 .col-md-4
                   %form
@@ -149,9 +147,9 @@
                             %option{ :value => qv, "#{(i == 0) ? 'selected' : '' }" => "" }= "#{qv.to_i*10}"
 
                   .button-submit.down
-                    %a.infoBtn{ :value => "info", :id => "#{genome}ViewOnIGV" }
-                      &#x24D8;
                     %button.btn.btn-primary.btn-lg.btn-block{ :id => "submit", :type => "button" }= "View on IGV"
+                    %a.pull-right.infoBtn{ :value => "info", :id => "#{genome}ViewOnIGV" }
+                      Error connecting to IGV?
                     %button.btn.btn-primary.btn-lg.btn-block{ :id => "download", :type => "button" }= "Download BED file"
 
 

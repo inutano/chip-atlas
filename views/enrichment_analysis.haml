@@ -63,7 +63,7 @@
           .header
             %h1
               ChIP-Atlas: Enrichment Analysis
-            %p= "Analyze your data with public ChIP-seq data."
+            %p= "Compare two dataset based on the public ChIP-seq data."
         .col-md-2
           .dropdown-help
             .dropdown
@@ -133,7 +133,7 @@
                   .panel.panel-default
                     - panel = "#{genome}MyDataPanel"
                     .panel-heading{ :id => panel }
-                      %h4.panel-title= "4. Select your data"
+                      %h4.panel-title= "4. Select dataset A"
                     .panel-body
                       %form
                         .checkbox.panel-input
@@ -167,13 +167,13 @@
                   .panel.panel-default
                     - panel = "#{genome}TargetDB"
                     .panel-heading{ :id => panel }
-                      %h4.panel-title= "5. Select dataset to be compared"
+                      %h4.panel-title= "5. Select dataset B"
                     .panel-body
                       %form
                         .checkbox.panel-input.bed
                           %label
                             %input{ :type => "radio", :id => "#{genome}ComparedWithRandom", :name => "comparedWith", :value => "rnd", :checked => "checked" }
-                            Random permutation of user data
+                            Random permutation of dataset A
                             %a.infoBtn{ :id => "#{genome}ComparedWithRandom" }
                               &#x24D8;
                           .checkbox.form-inline.panel-input.rnd
@@ -195,7 +195,7 @@
                         .checkbox.panel-input.gene.default-hide
                           %label
                             %input{ :type => "radio", :id => "#{genome}ComparedWithRefseq", :name => "comparedWith", :value => "refseq" }
-                            Refseq coding genes (excluding user data)
+                            Refseq coding genes (excluding dataset A)
                             %a.infoBtn{ :id => "#{genome}ComparedWithRefseq" }
                               &#x24D8;
                         .checkbox.panel-input.gene.default-hide
@@ -222,26 +222,26 @@
                   .panel.panel-default
                     - panel = "#{genome}Desc"
                     .panel-heading{ :id => panel }
-                      %h4.panel-title= "6. Describe datasets"
+                      %h4.panel-title= "6. Analysis description"
                     .panel-body
                       .panel-input.desc.form-inline
                         %p.form-control-static
-                          User data title
+                          Analysis title
+                          %a.infoBtn{ :value => "info", :id => "#{genome}ProjectDesc" }
+                            &#x24D8;
+                        %input.form-control{ :type => "text", :id => "#{genome}ProjectTitle"}
+                      .panel-input.desc.form-inline
+                        %p.form-control-static
+                          Dataset A title
                           %a.infoBtn{ :value => "info", :id => "#{genome}UserDataDesc" }
                             &#x24D8;
                         %input.form-control{ :type => "text", :id => "#{genome}UserDataTitle"}
                       .panel-input.desc.form-inline
                         %p.form-control-static
-                          Compared data title
+                          Dataset B title
                           %a.infoBtn{ :value => "info", :id => "#{genome}ComparedWithDesc" }
                             &#x24D8;
                         %input.form-control{ :type => "text", :id => "#{genome}ComparedWithTitle"}
-                      .panel-input.desc.form-inline
-                        %p.form-control-static
-                          Project title
-                          %a.infoBtn{ :value => "info", :id => "#{genome}ProjectDesc" }
-                            &#x24D8;
-                        %input.form-control{ :type => "text", :id => "#{genome}ProjectTitle"}
                       .panel-input.distTSS.form-group.default-hide
                         %p.form-control-static
                           Distance range from TSS
