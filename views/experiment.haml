@@ -67,9 +67,12 @@
               // View on IGV button
               .btn-group{ role: "group" }
                 .button.btn.btn-primary.dropdown-toggle{ type: "button", id: "view-igv-dropdown", "data-toggle" => "dropdown", "aria-haspopup" => true, "aria-expanded" => true }
-                  Peak Browser
+                  Visualize
                   %span.caret
                 %ul.dropdown-menu{ "aria-labelledby" => "igv-dropdown" }
+                  %li.dropdown-header{ role: "presentation" }
+                    Install and launch IGV before clicking the button
+                  %li.divider
                   - igv_linkout_base = "http://localhost:60151/load?file=http://dbarchive.biosciencedbc.jp/kyushu-u"
                   - records.each_with_index do |record, i|
                     - genome = record[:genome]
@@ -88,7 +91,7 @@
               // View Analysis button
               .btn-group{ role: "group" }
                 .button.btn.btn-primary.dropdown-toggle{ type: "button", id: "view-igv-dropdown", "data-toggle" => "dropdown", "aria-haspopup" => true, "aria-expanded" => true }
-                  Analysis
+                  Analyze
                   %span.caret
                 %ul.dropdown-menu{ "aria-labelledby" => "igv-dropdown" }
                   - nbdc_base = "http://dbarchive.biosciencedbc.jp/kyushu-u"
