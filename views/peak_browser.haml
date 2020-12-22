@@ -147,9 +147,9 @@
                             %option{ :value => qv, "#{(i == 0) ? 'selected' : '' }" => "" }= "#{qv.to_i*10}"
 
                   .button-submit.down
-                    %a.infoBtn{ :value => "info", :id => "#{genome}ViewOnIGV" }
-                      &#x24D8;
                     %button.btn.btn-primary.btn-lg.btn-block{ :id => "submit", :type => "button" }= "View on IGV"
+                    %a.pull-right.infoBtn{ :value => "info", :id => "#{genome}ViewOnIGV" }
+                      Error connecting to IGV?
                     %button.btn.btn-primary.btn-lg.btn-block{ :id => "download", :type => "button" }= "Download BED file"
 
 
