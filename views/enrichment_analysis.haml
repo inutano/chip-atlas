@@ -63,7 +63,8 @@
           .header
             %h1
               ChIP-Atlas: Enrichment Analysis
-            %p= "Compare two dataset based on the public ChIP-seq data."
+            %p
+              Predict proteins bound to given genomic loci and genes
         .col-md-2
           .dropdown-help
             .dropdown
@@ -133,7 +134,8 @@
                   .panel.panel-default
                     - panel = "#{genome}MyDataPanel"
                     .panel-heading{ :id => panel }
-                      %h4.panel-title= "4. Select dataset A"
+                      %h4.panel-title
+                        4. Enter dataset A
                     .panel-body
                       %form
                         .checkbox.panel-input
@@ -167,7 +169,8 @@
                   .panel.panel-default
                     - panel = "#{genome}TargetDB"
                     .panel-heading{ :id => panel }
-                      %h4.panel-title= "5. Select dataset B"
+                      %h4.panel-title
+                        5. Enter dataset B
                     .panel-body
                       %form
                         .checkbox.panel-input.bed

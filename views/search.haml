@@ -63,18 +63,20 @@
       .row
         .col-md-10
           .header
-            %h1= "ChIP-Atlas: Dataset Search"
-            %p= "Search Experiments by keywords."
+            %h1
+              ChIP-Atlas: Dataset Search
+            %p
+              Search for data by keywords
 
       .searchTab{ :role => "tabpanel"}
         %ul.nav.nav-tabs{ :role => "tablist" }
-          - ["Simple", "Advanced"].each.with_index do |stype, i|
+          - ["Simple", "Detailed"].each.with_index do |stype, i|
             %li{ :role => "presentation", :class => "#{(i == 0) ? 'active' : '' }", :id => "#{stype}-tab" }
               %a{ :href => "##{stype}-tab-content", "aria-controls" => "#{stype}-tab-content", :role => "tab", "data-toggle" => "tab", "source" => stype }
                 = "#{stype} search"
 
         .tab-content
-          - ["Simple", "Advanced"].each.with_index do |stype, i|
+          - ["Simple", "Detailed"].each.with_index do |stype, i|
             .tab-pane.fade{ :role => "tabpanel", :id => "#{stype}-tab-content", :class => "#{(i == 0) ? 'in active' : ''}" }
               .row
                 .col-md-12

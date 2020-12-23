@@ -31,7 +31,7 @@ class PeakJohn < Sinatra::Base
 
   configure do
     begin
-      set :number_of_experiments, ((PJ::Experiment.all.size / 1000) * 1000).to_s.reverse.gsub(/(\d{3})(?=\d)/, '\\1,').reverse
+      set :number_of_experiments, ((PJ::Experiment.number_of_experiments / 1000) * 1000).to_s.reverse.gsub(/(\d{3})(?=\d)/, '\\1,').reverse
       set :index_all_genome, PJ::Experiment.index_all_genome
       set :list_of_genome, PJ::Experiment.list_of_genome
       set :qval_range, PJ::Bedfile.qval_range
