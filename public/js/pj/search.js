@@ -5,7 +5,7 @@ $(function(){
     $(this).tab('show')
   });
 
-  $('#Advanced-tab a').click(function (e) {
+  $('#Detailed-tab a').click(function (e) {
     e.preventDefault()
     $(this).tab('show')
   });
@@ -52,7 +52,7 @@ $(function(){
   };
 
   simpleSearch();
-  advancedSearch();
+  DetailedSearch();
 });
 
 function simpleSearch() {
@@ -97,8 +97,8 @@ function simpleSearch() {
   });
 }
 
-function advancedSearch() {
-    $('#AdvancedSearchDataTable').DataTable( {
+function DetailedSearch() {
+    $('#DetailedSearchDataTable').DataTable( {
         deferRender: true,
         dom: '<"top"fliB>tpr<"bottom"><"clear">',
         aLengthMenu: [[10, 20, 50, 100], [10, 20, 50, 100]],
