@@ -150,6 +150,11 @@ module PJ
         records.each{|n| index[n.send(column)] += 1 }
         index
       end
+
+      def number_of_experiments
+        # Count number of entries but remove duplcation of multiple genome assemblies
+        self.all.map{|n| n.expid }.uniq.size
+      end
     end
   end
 end
