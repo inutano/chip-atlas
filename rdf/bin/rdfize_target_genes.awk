@@ -33,7 +33,7 @@ fn>=2 && FNR==1 {
         exp_id[i] = s[1]
         cell_line[i] = s[2]
     }
-    split(FILENAME, s, ".") # <TF>.(1|5|10).tsv
+    split(gensub(/^.*\//, "", "g", FILENAME), s, ".") # <TF>.(1|5|10).tsv
     #tf_sym = gensub(/(^.*\/)|(\.[0-9]+\.tsv)/, "", "g", FILENAME)
     tf_sym = s[1]
     range = s[2]
@@ -62,7 +62,7 @@ fn>=2 && FNR>=2 {
                 print "  cao:hasExperiment srx:" exp_id[i] " ;"
                 print "  cao:hasCellLine \"" cell_line[i] "\" .\n"
             } else {
-                print "ca:" relation_id " cao:score" range "k " $i " ."
+                print "ca:" relation_id " cao:score" range "k " $i " .\n"
             }
         }
     } else {
