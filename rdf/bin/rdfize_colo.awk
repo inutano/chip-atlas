@@ -59,7 +59,7 @@ fn>=2 && FNR>=2 {
             print "  cao:hasPartnerCellLine \"" $2 "\" .\n"
         }
     } else {
-        print FILENAME ":" FNR ": " $1 " is not defined in the ID mapping table file." > "/dev/stderr"
+        print FILENAME ":" FNR ": " $3 " is not defined in the ID mapping table file." > "/dev/stderr"
         next
         # print $1
     }
