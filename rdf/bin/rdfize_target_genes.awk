@@ -51,7 +51,7 @@ fn>=2 && FNR>=2 {
         target_id = sym2id[$1]
         for(i=3; i<=NF-1; i++) {
             if($i == 0)
-                next
+                continue
             relation_id = exp_id[i] "-" target_id
             if(!is_covered_id[relation_id]) {
                 is_covered_id[relation_id] = 1
