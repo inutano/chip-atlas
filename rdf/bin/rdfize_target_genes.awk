@@ -57,7 +57,7 @@ fn>=2 && FNR>=2 {
                 is_covered_id[relation_id] = 1
                 print "ca:" relation_id " a cao:PutativeRegulation ;"
                 print "  cao:hasTF ensg:" tf_id " ;"
-                print "  cao:hasTarget ensg:" target_id " ;"
+                print "  cao:hasTargetGene ensg:" target_id " ;"
                 print "  cao:score" range "k " $i " ;"
                 print "  cao:hasExperiment srx:" exp_id[i] " ;"
                 print "  cao:hasCellLine \"" cell_line[i] "\" .\n"

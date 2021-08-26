@@ -51,9 +51,9 @@ fn>=2 && FNR>=2 {
             relation_id = exp_id[i] "-" $1
             print "ca:" relation_id " a cao:Colocalization ;"
             print "  cao:hasTF ensg:" tf_id " ;"
-            print "  cao:hasPartner ensg:" partner_id " ;"
+            print "  cao:hasPartnerTF ensg:" partner_id " ;"
             print "  cao:hasExperiment srx:" exp_id[i] " ;"
-            print "  cao:hasPartnerExp srx:" $1 " ;"
+            print "  cao:hasPartnerExperiment srx:" $1 " ;"
             print "  cao:coloScore " $i " ;"
             print "  cao:hasCellLine \"" cell_line[i] "\" ;"
             print "  cao:hasPartnerCellLine \"" $2 "\" .\n"
