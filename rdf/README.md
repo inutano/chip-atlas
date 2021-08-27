@@ -1,8 +1,28 @@
-# ChIP-Atlas peak data in RDF
+# ChIP-Atlas data in RDF
 
-## RDF data model
+- Peak call data
+- Target gene analysis
+- Colocalization analysis
+
+## Models
+
+### Peaks
+
+Peak data (bed files) are converted to the RDF triples with FALDO which enables to record the genomic location.
 
 ![model](images/chipatlas_bindingsites_rdf.png)
+
+### Target genes and Colocalization
+
+- Target genes
+  - A class named `PutativeRegulation` is for pairs of transcription factors and their target genes candidates
+  - The pairs have scores in respective distances from TSS (1k, 5k, 10k)
+- Colocalization
+  - A class named `Colocalization` is for pairs of transcription factors and their colocalization partner TFs
+  - The Colo score means the strength of each peaks of the pair. See details [here](https://github.com/inutano/chip-atlas/wiki#colocalization_doc)
+
+![analysis model](images/chipatlas_analysis_rdf.png)
+
 
 ## Usage
 
