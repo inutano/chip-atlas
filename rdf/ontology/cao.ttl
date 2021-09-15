@@ -1,0 +1,82 @@
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix : <http://chip-atlas.org/ontology/cao.ttl#> .
+
+<http://chip-atlas.org/ontology/cao.ttl>
+    a owl:Ontology ;
+    rdfs:label "ChIP-Atlas ontology" ;
+    owl:versionInfo "2021-09-15" ;
+    owl:versionIRI <http://chip-atlas.org/ontology/releases/2021-09-15/cao.ttl> .
+
+:PutativeRegulation 
+    a owl:Class ;
+    rdfs:label "putative regulation" .
+
+:Colocalization 
+    a owl:Class ;
+    rdfs:label "colocalization" .
+
+:hasTargetGene 
+    a owl:ObjectProperty ;
+    rdfs:domain :PutativeRegulation ;
+    rdfs:label "has target gene" .
+
+:hasTF 
+    a owl:ObjectProperty ;
+    rdfs:domain :PutativeRegulation , :Colocalization ;
+    rdfs:label "has TF" .
+
+:hasCellLine 
+    a owl:DatatypeProperty ;
+    rdfs:domain :PutativeRegulation , :Colocalization ;
+    rdfs:label "has cell line" ;
+    rdfs:range xsd:string .
+
+:hasExperiment 
+    a owl:ObjectProperty ;
+    rdfs:domain :PutativeRegulation , :Colocalization ;
+    rdfs:label "has experiment" .
+
+:hasPartnerTF 
+    a owl:ObjectProperty ;
+    rdfs:domain :Colocalization ;
+    rdfs:label "has partner TF" .
+
+:hasPartnerExperiment 
+    a owl:ObjectProperty ;
+    rdfs:domain :Colocalization ;
+    rdfs:label "has partner experiment" .
+
+:hasPartnerCellLine 
+    a owl:DatatypeProperty ;
+    rdfs:domain :Colocalization ;
+    rdfs:label "has partner cell line" ;
+    rdfs:range xsd:string .
+
+:highestMACS2Score 
+    a owl:DatatypeProperty ;
+    rdfs:domain :PutativeRegulation ;
+    rdfs:label "score" ;
+    rdfs:range xsd:integer .
+
+:score1k 
+    a owl:DatatypeProperty ;
+    rdfs:subClassOf :highestMACS2Score ;
+    rdfs:label "score 1k" .
+
+:score5k 
+    a owl:DatatypeProperty ;
+    rdfs:subClassOf :highestMACS2Score ;
+    rdfs:label "score 5k" .
+
+:score10k 
+    a owl:DatatypeProperty ;
+    rdfs:subClassOf :highestMACS2Score ;
+    rdfs:label "score 10k" .
+
+:coloScore 
+    a owl:DatatypeProperty ;
+    rdfs:domain :Colocalization ;
+    rdfs:label "CoLo score" ;
+    rdfs:range xsd:integer .
