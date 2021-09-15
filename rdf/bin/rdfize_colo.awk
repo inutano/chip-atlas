@@ -10,7 +10,7 @@ BEGIN {
     FS = "\t"
 
     print "@prefix ca:   <http://chip-atlas.org/resources/> ."
-    print "@prefix cao:  <http://chip-atlas.org/ontology/> ."
+    print "@prefix cao:  <http://chip-atlas.org/ontology/cao.ttl#> ."
     print "@prefix ensg: <http://identifiers.org/ensembl/> ."
     print "@prefix srx:  <http://identifiers.org/insdc.sra/> ."
     print ""
