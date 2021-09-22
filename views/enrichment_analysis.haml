@@ -93,7 +93,30 @@
             .tab-pane.fade{ :role => "tabpanel", :id => "#{genome}-tab-content", :class => "#{(i == 0) ? 'in active' : ''}" }
               - index = @index_all_genome[genome]
               .row
-                - [["ag","Antigen"],["cl", "Cell type"]].each.with_index do |set, i|
+                .col-md-4
+                  %form
+                    .panel.panel-default
+                      - class_id = "#{genome}agClass"
+                      .panel-heading{ :id => "heading-#{class_id}" }
+                        %h4.panel-title= "#{i+1}. Experiments"
+                      .panel-body
+                        %select.form-control{ :id => "#{class_id}", :size => 8 }
+                          - ind = index[:antigen]
+                          - count = ind.values.map{|n| n.values }.flatten.reduce(:+)
+                          - specials = ["Input control","Others","Unclassified","No description"]
+                          - nodes = ind.to_a.sort
+                          - nodes_normal = nodes.reject{|a| specials.include?(a[0]) }
+                          - nodes_special = specials.map{|special| nodes.select{|n| n[0] == special }[0] }.compact
+                          - collection = nodes_normal + nodes_special
+                          %option{ :value => "Histone", "selected" => true }= "ChIP: Histone (#{collection.select{|node| node[0] == "Histone"}[0][1].each_value.reduce(:+)})"
+                          %option{ :value => "RNA polymerase" }= "ChIP: RNA polymerase (#{collection.select{|node| node[0] == "RNA polymerase"}[0][1].each_value.reduce(:+)})"
+                          %option{ :value => "TFs and others" }= "ChIP: TFs and others (#{collection.select{|node| node[0] == "TFs and others"}[0][1].each_value.reduce(:+)})"
+                          %option{ :value => "Input control" }= "ChIP: Input control (#{collection.select{|node| node[0] == "Input control"}[0][1].each_value.reduce(:+)})"
+                          %option{ :value => "ATAC-Seq" }= "ATAC-Seq (#{collection.select{|node| node[0] == "ATAC-Seq"}[0][1].each_value.reduce(:+)})"
+                          %option{ :value => "DNase-seq" }= "DNase-Seq (#{collection.select{|node| node[0] == "DNase-seq"}[0][1].each_value.reduce(:+)})"
+                          %option{ :value => "Bisulfite-Seq" }= "Bisulfite-Seq (#{collection.select{|node| node[0] == "Bisulfite-Seq"}[0][1].each_value.reduce(:+)})"
+
+                - [["cl", "Cell type"]].each.with_index do |set, i|
                   .col-md-4
                     %form
                       .panel.panel-default

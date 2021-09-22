@@ -94,13 +94,52 @@
               %a{ :href => "##{genome}-tab-content", "aria-controls" => "#{genome}-tab-content", :role => "tab", "data-toggle" => "tab", "source" => genome }
                 = "#{@list_of_genome[genome]}"
 
+
+
+
         // Contents
         .tab-content
           - @list_of_genome.keys.each.with_index do |genome, i|
             .tab-pane.fade{ :role => "tabpanel", :id => "#{genome}-tab-content", :class => "#{(i == 0) ? 'in active' : ''}" }
               - index = @index_all_genome[genome]
               .row
-                - [["ag","Antigen"],["cl", "Cell type"]].each do |set|
+                .col-md-4
+                  %form
+                    .panel.panel-default
+                      - class_id = "#{genome}agClass"
+                      .panel-heading{ :id => "heading-#{class_id}" }
+                        %h4.panel-title= "Experiments"
+                      .panel-body
+                        %select.form-control.classSelect{ :id => "#{class_id}", :size => 8, :name => "antigen" }
+                          - ind = index[:antigen]
+                          - count = ind.values.map{|n| n.values }.flatten.reduce(:+)
+                          - specials = ["Input control","Others","Unclassified","No description"]
+                          - nodes = ind.to_a.sort
+                          - nodes_normal = nodes.reject{|a| specials.include?(a[0]) }
+                          - nodes_special = specials.map{|special| nodes.select{|n| n[0] == special }[0] }.compact
+                          - collection = nodes_normal + nodes_special
+                          %option{ :value => "Histone", "selected" => true }= "ChIP: Histone (#{collection.select{|node| node[0] == "Histone"}[0][1].each_value.reduce(:+)})"
+                          %option{ :value => "RNA polymerase" }= "ChIP: RNA polymerase (#{collection.select{|node| node[0] == "RNA polymerase"}[0][1].each_value.reduce(:+)})"
+                          %option{ :value => "TFs and others" }= "ChIP: TFs and others (#{collection.select{|node| node[0] == "TFs and others"}[0][1].each_value.reduce(:+)})"
+                          %option{ :value => "Input control" }= "ChIP: Input control (#{collection.select{|node| node[0] == "Input control"}[0][1].each_value.reduce(:+)})"
+                          %option{ :value => "ATAC-Seq" }= "ATAC-Seq (#{collection.select{|node| node[0] == "ATAC-Seq"}[0][1].each_value.reduce(:+)})"
+                          %option{ :value => "DNase-seq" }= "DNase-Seq (#{collection.select{|node| node[0] == "DNase-seq"}[0][1].each_value.reduce(:+)})"
+                          %option{ :value => "Bisulfite-Seq" }= "Bisulfite-Seq (#{collection.select{|node| node[0] == "Bisulfite-Seq"}[0][1].each_value.reduce(:+)})"
+
+                    .panel.panel-default
+                      - sclass_id = "#{genome}agSubClass"
+                      .panel-heading{ :id => "heading-#{sclass_id}" }
+                        %h4.panel-title= "Experiment types"
+                      .panel-body
+                        .panel-message{ :id => "#{sclass_id}" }
+
+                        // input box for typeahead
+                        %input.typeahead.form-control{ :type => "text", :placeholder => "type to search", :id => "#{sclass_id}" }
+
+                        %select.form-control.flexselect{ :id => "#{sclass_id}", :size => 8 }
+                          %option{ :value => "-", "selected" => true }= "All"
+
+                - [["cl", "Cell type"]].each do |set|
                   .col-md-4
                     %form
                       .panel.panel-default
