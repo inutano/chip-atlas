@@ -61,11 +61,6 @@ function resetSubClassOptions(){ // Erase existing options and put an option for
   $.each(['ag', 'cl'], function(i, t){
     var subClassSelect = $('select#' + genome + t + 'SubClass');
     subClassSelect.empty();
-    $("<option>")
-      .attr("value", "-")
-      .attr("selected", "true")
-      .append("All")
-      .appendTo(subClassSelect);
   });
 }
 
@@ -73,21 +68,64 @@ function generateSubClassOptions(){
   var genome = genomeSelected();
   var agSelected = $('select#' + genome + 'agClass option:selected').val();
   var clSelected = $('select#' + genome + 'clClass option:selected').val();
-  $.each([['ag', agSelected], ['cl', clSelected]], function(i, set){
-    var url = '/data/index_subclass.json?' + 'genome=' + genome + '&agClass=' + agSelected + '&clClass=' + clSelected + '&type=' + set[0];
-    $.ajax({
-      type: 'GET',
-      url: url,
-      dataType: 'json'
-    }).done(function(json){
-      var options = json;
-      putSubClassOptions(options, 'select#' + genome + set[0] + 'SubClass')
-      activateTypeAhead(genome, set[0], options);
-    });
+  addAgSubClassOptions(genome, agSelected, clSelected)
+  addClSubClassOptions(genome, agSelected, clSelected)
+}
+
+function addAgSubClassOptions (genome, agSelected, clSelected) {
+  var url = '/data/index_subclass.json?' + 'genome=' + genome + '&agClass=' + agSelected + '&clClass=' + clSelected + '&type=ag';
+  const panelAppendTo = 'select#' + genome + 'agSubClass';
+  switch (agSelected) {
+    case 'Input control':
+    case 'ATAC-Seq':
+    case 'DNase-seq':
+    case 'Bisulfite-Seq':
+      putNAOptions(panelAppendTo)
+      break;
+    default:
+      $.ajax({
+        type: 'GET',
+        url: url,
+        dataType: 'json'
+      }).done(function(json){
+        var options = json;
+        putSubClassOptions(options, panelAppendTo)
+        activateTypeAhead(genome, 'ag', options);
+      });
+  }
+}
+
+function addClSubClassOptions (genome, agSelected, clSelected) {
+  var url = '/data/index_subclass.json?' + 'genome=' + genome + '&agClass=' + agSelected + '&clClass=' + clSelected + '&type=cl';
+  $.ajax({
+    type: 'GET',
+    url: url,
+    dataType: 'json'
+  }).done(function(json){
+    var options = json;
+    putSubClassOptions(options, 'select#' + genome + 'clSubClass')
+    activateTypeAhead(genome, 'cl', options);
   });
 }
 
+function putAllOptions(panelAppendTo) {
+  $('<option>')
+    .attr("value", "-")
+    .attr("selected", true)
+    .append("All")
+    .appendTo(panelAppendTo);
+}
+
+function putNAOptions(panelAppendTo) {
+  $('<option>')
+    .attr("value", "-")
+    .attr("selected", true)
+    .append("NA")
+    .appendTo(panelAppendTo);
+}
+
 function putSubClassOptions(options, panelAppendTo){
+  putAllOptions(panelAppendTo)
   $.map(options, function(value, key){
     return [[key, value]];
   }).sort().forEach(function(element,index,array){
