@@ -29,7 +29,53 @@ $(function(){
   generateSubClassOptions();
   // generate sub class options by selecting class name
   setSubClassOptions();
+
+  // Append qvalue options
+  addQvalOptions();
 })
+
+function addQvalOptions() {
+  var genome = genomeSelected();
+  generateQvalOptions(genome);
+  $('select.classSelect').change(function(){
+    resetQvalOptions(genome);
+    generateQvalOptions(genome);
+  });
+}
+
+function resetQvalOptions(genome) {
+  $('select#' + genome + 'qval').empty();
+}
+
+function generateQvalOptions(genome) {
+  var agSelected = $('select#' + genome + 'agClass option:selected').val();
+  var target = $('select#' + genome + 'qval');
+  switch (agSelected) {
+    case 'Bisulfite-Seq':
+      $('<option>')
+        .attr("value", 'bs')
+        .append('NA')
+        .attr("selected", true)
+        .appendTo(target);
+      break;
+    default:
+      $.ajax({
+        type: 'GET',
+        url: '/qvalue_range',
+        dataType: 'json'
+      }).done(function(json){
+        $.each(json, function(i, qv){
+          var opt = $('<option>')
+            .attr("value", qv)
+            .append(parseInt(qv) * 10)
+          if (i == 0) {
+            opt.attr("selected", true)
+          }
+          opt.appendTo(target);
+        });
+      });
+  }
+}
 
 // functions
 function peakBrowserTabTriggerEvents(){

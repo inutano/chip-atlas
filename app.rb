@@ -107,6 +107,11 @@ class PeakJohn < Sinatra::Base
     haml :about
   end
 
+  get "/qvalue_range" do
+    content_type "application/json"
+    JSON(settings.qval_range)
+  end
+
   get "/peak_browser" do
     @index_all_genome = settings.index_all_genome
     @list_of_genome   = settings.list_of_genome

@@ -100,7 +100,7 @@
                       .panel-heading{ :id => "heading-#{class_id}" }
                         %h4.panel-title= "#{i+1}. Experiments"
                       .panel-body
-                        %select.form-control{ :id => "#{class_id}", :size => 8 }
+                        %select.form-control.classSelect{ :id => "#{class_id}", :size => 8 }
                           - ind = index[:antigen]
                           - count = ind.values.map{|n| n.values }.flatten.reduce(:+)
                           - specials = ["Input control","Others","Unclassified","No description"]
@@ -150,8 +150,7 @@
                             &#x24D8;
                       .panel-body
                         %select.form-control{ :id => "#{genome}qval", :size => 5 }
-                          - @qval_range.sort.each.with_index do |qv, i|
-                            %option{ :value => qv, "#{(i == 1) ? 'selected' : '' }" => "" }= "#{qv.to_i*10}"
+
               .row
                 .col-md-4
                   .panel.panel-default
