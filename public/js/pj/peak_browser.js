@@ -1,8 +1,5 @@
 // onload
 $(function(){
-  // generate sub class options by selecting class name
-  setSubClassOptions();
-
   // tab trigger event
   peakBrowserTabTriggerEvents();
 
@@ -27,6 +24,11 @@ $(function(){
   // post form data
   sendBedToIGV();
   downloadBed();
+
+  // Append initial subclass options
+  generateSubClassOptions();
+  // generate sub class options by selecting class name
+  setSubClassOptions();
 })
 
 // functions
