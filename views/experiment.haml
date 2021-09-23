@@ -78,12 +78,25 @@
                     - genome = record[:genome]
                     - fname = URI.escape("#{record[:agSubClass]} (@ #{record[:clSubClass]}) #{@expid}")
                     %li.dropdown-header{ role: "presentation" }= "For #{genome}"
-                    %li
-                      %a{ href: "#{igv_linkout_base}/#{genome}/eachData/bw/#{@expid}.bw&genome=#{genome}&name=#{fname}" }= "BigWig"
-                    - ["05", "10", "20"].each do |dVal|
+                    - if metadata[:agClass] != 'Bisulfite-Seq'
                       %li
-                        %a{ href: "#{igv_linkout_base}/#{genome}/eachData/bb#{dVal}/#{@expid}.#{dVal}.bb&genome=#{genome}&name=#{fname}%20(1E-#{dVal})" }= "Peak-call (q < 1E-#{dVal})"
-                    %li.divider
+                        %a{ href: "#{igv_linkout_base}/#{genome}/eachData/bw/#{@expid}.bw&genome=#{genome}&name=#{fname}" }= "BigWig"
+                      - ["05", "10", "20"].each do |dVal|
+                        %li
+                          %a{ href: "#{igv_linkout_base}/#{genome}/eachData/bb#{dVal}/#{@expid}.#{dVal}.bb&genome=#{genome}&name=#{fname}%20(1E-#{dVal})" }= "Peak-call (q < 1E-#{dVal})"
+                      %li.divider
+                    - else
+                      %li
+                        %a{ href: "#{igv_linkout_base}/#{genome}/eachData/bs/methyl/#{@expid}.methyl.bw" }= "BigWig (Methylation rate)"
+                      %li
+                        %a{ href: "#{igv_linkout_base}/#{genome}/eachData/bs/cover/#{@expid}.cover.bw" }= "BigWig (Coverage)"
+                      %li
+                        %a{ href: "#{igv_linkout_base}/#{genome}/eachData/bs/hmr/BigBed/#{@expid}.hmr.bb" }= "Hypo MR"
+                      %li
+                        %a{ href: "#{igv_linkout_base}/#{genome}/eachData/bs/pmd/BigBed/#{@expid}.pmd.bb" }= "Partial MR"
+                      %li
+                        %a{ href: "#{igv_linkout_base}/#{genome}/eachData/bs/hypermr/BigBed/#{@expid}.hypermr.bb" }= "Hyper MR"
+
                   %li.dropdown-header{ role: "presentation" }
                     %a.infoBtn{ :value => "info", :id => "viewOnIGV" }
                       Error connecting to IGV?
