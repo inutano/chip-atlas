@@ -96,6 +96,7 @@
                         %a{ href: "#{igv_linkout_base}/#{genome}/eachData/bs/pmd/BigBed/#{@expid}.pmd.bb" }= "Partial MR"
                       %li
                         %a{ href: "#{igv_linkout_base}/#{genome}/eachData/bs/hypermr/BigBed/#{@expid}.hypermr.bb" }= "Hyper MR"
+                      %li.divider
 
                   %li.dropdown-header{ role: "presentation" }
                     %a.infoBtn{ :value => "info", :id => "viewOnIGV" }
@@ -119,7 +120,7 @@
                     - if i != (records.size - 1)
                       %li.divider
 
-              // View Analysis button
+              // Download button
               .btn-group{ role: "group" }
                 .button.btn.btn-primary.dropdown-toggle{ :type => "button", :id => "download-dropdown", "data-toggle" => "dropdown", "aria-haspopup" => true, "aria-expanded" => true }
                   Download
@@ -130,13 +131,26 @@
                     - genome = record[:genome]
                     - dfname = "#{genome}_#{URI.escape(record[:agSubClass])}_#{URI.escape(record[:clSubClass])}_#{@expid}"
                     %li.dropdown-header{ role: "presentation" }= "For #{genome}"
-                    %li
-                      %a{ :href => "#{nbdc_base}/#{genome}/eachData/bw/#{@expid}.bw", :download => "#{dfname}.bw" }= "BigWig"
-                    - ["05", "10", "20"].each do |dVal|
+                    - if metadata[:agClass] != 'Bisulfite-Seq'
                       %li
-                        %a{ :href => "#{nbdc_base}/#{genome}/eachData/bed#{dVal}/#{@expid}.#{dVal}.bed", :download => "#{dfname}.#{dVal}.bb" }= "Peak-call (q < 1E-#{dVal})"
+                        %a{ :href => "#{nbdc_base}/#{genome}/eachData/bw/#{@expid}.bw", :download => "#{dfname}.bw" }= "BigWig"
+                      - ["05", "10", "20"].each do |dVal|
+                        %li
+                          %a{ :href => "#{nbdc_base}/#{genome}/eachData/bed#{dVal}/#{@expid}.#{dVal}.bed", :download => "#{dfname}.#{dVal}.bb" }= "Peak-call (q < 1E-#{dVal})"
+                    - else
+                      %li
+                        %a{ href: "#{nbdc_base}/#{genome}/eachData/bs/methyl/#{@expid}.methyl.bw" }= "BigWig (Methylation rate)"
+                      %li
+                        %a{ href: "#{nbdc_base}/#{genome}/eachData/bs/cover/#{@expid}.cover.bw" }= "BigWig (Coverage)"
+                      %li
+                        %a{ href: "#{nbdc_base}/#{genome}/eachData/bs/hmr/BigBed/#{@expid}.hmr.bb" }= "Hypo MR"
+                      %li
+                        %a{ href: "#{nbdc_base}/#{genome}/eachData/bs/pmd/BigBed/#{@expid}.pmd.bb" }= "Partial MR"
+                      %li
+                        %a{ href: "#{nbdc_base}/#{genome}/eachData/bs/hypermr/BigBed/#{@expid}.hypermr.bb" }= "Hyper MR"
                     - if i != (records.size - 1)
                       %li.divider
+
 
               // SRA linkout button
               .btn-group{ role: "group" }
