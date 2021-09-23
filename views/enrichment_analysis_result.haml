@@ -33,7 +33,9 @@
             %span.icon-bar
             %span.icon-bar
             %span.icon-bar
-          %a.navbar-brand{ :href => "#{app_root}" }= "ChIP-Atlas"
+          %a.navbar-brand{ :href => "#{app_root}" }
+            %i.fas.fa-mountain
+            ChIP-Atlas
         #navbar.collapse.navbar-collapse
           %ul.nav.navbar-nav
             %li
@@ -45,17 +47,21 @@
             %li.active
               %a{ :href => "#{app_root}/enrichment_analysis" }= "Enrichment Analysis"
             %li
-              %a{ :href => "#{app_root}/search" }= "Dataset Search"
-            %li
-              %a{ :href => "https://github.com/inutano/chip-atlas/wiki" }= "Documentation"
-            %li
               %a{ :href => "#{app_root}/publications" }= "Publications"
+            %li
+              %a{ :href => "https://github.com/inutano/chip-atlas/wiki" }
+                %i.fab.fa-github
+                Docs
+          %p.navbar-text.navbar-right
+            %a{ href: "/search" }
+              %i.fas.fa-search
+              Advanced
           %form.navbar-form.navbar-right{ role: "search" }
             .form-group
               %input.form-control#jumpToExperiment{ type: "text", value: "SRX018625", }
             %button.btn.btn-default.go-experiment{ type: "submit", }= "Go"
           %p.navbar-text.navbar-right
-            Search by SRX/GSM ID
+            Find By ID
 
     .container
       .header
@@ -137,3 +143,4 @@
     %script{ :src => "#{app_root}/js/ie10-viewport-bug-workaround.js" }
     %script{ :src => "#{app_root}/js/pj/pj.js" }
     %script{ :src => "#{app_root}/js/pj/enrichment_analysis_result.js" }
+    %script{ :crossorigin => "anonymous", :src => "https://kit.fontawesome.com/9c24e0099d.js" }
