@@ -114,7 +114,7 @@
                     .panel.panel-default
                       - class_id = "#{genome}agClass"
                       .panel-heading{ :id => "heading-#{class_id}" }
-                        %h4.panel-title= "Experiments"
+                        %h4.panel-title= "Experiment type"
                       .panel-body
                         %select.form-control.classSelect{ :id => "#{class_id}", :size => 8, :name => "antigen" }
                           - ind = index[:antigen]
@@ -135,7 +135,7 @@
                     .panel.panel-default
                       - sclass_id = "#{genome}agSubClass"
                       .panel-heading{ :id => "heading-#{sclass_id}" }
-                        %h4.panel-title= "Experiment types"
+                        %h4.panel-title= "ChIP Antigen"
                       .panel-body
                         .panel-message{ :id => "#{sclass_id}" }
 
