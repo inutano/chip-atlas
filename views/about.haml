@@ -58,7 +58,8 @@
               Advanced
           %form.navbar-form.navbar-right{ role: "search" }
             .form-group
-              %input.form-control#jumpToExperiment{ type: "text", value: "SRX018625", }
+              - id_example = ["GSM469863", "SRX018625"].sample(1)[0]
+              %input.form-control#jumpToExperiment{ type: "text", value: "#{id_example}" }
             %button.btn.btn-default.go-experiment{ type: "submit", }= "Go"
           %p.navbar-text.navbar-right
             Find By ID
