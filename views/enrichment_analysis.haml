@@ -33,7 +33,9 @@
             %span.icon-bar
             %span.icon-bar
             %span.icon-bar
-          %a.navbar-brand{ :href => "#{app_root}" }= "ChIP-Atlas"
+          %a.navbar-brand{ :href => "#{app_root}" }
+            %i.fas.fa-mountain
+            ChIP-Atlas
         #navbar.collapse.navbar-collapse
           %ul.nav.navbar-nav
             %li
@@ -45,23 +47,29 @@
             %li.active
               %a{ :href => "#{app_root}/enrichment_analysis" }= "Enrichment Analysis"
             %li
-              %a{ :href => "#{app_root}/search" }= "Dataset Search"
-            %li
-              %a{ :href => "https://github.com/inutano/chip-atlas/wiki" }= "Documentation"
-            %li
               %a{ :href => "#{app_root}/publications" }= "Publications"
+            %li
+              %a{ :href => "https://github.com/inutano/chip-atlas/wiki" }
+                %i.fab.fa-github
+                Docs
+          %p.navbar-text.navbar-right
+            %a{ href: "/search" }
+              %i.fas.fa-search
+              Advanced
           %form.navbar-form.navbar-right{ role: "search" }
             .form-group
-              %input.form-control#jumpToExperiment{ type: "text", value: "SRX018625", }
+              - id_example = ["GSM469863", "SRX018625"].sample(1)[0]
+              %input.form-control#jumpToExperiment{ type: "text", value: "#{id_example}" }
             %button.btn.btn-default.go-experiment{ type: "submit", }= "Go"
           %p.navbar-text.navbar-right
-            Search by SRX/GSM ID
+            Find By ID
 
     .container
       .row
         .col-md-10
           .header
             %h1
+              %i.fas.fa-mountain
               ChIP-Atlas: Enrichment Analysis
             %p
               Predict proteins bound to given genomic loci and genes
@@ -93,7 +101,30 @@
             .tab-pane.fade{ :role => "tabpanel", :id => "#{genome}-tab-content", :class => "#{(i == 0) ? 'in active' : ''}" }
               - index = @index_all_genome[genome]
               .row
-                - [["ag","Antigen"],["cl", "Cell type"]].each.with_index do |set, i|
+                .col-md-4
+                  %form
+                    .panel.panel-default
+                      - class_id = "#{genome}agClass"
+                      .panel-heading{ :id => "heading-#{class_id}" }
+                        %h4.panel-title= "#{i+1}. Experiment type"
+                      .panel-body
+                        %select.form-control.classSelect{ :id => "#{class_id}", :size => 8 }
+                          - ind = index[:antigen]
+                          - count = ind.values.map{|n| n.values }.flatten.reduce(:+)
+                          - specials = ["Input control","Others","Unclassified","No description"]
+                          - nodes = ind.to_a.sort
+                          - nodes_normal = nodes.reject{|a| specials.include?(a[0]) }
+                          - nodes_special = specials.map{|special| nodes.select{|n| n[0] == special }[0] }.compact
+                          - collection = nodes_normal + nodes_special
+                          %option{ :value => "Histone", "selected" => true }= "ChIP: Histone (#{collection.select{|node| node[0] == "Histone"}[0][1].each_value.reduce(:+)})"
+                          %option{ :value => "RNA polymerase" }= "ChIP: RNA polymerase (#{collection.select{|node| node[0] == "RNA polymerase"}[0][1].each_value.reduce(:+)})"
+                          %option{ :value => "TFs and others" }= "ChIP: TFs and others (#{collection.select{|node| node[0] == "TFs and others"}[0][1].each_value.reduce(:+)})"
+                          %option{ :value => "Input control" }= "ChIP: Input control (#{collection.select{|node| node[0] == "Input control"}[0][1].each_value.reduce(:+)})"
+                          %option{ :value => "ATAC-Seq" }= "ATAC-Seq (#{collection.select{|node| node[0] == "ATAC-Seq"}[0][1].each_value.reduce(:+)})"
+                          %option{ :value => "DNase-seq" }= "DNase-Seq (#{collection.select{|node| node[0] == "DNase-seq"}[0][1].each_value.reduce(:+)})"
+                          %option{ :value => "Bisulfite-Seq" }= "Bisulfite-Seq (#{collection.select{|node| node[0] == "Bisulfite-Seq"}[0][1].each_value.reduce(:+)})"
+
+                - [["cl", "Cell type"]].each.with_index do |set, i|
                   .col-md-4
                     %form
                       .panel.panel-default
@@ -127,8 +158,7 @@
                             &#x24D8;
                       .panel-body
                         %select.form-control{ :id => "#{genome}qval", :size => 5 }
-                          - @qval_range.sort.each.with_index do |qv, i|
-                            %option{ :value => qv, "#{(i == 1) ? 'selected' : '' }" => "" }= "#{qv.to_i*10}"
+
               .row
                 .col-md-4
                   .panel.panel-default
@@ -306,3 +336,4 @@
           "genesetB": "#{@genesetB}"
         }
     %script{ :src => "#{app_root}/js/pj/enrichment_analysis.js" }
+    %script{ :crossorigin => "anonymous", :src => "https://kit.fontawesome.com/9c24e0099d.js" }

@@ -33,7 +33,9 @@
             %span.icon-bar
             %span.icon-bar
             %span.icon-bar
-          %a.navbar-brand{ :href => "#{app_root}" }= "ChIP-Atlas"
+          %a.navbar-brand{ :href => "#{app_root}" }
+            %i.fas.fa-mountain
+            ChIP-Atlas
         #navbar.collapse.navbar-collapse
           %ul.nav.navbar-nav
             %li
@@ -45,17 +47,22 @@
             %li
               %a{ :href => "#{app_root}/enrichment_analysis" }= "Enrichment Analysis"
             %li
-              %a{ :href => "#{app_root}/search" }= "Dataset Search"
-            %li
-              %a{ :href => "https://github.com/inutano/chip-atlas/wiki" }= "Documentation"
-            %li
               %a{ :href => "#{app_root}/publications" }= "Publications"
+            %li
+              %a{ :href => "https://github.com/inutano/chip-atlas/wiki" }
+                %i.fab.fa-github
+                Docs
+          %p.navbar-text.navbar-right
+            %a{ href: "/search" }
+              %i.fas.fa-search
+              Advanced
           %form.navbar-form.navbar-right{ role: "search" }
             .form-group
-              %input.form-control#jumpToExperiment{ type: "text", value: "SRX018625", }
+              - id_example = ["GSM469863", "SRX018625"].sample(1)[0]
+              %input.form-control#jumpToExperiment{ type: "text", value: "#{id_example}" }
             %button.btn.btn-default.go-experiment{ type: "submit", }= "Go"
           %p.navbar-text.navbar-right
-            Search by SRX/GSM ID
+            Find By ID
 
     - records = PJ::Experiment.record_by_expid(@expid)
     - metadata = records[0]
@@ -66,7 +73,7 @@
             .btn-toolbar.pull-right{ role: "toolbar" }
               // View on IGV button
               .btn-group{ role: "group" }
-                .button.btn.btn-primary.dropdown-toggle{ type: "button", id: "view-igv-dropdown", "data-toggle" => "dropdown", "aria-haspopup" => true, "aria-expanded" => true }
+                .button.btn.btn-primary.dropdown-toggle{ type: "button", id: "view-igv-dropdown", "data-toggle" => "dropdown", "aria-haspopup" => true, "aria-expanded" => true, "experiment" => metadata[:agClass] }
                   Visualize
                   %span.caret
                 %ul.dropdown-menu{ "aria-labelledby" => "igv-dropdown" }
@@ -78,19 +85,33 @@
                     - genome = record[:genome]
                     - fname = URI.escape("#{record[:agSubClass]} (@ #{record[:clSubClass]}) #{@expid}")
                     %li.dropdown-header{ role: "presentation" }= "For #{genome}"
-                    %li
-                      %a{ href: "#{igv_linkout_base}/#{genome}/eachData/bw/#{@expid}.bw&genome=#{genome}&name=#{fname}" }= "BigWig"
-                    - ["05", "10", "20"].each do |dVal|
+                    - if metadata[:agClass] != 'Bisulfite-Seq'
                       %li
-                        %a{ href: "#{igv_linkout_base}/#{genome}/eachData/bb#{dVal}/#{@expid}.#{dVal}.bb&genome=#{genome}&name=#{fname}%20(1E-#{dVal})" }= "Peak-call (q < 1E-#{dVal})"
-                    %li.divider
+                        %a{ href: "#{igv_linkout_base}/#{genome}/eachData/bw/#{@expid}.bw&genome=#{genome}&name=#{fname}" }= "BigWig"
+                      - ["05", "10", "20"].each do |dVal|
+                        %li
+                          %a{ href: "#{igv_linkout_base}/#{genome}/eachData/bb#{dVal}/#{@expid}.#{dVal}.bb&genome=#{genome}&name=#{fname}%20(1E-#{dVal})" }= "Peak-call (q < 1E-#{dVal})"
+                      %li.divider
+                    - else
+                      %li
+                        %a{ href: "#{igv_linkout_base}/#{genome}/eachData/bs/methyl/#{@expid}.methyl.bw" }= "BigWig (Methylation rate)"
+                      %li
+                        %a{ href: "#{igv_linkout_base}/#{genome}/eachData/bs/cover/#{@expid}.cover.bw" }= "BigWig (Coverage)"
+                      %li
+                        %a{ href: "#{igv_linkout_base}/#{genome}/eachData/bs/hmr/BigBed/#{@expid}.hmr.bb" }= "Hypo MR"
+                      %li
+                        %a{ href: "#{igv_linkout_base}/#{genome}/eachData/bs/pmd/BigBed/#{@expid}.pmd.bb" }= "Partial MR"
+                      %li
+                        %a{ href: "#{igv_linkout_base}/#{genome}/eachData/bs/hypermr/BigBed/#{@expid}.hypermr.bb" }= "Hyper MR"
+                      %li.divider
+
                   %li.dropdown-header{ role: "presentation" }
                     %a.infoBtn{ :value => "info", :id => "viewOnIGV" }
                       Error connecting to IGV?
 
               // View Analysis button
               .btn-group{ role: "group" }
-                .button.btn.btn-primary.dropdown-toggle{ type: "button", id: "view-igv-dropdown", "data-toggle" => "dropdown", "aria-haspopup" => true, "aria-expanded" => true }
+                .button.btn.btn-primary.dropdown-toggle{ type: "button", id: "analyze-dropdown", "data-toggle" => "dropdown", "aria-haspopup" => true, "aria-expanded" => true, "experiment" => metadata[:agClass] }
                   Analyze
                   %span.caret
                 %ul.dropdown-menu{ "aria-labelledby" => "igv-dropdown" }
@@ -106,7 +127,7 @@
                     - if i != (records.size - 1)
                       %li.divider
 
-              // View Analysis button
+              // Download button
               .btn-group{ role: "group" }
                 .button.btn.btn-primary.dropdown-toggle{ :type => "button", :id => "download-dropdown", "data-toggle" => "dropdown", "aria-haspopup" => true, "aria-expanded" => true }
                   Download
@@ -117,13 +138,26 @@
                     - genome = record[:genome]
                     - dfname = "#{genome}_#{URI.escape(record[:agSubClass])}_#{URI.escape(record[:clSubClass])}_#{@expid}"
                     %li.dropdown-header{ role: "presentation" }= "For #{genome}"
-                    %li
-                      %a{ :href => "#{nbdc_base}/#{genome}/eachData/bw/#{@expid}.bw", :download => "#{dfname}.bw" }= "BigWig"
-                    - ["05", "10", "20"].each do |dVal|
+                    - if metadata[:agClass] != 'Bisulfite-Seq'
                       %li
-                        %a{ :href => "#{nbdc_base}/#{genome}/eachData/bed#{dVal}/#{@expid}.#{dVal}.bed", :download => "#{dfname}.#{dVal}.bb" }= "Peak-call (q < 1E-#{dVal})"
+                        %a{ :href => "#{nbdc_base}/#{genome}/eachData/bw/#{@expid}.bw", :download => "#{dfname}.bw" }= "BigWig"
+                      - ["05", "10", "20"].each do |dVal|
+                        %li
+                          %a{ :href => "#{nbdc_base}/#{genome}/eachData/bed#{dVal}/#{@expid}.#{dVal}.bed", :download => "#{dfname}.#{dVal}.bb" }= "Peak-call (q < 1E-#{dVal})"
+                    - else
+                      %li
+                        %a{ href: "#{nbdc_base}/#{genome}/eachData/bs/methyl/#{@expid}.methyl.bw" }= "BigWig (Methylation rate)"
+                      %li
+                        %a{ href: "#{nbdc_base}/#{genome}/eachData/bs/cover/#{@expid}.cover.bw" }= "BigWig (Coverage)"
+                      %li
+                        %a{ href: "#{nbdc_base}/#{genome}/eachData/bs/hmr/BigBed/#{@expid}.hmr.bb" }= "Hypo MR"
+                      %li
+                        %a{ href: "#{nbdc_base}/#{genome}/eachData/bs/pmd/BigBed/#{@expid}.pmd.bb" }= "Partial MR"
+                      %li
+                        %a{ href: "#{nbdc_base}/#{genome}/eachData/bs/hypermr/BigBed/#{@expid}.hypermr.bb" }= "Hyper MR"
                     - if i != (records.size - 1)
                       %li.divider
+
 
               // SRA linkout button
               .btn-group{ role: "group" }

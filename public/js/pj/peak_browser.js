@@ -1,8 +1,5 @@
 // onload
 $(function(){
-  // generate sub class options by selecting class name
-  setSubClassOptions();
-
   // tab trigger event
   peakBrowserTabTriggerEvents();
 
@@ -27,7 +24,58 @@ $(function(){
   // post form data
   sendBedToIGV();
   downloadBed();
+
+  // Append initial subclass options
+  generateSubClassOptions();
+  // generate sub class options by selecting class name
+  setSubClassOptions();
+
+  // Append qvalue options
+  addQvalOptions();
 })
+
+function addQvalOptions() {
+  var genome = genomeSelected();
+  generateQvalOptions(genome);
+  $('select.classSelect').change(function(){
+    resetQvalOptions(genome);
+    generateQvalOptions(genome);
+  });
+}
+
+function resetQvalOptions(genome) {
+  $('select#' + genome + 'qval').empty();
+}
+
+function generateQvalOptions(genome) {
+  var agSelected = $('select#' + genome + 'agClass option:selected').val();
+  var target = $('select#' + genome + 'qval');
+  switch (agSelected) {
+    case 'Bisulfite-Seq':
+      $('<option>')
+        .attr("value", 'bs')
+        .append('NA')
+        .attr("selected", true)
+        .appendTo(target);
+      break;
+    default:
+      $.ajax({
+        type: 'GET',
+        url: '/qvalue_range',
+        dataType: 'json'
+      }).done(function(json){
+        $.each(json, function(i, qv){
+          var opt = $('<option>')
+            .attr("value", qv)
+            .append(parseInt(qv) * 10)
+          if (i == 0) {
+            opt.attr("selected", true)
+          }
+          opt.appendTo(target);
+        });
+      });
+  }
+}
 
 // functions
 function peakBrowserTabTriggerEvents(){
@@ -59,11 +107,6 @@ function resetSubClassOptions(){ // Erase existing options and put an option for
   $.each(['ag', 'cl'], function(i, t){
     var subClassSelect = $('select#' + genome + t + 'SubClass');
     subClassSelect.empty();
-    $("<option>")
-      .attr("value", "-")
-      .attr("selected", "true")
-      .append("All")
-      .appendTo(subClassSelect);
   });
 }
 
@@ -71,21 +114,64 @@ function generateSubClassOptions(){
   var genome = genomeSelected();
   var agSelected = $('select#' + genome + 'agClass option:selected').val();
   var clSelected = $('select#' + genome + 'clClass option:selected').val();
-  $.each([['ag', agSelected], ['cl', clSelected]], function(i, set){
-    var url = '/data/index_subclass.json?' + 'genome=' + genome + '&agClass=' + agSelected + '&clClass=' + clSelected + '&type=' + set[0];
-    $.ajax({
-      type: 'GET',
-      url: url,
-      dataType: 'json'
-    }).done(function(json){
-      var options = json;
-      putSubClassOptions(options, 'select#' + genome + set[0] + 'SubClass')
-      activateTypeAhead(genome, set[0], options);
-    });
+  addAgSubClassOptions(genome, agSelected, clSelected)
+  addClSubClassOptions(genome, agSelected, clSelected)
+}
+
+function addAgSubClassOptions (genome, agSelected, clSelected) {
+  var url = '/data/index_subclass.json?' + 'genome=' + genome + '&agClass=' + agSelected + '&clClass=' + clSelected + '&type=ag';
+  const panelAppendTo = 'select#' + genome + 'agSubClass';
+  switch (agSelected) {
+    case 'Input control':
+    case 'ATAC-Seq':
+    case 'DNase-seq':
+    case 'Bisulfite-Seq':
+      putNAOptions(panelAppendTo)
+      break;
+    default:
+      $.ajax({
+        type: 'GET',
+        url: url,
+        dataType: 'json'
+      }).done(function(json){
+        var options = json;
+        putSubClassOptions(options, panelAppendTo)
+        activateTypeAhead(genome, 'ag', options);
+      });
+  }
+}
+
+function addClSubClassOptions (genome, agSelected, clSelected) {
+  var url = '/data/index_subclass.json?' + 'genome=' + genome + '&agClass=' + agSelected + '&clClass=' + clSelected + '&type=cl';
+  $.ajax({
+    type: 'GET',
+    url: url,
+    dataType: 'json'
+  }).done(function(json){
+    var options = json;
+    putSubClassOptions(options, 'select#' + genome + 'clSubClass')
+    activateTypeAhead(genome, 'cl', options);
   });
 }
 
+function putAllOptions(panelAppendTo) {
+  $('<option>')
+    .attr("value", "-")
+    .attr("selected", true)
+    .append("All")
+    .appendTo(panelAppendTo);
+}
+
+function putNAOptions(panelAppendTo) {
+  $('<option>')
+    .attr("value", "-")
+    .attr("selected", true)
+    .append("NA")
+    .appendTo(panelAppendTo);
+}
+
 function putSubClassOptions(options, panelAppendTo){
+  putAllOptions(panelAppendTo)
   $.map(options, function(value, key){
     return [[key, value]];
   }).sort().forEach(function(element,index,array){

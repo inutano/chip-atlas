@@ -5,6 +5,7 @@ $(function(){
   showHelp();
   //browseIgv();
   loadImages();
+  hideAnalysis();
 })
 
 // variables
@@ -235,6 +236,14 @@ function showHelp(){
         break;
     };
   });
+}
+
+function hideAnalysis() {
+  var analysisButton = $('div#analyze-dropdown')
+  var expType = analysisButton.attr('experiment')
+  if (expType == 'Bisulfite-Seq') {
+    analysisButton.hide();
+  }
 }
 
 var helpText = {

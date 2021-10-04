@@ -33,7 +33,9 @@
             %span.icon-bar
             %span.icon-bar
             %span.icon-bar
-          %a.navbar-brand{ :href => "#{app_root}" }= "ChIP-Atlas"
+          %a.navbar-brand{ :href => "#{app_root}" }
+            %i.fas.fa-mountain
+            ChIP-Atlas
         #navbar.collapse.navbar-collapse
           %ul.nav.navbar-nav
             %li
@@ -45,21 +47,27 @@
             %li
               %a{ :href => "#{app_root}/enrichment_analysis" }= "Enrichment Analysis"
             %li
-              %a{ :href => "#{app_root}/search" }= "Dataset Search"
-            %li
-              %a{ :href => "https://github.com/inutano/chip-atlas/wiki" }= "Documentation"
-            %li
               %a{ :href => "#{app_root}/publications" }= "Publications"
+            %li
+              %a{ :href => "https://github.com/inutano/chip-atlas/wiki" }
+                %i.fab.fa-github
+                Docs
+          %p.navbar-text.navbar-right
+            %a{ href: "/search" }
+              %i.fas.fa-search
+              Advanced
           %form.navbar-form.navbar-right{ role: "search" }
             .form-group
-              %input.form-control#jumpToExperiment{ type: "text", value: "SRX018625", }
+              - id_example = ["GSM469863", "SRX018625"].sample(1)[0]
+              %input.form-control#jumpToExperiment{ type: "text", value: "#{id_example}" }
             %button.btn.btn-default.go-experiment{ type: "submit", }= "Go"
           %p.navbar-text.navbar-right
-            Search by SRX/GSM ID
+            Find By ID
 
     .jumbotron
       .container
         %h1
+          %i.fas.fa-mountain
           ChIP-Atlas
         %p.main-desc= "ChIP-Atlas is an integrative and comprehensive database for visualizing and making use of public ChIP-seq data. ChIP-Atlas covers almost all public ChIP-seq data submitted to the SRA (Sequence Read Archives) in NCBI, DDBJ, or ENA, and is based on over #{@number_of_experiments} experiments."
         %p.main-desc
@@ -76,7 +84,7 @@
               %ul
                 %li
                   %a{ href: "/search" }
-                    Dataset search 
+                    Dataset search
                   is available as a standalone function
                 %li
                   ID search at the top right corner now accepts GEO Sample ID (e.g. GSM469863) along with SRA Experiment ID (e.g. SRX018625)
@@ -87,9 +95,7 @@
 
       %hr.introduction
       .row
-        .col-md-12
-          %a{ :href => "https://youtu.be/qKNOkK-8hDo", :target => "_blank" }
-            %img.pull-right{ src: "https://img.youtube.com/vi/qKNOkK-8hDo/mq3.jpg" }
+        .col-md-3
           %h2
             %a{ :href => "#{app_root}/peak_browser" }
               Peak Browser
@@ -100,12 +106,11 @@
           %p.main-desc
             %a{ :href => "https://youtu.be/qKNOkK-8hDo", :target => "_blank" }
               Watch tutorial movie
+          %p
+            %a{ :href => "https://youtu.be/qKNOkK-8hDo", :target => "_blank" }
+              %img.pull-right{ src: "https://img.youtube.com/vi/qKNOkK-8hDo/mq3.jpg", width: 260 }
 
-      %hr.introduction
-      .row
-        .col-md-12
-          %a{ :href => "https://youtu.be/Sp9DUAuKkvQ", :target => "_blank" }
-            %img.pull-right{ src: "https://img.youtube.com/vi/Sp9DUAuKkvQ/mq3.jpg" }
+        .col-md-3
           %h2
             %a{ :href => "#{app_root}/target_genes" }
               Target Genes
@@ -114,12 +119,11 @@
           %p.main-desc
             %a{ :href => "https://youtu.be/Sp9DUAuKkvQ", :target => "_blank" }
               Watch tutorial movie
+          %p
+            %a{ :href => "https://youtu.be/Sp9DUAuKkvQ", :target => "_blank" }
+              %img.pull-right{ src: "https://img.youtube.com/vi/Sp9DUAuKkvQ/mq3.jpg", width: 260 }
 
-      %hr.introduction
-      .row
-        .col-md-12
-          %a{ :href => "https://youtu.be/jhLnWNCe_No", :target => "_blank" }
-            %img.pull-right{ src: "https://img.youtube.com/vi/jhLnWNCe_No/mq2.jpg" }
+        .col-md-3
           %h2
             %a{ :href => "#{app_root}/colo" }
               Colocalization
@@ -128,12 +132,11 @@
           %p.main-desc
             %a{ :href => "https://youtu.be/jhLnWNCe_No", :target => "_blank" }
               Watch tutorial movie
+          %p
+            %a{ :href => "https://youtu.be/jhLnWNCe_No", :target => "_blank" }
+              %img.pull-right{ src: "https://img.youtube.com/vi/jhLnWNCe_No/mq2.jpg", width: 260 }
 
-      %hr.introduction
-      .row
-        .col-md-12
-          %a{ :href => "https://youtu.be/JBOB2PX5_-0", :target => "_blank" }
-            %img.pull-right{ src: "https://img.youtube.com/vi/JBOB2PX5_-0/mq2.jpg" }
+        .col-md-3
           %h2
             %a{ :href => "#{app_root}/enrichment_analysis" }
               Enrichment Analysis
@@ -142,15 +145,9 @@
           %p.main-desc
             %a{ :href => "https://youtu.be/JBOB2PX5_-0", :target => "_blank"  }
               Watch tutorial movie
-
-      %hr.introduction
-      .row
-        .col-md-12
-          %h2
-            %a{ :href => "#{app_root}/search" }
-              Dataset Search
-          %p.main-desc
-            Search for data by keywords
+          %p
+            %a{ :href => "https://youtu.be/JBOB2PX5_-0", :target => "_blank" }
+              %img.pull-right{ src: "https://img.youtube.com/vi/JBOB2PX5_-0/mq2.jpg", width: 260 }
 
 
     %footer.footer
@@ -187,3 +184,4 @@
     %script{ :src => "#{app_root}/js/bootstrap.min.js" }
     %script{ :src => "#{app_root}/js/ie10-viewport-bug-workaround.js" }
     %script{ :src => "#{app_root}/js/pj/pj.js" }
+    %script{ :crossorigin => "anonymous", :src => "https://kit.fontawesome.com/9c24e0099d.js" }

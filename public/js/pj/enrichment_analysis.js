@@ -79,6 +79,9 @@ $(function(){
   // default value for dataset
   putDefaultTitles();
 
+  // qvalue options
+  addQvalOptions();
+
   // Form Layout: User Data
   $("input[name='bedORGene']").change(function(){
     var genome = genomeSelected();
@@ -643,6 +646,49 @@ function putFile2Textarea(fileId, event, callback){
       $('textarea#' + genome + 'ComparedWith').val(reader.result);
     }
     callback();
+  }
+}
+
+function addQvalOptions() {
+  var genome = genomeSelected();
+  generateQvalOptions(genome);
+  $('select.classSelect').change(function(){
+    resetQvalOptions(genome);
+    generateQvalOptions(genome);
+  });
+}
+
+function resetQvalOptions(genome) {
+  $('select#' + genome + 'qval').empty();
+}
+
+function generateQvalOptions(genome) {
+  var agSelected = $('select#' + genome + 'agClass option:selected').val();
+  var target = $('select#' + genome + 'qval');
+  switch (agSelected) {
+    case 'Bisulfite-Seq':
+      $('<option>')
+        .attr("value", 'bs')
+        .append('NA')
+        .attr("selected", true)
+        .appendTo(target);
+      break;
+    default:
+      $.ajax({
+        type: 'GET',
+        url: '/qvalue_range',
+        dataType: 'json'
+      }).done(function(json){
+        $.each(json, function(i, qv){
+          var opt = $('<option>')
+            .attr("value", qv)
+            .append(parseInt(qv) * 10)
+          if (i == 0) {
+            opt.attr("selected", true)
+          }
+          opt.appendTo(target);
+        });
+      });
   }
 }
 
