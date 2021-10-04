@@ -38,10 +38,8 @@ class PeakJohn < Sinatra::Base
       set :colo_analysis, PJ::Analysis.results(:colo)
       set :target_genes_analysis, PJ::Analysis.results(:target_genes)
       set :bedsizes, PJ::Bedsize.dump
-      #set :experiment_list, JSON.load(open("http://dbarchive.biosciencedbc.jp/kyushu-u/metadata/ExperimentList.json"))
-      #set :experiment_list_adv, JSON.load(open("http://dbarchive.biosciencedbc.jp/kyushu-u/metadata/ExperimentList_adv.json"))
-      set :experiment_list, JSON.load(open("https://chip-atlas.s3-ap-northeast-1.amazonaws.com/test/ExperimentList.json"))
-      set :experiment_list_adv, JSON.load(open("https://chip-atlas.s3-ap-northeast-1.amazonaws.com/test/ExperimentList_adv.json"))
+      set :experiment_list, JSON.load(open("http://dbarchive.biosciencedbc.jp/kyushu-u/metadata/ExperimentList.json"))
+      set :experiment_list_adv, JSON.load(open("http://dbarchive.biosciencedbc.jp/kyushu-u/metadata/ExperimentList_adv.json"))
       set :gsm_to_srx, Hash[settings.experiment_list["data"].map{|a| [a[2], a[0]] }]
     rescue ActiveRecord::StatementInvalid
       # Ignore Statement Invalid error when the database is not yet prepared
