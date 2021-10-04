@@ -168,6 +168,13 @@ $(function(){
         });
       });
     });
+
+    $('a[data-toggle="tab"]').on('shown.bs.tab', function(e){
+      var activatedTab = e.target;
+      var previousTab = e.relatedTarget;
+      // Append qvalue options
+      addQvalOptions();
+    });
   });
 
   // Q & A
@@ -651,6 +658,7 @@ function putFile2Textarea(fileId, event, callback){
 
 function addQvalOptions() {
   var genome = genomeSelected();
+  resetQvalOptions(genome);
   generateQvalOptions(genome);
   $('select.classSelect').change(function(){
     resetQvalOptions(genome);

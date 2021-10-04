@@ -36,6 +36,7 @@ $(function(){
 
 function addQvalOptions() {
   var genome = genomeSelected();
+  resetQvalOptions(genome);
   generateQvalOptions(genome);
   $('select.classSelect').change(function(){
     resetQvalOptions(genome);
@@ -83,6 +84,9 @@ function peakBrowserTabTriggerEvents(){
     var activatedTab = e.target;
     var previousTab = e.relatedTarget;
     resetSubClassOptions();
+
+    // Append qvalue options
+    addQvalOptions();
   });
 }
 
