@@ -25,8 +25,6 @@ $(function(){
   sendBedToIGV();
   downloadBed();
 
-  // Append initial subclass options
-  generateSubClassOptions();
   // generate sub class options by selecting class name
   setSubClassOptions();
 
@@ -36,10 +34,8 @@ $(function(){
 
 function addQvalOptions() {
   var genome = genomeSelected();
-  resetQvalOptions(genome);
   generateQvalOptions(genome);
   $('select.classSelect').change(function(){
-    resetQvalOptions(genome);
     generateQvalOptions(genome);
   });
 }
@@ -49,6 +45,7 @@ function resetQvalOptions(genome) {
 }
 
 function generateQvalOptions(genome) {
+  resetQvalOptions(genome);
   var agSelected = $('select#' + genome + 'agClass option:selected').val();
   var target = $('select#' + genome + 'qval');
   switch (agSelected) {
@@ -87,6 +84,9 @@ function peakBrowserTabTriggerEvents(){
 
     // Append qvalue options
     addQvalOptions();
+
+    // Append initial subclass options
+    generateSubClassOptions();
   });
 }
 
@@ -100,8 +100,8 @@ function panelCollapse(genome){
 
 // sub class options
 function setSubClassOptions(){
+  generateSubClassOptions();
   $('select.classSelect').change(function(){
-    resetSubClassOptions();
     generateSubClassOptions();
   });
 }
@@ -115,6 +115,7 @@ function resetSubClassOptions(){ // Erase existing options and put an option for
 }
 
 function generateSubClassOptions(){
+  resetSubClassOptions();
   var genome = genomeSelected();
   var agSelected = $('select#' + genome + 'agClass option:selected').val();
   var clSelected = $('select#' + genome + 'clClass option:selected').val();
