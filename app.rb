@@ -238,6 +238,9 @@ class PeakJohn < Sinatra::Base
     else
       JSON.dump({ "request_body" => wabi_request_body })
     end
+  rescue
+    puts wabi_response_body
+    redirect "not_found", 404
   end
 
   get "/view" do
