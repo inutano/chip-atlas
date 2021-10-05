@@ -693,7 +693,7 @@ function generateQvalOptions(genome) {
           var opt = $('<option>')
             .attr("value", qv)
             .append(parseInt(qv) * 10)
-          if (i == 0) {
+          if (qv == "10") {
             opt.attr("selected", true)
           }
           opt.appendTo(target);
