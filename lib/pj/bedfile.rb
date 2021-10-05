@@ -53,7 +53,7 @@ module PJ
       end
 
       def qval_range
-        self.all.map{|r| r.qval }.uniq
+        self.all.map{|r| r.qval }.uniq.sort
       end
 
       def list_of_genome
