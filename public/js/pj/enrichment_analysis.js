@@ -678,7 +678,7 @@ function generateQvalOptions(genome) {
   switch (agSelected) {
     case 'Bisulfite-Seq':
       $('<option>')
-        .attr("value", 'bs')
+        .attr("value", 999)
         .append('NA')
         .attr("selected", true)
         .appendTo(target);
