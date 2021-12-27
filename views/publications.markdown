@@ -2,10 +2,8 @@
 
 - Paper
   - Shinya Oki, Tazro Ohta, et al. ChIP‐Atlas: a data‐mining suite powered by full integration of public ChIP‐seq data. EMBO Rep. (2018) e46255; doi: https://doi.org/10.15252/embr.201846255
-- Database
-  - Oki, S; Ohta, T (2015): ChIP-Atlas. http://dx.doi.org/10.18908/lsdba.nbdc01558-000
 - Web tool
-  - Oki, S; Ohta, T (2015): ChIP-Atlas. http://chip-atlas.org
+  - Oki, S; Ohta, T (2015): ChIP-Atlas. https://chip-atlas.org
 
 ## Publications citing ChIP-Atlas:
 
