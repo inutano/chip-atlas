@@ -11,7 +11,7 @@ module PJ
     #
 
     def archive_base
-      "http://dbarchive.biosciencedbc.jp/kyushu-u/"
+      "#{env["rack.url_scheme"]}://dbarchive.biosciencedbc.jp/kyushu-u/"
     end
 
     def fileformat
