@@ -73,9 +73,6 @@
       .container.job-info
         %p
           Result page URL will be available for a week from the time when 'status' is 'finished'.
-        %p
-          This function uses the short queue of NIG supercomputer system.
-          %a{ href: "https://sc2.ddbj.nig.ac.jp/index.php/en/", target: "_blank" }= "https://sc2.ddbj.nig.ac.jp/index.php/en/"
         %table.table
           %tr
             %td
@@ -112,7 +109,11 @@
               Download TSV:
             %td
               %a#download-tsv
-
+        %p
+          As this function uses the NIG supercomputer system, it may take time to start your job when the nodes are busy. Please check computation node status
+          %a{ href: "https://sc2.ddbj.nig.ac.jp/index.php/en/", target: "_blank" }
+            here
+          (short.q)
 
     %footer.footer
       .container
