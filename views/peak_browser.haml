@@ -116,7 +116,7 @@
                     .panel.panel-default
                       - class_id = "#{genome}agClass"
                       .panel-heading{ :id => "heading-#{class_id}" }
-                        %h4.panel-title= "Experiment type"
+                        %h4.panel-title= "1. Experiment type"
                       .panel-body
                         %select.form-control.classSelect{ :id => "#{class_id}", :size => 8, :name => "antigen" }
                           - ind = index[:antigen]
@@ -137,7 +137,7 @@
                     .panel.panel-default
                       - sclass_id = "#{genome}agSubClass"
                       .panel-heading{ :id => "heading-#{sclass_id}" }
-                        %h4.panel-title= "ChIP Antigen"
+                        %h4.panel-title= "ChIP Antigen (optional)"
                       .panel-body
                         .panel-message{ :id => "#{sclass_id}" }
 
@@ -152,7 +152,7 @@
                       .panel.panel-default
                         - class_id = "#{genome}#{set[0]}Class"
                         .panel-heading{ :id => "heading-#{class_id}" }
-                          %h4.panel-title= "#{set[1]} Class"
+                          %h4.panel-title= "2. #{set[1]} Class"
                         .panel-body
                           %select.form-control.classSelect{ :id => "#{class_id}", :size => 8, :name => set[1].downcase.sub("\s","") }
                             - ind = index[set[1].downcase.sub("\s","").intern]
@@ -173,7 +173,7 @@
                       .panel.panel-default
                         - sclass_id = "#{genome}#{set[0]}SubClass"
                         .panel-heading{ :id => "heading-#{sclass_id}" }
-                          %h4.panel-title= "#{set[1]}"
+                          %h4.panel-title= "#{set[1]} (optional)"
                         .panel-body
                           .panel-message{ :id => "#{sclass_id}" }
 
@@ -187,7 +187,7 @@
                     .panel.panel-default
                       .panel-heading{ :id => "heading-#{genome}qval"}
                         %h4.panel-title
-                          Threshold for Significance
+                          3. Threshold for Significance
                           %a.infoBtn{ :value => "info", :id => "#{genome}Threshold" }
                             &#x24D8;
                       .panel-body
