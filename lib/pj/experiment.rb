@@ -60,15 +60,15 @@ module PJ
 
       def list_of_genome
         {
-          "hg19" => "H. sapiens (hg19)",
           "hg38" => "H.sapiens (hg38)",
-          "mm9" => "M. musculus (mm9)",
+          "hg19" => "H. sapiens (hg19)",
           "mm10" => "M. musculus (mm10)",
+          "mm9" => "M. musculus (mm9)",
           "rn6" => "R. norvegicus (rn6)",
-          "dm3" => "D. melanogaster (dm3)",
           "dm6" => "D. melanogaster (dm6)",
-          "ce10" => "C. elegans (ce10)",
+          "dm3" => "D. melanogaster (dm3)",
           "ce11" => "C. elegans (ce11)",
+          "ce10" => "C. elegans (ce10)",
           "sacCer3" => "S. cerevisiae (sacCer3)"
         }
         # self.all.map{|r| r.genome }.uniq
