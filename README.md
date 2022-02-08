@@ -34,7 +34,7 @@ We use the google analytics to analyze the visitor information to improve our we
 - Osamu Ogasawara, DNA Data Bank of Japan (DDBJ)
   - Support *in silico* ChIP implementation over [NIG supercomputer system](http://sc.ddbj.nig.ac.jp)
 - Hideki Hatanaka, National Bioscience Database Center (NBDC)
-  - Support data archive on [LSDB Archive](http://dbarchive.biosciencedbc.jp)
+  - Support data archive on [LSDB Archive](https://dbarchive.biosciencedbc.jp)
 
 ## Copyright
 

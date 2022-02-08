@@ -44,7 +44,7 @@ The script is a wrapper for two gawk scripts work like below:
 
 ```
 $ cd chip-atlas/rdf
-$ curl "http://dbarchive.biosciencedbc.jp/kyushu-u/sacCer3/allPeaks_light/allPeaks_light.sacCer3.50.bed.gz" | gunzip -c | gawk ./bin/chr2genbank -v ref=$(pwd)/reference -v genome_version=sacCer3 | gawk ./bin/bed2ttl -v data_version=test
+$ curl "https://dbarchive.biosciencedbc.jp/kyushu-u/sacCer3/allPeaks_light/allPeaks_light.sacCer3.50.bed.gz" | gunzip -c | gawk ./bin/chr2genbank -v ref=$(pwd)/reference -v genome_version=sacCer3 | gawk ./bin/bed2ttl -v data_version=test
 ```
 
 How it works:
