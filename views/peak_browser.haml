@@ -19,7 +19,7 @@
     %link{ href: "#{app_root}/style.css", rel: "stylesheet"}
 
     // GA
-    %script{:async => true, src: "https://www.googletagmanager.com/gtag/js?id=UA-117599014-1"}
+    %script{ async: true, src: "https://www.googletagmanager.com/gtag/js?id=UA-117599014-1" }
     :javascript
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
@@ -30,7 +30,7 @@
     %nav.navbar.navbar-inverse.navbar-fixed-top
       .container-fluid
         .navbar-header
-          %button.navbar-toggle.collapsed{ type: "button", "data-toggle" => "collapse", "data-target" => "#navbar", "aria-expanded" => "false", "aria-controls" => "navbar" }
+          %button.navbar-toggle.collapsed{ type: "button", "data-toggle": "collapse", "data-target": "#navbar", "aria-expanded": "false", "aria-controls": "navbar" }
             %span.sr-only
               Toggle navigation
             %span.icon-bar
@@ -68,7 +68,8 @@
             .form-group
               - id_example = ["GSM469863", "SRX018625"].sample(1)[0]
               %input.form-control#jumpToExperiment{ type: "text", value: "#{id_example}" }
-            %button.btn.btn-default.go-experiment{ type: "submit", }= "Go"
+            %button.btn.btn-default.go-experiment{ type: "submit", }
+              Go
           %p.navbar-text.navbar-right
             Find By ID
 
@@ -87,10 +88,10 @@
         .col-md-2
           .dropdown-help
             .dropdown
-              .button.btn.btn-default.dropdown-toggle{ type: "button", id: "movies-dropdown", "data-toggle" => "dropdown", "aria-haspopup" => true, "aria-expanded" => true }
+              .button.btn.btn-default.dropdown-toggle{ type: "button", id: "movies-dropdown", "data-toggle": "dropdown", "aria-haspopup": true, "aria-expanded": true }
                 Tutorial movies
                 %span.caret
-              %ul.dropdown-menu{ "aria-labelledby" => "movies-dropdown" }
+              %ul.dropdown-menu{ "aria-labelledby": "movies-dropdown" }
                 %li
                   %a{ href: "https://youtu.be/JVWLlzIedw8", target: "_blank" }
                     Requirements
@@ -124,7 +125,7 @@
                         %h4.panel-title= "1. Experiment type"
                       .panel-body
                         %select.form-control.classSelect{ id: "#{class_id}", size: 8, name: "antigen" }
-                          %option{ value: "Histone", id: "Histone", "selected" => true }
+                          %option{ value: "Histone", id: "Histone", selected: true }
                             ChIP: Histone
                           %option{ value: "RNA polymerase", id: "RNA polymerase" }
                             ChIP: RNA polymerase
@@ -142,7 +143,8 @@
                     .panel.panel-default
                       - class_id = "#{genome}agSubClass"
                       .panel-heading{ id: "heading-#{class_id}" }
-                        %h4.panel-title= "ChIP Antigen (optional)"
+                        %h4.panel-title
+                          ChIP Antigen (optional)
                       .panel-body
                         .panel-message{ id: class_id }
                         // input box for typeahead
@@ -183,10 +185,12 @@
                         %select.form-control{ id: "#{genome}qval", size: 5 }
 
                   .button-submit.down
-                    %button.btn.btn-primary.btn-lg.btn-block{ id: "submit", type: "button" }= "View on IGV"
+                    %button.btn.btn-primary.btn-lg.btn-block{ id: "submit", type: "button" }
+                      View on IGV
                     %a.pull-right.infoBtn{ value: "info", id: "#{genome}ViewOnIGV" }
                       Error connecting to IGV?
-                    %button.btn.btn-primary.btn-lg.btn-block{ id: "download", type: "button" }= "Download BED file"
+                    %button.btn.btn-primary.btn-lg.btn-block{ id: "download", type: "button" }
+                      Download BED file
 
     %footer.footer
       .container
