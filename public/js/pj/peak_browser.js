@@ -7,6 +7,7 @@ window.onload = () => {
 };
 
 const initOptions = () => {
+  generateAgClassOptions();
   generateSubClassOptions();
   generateQvalOptions();
   $('select.classSelect').change(function(){
@@ -20,6 +21,28 @@ const peakBrowserTabTriggerEvents = () => {
     const activatedTab = e.target;
     const previousTab = e.relatedTarget;
     initOptions();
+  });
+}
+
+/*
+    Antigen/Cell type parent Class option generation
+*/
+
+const generateAgClassOptions = async () => {
+  let response = await fetch('/data/list_of_experiment_types.json');
+  let experimentList = await response.json();
+
+  const genome = genomeSelected();
+  const select = $('select#' + genome + 'agClass')
+  select.empty();
+  experimentList.forEach((experiment, i) => {
+    let id = experiment['id'];
+    let label = experiment['label'];
+    let option = $('<option>')
+                   .attr("value", id)
+                   .append(label)
+    if (i==0) option.attr("selected", true);
+    option.appendTo(select);
   });
 }
 

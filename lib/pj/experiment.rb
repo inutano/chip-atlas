@@ -74,6 +74,39 @@ module PJ
         # self.all.map{|r| r.genome }.uniq
       end
 
+      def list_of_experiment_types
+        [
+          {
+            id: "Histone",
+            label: "ChIP: Histone"
+          },
+          {
+            id: "RNA polymerase",
+            label: "ChIP: RNA polymerase"
+          },
+          {
+            id: "TFs and others",
+            label: "ChIP: TFs and others"
+          },
+          {
+            id: "Input control",
+            label: "ChIP: Input control"
+          },
+          {
+            id: "ATAC-Seq",
+            label: "ATAC-Seq"
+          },
+          {
+            id: "DNase-seq",
+            label: "DNase-seq"
+          },
+          {
+            id: "Bisulfite-Seq",
+            label: "Bisulfite-Seq"
+          }
+        ]
+      end
+
       ## Retrieve sub class options
       def get_subclass(genome, ag_class, cl_class, subclass_type)
         f_genome = self.where(:genome => genome)

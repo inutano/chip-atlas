@@ -125,20 +125,6 @@
                         %h4.panel-title= "1. Experiment type"
                       .panel-body
                         %select.form-control.classSelect{ id: "#{class_id}", size: 8, name: "antigen" }
-                          %option{ value: "Histone", id: "Histone", selected: true }
-                            ChIP: Histone
-                          %option{ value: "RNA polymerase", id: "RNA polymerase" }
-                            ChIP: RNA polymerase
-                          %option{ value: "TFs and others", id: "TFs and others" }
-                            ChIP: TFs and others
-                          %option{ value: "Input control", id: "Input control" }
-                            ChIP: Input control
-                          %option{ value: "ATAC-Seq", id: "ATAC-Seq" }
-                            ATAC-Seq
-                          %option{ value: "DNase-seq", id: "DNase-seq" }
-                            DNase-Seq
-                          %option{ value: "Bisulfite-Seq", id: "Bisulfite-Seq" }
-                            Bisulfite-Seq
 
                     .panel.panel-default
                       - class_id = "#{genome}agSubClass"
