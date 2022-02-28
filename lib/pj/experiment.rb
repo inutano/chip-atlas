@@ -141,6 +141,29 @@ module PJ
         ct
       end
 
+      def chip_antigen(genome, ag_class)
+        ag = [{id: 'All', label: 'All', count: nil}]
+        ag_class = 'Histone' if ag_class == 'undefined'
+        where(genome: genome, agClass: ag_class).group(:agSubClass).count.each_pair do |k,v|
+          ag << { id: k, label: k, count: v }
+        end
+        ag
+      end
+
+      def cell_type(genome, ag_class, cl_class)
+        cl = [{id: 'All', label: 'All', count: nil}]
+
+        if cl_class != 'undefined' and cl_class != 'All cell types'
+          ag_class = 'Histone' if ag_class == 'undefined'
+
+          subset = self.where(genome: genome, agClass: ag_class, clClass: cl_class)
+          subset.group(:clSubClass).count.each_pair do |k,v|
+            cl << { id: k, label: k, count: v }
+          end
+        end
+        cl
+      end
+
       ## Retrieve sub class options
       def get_subclass(genome, ag_class, cl_class, subclass_type)
         f_genome = self.where(:genome => genome)

@@ -9,14 +9,19 @@ window.onload = () => {
 const initOptions = () => {
   generateExperimentTypeOptions();
   generateSampleTypeOptions();
-  generateSubClassOptions();
+  generateChIPAntigenOptions();
+  generateCellTypeOptions();
   generateQvalOptions();
+
   $('select.agClassSelect').change(() => {
     generateSampleTypeOptions();
+    generateChIPAntigenOptions();
+    generateCellTypeOptions();
     generateQvalOptions();
   });
-  $('select.classSelect').change(function(){
-    generateSubClassOptions();
+
+  $('select.clClassSelect').change(function(){
+    generateCellTypeOptions();
   });
 }
 
@@ -80,20 +85,13 @@ const generateSampleTypeOptions = async () => {
      Antigen/Cell type SubClass option generation
 */
 
-const generateSubClassOptions = () => {
+const generateChIPAntigenOptions = async () => {
   const genome = genomeSelected();
-  $('select#' + genome + 'agSubClass').empty();
-  $('select#' + genome + 'clSubClass').empty();
-
   const agSelected = $('select#' + genome + 'agClass option:selected').val();
-  const clSelected = $('select#' + genome + 'clClass option:selected').val();
-  addAgSubClassOptions(genome, agSelected, clSelected)
-  addClSubClassOptions(genome, agSelected, clSelected)
-}
 
-const addAgSubClassOptions = (genome, agSelected, clSelected) => {
-  var url = '/data/index_subclass.json?' + 'genome=' + genome + '&agClass=' + agSelected + '&clClass=' + clSelected + '&type=ag';
-  const panelAppendTo = 'select#' + genome + 'agSubClass';
+  const select = $('select#' + genome + 'agSubClass');
+  select.empty();
+
   switch (agSelected) {
     case 'Input control':
     case 'ATAC-Seq':
@@ -104,51 +102,55 @@ const addAgSubClassOptions = (genome, agSelected, clSelected) => {
         .attr("value", "-")
         .attr("selected", true)
         .append("NA")
-        .appendTo(panelAppendTo);
+        .appendTo(select);
       break;
     default:
-      $.ajax({
-        type: 'GET',
-        url: url,
-        dataType: 'json'
-      }).done(function(json){
-        const options = json;
-        putSubClassOptions(options, panelAppendTo)
-        activateTypeAhead(genome, 'ag', options);
+      let response = await fetch('/data/chip_antigen?genome=' + genome + '&agClass=' + agSelected);
+      let agList = await response.json();
+
+      agList.forEach((experiment, i) => {
+        let id = experiment['id'];
+        let label = experiment['label'];
+        let count = experiment['count'];
+        let option = $('<option>')
+                       .attr("value", id)
+        if (i==0) {
+          option.append(label).attr("selected", true);
+        } else {
+          option.append(label + ' (' + count + ')');
+        }
+
+        option.appendTo(select);
+        // activateTypeAhead(genome, 'ag', options);
       });
   }
 }
 
-const addClSubClassOptions = (genome, agSelected, clSelected) => {
-  const url = '/data/index_subclass.json?' + 'genome=' + genome + '&agClass=' + agSelected + '&clClass=' + clSelected + '&type=cl';
-  $.ajax({
-    type: 'GET',
-    url: url,
-    dataType: 'json'
-  }).done(function(json){
-    const options = json;
-    putSubClassOptions(options, 'select#' + genome + 'clSubClass')
-    activateTypeAhead(genome, 'cl', options);
-  });
-}
+const generateCellTypeOptions = async () => {
+  const genome = genomeSelected();
+  const agSelected = $('select#' + genome + 'agClass option:selected').val();
+  const clSelected = $('select#' + genome + 'clClass option:selected').val();
 
-const putSubClassOptions = (options, panelAppendTo) => {
-  // put 'All'
-  $('<option>')
-    .attr("value", "-")
-    .attr("selected", true)
-    .append("All")
-    .appendTo(panelAppendTo);
+  const select = $('select#' + genome + 'clSubClass');
+  select.empty();
 
-  $.map(options, function(value, key){
-    return [[key, value]];
-  }).sort().forEach(function(element,index,array){
-    const name = element[0];
-    const count = element[1];
-    $('<option>')
-      .attr("value", name)
-      .append(name + " (" + count + ")")
-      .appendTo(panelAppendTo);
+  let response = await fetch('/data/cell_type?genome=' + genome + '&clClass=' + clSelected + '&agClass=' + agSelected);
+  let clList = await response.json();
+
+  clList.forEach((experiment, i) => {
+    let id = experiment['id'];
+    let label = experiment['label'];
+    let count = experiment['count'];
+    let option = $('<option>')
+                   .attr("value", id)
+    if (i==0) {
+      option.append(label).attr("selected", true);
+    } else {
+      option.append(label + ' (' + count + ')');
+    }
+
+    option.appendTo(select);
+    // activateTypeAhead(genome, 'cl', options);
   });
 }
 

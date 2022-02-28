@@ -121,6 +121,25 @@ class PeakJohn < Sinatra::Base
     JSON(data)
   end
 
+  get '/data/chip_antigen' do
+    genome   = params[:genome]
+    ag_class = params[:agClass]
+    data = PJ::Experiment.chip_antigen(genome, ag_class)
+
+    content_type "application/json"
+    JSON(data)
+  end
+
+  get '/data/cell_type' do
+    genome   = params[:genome]
+    ag_class = params[:agClass]
+    cl_class = params[:clClass]
+    data = PJ::Experiment.cell_type(genome, ag_class, cl_class)
+
+    content_type "application/json"
+    JSON(data)
+  end
+
   get "/" do
     @number_of_experiments = settings.number_of_experiments
     haml :about
