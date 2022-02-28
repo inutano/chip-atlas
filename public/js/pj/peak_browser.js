@@ -1,5 +1,4 @@
 window.onload = () => {
-  changeSelect();
   initOptions();
   peakBrowserTabTriggerEvents();
   genomeTabSettings();
@@ -15,27 +14,10 @@ const initOptions = () => {
   generateQvalOptions();
 }
 
-const changeSelect = () => {
-  const agSelectElement = document.querySelector('.agClassSelect');
-  agSelectElement.addEventListener('change', (event) => {
-    generateSampleTypeOptions();
-    generateChIPAntigenOptions();
-    generateCellTypeOptions();
-    generateQvalOptions();
-  });
-
-  const clSelectElement = document.querySelector('.clClassSelect');
-  clSelectElement.addEventListener('change', (event) => {
-    generateChIPAntigenOptions();
-    generateCellTypeOptions();
-  });
-}
-
 const peakBrowserTabTriggerEvents = () => {
   $('a[data-toggle="tab"]').on('shown.bs.tab', function(e){
     const activatedTab = e.target;
     const previousTab = e.relatedTarget;
-    changeSelect();
     initOptions();
   });
 }
@@ -233,9 +215,26 @@ const genomeTabSettings = async () => {
   let response = await fetch('/data/list_of_genome.json');
   let genomeList = await response.json();
   genomeList.forEach((genome, i) => {
+    changeSelect(genome);
     tabControl(genome);
     panelCollapse(genome);
     selectToHideAnother(genome);
+  });
+}
+
+const changeSelect = (genome) => {
+  const agSelectElement = document.querySelector('#' + genome + 'agClass');
+  agSelectElement.addEventListener('change', (event) => {
+    generateSampleTypeOptions();
+    generateChIPAntigenOptions();
+    generateCellTypeOptions();
+    generateQvalOptions();
+  });
+
+  const clSelectElement = document.querySelector('#' + genome + 'clClass');
+  clSelectElement.addEventListener('change', (event) => {
+    generateChIPAntigenOptions();
+    generateCellTypeOptions();
   });
 }
 
