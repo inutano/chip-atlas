@@ -142,7 +142,7 @@ module PJ
       end
 
       def chip_antigen(genome, ag_class, cl_class)
-        ag = [{id: 'All', label: 'All', count: nil}]
+        ag = [{id: '-', label: 'All', count: nil}]
         ag_class = 'Histone' if ag_class == 'undefined'
         count = if cl_class == 'undefined' or cl_class == 'All cell types'
           where(genome: genome, agClass: ag_class).group(:agSubClass).count
@@ -156,7 +156,7 @@ module PJ
       end
 
       def cell_type(genome, ag_class, cl_class)
-        cl = [{id: 'All', label: 'All', count: nil}]
+        cl = [{id: '-', label: 'All', count: nil}]
 
         if cl_class != 'undefined' and cl_class != 'All cell types'
           ag_class = 'Histone' if ag_class == 'undefined'
