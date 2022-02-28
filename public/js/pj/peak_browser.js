@@ -16,8 +16,6 @@ const initOptions = () => {
 
 const peakBrowserTabTriggerEvents = () => {
   $('a[data-toggle="tab"]').on('shown.bs.tab', function(e){
-    const activatedTab = e.target;
-    const previousTab = e.relatedTarget;
     initOptions();
   });
 }
