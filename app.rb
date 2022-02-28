@@ -124,7 +124,8 @@ class PeakJohn < Sinatra::Base
   get '/data/chip_antigen' do
     genome   = params[:genome]
     ag_class = params[:agClass]
-    data = PJ::Experiment.chip_antigen(genome, ag_class)
+    cl_class = params[:clClass]
+    data = PJ::Experiment.chip_antigen(genome, ag_class, cl_class)
 
     content_type "application/json"
     JSON(data)

@@ -141,10 +141,15 @@ module PJ
         ct
       end
 
-      def chip_antigen(genome, ag_class)
+      def chip_antigen(genome, ag_class, cl_class)
         ag = [{id: 'All', label: 'All', count: nil}]
         ag_class = 'Histone' if ag_class == 'undefined'
-        where(genome: genome, agClass: ag_class).group(:agSubClass).count.each_pair do |k,v|
+        count = if cl_class == 'undefined' or cl_class == 'All cell types'
+          where(genome: genome, agClass: ag_class).group(:agSubClass).count
+        else
+          where(genome: genome, agClass: ag_class, clClass: cl_class).group(:agSubClass).count
+        end
+        count.each_pair do |k,v|
           ag << { id: k, label: k, count: v }
         end
         ag

@@ -88,6 +88,7 @@ const generateSampleTypeOptions = async () => {
 const generateChIPAntigenOptions = async () => {
   const genome = genomeSelected();
   const agSelected = $('select#' + genome + 'agClass option:selected').val();
+  const clSelected = $('select#' + genome + 'clClass option:selected').val();
 
   const select = $('select#' + genome + 'agSubClass');
   select.empty();
@@ -105,7 +106,7 @@ const generateChIPAntigenOptions = async () => {
         .appendTo(select);
       break;
     default:
-      let response = await fetch('/data/chip_antigen?genome=' + genome + '&agClass=' + agSelected);
+      let response = await fetch('/data/chip_antigen?genome=' + genome + '&agClass=' + agSelected + '&clClass=' + clSelected);
       let agList = await response.json();
 
       agList.forEach((experiment, i) => {
