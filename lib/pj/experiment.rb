@@ -107,6 +107,40 @@ module PJ
         ]
       end
 
+      def experiment_types(genome, cl_class)
+        # Select experiments by genome and cell type class
+        subset = if cl_class == 'All cell types'
+          self.where(genome: genome)
+        else
+          self.where(genome: genome, clClass: cl_class)
+        end
+        # Get count per experiment types
+        counts = subset.group(:agClass).size
+        # Return the map results: labels-counts
+        list_of_experiment_types.map do |h|
+          {
+            id: h[:id],
+            label: h[:label],
+            count: counts[h[:id]]
+          }
+        end
+      end
+
+      def sample_types(genome, ag_class)
+        # Select experiments by genome and experiment type
+        subset = if ag_class == 'undefined'
+          self.where(genome: genome)
+        else
+          self.where(genome: genome, agClass: ag_class)
+        end
+        # Initialize return object with all count
+        ct = [{id: 'All cell types', label: 'All cell types', count: subset.size}]
+        subset.group(:clClass).count.each_pair do |k,v|
+          ct << { id: k, label: k, count: v }
+        end
+        ct
+      end
+
       ## Retrieve sub class options
       def get_subclass(genome, ag_class, cl_class, subclass_type)
         f_genome = self.where(:genome => genome)

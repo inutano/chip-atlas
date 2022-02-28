@@ -103,6 +103,24 @@ class PeakJohn < Sinatra::Base
     JSON.dump(data)
   end
 
+  get '/data/experiment_types' do
+    genome   = params[:genome]
+    cl_class = params[:clClass]
+    data = PJ::Experiment.experiment_types(genome, cl_class)
+
+    content_type "application/json"
+    JSON(data)
+  end
+
+  get '/data/sample_types' do
+    genome   = params[:genome]
+    ag_class = params[:agClass]
+    data = PJ::Experiment.sample_types(genome, ag_class)
+
+    content_type "application/json"
+    JSON(data)
+  end
+
   get "/" do
     @number_of_experiments = settings.number_of_experiments
     haml :about

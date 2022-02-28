@@ -124,7 +124,7 @@
                       .panel-heading{ id: "heading-#{class_id}" }
                         %h4.panel-title= "1. Experiment type"
                       .panel-body
-                        %select.form-control.classSelect{ id: "#{class_id}", size: 8, name: "antigen" }
+                        %select.form-control.classSelect.agClassSelect{ id: "#{class_id}", size: 8, name: "antigen" }
 
                     .panel.panel-default
                       - class_id = "#{genome}agSubClass"
@@ -145,7 +145,7 @@
                         %h4.panel-title
                           2. Cell type Class
                       .panel-body
-                        %select.form-control.classSelect{ id: class_id, size: 8, name: "celltype" }
+                        %select.form-control.classSelect.clClassSelect{ id: class_id, size: 8, name: "celltype" }
                           %option{ value: 'All cell types', selected: true }
                             All cell types
 
