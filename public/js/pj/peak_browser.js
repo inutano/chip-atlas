@@ -121,8 +121,8 @@ const generateChIPAntigenOptions = async () => {
         }
 
         option.appendTo(select);
-        // activateTypeAhead(genome, 'ag', options);
       });
+      activateTypeAhead(genome, 'ag', agList);
   }
 }
 
@@ -150,15 +150,14 @@ const generateCellTypeOptions = async () => {
     }
 
     option.appendTo(select);
-    // activateTypeAhead(genome, 'cl', options);
+
   });
+  activateTypeAhead(genome, 'cl', clList);
 }
 
 // typeahead
-const activateTypeAhead = (genome, panelType, options) => {
-  const listSubClass = $.map(options, function(value, key){
-    return key;
-  });
+const activateTypeAhead = (genome, panelType, listObject) => {
+  const listLabels = listObject.map(experiment => experiment.label);
   const typeaheadInput = $('#' + genome + panelType + 'SubClass.typeahead');
   // destroy
   typeaheadInput.typeahead('destroy');
@@ -166,7 +165,7 @@ const activateTypeAhead = (genome, panelType, options) => {
   const list = new Bloodhound({
     datumTokenizer: Bloodhound.tokenizers.whitespace,
     queryTokenizer: Bloodhound.tokenizers.whitespace,
-    local: listSubClass
+    local: listLabels
   });
   typeaheadInput.typeahead({
     hint: true,
@@ -179,7 +178,7 @@ const activateTypeAhead = (genome, panelType, options) => {
   // sync
   typeaheadInput.on('typeahead:select keyup', function(){
     const input = $(this).val();
-    if($.inArray(input,listSubClass) > -1){
+    if($.inArray(input, listLabels) > -1){
       $('select#' + genome + type + 'SubClass').val(input);
     }
   });
