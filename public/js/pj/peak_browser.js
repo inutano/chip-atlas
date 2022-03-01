@@ -167,7 +167,7 @@ const activateTypeAhead = (genome, panelType, listObject) => {
   typeaheadInput.on('typeahead:select keyup', function(){
     const input = $(this).val();
     if($.inArray(input, listLabels) > -1){
-      $('select#' + genome + type + 'SubClass').val(input);
+      $('select#' + genome + panelType + 'SubClass').val(input);
     }
   });
 }
