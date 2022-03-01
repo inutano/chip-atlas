@@ -48,7 +48,7 @@ const generateExperimentTypeOptions = async () => {
 
 const generateSampleTypeOptions = async () => {
   const genome = genomeSelected();
-  const agSelected = $('select#' + genome + 'agClass option:selected').val();
+  const agSelected = $('select#' + genome + 'agClass option:selected').val(); // send undefined when loading window / tab
 
   const select = $('select#' + genome + 'clClass')
   select.empty();
