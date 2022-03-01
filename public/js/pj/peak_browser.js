@@ -198,6 +198,7 @@ const generateQvalOptions = async () => {
       let qvList = await response.json();
       qvList.forEach((qv, i) => {
         let opt = document.createElement('option', { value: qv });
+        if (i == 0) opt.setAttribute('selected', 'true');
         let val = document.createTextNode(parseInt(qv) * 10);
         opt.appendChild(val);
         select.appendChild(opt);
