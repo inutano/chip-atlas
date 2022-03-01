@@ -76,6 +76,9 @@ const taxidMap = {
 
 // onload
 $(function(){
+  generateExperimentTypeOptions();
+  generateSampleTypeOptions();
+
   // default value for dataset
   putDefaultTitles();
 
@@ -154,11 +157,14 @@ $(function(){
     }).done(function(json){
       genomeList = json;
       $.each(genomeList, function(i, genome){
+        changeSelect(genome);
         // set tab controller
         $('#' + genome + '-tab a').on('click', function(e){
           e.preventDefault();
           $(this).tab('show');
           positionBed();
+          generateExperimentTypeOptions();
+          generateSampleTypeOptions();
           putDefaultTitles();
         });
         // put file content into the textarea
@@ -248,6 +254,57 @@ $(function(){
 });
 
 // functions
+const changeSelect = (genome) => {
+  const agSelectElement = document.querySelector('#' + genome + 'agClass');
+  agSelectElement.addEventListener('change', (event) => {
+    generateSampleTypeOptions();
+  });
+}
+
+const generateExperimentTypeOptions = async () => {
+  const genome = genomeSelected();
+  const clSelected = $('select#' + genome + 'clClass option:selected').val();
+
+  const select = $('select#' + genome + 'agClass')
+  select.empty();
+
+  let response = await fetch('/data/experiment_types?genome=' + genome + '&clClass=' + clSelected);
+  let experimentList = await response.json();
+
+  experimentList.forEach((experiment, i) => {
+    let id = experiment['id'];
+    let label = experiment['label'];
+    let count = experiment['count'];
+    let option = $('<option>')
+                   .attr("value", id)
+                   .append(label + ' (' + count + ')');
+    if (i==0) option.attr("selected", true);
+    option.appendTo(select);
+  });
+}
+
+const generateSampleTypeOptions = async () => {
+  const genome = genomeSelected();
+  const agSelected = $('select#' + genome + 'agClass option:selected').val();
+
+  const select = $('select#' + genome + 'clClass')
+  select.empty();
+
+  let response = await fetch('/data/sample_types?genome=' + genome + '&agClass=' + agSelected);
+  let sampleList = await response.json();
+
+  sampleList.forEach((experiment, i) => {
+    let id = experiment['id'];
+    let label = experiment['label'];
+    let count = experiment['count'];
+    let option = $('<option>')
+                   .attr("value", id)
+                   .append(label + ' (' + count + ')');
+    if (i==0) option.attr("selected", true);
+    option.appendTo(select);
+  });
+}
+
 function putDefaultTitles(){
   var defaultTitles = {
     'UserDataTitle':     "dataset A",
