@@ -128,11 +128,8 @@ module PJ
 
       def sample_types(genome, ag_class)
         # Select experiments by genome and experiment type
-        subset = if ag_class == 'undefined'
-          self.where(genome: genome)
-        else
-          self.where(genome: genome, agClass: ag_class)
-        end
+        ag_class = list_of_experiment_types.first[:id] if ag_class == 'undefined'
+        subset = self.where(genome: genome, agClass: ag_class)
         # Initialize return object with all count
         ct = [{id: 'All cell types', label: 'All cell types', count: subset.size}]
         subset.group(:clClass).count.each_pair do |k,v|
@@ -143,7 +140,7 @@ module PJ
 
       def chip_antigen(genome, ag_class, cl_class)
         ag = [{id: '-', label: 'All', count: nil}]
-        ag_class = 'Histone' if ag_class == 'undefined'
+        ag_class = list_of_experiment_types.first[:id] if ag_class == 'undefined'
         count = if cl_class == 'undefined' or cl_class == 'All cell types'
           where(genome: genome, agClass: ag_class).group(:agSubClass).count
         else
@@ -159,7 +156,7 @@ module PJ
         cl = [{id: '-', label: 'All', count: nil}]
 
         if cl_class != 'undefined' and cl_class != 'All cell types'
-          ag_class = 'Histone' if ag_class == 'undefined'
+          ag_class = list_of_experiment_types.first[:id] if ag_class == 'undefined'
 
           subset = self.where(genome: genome, agClass: ag_class, clClass: cl_class)
           subset.group(:clSubClass).count.each_pair do |k,v|
