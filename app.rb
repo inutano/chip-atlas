@@ -34,13 +34,14 @@ class PeakJohn < Sinatra::Base
       set :number_of_experiments, ((PJ::Experiment.number_of_experiments / 1000) * 1000).to_s.reverse.gsub(/(\d{3})(?=\d)/, '\\1,').reverse
       set :index_all_genome, PJ::Experiment.index_all_genome
       set :list_of_genome, PJ::Experiment.list_of_genome
+      set :list_of_experiment_types, PJ::Experiment.list_of_experiment_types
       set :qval_range, PJ::Bedfile.qval_range
       set :colo_analysis, PJ::Analysis.results(:colo)
       set :target_genes_analysis, PJ::Analysis.results(:target_genes)
       set :bedsizes, PJ::Bedsize.dump
-      set :experiment_list, JSON.load(open("https://dbarchive.biosciencedbc.jp/kyushu-u/metadata/ExperimentList.json"))
-      set :experiment_list_adv, JSON.load(open("https://dbarchive.biosciencedbc.jp/kyushu-u/metadata/ExperimentList_adv.json"))
-      set :gsm_to_srx, Hash[settings.experiment_list["data"].map{|a| [a[2], a[0]] }]
+      # set :experiment_list, JSON.load(open("https://dbarchive.biosciencedbc.jp/kyushu-u/metadata/ExperimentList.json"))
+      # set :experiment_list_adv, JSON.load(open("https://dbarchive.biosciencedbc.jp/kyushu-u/metadata/ExperimentList_adv.json"))
+      # set :gsm_to_srx, Hash[settings.experiment_list["data"].map{|a| [a[2], a[0]] }]
     rescue ActiveRecord::StatementInvalid
       # Ignore Statement Invalid error when the database is not yet prepared
     end
@@ -70,6 +71,8 @@ class PeakJohn < Sinatra::Base
              settings.index_all_genome
            when "list_of_genome"
              settings.list_of_genome.keys
+           when "list_of_experiment_types"
+             settings.list_of_experiment_types
            when "qval_range"
              settings.qval_range
            when "exp_metadata"
@@ -98,6 +101,44 @@ class PeakJohn < Sinatra::Base
            end
     content_type "application/json"
     JSON.dump(data)
+  end
+
+  get '/data/experiment_types' do
+    genome   = params[:genome]
+    cl_class = params[:clClass]
+    data = PJ::Experiment.experiment_types(genome, cl_class)
+
+    content_type "application/json"
+    JSON(data)
+  end
+
+  get '/data/sample_types' do
+    genome   = params[:genome]
+    ag_class = params[:agClass]
+    data = PJ::Experiment.sample_types(genome, ag_class)
+
+    content_type "application/json"
+    JSON(data)
+  end
+
+  get '/data/chip_antigen' do
+    genome   = params[:genome]
+    ag_class = params[:agClass]
+    cl_class = params[:clClass]
+    data = PJ::Experiment.chip_antigen(genome, ag_class, cl_class)
+
+    content_type "application/json"
+    JSON(data)
+  end
+
+  get '/data/cell_type' do
+    genome   = params[:genome]
+    ag_class = params[:agClass]
+    cl_class = params[:clClass]
+    data = PJ::Experiment.cell_type(genome, ag_class, cl_class)
+
+    content_type "application/json"
+    JSON(data)
   end
 
   get "/" do

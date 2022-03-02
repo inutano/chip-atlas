@@ -1,218 +1,159 @@
-// onload
-$(function(){
-  // tab trigger event
+window.onload = () => {
+  initOptions();
   peakBrowserTabTriggerEvents();
-
-  // iterate for each genome
-  var genomeList;
-  $.ajax({
-    type: 'GET',
-    url: '/data/list_of_genome.json',
-    dataType: 'json',
-  }).done(function(json){
-    genomeList = json;
-    $.each(genomeList, function(i, genome){
-      tabControl(genome);
-      panelCollapse(genome);
-      selectToHideAnother(genome);
-    })
-  });
-
-  // help message
+  genomeTabSettings();
+  setForm();
   showHelp();
+};
 
-  // post form data
-  sendBedToIGV();
-  downloadBed();
-
-  // generate sub class options by selecting class name
-  setSubClassOptions();
-
-  // Append qvalue options
-  addQvalOptions();
-})
-
-function addQvalOptions() {
-  var genome = genomeSelected();
-  generateQvalOptions(genome);
-  $('select.classSelect').change(function(){
-    generateQvalOptions(genome);
-  });
+const initOptions = () => {
+  generateExperimentTypeOptions();
+  generateSampleTypeOptions();
+  generateChIPAntigenOptions();
+  generateCellTypeOptions();
+  generateQvalOptions();
 }
 
-function resetQvalOptions(genome) {
-  $('select#' + genome + 'qval').empty();
-}
-
-function generateQvalOptions(genome) {
-  resetQvalOptions(genome);
-  var agSelected = $('select#' + genome + 'agClass option:selected').val();
-  var target = $('select#' + genome + 'qval');
-  switch (agSelected) {
-    case 'Bisulfite-Seq':
-      $('<option>')
-        .attr("value", 'bs')
-        .append('NA')
-        .attr("selected", true)
-        .appendTo(target);
-      break;
-    default:
-      $.ajax({
-        type: 'GET',
-        url: '/qvalue_range',
-        dataType: 'json'
-      }).done(function(json){
-        $.each(json, function(i, qv){
-          var opt = $('<option>')
-            .attr("value", qv)
-            .append(parseInt(qv) * 10)
-          if (i == 0) {
-            opt.attr("selected", true)
-          }
-          opt.appendTo(target);
-        });
-      });
-  }
-}
-
-// functions
-function peakBrowserTabTriggerEvents(){
+const peakBrowserTabTriggerEvents = () => {
   $('a[data-toggle="tab"]').on('shown.bs.tab', function(e){
-    var activatedTab = e.target;
-    var previousTab = e.relatedTarget;
-    resetSubClassOptions();
-
-    // Append qvalue options
-    addQvalOptions();
-
-    // Append initial subclass options
-    generateSubClassOptions();
+    initOptions();
   });
 }
 
-function panelCollapse(genome){
-  $.each(["ag", "cl"], function(i, type){
-    $('#toggle-' + genome + type + 'SubClass').click(function(){
-      $('#collapse-' + genome + type + 'SubClass').collapse('toggle');
-    });
+/*
+    Antigen/Cell type parent Class option generation
+*/
+
+const generateExperimentTypeOptions = async () => {
+  const genome = genomeSelected();
+  const clSelected = $('select#' + genome + 'clClass option:selected').val();
+
+  const select = $('select#' + genome + 'agClass')
+  select.empty();
+
+  let response = await fetch('/data/experiment_types?genome=' + genome + '&clClass=' + clSelected);
+  let experimentList = await response.json();
+
+  experimentList.forEach((experiment, i) => {
+    let id = experiment['id'];
+    let label = experiment['label'];
+    let count = experiment['count'];
+    let option = $('<option>')
+                   .attr("value", id)
+                   .append(label + ' (' + count + ')');
+    if (i==0) option.attr("selected", true);
+    option.appendTo(select);
   });
 }
 
-// sub class options
-function setSubClassOptions(){
-  generateSubClassOptions();
-  $('select.classSelect').change(function(){
-    generateSubClassOptions();
+const generateSampleTypeOptions = async () => {
+  const genome = genomeSelected();
+  const agSelected = $('select#' + genome + 'agClass option:selected').val(); // send undefined when loading window / tab
+
+  const select = $('select#' + genome + 'clClass')
+  select.empty();
+
+  let response = await fetch('/data/sample_types?genome=' + genome + '&agClass=' + agSelected);
+  let sampleList = await response.json();
+
+  sampleList.forEach((experiment, i) => {
+    let id = experiment['id'];
+    let label = experiment['label'];
+    let count = experiment['count'];
+    let option = $('<option>')
+                   .attr("value", id)
+                   .append(label + ' (' + count + ')');
+    if (i==0) option.attr("selected", true);
+    option.appendTo(select);
   });
 }
 
-function resetSubClassOptions(){ // Erase existing options and put an option for 'all'
-  var genome = genomeSelected();
-  $.each(['ag', 'cl'], function(i, t){
-    var subClassSelect = $('select#' + genome + t + 'SubClass');
-    subClassSelect.empty();
-  });
-}
+/*
+     Antigen/Cell type SubClass option generation
+*/
 
-function generateSubClassOptions(){
-  resetSubClassOptions();
-  var genome = genomeSelected();
-  var agSelected = $('select#' + genome + 'agClass option:selected').val();
-  var clSelected = $('select#' + genome + 'clClass option:selected').val();
-  addAgSubClassOptions(genome, agSelected, clSelected)
-  addClSubClassOptions(genome, agSelected, clSelected)
-}
+const generateChIPAntigenOptions = async () => {
+  const genome = genomeSelected();
+  const agSelected = $('select#' + genome + 'agClass option:selected').val();
+  const clSelected = $('select#' + genome + 'clClass option:selected').val();
 
-function addAgSubClassOptions (genome, agSelected, clSelected) {
-  var url = '/data/index_subclass.json?' + 'genome=' + genome + '&agClass=' + agSelected + '&clClass=' + clSelected + '&type=ag';
-  const panelAppendTo = 'select#' + genome + 'agSubClass';
+  const select = $('select#' + genome + 'agSubClass');
+  select.empty();
+
   switch (agSelected) {
     case 'Input control':
     case 'ATAC-Seq':
     case 'DNase-seq':
     case 'Bisulfite-Seq':
-      putNAOptions(panelAppendTo)
+      // put 'NA'
+      $('<option>')
+        .attr("value", "-")
+        .attr("selected", true)
+        .append("NA")
+        .appendTo(select);
       break;
     default:
-      $.ajax({
-        type: 'GET',
-        url: url,
-        dataType: 'json'
-      }).done(function(json){
-        var options = json;
-        putSubClassOptions(options, panelAppendTo)
-        activateTypeAhead(genome, 'ag', options);
+      let response = await fetch('/data/chip_antigen?genome=' + genome + '&agClass=' + agSelected + '&clClass=' + clSelected);
+      let agList = await response.json();
+
+      agList.forEach((experiment, i) => {
+        let id = experiment['id'];
+        let label = experiment['label'];
+        let count = experiment['count'];
+        let option = $('<option>')
+                       .attr("value", id)
+        if (i==0) {
+          option.append(label).attr("selected", true);
+        } else {
+          option.append(label + ' (' + count + ')');
+        }
+
+        option.appendTo(select);
       });
+      activateTypeAhead(genome, 'ag', agList);
   }
 }
 
-function addClSubClassOptions (genome, agSelected, clSelected) {
-  var url = '/data/index_subclass.json?' + 'genome=' + genome + '&agClass=' + agSelected + '&clClass=' + clSelected + '&type=cl';
-  $.ajax({
-    type: 'GET',
-    url: url,
-    dataType: 'json'
-  }).done(function(json){
-    var options = json;
-    putSubClassOptions(options, 'select#' + genome + 'clSubClass')
-    activateTypeAhead(genome, 'cl', options);
+const generateCellTypeOptions = async () => {
+  const genome = genomeSelected();
+  const agSelected = $('select#' + genome + 'agClass option:selected').val();
+  const clSelected = $('select#' + genome + 'clClass option:selected').val();
+
+  const select = $('select#' + genome + 'clSubClass');
+  select.empty();
+
+  let response = await fetch('/data/cell_type?genome=' + genome + '&clClass=' + clSelected + '&agClass=' + agSelected);
+  let clList = await response.json();
+
+  clList.forEach((experiment, i) => {
+    let id = experiment['id'];
+    let label = experiment['label'];
+    let count = experiment['count'];
+    let option = $('<option>')
+                   .attr("value", id)
+    if (i==0) {
+      option.append(label).attr("selected", true);
+    } else {
+      option.append(label + ' (' + count + ')');
+    }
+
+    option.appendTo(select);
+
   });
-}
-
-function putAllOptions(panelAppendTo) {
-  $('<option>')
-    .attr("value", "-")
-    .attr("selected", true)
-    .append("All")
-    .appendTo(panelAppendTo);
-}
-
-function putNAOptions(panelAppendTo) {
-  $('<option>')
-    .attr("value", "-")
-    .attr("selected", true)
-    .append("NA")
-    .appendTo(panelAppendTo);
-}
-
-function putSubClassOptions(options, panelAppendTo){
-  putAllOptions(panelAppendTo)
-  $.map(options, function(value, key){
-    return [[key, value]];
-  }).sort().forEach(function(element,index,array){
-    var name = element[0];
-    var count = element[1];
-    appendSubClassOption(name, count, panelAppendTo);
-  });
-}
-
-function appendSubClassOption(name, count, panelAppendTo){
-  $('<option>')
-    .attr("value", name)
-    .append(name + " (" + count + ")")
-    .appendTo(panelAppendTo);
+  activateTypeAhead(genome, 'cl', clList);
 }
 
 // typeahead
-function activateTypeAhead(genome, panelType, options){
-  var listSubClass = $.map(options, function(value, key){
-    return key;
-  });
-  var typeaheadInput = $('#' + genome + panelType + 'SubClass.typeahead');
-  removePreviousTypeahead(typeaheadInput);
-  enableTypeAhead(listSubClass, typeaheadInput);
-  syncTypeaheadAndInput(listSubClass, typeaheadInput, panelType);
-}
-
-function removePreviousTypeahead(typeaheadInput){
+const activateTypeAhead = (genome, panelType, listObject) => {
+  const listLabels = listObject.map(experiment => experiment.label);
+  const typeaheadInput = $('#' + genome + panelType + 'SubClass.typeahead');
+  // destroy
   typeaheadInput.typeahead('destroy');
-}
-
-function enableTypeAhead(listSubClass, typeaheadInput){
-  var list = new Bloodhound({
+  // enable
+  const list = new Bloodhound({
     datumTokenizer: Bloodhound.tokenizers.whitespace,
     queryTokenizer: Bloodhound.tokenizers.whitespace,
-    local: listSubClass
+    local: listLabels
   });
   typeaheadInput.typeahead({
     hint: true,
@@ -222,20 +163,91 @@ function enableTypeAhead(listSubClass, typeaheadInput){
     name: 'list',
     source: list
   });
-}
-
-function syncTypeaheadAndInput(listSubClass, typeaheadInput, type){
-  var genome = genomeSelected();
+  // sync
   typeaheadInput.on('typeahead:select keyup', function(){
-    var input = $(this).val();
-    if($.inArray(input,listSubClass) > -1){
-      $('select#' + genome + type + 'SubClass').val(input);
+    const input = $(this).val();
+    if($.inArray(input, listLabels) > -1){
+      $('select#' + genome + panelType + 'SubClass').val(input);
     }
   });
 }
 
-function selectToHideAnother(genome){
-  var twoSelectors = ['select#' + genome + 'agSubClass', 'select#' + genome + 'clSubClass'];
+/*
+    Q-value options
+*/
+
+const generateQvalOptions = async () => {
+  const genome = genomeSelected();
+
+  const select = document.getElementById(genome + 'qval')
+  document.querySelectorAll('#' + genome + 'qval option').forEach(option => option.remove());
+
+  const agSelected = $('select#' + genome + 'agClass option:selected').val();
+  switch (agSelected) {
+    case 'Bisulfite-Seq':
+      const opt = document.createElement('option');
+      opt.setAttribute('value', 'bs');
+      opt.setAttribute('selected', 'true');
+
+      const val = document.createTextNode('NA');
+      opt.appendChild(val);
+      select.appendChild(opt);
+      break;
+    default:
+      let response = await fetch('/qvalue_range');
+      let qvList = await response.json();
+      qvList.forEach((qv, i) => {
+        let opt = document.createElement('option', { value: qv });
+        if (i == 0) opt.setAttribute('selected', 'true');
+        let val = document.createTextNode(parseInt(qv) * 10);
+        opt.appendChild(val);
+        select.appendChild(opt);
+      });
+  }
+}
+
+/*
+    Genome Tab settings
+*/
+
+const genomeTabSettings = async () => {
+  let response = await fetch('/data/list_of_genome.json');
+  let genomeList = await response.json();
+  genomeList.forEach((genome, i) => {
+    changeSelect(genome);
+    tabControl(genome);
+    panelCollapse(genome);
+    selectToHideAnother(genome);
+  });
+}
+
+const changeSelect = (genome) => {
+  const agSelectElement = document.querySelector('#' + genome + 'agClass');
+  agSelectElement.addEventListener('change', (event) => {
+    generateSampleTypeOptions();
+    generateChIPAntigenOptions();
+    generateCellTypeOptions();
+    generateQvalOptions();
+  });
+
+  const clSelectElement = document.querySelector('#' + genome + 'clClass');
+  clSelectElement.addEventListener('change', (event) => {
+    generateChIPAntigenOptions();
+    generateCellTypeOptions();
+  });
+}
+
+const panelCollapse = (genome) => {
+  $('#toggle-' + genome + 'agSubClass').click(function(){
+    $('#collapse-' + genome + 'agSubClass').collapse('toggle');
+  });
+  $('#toggle-' + genome + 'clSubClass').click(function(){
+    $('#collapse-' + genome + 'clSubClass').collapse('toggle');
+  });
+}
+
+const selectToHideAnother = (genome) => {
+  const twoSelectors = ['select#' + genome + 'agSubClass', 'select#' + genome + 'clSubClass'];
   $.each(twoSelectors, function(i, selector){
     $(selector).on('typeahead:select keyup change', function(){
       if($(twoSelectors[0]).val() != "-" && $(twoSelectors[1]).val() != "-"){
@@ -245,17 +257,17 @@ function selectToHideAnother(genome){
   });
 }
 
-function disableAnother(thisSelector, genome){
-  var span = $('<span>')
+const disableAnother = (thisSelector, genome) => {
+  const span = $('<span>')
         .attr("aria-hidden","true")
         .append("×");
-  var button = $('<button>')
+  const button = $('<button>')
         .attr("type","button")
         .attr("class","close")
         .attr("data-dismiss","alert")
         .attr("aria-label","Close")
         .append(span);
-  var message = $('<div>')
+  const message = $('<div>')
         .attr("class","alert alert-warning alert-dismissible fade in")
         .attr("role","alert")
         .append(button)
@@ -277,71 +289,70 @@ function disableAnother(thisSelector, genome){
   };
 };
 
-function sendBedToIGV(){
+/*
+    Set form
+*/
+
+const setForm = () => {
+  sendBedToIGV();
+  downloadBed();
+}
+
+const sendBedToIGV = () => {
   postFormData('button#submit', '/browse');
 }
 
-function downloadBed(){
+const downloadBed = () => {
   postFormData('button#download', '/download')
 }
 
-function postFormData(buttonId, url){
+const postFormData = (buttonId, url) => {
   $(buttonId).on('click', function(){
-    var button = $(this);
+    const button = $(this);
+    // button off
     button.prop("disable", true);
-    if(url == '/browse'){
-      postDataAjax(url);
-      // var igvUrl = 'http://127.0.0.1:60151';
-      // $.ajax({
-      //   url: igvUrl,
-      //   type: 'GET'
-      // }).done(function(response){
-      //   postDataAjax(url);
-      // }).fail(function(response){
-      //   alert("IGV is not running on your computer.\n\nLaunch IGV and allow an access via port 60151 (View > Preferences... > Advanced > check 'enable port' and set port number 60151) to browse data.\n\n If you have not installed IGV, visit  https://www.broadinstitute.org/igv/download or google 'Integrative Genomics Viewer' to download the software.");
-      // })
-    }else{
-      postDataAjax(url);
-    }
+    // get form data
+    const genome = genomeSelected();
+    const data = {
+      condition: {
+        genome: genome,
+        agClass: $('select#' + genome + 'agClass option:selected').val(),
+        agSubClass: $('select#' + genome + 'agSubClass option:selected').val(),
+        clClass: $('select#' + genome + 'clClass option:selected').val(),
+        clSubClass: $('select#' + genome + 'clSubClass option:selected').val(),
+        qval: $('select#' + genome + 'qval option:selected').val()
+      }
+    };
+    // post
+    $.ajax({
+      type: 'POST',
+      url: url,
+      data: JSON.stringify(data),
+      contentType: 'application/json',
+      dataType: 'json',
+      scriptCharset: 'utf-8'
+    }).done(function(response){
+      window.open(response.url, "_self", "")
+    }).fail(function(response){
+      console.log("Error: failed to send/get data. Please contact from github issue");
+    });
+    // button on
     button.prop("disable", false);
   });
 }
 
-function postDataAjax(url){
-  var data = getFormData();
-  $.ajax({
-    type: 'POST',
-    url: url,
-    data: JSON.stringify(data),
-    contentType: 'application/json',
-    dataType: 'json',
-    scriptCharset: 'utf-8'
-  }).done(function(response){
-    window.open(response.url, "_self", "")
-  }).fail(function(response){
-    console.log("Error: failed to send/get data. Please contact from github issue");
-  });
-}
+/*
+    Show help messages
+*/
 
-function getFormData(){
-  var genome = genomeSelected();
-  var data = {
-    // igv: $().text
-    condition: {
-      genome: genome,
-      agClass: $('select#' + genome + 'agClass option:selected').val(),
-      agSubClass: $('select#' + genome + 'agSubClass option:selected').val(),
-      clClass: $('select#' + genome + 'clClass option:selected').val(),
-      clSubClass: $('select#' + genome + 'clSubClass option:selected').val(),
-      qval: $('select#' + genome + 'qval option:selected').val()
-    }
+const showHelp = () => {
+  const helpText = {
+    threshold: 'Set the threshold for statistical significance values calculated by peak-caller MACS2 (-10*Log10[MACS2 Q-value]). If 50 is set here, peaks with Q value < 1E-05 are shown on genome browser IGV. Colors shown in IGV indicate the statistical significance values as follows: blue (50), cyan (250), green (500), yellow (750), and red (> 1,000).',
+    viewOnIGV: 'IGV must be running on your computer before clicking the button.\n\nIf your browser shows "cannot open the page" error, launch IGV and allow an access via port 60151 (from the menu bar of IGV, View > Preferences... > Advanced > "enable port" and set port number 60151) to browse the data. If you have not installed IGV on your computer, visit https://www.broadinstitute.org/igv/download or google "Integrative Genomics Viewer" to download the software.'
   };
-  return data
-}
 
-function showHelp(){
   $('.infoBtn').click(function(){
-    var genome = genomeSelected();
+    const genome = genomeSelected();
     switch($(this).attr('id')){
       case genome + 'Threshold':
         alert(helpText["threshold"]);
@@ -352,8 +363,3 @@ function showHelp(){
     };
   });
 }
-
-var helpText = {
-  threshold: 'Set the threshold for statistical significance values calculated by peak-caller MACS2 (-10*Log10[MACS2 Q-value]). If 50 is set here, peaks with Q value < 1E-05 are shown on genome browser IGV. Colors shown in IGV indicate the statistical significance values as follows: blue (50), cyan (250), green (500), yellow (750), and red (> 1,000).',
-  viewOnIGV: 'IGV must be running on your computer before clicking the button.\n\nIf your browser shows "cannot open the page" error, launch IGV and allow an access via port 60151 (from the menu bar of IGV, View > Preferences... > Advanced > "enable port" and set port number 60151) to browse the data. If you have not installed IGV on your computer, visit https://www.broadinstitute.org/igv/download or google "Integrative Genomics Viewer" to download the software.'
-};

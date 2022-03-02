@@ -12,3 +12,7 @@ gem 'redcarpet'
 gem 'nokogiri'
 gem 'unicorn'
 gem 'rubyzip'
+
+group :development do
+  gem 'shotgun'
+end

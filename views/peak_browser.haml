@@ -1,24 +1,25 @@
 !!! 5
-%html{ :lang => "en" }
+%html{ lang: "en" }
   %head
-    %meta{ :charset => "utf-8" }
-    %meta{ "http-equiv" => "X-UA-Compatible", :content => "IE=edge" }
-    %meta{ :name => "viewport", :content => "width=device-width, initial-scale=1" }
+    %meta{ charset: "utf-8" }
+    %meta{ 'http-equiv': "X-UA-Compatible", content: "IE=edge" }
+    %meta{ name: "viewport", content: "width=device-width, initial-scale=1" }
 
-    %meta{ :name => "description", :content => "Visualize all peaks of the public ChIP-Seq data on IGV." }
-    %meta{ :name => "author", :content => "Shinya Oki, Tazro Ohta" }
+    %meta{ name: "description", content: "Visualize all peaks of the public ChIP-Seq data on IGV." }
+    %meta{ name: "author", content: "Shinya Oki, Tazro Ohta" }
 
-    %title= "ChIP-Atlas: Peak Browser"
+    %title
+      ChIP-Atlas: Peak Browser
 
     // Bootstrap core and typeahead CSS
-    %link{ :href => "#{app_root}/css/bootstrap.min.css", :rel => "stylesheet" }
-    %link{ :href => "#{app_root}/css/typeaheadjs.css", :rel => "stylesheet" }
+    %link{ href: "#{app_root}/css/bootstrap.min.css", rel: "stylesheet" }
+    %link{ href: "#{app_root}/css/typeaheadjs.css", rel: "stylesheet" }
 
     // Custom style for this website
-    %link{ :href => "#{app_root}/style.css", :rel => "stylesheet"}
+    %link{ href: "#{app_root}/style.css", rel: "stylesheet"}
 
     // GA
-    %script{:async => true, :src => "https://www.googletagmanager.com/gtag/js?id=UA-117599014-1"}
+    %script{ async: true, src: "https://www.googletagmanager.com/gtag/js?id=UA-117599014-1" }
     :javascript
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
@@ -29,28 +30,34 @@
     %nav.navbar.navbar-inverse.navbar-fixed-top
       .container-fluid
         .navbar-header
-          %button.navbar-toggle.collapsed{ :type => "button", "data-toggle" => "collapse", "data-target" => "#navbar", "aria-expanded" => "false", "aria-controls" => "navbar" }
-            %span.sr-only Toggle navigation
+          %button.navbar-toggle.collapsed{ type: "button", "data-toggle": "collapse", "data-target": "#navbar", "aria-expanded": "false", "aria-controls": "navbar" }
+            %span.sr-only
+              Toggle navigation
             %span.icon-bar
             %span.icon-bar
             %span.icon-bar
-          %a.navbar-brand{ :href => "#{app_root}" }
+          %a.navbar-brand{ href: "#{app_root}" }
             %i.fas.fa-mountain
             ChIP-Atlas
         #navbar.collapse.navbar-collapse
           %ul.nav.navbar-nav
             %li.active
-              %a{ :href => "#{app_root}/peak_browser" }= "Peak Browser"
+              %a{ href: "#{app_root}/peak_browser" }
+                Peak Browser
             %li
-              %a{ :href => "#{app_root}/target_genes" }= "Target Genes"
+              %a{ href: "#{app_root}/target_genes" }
+                Target Genes
             %li
-              %a{ :href => "#{app_root}/colo" }= "Colocalization"
+              %a{ href: "#{app_root}/colo" }
+                Colocalization
             %li
-              %a{ :href => "#{app_root}/enrichment_analysis" }= "Enrichment Analysis"
+              %a{ href: "#{app_root}/enrichment_analysis" }
+                Enrichment Analysis
             %li
-              %a{ :href => "#{app_root}/publications" }= "Publications"
+              %a{ href: "#{app_root}/publications" }
+                Publications
             %li
-              %a{ :href => "https://github.com/inutano/chip-atlas/wiki" }
+              %a{ href: "https://github.com/inutano/chip-atlas/wiki" }
                 %i.fab.fa-github
                 Docs
           %p.navbar-text.navbar-right
@@ -61,7 +68,8 @@
             .form-group
               - id_example = ["GSM469863", "SRX018625"].sample(1)[0]
               %input.form-control#jumpToExperiment{ type: "text", value: "#{id_example}" }
-            %button.btn.btn-default.go-experiment{ type: "submit", }= "Go"
+            %button.btn.btn-default.go-experiment{ type: "submit", }
+              Go
           %p.navbar-text.navbar-right
             Find By ID
 
@@ -80,126 +88,95 @@
         .col-md-2
           .dropdown-help
             .dropdown
-              .button.btn.btn-default.dropdown-toggle{ :type => "button", :id => "movies-dropdown", "data-toggle" => "dropdown", "aria-haspopup" => true, "aria-expanded" => true }
+              .button.btn.btn-default.dropdown-toggle{ type: "button", id: "movies-dropdown", "data-toggle": "dropdown", "aria-haspopup": true, "aria-expanded": true }
                 Tutorial movies
                 %span.caret
-              %ul.dropdown-menu{ "aria-labelledby" => "movies-dropdown" }
+              %ul.dropdown-menu{ "aria-labelledby": "movies-dropdown" }
                 %li
-                  %a{ :href => "https://youtu.be/JVWLlzIedw8", :target => "_blank" }= "Requirements"
+                  %a{ href: "https://youtu.be/JVWLlzIedw8", target: "_blank" }
+                    Requirements
                 %li
-                  %a{ :href => "https://youtu.be/qKNOkK-8hDo", :target => "_blank" }= "How to use"
+                  %a{ href: "https://youtu.be/qKNOkK-8hDo", target: "_blank" }
+                    How to use
                 %li
-                  %a{ :href => "http://doi.org/10.7875/togotv.2018.023", :target => "_blank" }= "How to use (統合TV, Japanese)"
-
+                  %a{ href: "http://doi.org/10.7875/togotv.2018.023", target: "_blank" }
+                    How to use (統合TV, Japanese)
 
       // Navigation Tabs, links and contents
-      .genomeTab{ :role => "tabpanel"}
-
+      .genomeTab{ role: "tabpanel"}
         // Tabs
-        %ul.nav.nav-tabs{ :role => "tablist" }
+        %ul.nav.nav-tabs{ role: "tablist" }
           - @list_of_genome.keys.each.with_index do |genome, i|
-            %li{ :role => "presentation", :class => "#{(i == 0) ? 'active' : '' }", :id => "#{genome}-tab" }
-              %a{ :href => "##{genome}-tab-content", "aria-controls" => "#{genome}-tab-content", :role => "tab", "data-toggle" => "tab", "source" => genome }
+            %li{ role: "presentation", class: "#{(i == 0) ? 'active' : '' }", id: "#{genome}-tab" }
+              %a{ href: "##{genome}-tab-content", "aria-controls": "#{genome}-tab-content", role: "tab", "data-toggle": "tab", source: genome }
                 = "#{@list_of_genome[genome]}"
-
-
-
 
         // Contents
         .tab-content
           - @list_of_genome.keys.each.with_index do |genome, i|
-            .tab-pane.fade{ :role => "tabpanel", :id => "#{genome}-tab-content", :class => "#{(i == 0) ? 'in active' : ''}" }
+            .tab-pane.fade{ role: "tabpanel", id: "#{genome}-tab-content", class: "#{(i == 0) ? 'in active' : ''}" }
               - index = @index_all_genome[genome]
               .row
                 .col-md-4
                   %form
                     .panel.panel-default
                       - class_id = "#{genome}agClass"
-                      .panel-heading{ :id => "heading-#{class_id}" }
+                      .panel-heading{ id: "heading-#{class_id}" }
                         %h4.panel-title= "1. Experiment type"
                       .panel-body
-                        %select.form-control.classSelect{ :id => "#{class_id}", :size => 8, :name => "antigen" }
-                          - ind = index[:antigen]
-                          - count = ind.values.map{|n| n.values }.flatten.reduce(:+)
-                          - specials = ["Input control","Others","Unclassified","No description"]
-                          - nodes = ind.to_a.sort
-                          - nodes_normal = nodes.reject{|a| specials.include?(a[0]) }
-                          - nodes_special = specials.map{|special| nodes.select{|n| n[0] == special }[0] }.compact
-                          - collection = nodes_normal + nodes_special
-                          %option{ :value => "Histone", "selected" => true }= "ChIP: Histone (#{collection.select{|node| node[0] == "Histone"}[0][1].each_value.reduce(:+)})"
-                          %option{ :value => "RNA polymerase" }= "ChIP: RNA polymerase (#{collection.select{|node| node[0] == "RNA polymerase"}[0][1].each_value.reduce(:+)})"
-                          %option{ :value => "TFs and others" }= "ChIP: TFs and others (#{collection.select{|node| node[0] == "TFs and others"}[0][1].each_value.reduce(:+)})"
-                          %option{ :value => "Input control" }= "ChIP: Input control (#{collection.select{|node| node[0] == "Input control"}[0][1].each_value.reduce(:+)})"
-                          %option{ :value => "ATAC-Seq" }= "ATAC-Seq (#{collection.select{|node| node[0] == "ATAC-Seq"}[0][1].each_value.reduce(:+)})"
-                          %option{ :value => "DNase-seq" }= "DNase-Seq (#{collection.select{|node| node[0] == "DNase-seq"}[0][1].each_value.reduce(:+)})"
-                          %option{ :value => "Bisulfite-Seq" }= "Bisulfite-Seq (#{collection.select{|node| node[0] == "Bisulfite-Seq"}[0][1].each_value.reduce(:+)})"
+                        %select.form-control.classSelect.agClassSelect{ id: "#{class_id}", size: 8, name: "antigen" }
 
                     .panel.panel-default
-                      - sclass_id = "#{genome}agSubClass"
-                      .panel-heading{ :id => "heading-#{sclass_id}" }
-                        %h4.panel-title= "ChIP Antigen (optional)"
+                      - class_id = "#{genome}agSubClass"
+                      .panel-heading{ id: "heading-#{class_id}" }
+                        %h4.panel-title
+                          ChIP Antigen (optional)
                       .panel-body
-                        .panel-message{ :id => "#{sclass_id}" }
-
+                        .panel-message{ id: class_id }
                         // input box for typeahead
-                        %input.typeahead.form-control{ :type => "text", :placeholder => "type to search", :id => "#{sclass_id}" }
+                        %input.typeahead.form-control{ type: "text", placeholder: "type to search", id: class_id }
+                        %select.form-control.flexselect{ id: class_id, size: 8 }
 
-                        %select.form-control.flexselect{ :id => "#{sclass_id}", :size => 8 }
+                .col-md-4
+                  %form
+                    - class_id = "#{genome}clClass"
+                    .panel.panel-default
+                      .panel-heading{ id: "heading-#{class_id}"}
+                        %h4.panel-title
+                          2. Cell type Class
+                      .panel-body
+                        %select.form-control.classSelect.clClassSelect{ id: class_id, size: 8, name: "celltype" }
+                          %option{ value: 'All cell types', selected: true }
+                            All cell types
 
-                - [["cl", "Cell type"]].each do |set|
-                  .col-md-4
-                    %form
-                      .panel.panel-default
-                        - class_id = "#{genome}#{set[0]}Class"
-                        .panel-heading{ :id => "heading-#{class_id}" }
-                          %h4.panel-title= "2. #{set[1]} Class"
-                        .panel-body
-                          %select.form-control.classSelect{ :id => "#{class_id}", :size => 8, :name => set[1].downcase.sub("\s","") }
-                            - ind = index[set[1].downcase.sub("\s","").intern]
-                            - count = ind.values.map{|n| n.values }.flatten.reduce(:+)
-                            %option{ :value => "All #{set[1].downcase}s", "selected" => true }= "All #{set[1].downcase}s (#{count})"
-
-                            = specials = ["Input control","Others","Unclassified","No description"]
-                            - nodes = ind.to_a.sort
-                            - nodes_normal = nodes.reject{|a| specials.include?(a[0]) }
-                            - nodes_special = specials.map{|special| nodes.select{|n| n[0] == special }[0] }.compact
-                            - collection = nodes_normal + nodes_special
-
-                            - collection.each do |node|
-                              - typeClass = node[0]
-                              - typeSubClass = node[1]
-                              %option{ :value => typeClass }= "#{typeClass} (#{typeSubClass.each_value.reduce(:+)})"
-
-                      .panel.panel-default
-                        - sclass_id = "#{genome}#{set[0]}SubClass"
-                        .panel-heading{ :id => "heading-#{sclass_id}" }
-                          %h4.panel-title= "#{set[1]} (optional)"
-                        .panel-body
-                          .panel-message{ :id => "#{sclass_id}" }
-
-                          // input box for typeahead
-                          %input.typeahead.form-control{ :type => "text", :placeholder => "type to search", :id => "#{sclass_id}" }
-
-                          %select.form-control.flexselect{ :id => "#{sclass_id}", :size => 8 }
+                    .panel.panel-default
+                      - class_id = "#{genome}clSubClass"
+                      .panel-heading{ id: "heading-#{class_id}" }
+                        %h4.panel-title
+                          Cell type (optional)
+                      .panel-body
+                        .panel-message{ id: class_id }
+                        %input.typeahead.form-control{ type: 'text', placeholder: 'type to search', id: class_id }
+                        %select.form-control.flexselect{ id: class_id, size: 8 }
 
                 .col-md-4
                   %form
                     .panel.panel-default
-                      .panel-heading{ :id => "heading-#{genome}qval"}
+                      .panel-heading{ id: "heading-#{genome}qval"}
                         %h4.panel-title
                           3. Threshold for Significance
-                          %a.infoBtn{ :value => "info", :id => "#{genome}Threshold" }
+                          %a.infoBtn{ value: "info", id: "#{genome}Threshold" }
                             &#x24D8;
                       .panel-body
-                        %select.form-control{ :id => "#{genome}qval", :size => 5 }
+                        %select.form-control{ id: "#{genome}qval", size: 5 }
 
                   .button-submit.down
-                    %button.btn.btn-primary.btn-lg.btn-block{ :id => "submit", :type => "button" }= "View on IGV"
-                    %a.pull-right.infoBtn{ :value => "info", :id => "#{genome}ViewOnIGV" }
+                    %button.btn.btn-primary.btn-lg.btn-block{ id: "submit", type: "button" }
+                      View on IGV
+                    %a.pull-right.infoBtn{ value: "info", id: "#{genome}ViewOnIGV" }
                       Error connecting to IGV?
-                    %button.btn.btn-primary.btn-lg.btn-block{ :id => "download", :type => "button" }= "Download BED file"
-
-
+                    %button.btn.btn-primary.btn-lg.btn-block{ id: "download", type: "button" }
+                      Download BED file
 
     %footer.footer
       .container
@@ -230,13 +207,13 @@
     /
       Bootstrap Core Javascript
       =========================
-    %link{ :href => "#{app_root}/css/flexselect.css", :rel => "stylesheet", :type => "text/css", :media => "screen" }
-    %script{ :src => "#{app_root}/js/jquery.min.js" }
-    %script{ :src => "#{app_root}/js/bootstrap.min.js" }
-    %script{ :src => "#{app_root}/js/ie10-viewport-bug-workaround.js" }
-    %script{ :src => "#{app_root}/js/liquidmetal.js" }
-    %script{ :src => "#{app_root}/js/jquery.flexselect.js" }
-    %script{ :src => "#{app_root}/js/typeahead.bundle.js" }
-    %script{ :src => "#{app_root}/js/pj/pj.js" }
-    %script{ :src => "#{app_root}/js/pj/peak_browser.js" }
-    %script{ :crossorigin => "anonymous", :src => "https://kit.fontawesome.com/9c24e0099d.js" }
+    %link{ href: "#{app_root}/css/flexselect.css", rel: "stylesheet", type: "text/css", media: "screen" }
+    %script{ src: "#{app_root}/js/jquery.min.js" }
+    %script{ src: "#{app_root}/js/bootstrap.min.js" }
+    %script{ src: "#{app_root}/js/ie10-viewport-bug-workaround.js" }
+    %script{ src: "#{app_root}/js/liquidmetal.js" }
+    %script{ src: "#{app_root}/js/jquery.flexselect.js" }
+    %script{ src: "#{app_root}/js/typeahead.bundle.js" }
+    %script{ src: "#{app_root}/js/pj/pj.js" }
+    %script{ src: "#{app_root}/js/pj/peak_browser.js" }
+    %script{ crossorigin: "anonymous", src: "https://kit.fontawesome.com/9c24e0099d.js" }

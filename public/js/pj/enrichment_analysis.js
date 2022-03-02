@@ -76,11 +76,14 @@ const taxidMap = {
 
 // onload
 $(function(){
+  generateExperimentTypeOptions();
+  generateSampleTypeOptions();
+
   // default value for dataset
   putDefaultTitles();
 
   // qvalue options
-  addQvalOptions();
+  generateQvalOptions();
 
   // Form Layout: User Data
   $("input[name='bedORGene']").change(function(){
@@ -154,11 +157,14 @@ $(function(){
     }).done(function(json){
       genomeList = json;
       $.each(genomeList, function(i, genome){
+        changeSelect(genome);
         // set tab controller
         $('#' + genome + '-tab a').on('click', function(e){
           e.preventDefault();
           $(this).tab('show');
           positionBed();
+          generateExperimentTypeOptions();
+          generateSampleTypeOptions();
           putDefaultTitles();
         });
         // put file content into the textarea
@@ -173,7 +179,7 @@ $(function(){
       var activatedTab = e.target;
       var previousTab = e.relatedTarget;
       // Append qvalue options
-      addQvalOptions();
+      generateQvalOptions();
     });
   });
 
@@ -248,6 +254,58 @@ $(function(){
 });
 
 // functions
+const changeSelect = (genome) => {
+  const agSelectElement = document.querySelector('#' + genome + 'agClass');
+  agSelectElement.addEventListener('change', (event) => {
+    generateSampleTypeOptions();
+    generateQvalOptions();
+  });
+}
+
+const generateExperimentTypeOptions = async () => {
+  const genome = genomeSelected();
+  const clSelected = $('select#' + genome + 'clClass option:selected').val();
+
+  const select = $('select#' + genome + 'agClass')
+  select.empty();
+
+  let response = await fetch('/data/experiment_types?genome=' + genome + '&clClass=' + clSelected);
+  let experimentList = await response.json();
+
+  experimentList.forEach((experiment, i) => {
+    let id = experiment['id'];
+    let label = experiment['label'];
+    let count = experiment['count'];
+    let option = $('<option>')
+                   .attr("value", id)
+                   .append(label + ' (' + count + ')');
+    if (i==0) option.attr("selected", true);
+    option.appendTo(select);
+  });
+}
+
+const generateSampleTypeOptions = async () => {
+  const genome = genomeSelected();
+  const agSelected = $('select#' + genome + 'agClass option:selected').val();
+
+  const select = $('select#' + genome + 'clClass')
+  select.empty();
+
+  let response = await fetch('/data/sample_types?genome=' + genome + '&agClass=' + agSelected);
+  let sampleList = await response.json();
+
+  sampleList.forEach((experiment, i) => {
+    let id = experiment['id'];
+    let label = experiment['label'];
+    let count = experiment['count'];
+    let option = $('<option>')
+                   .attr("value", id)
+                   .append(label + ' (' + count + ')');
+    if (i==0) option.attr("selected", true);
+    option.appendTo(select);
+  });
+}
+
 function putDefaultTitles(){
   var defaultTitles = {
     'UserDataTitle':     "dataset A",
@@ -658,46 +716,32 @@ function putFile2Textarea(fileId, event, callback){
   }
 }
 
-function addQvalOptions() {
-  var genome = genomeSelected();
-  resetQvalOptions(genome);
-  generateQvalOptions(genome);
-  $('select.classSelect').change(function(){
-    resetQvalOptions(genome);
-    generateQvalOptions(genome);
-  });
-}
+const generateQvalOptions = async () => {
+  const genome = genomeSelected();
 
-function resetQvalOptions(genome) {
-  $('select#' + genome + 'qval').empty();
-}
+  const select = document.getElementById(genome + 'qval')
+  document.querySelectorAll('#' + genome + 'qval option').forEach(option => option.remove());
 
-function generateQvalOptions(genome) {
-  var agSelected = $('select#' + genome + 'agClass option:selected').val();
-  var target = $('select#' + genome + 'qval');
+  const agSelected = $('select#' + genome + 'agClass option:selected').val();
   switch (agSelected) {
     case 'Bisulfite-Seq':
-      $('<option>')
-        .attr("value", 999)
-        .append('NA')
-        .attr("selected", true)
-        .appendTo(target);
+      const opt = document.createElement('option');
+      opt.setAttribute('value', 'bs');
+      opt.setAttribute('selected', 'true');
+
+      const val = document.createTextNode('NA');
+      opt.appendChild(val);
+      select.appendChild(opt);
       break;
     default:
-      $.ajax({
-        type: 'GET',
-        url: '/qvalue_range',
-        dataType: 'json'
-      }).done(function(json){
-        $.each(json, function(i, qv){
-          var opt = $('<option>')
-            .attr("value", qv)
-            .append(parseInt(qv) * 10)
-          if (qv == "10") {
-            opt.attr("selected", true)
-          }
-          opt.appendTo(target);
-        });
+      let response = await fetch('/qvalue_range');
+      let qvList = await response.json();
+      qvList.forEach((qv, i) => {
+        let opt = document.createElement('option', { value: qv });
+        if (i == 0) opt.setAttribute('selected', 'true');
+        let val = document.createTextNode(parseInt(qv) * 10);
+        opt.appendChild(val);
+        select.appendChild(opt);
       });
   }
 }

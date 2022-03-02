@@ -74,6 +74,98 @@ module PJ
         # self.all.map{|r| r.genome }.uniq
       end
 
+      def list_of_experiment_types
+        [
+          {
+            id: "Histone",
+            label: "ChIP: Histone"
+          },
+          {
+            id: "RNA polymerase",
+            label: "ChIP: RNA polymerase"
+          },
+          {
+            id: "TFs and others",
+            label: "ChIP: TFs and others"
+          },
+          {
+            id: "Input control",
+            label: "ChIP: Input control"
+          },
+          {
+            id: "ATAC-Seq",
+            label: "ATAC-Seq"
+          },
+          {
+            id: "DNase-seq",
+            label: "DNase-seq"
+          },
+          {
+            id: "Bisulfite-Seq",
+            label: "Bisulfite-Seq"
+          }
+        ]
+      end
+
+      def experiment_types(genome, cl_class)
+        # Select experiments by genome and cell type class
+        subset = if cl_class == 'All cell types'
+          self.where(genome: genome)
+        else
+          self.where(genome: genome, clClass: cl_class)
+        end
+        # Get count per experiment types
+        counts = subset.group(:agClass).size
+        # Return the map results: labels-counts
+        list_of_experiment_types.map do |h|
+          {
+            id: h[:id],
+            label: h[:label],
+            count: counts[h[:id]]
+          }
+        end
+      end
+
+      def sample_types(genome, ag_class)
+        # Select experiments by genome and experiment type
+        ag_class = list_of_experiment_types.first[:id] if ag_class == 'undefined'
+        subset = self.where(genome: genome, agClass: ag_class)
+        # Initialize return object with all count
+        ct = [{id: 'All cell types', label: 'All cell types', count: subset.size}]
+        subset.group(:clClass).count.each_pair do |k,v|
+          ct << { id: k, label: k, count: v }
+        end
+        ct
+      end
+
+      def chip_antigen(genome, ag_class, cl_class)
+        ag = [{id: '-', label: 'All', count: nil}]
+        ag_class = list_of_experiment_types.first[:id] if ag_class == 'undefined'
+        count = if cl_class == 'undefined' or cl_class == 'All cell types'
+          where(genome: genome, agClass: ag_class).group(:agSubClass).count
+        else
+          where(genome: genome, agClass: ag_class, clClass: cl_class).group(:agSubClass).count
+        end
+        count.each_pair do |k,v|
+          ag << { id: k, label: k, count: v }
+        end
+        ag
+      end
+
+      def cell_type(genome, ag_class, cl_class)
+        cl = [{id: '-', label: 'All', count: nil}]
+
+        if cl_class != 'undefined' and cl_class != 'All cell types'
+          ag_class = list_of_experiment_types.first[:id] if ag_class == 'undefined'
+
+          subset = self.where(genome: genome, agClass: ag_class, clClass: cl_class)
+          subset.group(:clSubClass).count.each_pair do |k,v|
+            cl << { id: k, label: k, count: v }
+          end
+        end
+        cl
+      end
+
       ## Retrieve sub class options
       def get_subclass(genome, ag_class, cl_class, subclass_type)
         f_genome = self.where(:genome => genome)
