@@ -726,7 +726,7 @@ const generateQvalOptions = async () => {
   switch (agSelected) {
     case 'Bisulfite-Seq':
       const opt = document.createElement('option');
-      opt.setAttribute('value', 'bs');
+      opt.setAttribute('value', 999);
       opt.setAttribute('selected', 'true');
 
       const val = document.createTextNode('NA');
