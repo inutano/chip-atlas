@@ -2,10 +2,10 @@ source 'https://rubygems.org'
 
 gem 'rake'
 gem 'sinatra'
-gem 'activerecord', "< 5.0.0"
+gem 'activerecord'
 gem 'sinatra-activerecord'
 gem 'rack-protection'
-gem 'sqlite3', "~> 1.3.6"
+gem 'sqlite3'
 gem 'haml'
 gem 'sass'
 gem 'redcarpet'
