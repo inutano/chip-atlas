@@ -75,7 +75,7 @@ const taxidMap = {
 };
 
 // onload
-$(function(){
+window.onload = async () => {
   generateExperimentTypeOptions();
   generateSampleTypeOptions();
 
@@ -144,7 +144,7 @@ $(function(){
   });
 
   // iterate for each genome
-  let genomeListResponse = await fetch('/data/number_of_lines.json');
+  let genomeListResponse = await fetch('/data/list_of_genome.json');
   let genomeList = await genomeListResponse.json();
 
   $.each(genomeList, function(i, genome){
@@ -239,7 +239,7 @@ $(function(){
       $("textarea[id='" + taxonomy + "ComparedWith']").append(genesetB);
     }
   }
-});
+}
 
 // functions
 const changeSelect = (genome) => {
