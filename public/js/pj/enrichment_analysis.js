@@ -621,9 +621,6 @@ function timeCalculate(numRef){
   var qBed = genome + ',' + ag + ',' + cl + ',' + qval;
   var numRef = numRef[qBed];
   var est = estimateTime(userData, comparedWith, numRef);
-  if (isNaN(est)) {
-    var est = '-'
-  }
   $('a#' + genome + '-estimated-run-time').html(est);
 }
 
