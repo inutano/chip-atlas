@@ -1,7 +1,8 @@
 ## To cite ChIP-Atlas in your publication:
 
 - Paper
-  - Shinya Oki, Tazro Ohta, et al. ChIP‐Atlas: a data‐mining suite powered by full integration of public ChIP‐seq data. EMBO Rep. (2018) e46255; doi: https://doi.org/10.15252/embr.201846255
+  - Zou Z, Ohta T, Miura F, Oki S. ChIP-Atlas 2021 update: a data-mining suite for exploring epigenomic landscapes by fully integrating ChIP-seq, ATAC-seq and Bisulfite-seq data. Nucleic Acids Research. Oxford University Press (OUP); 2022. http://dx.doi.org/10.1093/nar/gkac199
+  - Oki S, Ohta T, Shioi G, Hatanaka H, Ogasawara O, Okuda Y, Kawaji H, Nakaki R, Sese J, Meno C. ChIP‐Atlas: a data‐mining suite powered by full integration of public ChIP‐seq data. Vol. 19, EMBO reports. EMBO; 2018. http://dx.doi.org/10.15252/embr.201846255
 - Web tool
   - Oki, S; Ohta, T (2015): ChIP-Atlas. https://chip-atlas.org
 
