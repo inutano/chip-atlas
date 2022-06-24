@@ -612,7 +612,10 @@ function timeCalculate(numRef){
   var comparedWith = $('textarea#' + genome + 'ComparedWith').val();
   var ag = $('select#' + genome + 'agClass').val();
   var cl = $('select#' + genome + 'clClass').val();
-  var qval = $('select#' + genome + 'qval').val();
+  var qval = $('select#' + genome + 'qval').val() / 10;
+  if (qval == 5) {
+    var qval = "0" + 5;
+  }
   var qBed = genome + ',' + ag + ',' + cl + ',' + qval;
   var numRef = numRef[qBed];
   var est = estimateTime(userData, comparedWith, numRef);
