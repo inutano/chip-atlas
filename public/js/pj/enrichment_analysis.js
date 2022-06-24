@@ -613,7 +613,9 @@ function timeCalculate(numRef){
   var ag = $('select#' + genome + 'agClass').val();
   var cl = $('select#' + genome + 'clClass').val();
   var qval = $('select#' + genome + 'qval').val() / 10;
-  if (qval == 5) {
+  if (ag == 'Bisulfite-Seq') {
+    var qval = 'bs';
+  } else if (qval == 5) {
     var qval = "0" + 5;
   }
   var qBed = genome + ',' + ag + ',' + cl + ',' + qval;
