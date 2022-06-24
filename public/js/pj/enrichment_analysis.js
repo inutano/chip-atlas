@@ -128,53 +128,41 @@ $(function(){
 
   // calculate estimated running time
   // get reference of #lines of bed files
-  var numRef;
-  $.ajax({
-    type: 'GET',
-    url: '/data/number_of_lines.json',
-    dataType: 'json',
-  }).done(function(json){
-    numRef = json;
-    // making change to input, select, textarea to invoke time calculation
-    $('input, select, textarea').on('click keyup paste change', function(){
-      timeCalculate(numRef);
-    });
-    // example data
-    $('a.dataExample').on('click', function(event){
-      event.preventDefault();
-      event.stopPropagation();
-      var id = $(this).attr("id");
-      putExampleData(id);
-      timeCalculate(numRef);
-    });
+  let numRefResponse = await fetch('/data/number_of_lines.json');
+  let numRef = await numRefResponse.json();
 
-    // iterate for each genomes
-    var genomeList;
-    $.ajax({
-      type: 'GET',
-      url: '/data/list_of_genome.json',
-      dataType: 'json',
-    }).done(function(json){
-      genomeList = json;
-      $.each(genomeList, function(i, genome){
-        changeSelect(genome);
-        // set tab controller
-        $('#' + genome + '-tab a').on('click', function(e){
-          e.preventDefault();
-          $(this).tab('show');
-          positionBed();
-          generateExperimentTypeOptions();
-          generateSampleTypeOptions();
-          putDefaultTitles();
-        });
-        // put file content into the textarea
-        $('input#' + genome + 'UserDataFile, input#' + genome + 'ComparedWithFile').on('change', function(event) {
-          var fileId = $(this).attr('id');
-          putFile2Textarea(fileId, event, timeCalculate.bind(this, numRef));
-        });
-      });
-    });
+  $('input, select, textarea').on('click keyup paste', function(){
+    timeCalculate(numRef);
+  });
+  // example data
+  $('a.dataExample').on('click', function(event){
+    event.preventDefault();
+    event.stopPropagation();
+    var id = $(this).attr("id");
+    putExampleData(id);
+    timeCalculate(numRef);
+  });
 
+  // iterate for each genome
+  let genomeListResponse = await fetch('/data/number_of_lines.json');
+  let genomeList = await genomeListResponse.json();
+
+  $.each(genomeList, function(i, genome){
+    changeSelect(genome);
+    // set tab controller
+    $('#' + genome + '-tab a').on('click', function(e){
+      e.preventDefault();
+      $(this).tab('show');
+      positionBed();
+      generateExperimentTypeOptions();
+      generateSampleTypeOptions();
+      putDefaultTitles();
+    });
+    // put file content into the textarea
+    $('input#' + genome + 'UserDataFile, input#' + genome + 'ComparedWithFile').on('change', function(event) {
+      var fileId = $(this).attr('id');
+      putFile2Textarea(fileId, event, timeCalculate.bind(this, numRef));
+    });
     $('a[data-toggle="tab"]').on('shown.bs.tab', function(e){
       var activatedTab = e.target;
       var previousTab = e.relatedTarget;
@@ -304,6 +292,10 @@ const generateSampleTypeOptions = async () => {
     if (i==0) option.attr("selected", true);
     option.appendTo(select);
   });
+
+  let numRefResponse = await fetch('/data/number_of_lines.json');
+  let numRef = await numRefResponse.json();
+  timeCalculate(numRef);
 }
 
 function putDefaultTitles(){
