@@ -61,6 +61,10 @@ class PeakJohn < Sinatra::Base
     end
   end
 
+  after do
+    ActiveRecord::Base.clear_active_connections!
+  end
+
   get "/:source.css" do
     sass params[:source].intern
   end
