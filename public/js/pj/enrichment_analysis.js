@@ -270,6 +270,10 @@ const generateExperimentTypeOptions = async () => {
     if (i==0) option.attr("selected", true);
     option.appendTo(select);
   });
+
+  let numRefResponse = await fetch('/data/number_of_lines.json');
+  let numRef = await numRefResponse.json();
+  timeCalculate(numRef);
 }
 
 const generateSampleTypeOptions = async () => {
@@ -741,6 +745,10 @@ const generateQvalOptions = async () => {
         select.appendChild(opt);
       });
   }
+
+  let numRefResponse = await fetch('/data/number_of_lines.json');
+  let numRef = await numRefResponse.json();
+  timeCalculate(numRef);
 }
 
 // should be exported to json file
