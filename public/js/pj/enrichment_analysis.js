@@ -120,8 +120,8 @@ window.onload = async () => {
   });
 
   // post to wabi, diable when blackout
-  var endpointUrl = "http://ddbj.nig.ac.jp/wabi/chipatlas/"
-  let endpointStatusResponse = await fetch(endpointUrl);
+  var endpointStatusUrl = "/wabi_endpoint_status"
+  let endpointStatusResponse = await fetch(endpointStatusUrl);
   let endpointStatus = await endpointStatusResponse.text();
   if (endpointStatus == 'chipatlas') {
     $("button#virtual-chip-submit").click(function(){

@@ -27,6 +27,11 @@ class PeakJohn < Sinatra::Base
     def app_root
       "#{env["rack.url_scheme"]}://#{env["HTTP_HOST"]}#{env["SCRIPT_NAME"]}"
     end
+
+    def wabi_endpoint_status
+      wabi_endpoint = "http://ddbj.nig.ac.jp/wabi/chipatlas/"
+      open(wabi_endpoint).read
+    end
   end
 
   configure do
@@ -273,13 +278,15 @@ class PeakJohn < Sinatra::Base
     end
   end
 
+  get "/wabi_endpoint_status" do
+    wabi_endpoint_status
+  end
+
   post "/wabi_chipatlas" do
     request.body.rewind
 
-    wabi_endpoint = "http://ddbj.nig.ac.jp/wabi/chipatlas/"
-    endpoint_status = open(wabi_endpoint).read
-
-    if endpoint_status != 'chipatlas'
+    if wabi_endpoint_status != 'chipatlas'
+      status 503
     else
       wabi_response = Net::HTTP.post_form(URI.parse(wabi_endpoint), JSON.parse(request.body.read))
       wabi_response_body = wabi_response.body
