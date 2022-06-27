@@ -275,13 +275,20 @@ class PeakJohn < Sinatra::Base
 
   post "/wabi_chipatlas" do
     request.body.rewind
-    wabi_response = Net::HTTP.post_form(URI.parse('http://ddbj.nig.ac.jp/wabi/chipatlas/'), JSON.parse(request.body.read))
-    wabi_response_body = wabi_response.body
-    if wabi_response_body
-      id = wabi_response_body.split("\n").select{|n| n =~ /^requestId/ }.first.split("\s").last
-      JSON.dump({ "requestId" => id })
+
+    wabi_endpoint = "http://ddbj.nig.ac.jp/wabi/chipatlas/"
+    endpoint_status = open(wabi_endpoint).read
+
+    if endpoint_status != 'chipatlas'
     else
-      JSON.dump({ "request_body" => wabi_request_body })
+      wabi_response = Net::HTTP.post_form(URI.parse(wabi_endpoint), JSON.parse(request.body.read))
+      wabi_response_body = wabi_response.body
+      if wabi_response_body
+        id = wabi_response_body.split("\n").select{|n| n =~ /^requestId/ }.first.split("\s").last
+        JSON.dump({ "requestId" => id })
+      else
+        JSON.dump({ "request_body" => wabi_request_body })
+      end
     end
   rescue
     puts wabi_response_body
