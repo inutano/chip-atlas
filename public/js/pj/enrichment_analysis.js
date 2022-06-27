@@ -119,12 +119,20 @@ window.onload = async () => {
     eraseTextarea(genome + 'ComparedWith');
   });
 
-  // post to wabi
-  $("button#virtual-chip-submit").click(function(){
-    var button = $(this);
-    var data = retrievePostData();
-    post2wabi(button, data);
-  });
+  // post to wabi, diable when blackout
+  var endpointStatusUrl = "/wabi_endpoint_status"
+  let endpointStatusResponse = await fetch(endpointStatusUrl);
+  let endpointStatus = await endpointStatusResponse.text();
+  if (endpointStatus == 'chipatlas') {
+    $("button#virtual-chip-submit").click(function(){
+      var button = $(this);
+      var data = retrievePostData();
+      post2wabi(button, data);
+    });
+  } else {
+    $("button#virtual-chip-submit").prop("disabled", true);
+    alert("Enrichment analysis is currently unavailable due to the background server issue. See maintainance schedule on top page.");
+  }
 
   // calculate estimated running time
   // get reference of #lines of bed files

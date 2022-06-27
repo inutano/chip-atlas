@@ -27,6 +27,13 @@ class PeakJohn < Sinatra::Base
     def app_root
       "#{env["rack.url_scheme"]}://#{env["HTTP_HOST"]}#{env["SCRIPT_NAME"]}"
     end
+
+    def wabi_endpoint_status
+      wabi_endpoint = "http://ddbj.nig.ac.jp/wabi/chipatlas/"
+      open(wabi_endpoint).read
+    rescue OpenURI::HTTPError
+      nil
+    end
   end
 
   configure do
@@ -273,15 +280,24 @@ class PeakJohn < Sinatra::Base
     end
   end
 
+  get "/wabi_endpoint_status" do
+    wabi_endpoint_status
+  end
+
   post "/wabi_chipatlas" do
     request.body.rewind
-    wabi_response = Net::HTTP.post_form(URI.parse('http://ddbj.nig.ac.jp/wabi/chipatlas/'), JSON.parse(request.body.read))
-    wabi_response_body = wabi_response.body
-    if wabi_response_body
-      id = wabi_response_body.split("\n").select{|n| n =~ /^requestId/ }.first.split("\s").last
-      JSON.dump({ "requestId" => id })
+
+    if wabi_endpoint_status != 'chipatlas'
+      status 503
     else
-      JSON.dump({ "request_body" => wabi_request_body })
+      wabi_response = Net::HTTP.post_form(URI.parse(wabi_endpoint), JSON.parse(request.body.read))
+      wabi_response_body = wabi_response.body
+      if wabi_response_body
+        id = wabi_response_body.split("\n").select{|n| n =~ /^requestId/ }.first.split("\s").last
+        JSON.dump({ "requestId" => id })
+      else
+        JSON.dump({ "request_body" => wabi_request_body })
+      end
     end
   rescue
     puts wabi_response_body
