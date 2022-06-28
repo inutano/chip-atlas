@@ -30,8 +30,12 @@ class PeakJohn < Sinatra::Base
 
     def wabi_endpoint_status
       wabi_endpoint = "http://ddbj.nig.ac.jp/wabi/chipatlas/"
-      open(wabi_endpoint).read
+      Timeout.timeout(3) do
+        open(wabi_endpoint).read
+      end
     rescue OpenURI::HTTPError
+      nil
+    rescue Timeout::Error
       nil
     end
   end
