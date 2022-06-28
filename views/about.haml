@@ -76,39 +76,7 @@
     .container
       .row
         .col-md-12
-          %h3
-            What's new
-          %ul
-            %li
-              %strong
-                %font{ color: 'red' }
-                  New publication
-              on the NAR web server issue! 
-              %a{ href: "https://doi.org/10.1093/nar/gkac199", target: '_blank' }
-                https://doi.org/10.1093/nar/gkac199
-              (2022/03/24) :tada:
-            %li
-              Minor bug fix: Peak Browser / Enrichment Analysis UI updates the number of experiments by selecting experiment type (2022/03/01)
-            %li
-              Updated the order of the genome assembly tabs, now GRCh38 is default. And some minor fixes came together! (2022/02/08)
-            %li
-              Added
-              %strong
-                ATAC-Seq and Bisulfite-Seq
-              , together with UI improvement including 'peak' icon! (2021/10/04)
-            %li
-              Updated site design: (2021/01/04)
-              %ul
-                %li
-                  %a{ href: "/search" }
-                    Dataset search
-                  is available as a standalone function
-                %li
-                  ID search at the top right corner now accepts GEO Sample ID (e.g. GSM469863) along with SRA Experiment ID (e.g. SRX018625)
-                %li
-                  New information layout for individual experiment list
-            %li
-              Added new genome assemblies: hg38, mm10, dm6, ce11. Happy holidays! (2020/12/01)
+          ~ markdown(:updates, layout: false, fenced_code_blocks: true, autolink: true)
 
       %hr.introduction
       .row
