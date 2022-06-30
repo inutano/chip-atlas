@@ -30,9 +30,8 @@ class PeakJohn < Sinatra::Base
     end
 
     def wabi_endpoint_status
-      wabi_endpoint = "https://ddbj.nig.ac.jp/wabi/chipatlas/"
       Timeout.timeout(3) do
-        open(wabi_endpoint).read
+        open(settings.wabi_endpoint).read
       end
     rescue OpenURI::HTTPError
       nil
@@ -54,6 +53,7 @@ class PeakJohn < Sinatra::Base
       set :experiment_list, JSON.load(open("https://dbarchive.biosciencedbc.jp/kyushu-u/metadata/ExperimentList.json"))
       set :experiment_list_adv, JSON.load(open("https://dbarchive.biosciencedbc.jp/kyushu-u/metadata/ExperimentList_adv.json"))
       set :gsm_to_srx, Hash[settings.experiment_list["data"].map{|a| [a[2], a[0]] }]
+      set :wabi_endpoint, "https://ddbj.nig.ac.jp/wabi/chipatlas/"
     rescue ActiveRecord::StatementInvalid
       # Ignore Statement Invalid error when the database is not yet prepared
     end
@@ -291,11 +291,12 @@ class PeakJohn < Sinatra::Base
 
   post "/wabi_chipatlas" do
     request.body.rewind
+    request_body = request.body.read
 
     if wabi_endpoint_status != 'chipatlas'
       status 503
     else
-      wabi_response = Net::HTTP.post_form(URI.parse(wabi_endpoint), JSON.parse(request.body.read))
+      wabi_response = Net::HTTP.post_form(URI.parse(settings.wabi_endpoint), JSON.parse(request_body))
       wabi_response_body = wabi_response.body
       if wabi_response_body
         id = wabi_response_body.split("\n").select{|n| n =~ /^requestId/ }.first.split("\s").last
@@ -304,8 +305,8 @@ class PeakJohn < Sinatra::Base
         JSON.dump({ "request_body" => wabi_request_body })
       end
     end
-  rescue
-    puts wabi_response_body
+  rescue => e
+    puts "ERROR: #{e}, BODY: #{wabi_response_body}"
     redirect "not_found", 404
   end
 
