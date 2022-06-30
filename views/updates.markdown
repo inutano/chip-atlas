@@ -1,6 +1,6 @@
 ### What's new
 
-- <span style="color:red">**Enrichment analysis will be temporarily unavailable due to the backend server maintenance: June 28th 9am - July 1st 0am (GMT+9)**</span>
+<!-- - <span style="color:red">**Enrichment analysis will be temporarily unavailable due to the backend server maintenance: June 28th 9am - July 1st 0am (GMT+9)**</span> -->
 - **New publication** on the NAR web server issue! [https://doi.org/10.1093/nar/gkac199](https://doi.org/10.1093/nar/gkac199) (2022/03/24)
 - Minor bug fix: Peak Browser / Enrichment Analysis UI updates the number of experiments by selecting experiment type (2022/03/01)
 - Updated the order of the genome assembly tabs, now GRCh38 is default. And some minor fixes came together! (2022/02/08)
