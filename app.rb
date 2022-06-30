@@ -9,6 +9,7 @@ require 'sinatra/activerecord'
 require 'haml'
 require 'sass'
 require 'open-uri'
+require 'timeout'
 require 'net/http'
 require 'uri'
 require 'json'
@@ -29,7 +30,7 @@ class PeakJohn < Sinatra::Base
     end
 
     def wabi_endpoint_status
-      wabi_endpoint = "http://ddbj.nig.ac.jp/wabi/chipatlas/"
+      wabi_endpoint = "https://ddbj.nig.ac.jp/wabi/chipatlas/"
       Timeout.timeout(3) do
         open(wabi_endpoint).read
       end
