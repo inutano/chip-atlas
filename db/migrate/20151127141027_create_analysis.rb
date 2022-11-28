@@ -1,4 +1,4 @@
-class CreateAnalysis < ActiveRecord::Migration
+class CreateAnalysis < ActiveRecord::Migration[7.0]
   def change
     create_table(:analyses) do |t|
       t.string :antigen

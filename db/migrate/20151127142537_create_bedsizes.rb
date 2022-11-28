@@ -1,4 +1,4 @@
-class CreateBedsizes < ActiveRecord::Migration
+class CreateBedsizes < ActiveRecord::Migration[7.0]
   def change
     create_table(:bedsizes) do |t|
       t.string :genome

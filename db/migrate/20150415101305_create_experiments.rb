@@ -1,4 +1,4 @@
-class CreateExperiments < ActiveRecord::Migration
+class CreateExperiments < ActiveRecord::Migration[7.0]
   def up
     create_table(:experiments) do |t|
       t.string :expid
