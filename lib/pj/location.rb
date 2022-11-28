@@ -11,7 +11,7 @@ module PJ
     #
 
     def archive_base
-      "https://dbarchive.biosciencedbc.jp/kyushu-u/"
+      "https://chip-atlas.dbcls.jp/data/"
     end
 
     def fileformat

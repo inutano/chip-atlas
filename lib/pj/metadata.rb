@@ -8,7 +8,7 @@ module PJ
       #
 
       def nbdc_base
-        "https://dbarchive.biosciencedbc.jp/kyushu-u"
+        "https://chip-atlas.dbcls.jp/data"
       end
 
       def metadata_base

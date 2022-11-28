@@ -80,7 +80,7 @@
                   %li.dropdown-header{ role: "presentation" }
                     Install and launch IGV before selecting data to visualize
                   %li.divider
-                  - igv_linkout_base = "http://localhost:60151/load?file=https://dbarchive.biosciencedbc.jp/kyushu-u"
+                  - igv_linkout_base = "http://localhost:60151/load?file=https://chip-atlas.dbcls.jp/data"
                   - records.each_with_index do |record, i|
                     - genome = record[:genome]
                     - fname = URI.escape("#{record[:agSubClass]} (@ #{record[:clSubClass]}) #{@expid}")
@@ -115,7 +115,7 @@
                   Analyze
                   %span.caret
                 %ul.dropdown-menu{ "aria-labelledby" => "igv-dropdown" }
-                  - nbdc_base = "https://dbarchive.biosciencedbc.jp/kyushu-u"
+                  - nbdc_base = "https://chip-atlas.dbcls.jp/data"
                   - records.each_with_index do |record, i|
                     - genome = record[:genome]
                     %li.dropdown-header{ role: "presentation" }= "For #{genome}"
@@ -133,7 +133,7 @@
                   Download
                   %span.caret
                 %ul.dropdown-menu{ "aria-labelledby" => "download-dropdown" }
-                  - nbdc_base = "https://dbarchive.biosciencedbc.jp/kyushu-u"
+                  - nbdc_base = "https://chip-atlas.dbcls.jp/data"
                   - records.each_with_index do |record, i|
                     - genome = record[:genome]
                     - dfname = "#{genome}_#{URI.escape(record[:agSubClass])}_#{URI.escape(record[:clSubClass])}_#{@expid}"
