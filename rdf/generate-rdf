@@ -20,7 +20,7 @@ threshold=(
 get_bed() {
   local genome=${1}
   local th=${2}
-  url_base="https://dbarchive.biosciencedbc.jp/kyushu-u/${genome}/allPeaks_light"
+  url_base="https://chip-atlas.dbcls.jp/data/${genome}/allPeaks_light"
   fname="allPeaks_light.${genome}.${th}.bed.gz"
   wget -nc -P "./data/bed" "${url_base}/${fname}"
   echo "${fname}"

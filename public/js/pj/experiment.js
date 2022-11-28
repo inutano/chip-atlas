@@ -60,7 +60,7 @@ function analysisLinkOut(){
   }).done(function(records){
     $.each(records, function(i, record){
       var genome = record['genome'];
-      var dbarc = "https://dbarchive.biosciencedbc.jp/kyushu-u/" + genome;
+      var dbarc = "https://chip-atlas.dbcls.jp/data/" + genome;
       var urlList = [
         ["Colocalization", dbarc + "/colo/" + expid + ".html"],
         ["Target Genes (TSS ± 1kb)", dbarc + "/target/" + expid + ".1.html"],
@@ -147,7 +147,7 @@ function getUrlParameters(expid, metadata){
   var antigenEnc = encodeURI(antigen);
   var celltypeEnc = encodeURI(celltype);
   var igvUrl = 'http://localhost:60151/load?file=';
-  var nbdcUrl = 'https://dbarchive.biosciencedbc.jp/kyushu-u';
+  var nbdcUrl = 'https://chip-atlas.dbcls.jp/data';
   var params = {
     baseUrl: igvUrl+nbdcUrl+"/"+genome+'/eachData',
     genome: genome,

@@ -50,8 +50,8 @@ class PeakJohn < Sinatra::Base
       set :colo_analysis, PJ::Analysis.results(:colo)
       set :target_genes_analysis, PJ::Analysis.results(:target_genes)
       set :bedsizes, PJ::Bedsize.dump
-      set :experiment_list, JSON.load(open("https://dbarchive.biosciencedbc.jp/kyushu-u/metadata/ExperimentList.json"))
-      set :experiment_list_adv, JSON.load(open("https://dbarchive.biosciencedbc.jp/kyushu-u/metadata/ExperimentList_adv.json"))
+      set :experiment_list, JSON.load(open("https://chip-atlas.dbcls.jp/data/metadata/ExperimentList.json"))
+      set :experiment_list_adv, JSON.load(open("https://chip-atlas.dbcls.jp/data/metadata/ExperimentList_adv.json"))
       set :gsm_to_srx, Hash[settings.experiment_list["data"].map{|a| [a[2], a[0]] }]
       set :wabi_endpoint, "https://ddbj.nig.ac.jp/wabi/chipatlas/"
     rescue ActiveRecord::StatementInvalid
