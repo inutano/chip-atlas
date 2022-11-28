@@ -31,7 +31,7 @@ class PeakJohn < Sinatra::Base
 
     def wabi_endpoint_status
       Timeout.timeout(3) do
-        open(settings.wabi_endpoint).read
+        URI.open(settings.wabi_endpoint).read
       end
     rescue OpenURI::HTTPError
       nil
