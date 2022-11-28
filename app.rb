@@ -18,7 +18,7 @@ require 'lib/pj'
 require 'fileutils'
 require 'redcarpet'
 
-ENV["DATABASE_URL"] ||= "sqlite3:database.sqlite"
+ENV["DATABASE_URL"] ||= "sqlite3:development.sqlite3"
 
 class PeakJohn < Sinatra::Base
   register Sinatra::ActiveRecordExtension
