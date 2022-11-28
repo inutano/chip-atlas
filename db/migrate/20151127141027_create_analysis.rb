@@ -5,7 +5,7 @@ class CreateAnalysis < ActiveRecord::Migration[7.0]
       t.string :cell_list
       t.boolean :target_genes
       t.string :genome
-      t.timestamp
+      t.timestamp :timestamp
     end
     [ :antigen, :cell_list, :target_genes, :genome ].each do |column|
       add_index :analyses, column

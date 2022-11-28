@@ -9,7 +9,7 @@ class CreateExperiments < ActiveRecord::Migration[7.0]
       t.string :clSubClass
       t.string :title
       t.string :additional_attributes
-      t.timestamp
+      t.timestamp :timestamp
     end
     [ :expid, :agClass, :agSubClass, :clClass, :clSubClass ].each do |field|
       add_index :experiments, field

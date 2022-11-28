@@ -3,7 +3,7 @@ class CreateRuns < ActiveRecord::Migration[7.0]
     create_table(:runs) do |t|
       t.string :runid
       t.string :expid
-      t.timestamp
+      t.timestamp :timestamp
     end
     [ :runid, :expid ].each do |column|
       add_index :runs, column

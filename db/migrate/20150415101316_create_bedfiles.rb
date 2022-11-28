@@ -9,7 +9,7 @@ class CreateBedfiles < ActiveRecord::Migration[7.0]
       t.string :clSubClass
       t.string :qval
       t.string :experiments
-      t.timestamp
+      t.timestamp :timestamp
     end
     [ :genome, :agClass, :agSubClass, :clClass, :clSubClass, :qval ].each do |field|
       add_index :bedfiles, field
