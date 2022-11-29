@@ -2,6 +2,7 @@ public/src
 vendor
 .sass-cache
 database.sqlite
+development.sqlite3
 table/prev
 public/images/fastqc
 public/tables/*tab
