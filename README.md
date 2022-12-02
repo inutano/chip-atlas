@@ -10,6 +10,20 @@ ChIP-Atlas is providing online enrichment analysis function on [ChIP-Atlas - Enr
 
 Processed data including the peak-call data in bed, bigBed or bigWig format is available to download via web application interface ([example](http://chip-atlas.org/view?id=SRX018625)). We also provide the bulk download via [LSDB Archive](http://dx.doi.org/10.18908/lsdba.nbdc01558-000) maintained by the [National Bioscience Database Center](https://biosciencedbc.jp/en/). We provide individual bed/wig data for each experiment and data assembled by the curated metadata. See more details in [Wiki](https://github.com/inutano/chip-atlas/wiki#downloads_doc).
 
+## History
+
+- **New publication** on the NAR web server issue! [https://doi.org/10.1093/nar/gkac199](https://doi.org/10.1093/nar/gkac199) (2022/03/24)
+- Minor bug fix: Peak Browser / Enrichment Analysis UI updates the number of experiments by selecting experiment type (2022/03/01)
+- Updated the order of the genome assembly tabs, now GRCh38 is default. And some minor fixes came together! (2022/02/08)
+- Added **ATAC-Seq and Bisulfite-Seq** , together with UI improvement including 'peak' icon! (2021/10/04)
+- Updated site design: (2021/01/04)
+  - [Dataset search](/search) is available as a standalone function
+  - ID search at the top right corner now accepts GEO Sample ID (e.g. GSM469863) along with SRA Experiment ID (e.g. SRX018625)
+  - New information layout for individual experiment list
+- Added new genome assemblies: hg38, mm10, dm6, ce11. Happy holidays! (2020/12/01)
+- **Publication** on EMBO reports! Oki S, Ohta T, Shioi G, Hatanaka H, Ogasawara O, Okuda Y, Kawaji H, Nakaki R, Sese J, Meno C. ChIP‐Atlas: a data‐mining suite powered by full integration of public ChIP‐seq data. Vol. 19, EMBO reports. EMBO; 2018. [http://dx.doi.org/10.15252/embr.201846255](http://dx.doi.org/10.15252/embr.201846255) (2018/11/09)
+- Launched the ChIP-Atlas website! (2015/04/13)
+
 ## Disclaimer
 
 We use the google analytics to analyze the visitor information to improve our web service and report the summarized web access status to our funding agencies. The web server records the queries just for solving issues such as server error. We will not open or distribute those information without an announcement to the users.
