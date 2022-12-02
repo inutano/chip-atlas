@@ -5,7 +5,7 @@ class CreateBedsizes < ActiveRecord::Migration[7.0]
       t.string :agClass
       t.string :clClass
       t.string :qval
-      t.integer :number_of_lines
+      t.integer :number_of_lines, limit: 8
       t.timestamp :timestamp
     end
     [ :genome, :agClass, :clClass, :qval, :number_of_lines ].each do |column|
