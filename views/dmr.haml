@@ -1,0 +1,287 @@
+!!! 5
+%html{ lang: "en" }
+  %head
+    %meta{ charset: "utf-8" }
+    %meta{ "http-equiv": "X-UA-Compatible", content: "IE=edge" }
+    %meta{ name: "viewport", content: "width=device-width, initial-scale=1" }
+
+    %meta{ name: "description", content: "Detect differentially methylated regions (DMRs) between given Bisulfite-seq datasets." }
+    %meta{ name: "author", content: "Shinya Oki, Tazro Ohta" }
+
+    %title
+      ChIP-Atlas: DMR Analysis
+
+    // Bootstrap core and typeahead CSS
+    %link{ href: "#{app_root}/css/bootstrap.min.css", rel: "stylesheet" }
+
+    // Custom style for this website
+    %link{ href: "#{app_root}/style.css", rel: "stylesheet"}
+
+    // GA
+    %script{ async: true, src: "https://www.googletagmanager.com/gtag/js?id=UA-117599014-1" }
+    :javascript
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'UA-117599014-1');
+
+  %body
+    %nav.navbar.navbar-inverse.navbar-fixed-top
+      .container-fluid
+        .navbar-header
+          %button.navbar-toggle.collapsed{ type: "button", "data-toggle": "collapse", "data-target": "#navbar", "aria-expanded": "false", "aria-controls": "navbar" }
+            %span.sr-only
+              Toggle navigation
+            %span.icon-bar
+            %span.icon-bar
+            %span.icon-bar
+          %a.navbar-brand{ href: "#{app_root}" }
+            %i.fas.fa-mountain
+            ChIP-Atlas
+        #navbar.collapse.navbar-collapse
+          %ul.nav.navbar-nav
+            %li
+              %a{ href: "#{app_root}/peak_browser" }
+                Peak Browser
+            %li
+              %a{ href: "#{app_root}/target_genes" }
+                Target Genes
+            %li
+              %a{ href: "#{app_root}/colo" }
+                Colocalization
+            %li
+              %a{ href: "#{app_root}/enrichment_analysis" }
+                Enrichment Analysis
+            %li.active
+              %a{ href: "#{app_root}/dmr_analysis" }
+                DMR Analysis
+            %li
+              %a{ href: "#{app_root}/publications" }
+                Publications
+            %li
+              %a{ href: "https://github.com/inutano/chip-atlas/wiki" }
+                %i.fab.fa-github
+                Docs
+          %p.navbar-text.navbar-right
+            %a{ href: "/search" }
+              %i.fas.fa-search
+              Advanced
+          %form.navbar-form.navbar-right{ role: "search" }
+            .form-group
+              - id_example = ["GSM469863", "SRX018625"].sample(1)[0]
+              %input.form-control#jumpToExperiment{ type: "text", value: "#{id_example}" }
+            %button.btn.btn-default.go-experiment{ type: "submit", }= "Go"
+          %p.navbar-text.navbar-right
+            Find By ID
+
+    .container
+      .row
+        .col-md-10
+          .header
+            %h1
+              %i.fas.fa-mountain
+              ChIP-Atlas: DMR Analysis
+            %p
+              Detect differentially methylated regions (DMRs) between given Bisulfite-seq datasets
+        .col-md-2
+          .dropdown-help
+            .dropdown
+              .button.btn.btn-default.dropdown-toggle{ type: "button", id: "movies-dropdown", "data-toggle": "dropdown", "aria-haspopup": true, "aria-expanded": true }
+                Tutorial movie
+                %span.caret
+              %ul.dropdown-menu{ "aria-labelledby": "movies-dropdown" }
+                %li
+                  %a{ href: "", target: "_blank" }
+                    How to use
+
+      // Navigation Tabs, links and contents
+      .genomeTab{ role: "tabpanel"}
+
+        // Tabs
+        %ul.nav.nav-tabs{ role: "tablist" }
+          - @list_of_genome.keys.each.with_index do |genome, i|
+            %li{ role: "presentation", class: "#{(i == 0) ? 'active' : '' }", id: "#{genome}-tab" }
+              %a{ href: "##{genome}-tab-content", "aria-controls": "#{genome}-tab-content", role: "tab", "data-toggle": "tab", "source": genome }
+                = "#{@list_of_genome[genome]}"
+
+        // Contents
+        .tab-content
+          - @list_of_genome.keys.each.with_index do |genome, i|
+            .tab-pane.fade{ role: "tabpanel", id: "#{genome}-tab-content", class: "#{(i == 0) ? 'in active' : ''}" }
+              - index = @index_all_genome[genome]
+              .row
+                .col-md-4
+                  .panel.panel-default
+                    - panel = "#{genome}MyDataPanel"
+                    .panel-heading{ id: panel }
+                      %h4.panel-title
+                        1. Enter dataset A
+                    .panel-body
+                      %form
+                        .checkbox.panel-input
+                          %label
+                            %input{ type: "radio", id: "#{genome}UserDataBed", name: "bedORGene", value: "bed", checked: "checked" }
+                            Genomic regions (BED) or sequence motif
+                            %a.infoBtn{ value: "info", id: "#{genome}UserDataBed" }
+                              &#x24D8;
+                        .checkbox.panel-input
+                          %label
+                            %input{ type: "radio", id: "#{genome}UserDataGenes", name: "bedORGene", value: "gene" }
+                            Gene list (Gene symbols)
+                            %a.infoBtn{ id: "#{genome}UserDataGenes" }
+                              &#x24D8;
+                        .panel-input.bed-input.userData
+                          .form-group.panel-input-textarea
+                            %textarea.form-control{ name: "txtA", id: "#{genome}UserData", rows: 8, cols: 50, placeholder: "Click info buttons above to show the description format."}
+                          %row
+                            .col-md-6
+                              .form-group
+                                %input{ type: "file", id: "#{genome}UserDataFile" }
+                                %p.help-block
+                                  Choose local file
+                            .col-md-5.col-md-offset-1
+                              .linkExample
+                                %a.dataExample{ href: "#", id: "#{genome}UserData" }
+                                  Try with example
+
+
+                .col-md-4
+                  .panel.panel-default
+                    - panel = "#{genome}TargetDB"
+                    .panel-heading{ id: panel }
+                      %h4.panel-title
+                        2. Enter dataset B
+                    .panel-body
+                      %form
+                        .checkbox.panel-input.bed
+                          %label
+                            %input{ type: "radio", id: "#{genome}ComparedWithRandom", name: "comparedWith", value: "rnd", checked: "checked" }
+                            Random permutation of dataset A
+                            %a.infoBtn{ id: "#{genome}ComparedWithRandom" }
+                              &#x24D8;
+                          .checkbox.form-inline.panel-input.rnd
+                            %p.help-block.ptimes{ for: "permutationTimes"}
+                              Permutation times
+                              %input.form-control{ type: "radio", id: "#{genome}ComparedWithRandomx1", name: "numShuf", value: "1", checked: "checked" }
+                              x1
+                              %input.form-control{ type: "radio", id: "#{genome}ComparedWithRandomx10", name: "numShuf", value: "10"}
+                              x10
+                              %input.form-control{ type: "radio", id: "#{genome}ComparedWithRandomx100", name: "numShuf", value: "100"}
+                              x100
+                        .checkbox.panel-input.bed
+                          %label
+                            %input{ type: "radio", id: "#{genome}ComparedWithBed", name: "comparedWith", value: "bed" }
+                            BED or sequence motif
+                            %a.infoBtn{ id: "#{genome}ComparedWithBed" }
+                              &#x24D8;
+                      %form
+                        .checkbox.panel-input.gene.default-hide
+                          %label
+                            %input{ type: "radio", id: "#{genome}ComparedWithRefseq", name: "comparedWith", value: "refseq" }
+                            Refseq coding genes (excluding dataset A)
+                            %a.infoBtn{ id: "#{genome}ComparedWithRefseq" }
+                              &#x24D8;
+                        .checkbox.panel-input.gene.default-hide
+                          %label
+                            %input{ type: "radio", id: "#{genome}ComparedWithUserlist", name: "comparedWith", value: "userlist" }
+                            Gene list (Gene symbols)
+                            %a.infoBtn{ id: "#{genome}ComparedWithUserlist" }
+                              &#x24D8;
+                      .panel-input.bed-input.comparedWith.default-hide
+                        .form-group.panel-input-textarea
+                          %textarea.form-control{ name: "txtB", id: "#{genome}ComparedWith", rows: 8, cols: 50, placeholder: "Click info buttons above to show the description format.", value: nil }
+                        %row
+                          .col-md-6
+                            .form-group
+                              %input{ type: "file", id: "#{genome}ComparedWithFile", name: "fsel" }
+                              %p.help-block
+                                Choose local file
+                          .col-md-5.col-md-offset-1
+                            .linkExample
+                              %a.dataExample{ href: "#", id: "#{genome}ComparedWith" }
+                                Try with example
+
+                .col-md-4
+                  .panel.panel-default
+                    - panel = "#{genome}Desc"
+                    .panel-heading{ id: panel }
+                      %h4.panel-title
+                        3. Analysis description
+                    .panel-body
+                      .panel-input.desc.form-inline
+                        %p.form-control-static
+                          Analysis title
+                          %a.infoBtn{ value: "info", id: "#{genome}ProjectDesc" }
+                            &#x24D8;
+                        %input.form-control{ type: "text", id: "#{genome}ProjectTitle"}
+                      .panel-input.desc.form-inline
+                        %p.form-control-static
+                          Dataset A title
+                          %a.infoBtn{ value: "info", id: "#{genome}UserDataDesc" }
+                            &#x24D8;
+                        %input.form-control{ type: "text", id: "#{genome}UserDataTitle"}
+                      .panel-input.desc.form-inline
+                        %p.form-control-static
+                          Dataset B title
+                          %a.infoBtn{ value: "info", id: "#{genome}ComparedWithDesc" }
+                            &#x24D8;
+                        %input.form-control{ type: "text", id: "#{genome}ComparedWithTitle"}
+
+                      .button-submit
+                        %button.btn.btn-primary.btn-lg.btn-block{ id: "virtual-chip-submit", type: "button" }
+                          submit
+                      .estimated-run-time
+                        Estimated run time:
+                        %a{ id: "#{genome}-estimated-run-time" }
+                          \-
+                      %p
+                        Check computation node status
+                        %a{ href: "https://sc.ddbj.nig.ac.jp/en/operation/", target: "_blank" }
+                          here
+                        (short.q)
+
+
+
+    %footer.footer
+      .container
+        %row
+          .col-md-4.col-md-offset-4
+            %a{ href: "http://www.mic.med.kyoto-u.ac.jp/dddm_en/", target: "_blank" }
+              %img{ src: "/images/logo/kyoto_uni_logo.png", width: 120 }
+            %span.collaboration
+              in collaboration with
+            %a{ href: "https://dbcls.rois.ac.jp", target: "_blank" }
+              %img{ src: "/images/logo/dbcls_logo.png", width: 100 }
+        %row
+          .col-md-6.col-md-offset-3
+            %p.acknowledgement
+              This work is supported by
+              %a{ href: "https://sc.ddbj.nig.ac.jp/" }
+                NIG Supercomputer system
+              and
+              %a{ href: "https://biosciencedbc.jp" }
+                National Bioscience Database Center.
+            %p
+              Need help? Create an issue on
+              %a{ href: "https://github.com/inutano/chip-atlas/issues" }
+                github
+              or
+              %a{ href: "mailto:oki.shinya.3w@kyoto-u.ac.jp" }
+                contact us
+    /
+      Bootstrap Core Javascript
+      =========================
+    %script{ src: "#{app_root}/js/jquery.min.js" }
+    %script{ src: "#{app_root}/js/bootstrap.min.js" }
+    %script{ src: "#{app_root}/js/ie10-viewport-bug-workaround.js" }
+    %script{ src: "#{app_root}/js/pj/pj.js" }
+    %script{ type: "application/json", id: "ea_params" }
+      :plain
+        {
+          "genes": "#{@genes}",
+          "taxonomy": "#{@taxonomy}",
+          "genesetA": "#{@genesetA}",
+          "genesetB": "#{@genesetB}"
+        }
+    %script{ src: "#{app_root}/js/pj/enrichment_analysis.js" }
+    %script{ crossorigin: "anonymous", src: "https://kit.fontawesome.com/9c24e0099d.js" }
