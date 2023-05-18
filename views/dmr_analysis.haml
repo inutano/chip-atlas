@@ -112,94 +112,54 @@
               .row
                 .col-md-4
                   .panel.panel-default
-                    - panel = "#{genome}MyDataPanel"
-                    .panel-heading{ id: panel }
+                    .panel-heading{ id: "#{genome}DataSetA" }
                       %h4.panel-title
                         1. Enter dataset A
                     .panel-body
                       %form
                         .checkbox.panel-input
-                          %label
-                            %input{ type: "radio", id: "#{genome}UserDataBed", name: "bedORGene", value: "bed", checked: "checked" }
-                            Genomic regions (BED) or sequence motif
-                            %a.infoBtn{ value: "info", id: "#{genome}UserDataBed" }
-                              &#x24D8;
-                        .checkbox.panel-input
-                          %label
-                            %input{ type: "radio", id: "#{genome}UserDataGenes", name: "bedORGene", value: "gene" }
-                            Gene list (Gene symbols)
-                            %a.infoBtn{ id: "#{genome}UserDataGenes" }
-                              &#x24D8;
-                        .panel-input.bed-input.userData
+                          Experiment IDs (SRXs)
+                          %a.infoBtn{ value: "info", id: "#{genome}DataSetA" }
+                            &#x24D8;
+
+                        .panel-input.dataSetA
                           .form-group.panel-input-textarea
-                            %textarea.form-control{ name: "txtA", id: "#{genome}UserData", rows: 8, cols: 50, placeholder: "Click info buttons above to show the description format."}
+                            %textarea.form-control{ name: "dataSetA", id: "#{genome}dataSetA", rows: 8, cols: 50, placeholder: "Click info buttons above to show the description format." }
                           %row
                             .col-md-6
                               .form-group
-                                %input{ type: "file", id: "#{genome}UserDataFile" }
+                                %input{ type: "file", id: "#{genome}dataSetA" }
                                 %p.help-block
                                   Choose local file
                             .col-md-5.col-md-offset-1
                               .linkExample
-                                %a.dataExample{ href: "#", id: "#{genome}UserData" }
+                                %a.dataExample{ href: "#", id: "#{genome}dataSetA" }
                                   Try with example
-
 
                 .col-md-4
                   .panel.panel-default
-                    - panel = "#{genome}TargetDB"
-                    .panel-heading{ id: panel }
+                    .panel-heading{ id: "#{genome}DataSetB" }
                       %h4.panel-title
                         2. Enter dataset B
                     .panel-body
                       %form
-                        .checkbox.panel-input.bed
-                          %label
-                            %input{ type: "radio", id: "#{genome}ComparedWithRandom", name: "comparedWith", value: "rnd", checked: "checked" }
-                            Random permutation of dataset A
-                            %a.infoBtn{ id: "#{genome}ComparedWithRandom" }
-                              &#x24D8;
-                          .checkbox.form-inline.panel-input.rnd
-                            %p.help-block.ptimes{ for: "permutationTimes"}
-                              Permutation times
-                              %input.form-control{ type: "radio", id: "#{genome}ComparedWithRandomx1", name: "numShuf", value: "1", checked: "checked" }
-                              x1
-                              %input.form-control{ type: "radio", id: "#{genome}ComparedWithRandomx10", name: "numShuf", value: "10"}
-                              x10
-                              %input.form-control{ type: "radio", id: "#{genome}ComparedWithRandomx100", name: "numShuf", value: "100"}
-                              x100
-                        .checkbox.panel-input.bed
-                          %label
-                            %input{ type: "radio", id: "#{genome}ComparedWithBed", name: "comparedWith", value: "bed" }
-                            BED or sequence motif
-                            %a.infoBtn{ id: "#{genome}ComparedWithBed" }
-                              &#x24D8;
-                      %form
-                        .checkbox.panel-input.gene.default-hide
-                          %label
-                            %input{ type: "radio", id: "#{genome}ComparedWithRefseq", name: "comparedWith", value: "refseq" }
-                            Refseq coding genes (excluding dataset A)
-                            %a.infoBtn{ id: "#{genome}ComparedWithRefseq" }
-                              &#x24D8;
-                        .checkbox.panel-input.gene.default-hide
-                          %label
-                            %input{ type: "radio", id: "#{genome}ComparedWithUserlist", name: "comparedWith", value: "userlist" }
-                            Gene list (Gene symbols)
-                            %a.infoBtn{ id: "#{genome}ComparedWithUserlist" }
-                              &#x24D8;
-                      .panel-input.bed-input.comparedWith.default-hide
-                        .form-group.panel-input-textarea
-                          %textarea.form-control{ name: "txtB", id: "#{genome}ComparedWith", rows: 8, cols: 50, placeholder: "Click info buttons above to show the description format.", value: nil }
-                        %row
-                          .col-md-6
-                            .form-group
-                              %input{ type: "file", id: "#{genome}ComparedWithFile", name: "fsel" }
-                              %p.help-block
-                                Choose local file
-                          .col-md-5.col-md-offset-1
-                            .linkExample
-                              %a.dataExample{ href: "#", id: "#{genome}ComparedWith" }
-                                Try with example
+                        .checkbox.panel-input
+                          Experiment IDs (SRXs)
+                          %a.infoBtn{ value: "info", id: "#{genome}DataSetB" }
+                            &#x24D8;
+                        .panel-input.dataSetB
+                          .form-group.panel-input-textarea
+                            %textarea.form-control{ name: "dataSetB", id: "#{genome}dataSetB", rows: 8, cols: 50, placeholder: "Click info buttons above to show the description format." }
+                          %row
+                            .col-md-6
+                              .form-group
+                                %input{ type: "file", id: "#{genome}dataSetB" }
+                                %p.help-block
+                                  Choose local file
+                            .col-md-5.col-md-offset-1
+                              .linkExample
+                                %a.dataExample{ href: "#", id: "#{genome}dataSetB" }
+                                  Try with example
 
                 .col-md-4
                   .panel.panel-default
@@ -217,18 +177,18 @@
                       .panel-input.desc.form-inline
                         %p.form-control-static
                           Dataset A title
-                          %a.infoBtn{ value: "info", id: "#{genome}UserDataDesc" }
+                          %a.infoBtn{ value: "info", id: "#{genome}DataSetADesc" }
                             &#x24D8;
-                        %input.form-control{ type: "text", id: "#{genome}UserDataTitle"}
+                        %input.form-control{ type: "text", id: "#{genome}DataSetATitle"}
                       .panel-input.desc.form-inline
                         %p.form-control-static
                           Dataset B title
-                          %a.infoBtn{ value: "info", id: "#{genome}ComparedWithDesc" }
+                          %a.infoBtn{ value: "info", id: "#{genome}DataSetBDesc" }
                             &#x24D8;
-                        %input.form-control{ type: "text", id: "#{genome}ComparedWithTitle"}
+                        %input.form-control{ type: "text", id: "#{genome}DataSetBTitle"}
 
                       .button-submit
-                        %button.btn.btn-primary.btn-lg.btn-block{ id: "virtual-chip-submit", type: "button" }
+                        %button.btn.btn-primary.btn-lg.btn-block{ id: "dmr-submit", type: "button" }
                           submit
                       .estimated-run-time
                         Estimated run time:
@@ -239,7 +199,6 @@
                         %a{ href: "https://sc.ddbj.nig.ac.jp/en/operation/", target: "_blank" }
                           here
                         (short.q)
-
 
 
     %footer.footer

@@ -193,6 +193,13 @@ class PeakJohn < Sinatra::Base
     haml :enrichment_analysis
   end
 
+  get "/dmr_analysis" do
+    @index_all_genome = settings.index_all_genome
+    @list_of_genome = settings.list_of_genome
+    @qval_range = settings.qval_range
+    haml :dmr_analysis
+  end
+
   get "/search" do
     haml :search
   end
