@@ -124,7 +124,7 @@
 
                         .panel-input.dataSetA
                           .form-group.panel-input-textarea
-                            %textarea.form-control{ name: "dataSetA", id: "#{genome}dataSetA", rows: 8, cols: 50, placeholder: "Click info buttons above to show the description format." }
+                            %textarea.form-control{ name: "dataSetA", id: "#{genome}DataSetA", rows: 8, cols: 50, placeholder: "Click info buttons above to show the description format." }
                           %row
                             .col-md-6
                               .form-group
@@ -149,7 +149,7 @@
                             &#x24D8;
                         .panel-input.dataSetB
                           .form-group.panel-input-textarea
-                            %textarea.form-control{ name: "dataSetB", id: "#{genome}dataSetB", rows: 8, cols: 50, placeholder: "Click info buttons above to show the description format." }
+                            %textarea.form-control{ name: "dataSetB", id: "#{genome}DataSetB", rows: 8, cols: 50, placeholder: "Click info buttons above to show the description format." }
                           %row
                             .col-md-6
                               .form-group
@@ -242,5 +242,5 @@
           "genesetA": "#{@genesetA}",
           "genesetB": "#{@genesetB}"
         }
-    %script{ src: "#{app_root}/js/pj/enrichment_analysis.js" }
+    %script{ src: "#{app_root}/js/pj/dmr_analysis.js" }
     %script{ crossorigin: "anonymous", src: "https://kit.fontawesome.com/9c24e0099d.js" }
