@@ -60,7 +60,7 @@ module PJ
 
       def list_of_genome
         {
-          "hg38" => "H.sapiens (hg38)",
+          "hg38" => "H. sapiens (hg38)",
           "hg19" => "H. sapiens (hg19)",
           "mm10" => "M. musculus (mm10)",
           "mm9" => "M. musculus (mm9)",
