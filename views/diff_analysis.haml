@@ -9,7 +9,7 @@
     %meta{ name: "author", content: "Shinya Oki, Tazro Ohta" }
 
     %title
-      ChIP-Atlas: DMR Analysis
+      ChIP-Atlas: Diff Analysis
 
     // Bootstrap core and typeahead CSS
     %link{ href: "#{app_root}/css/bootstrap.min.css", rel: "stylesheet" }
@@ -53,8 +53,8 @@
               %a{ href: "#{app_root}/enrichment_analysis" }
                 Enrichment Analysis
             %li.active
-              %a{ href: "#{app_root}/dmr_analysis" }
-                DMR Analysis
+              %a{ href: "#{app_root}/diff_analysis" }
+                Diff Analysis
             %li
               %a{ href: "#{app_root}/publications" }
                 Publications
@@ -80,9 +80,9 @@
           .header
             %h1
               %i.fas.fa-mountain
-              ChIP-Atlas: DMR Analysis
+              ChIP-Atlas: Diff Analysis
             %p
-              Detect differentially methylated regions (DMRs) between given Bisulfite-seq datasets
+              Detect differences between given ChIP-Seq, ATAC-Seq or Bisulfite-Seq dataset groups
         .col-md-2
           .dropdown-help
             .dropdown
@@ -242,5 +242,5 @@
           "genesetA": "#{@genesetA}",
           "genesetB": "#{@genesetB}"
         }
-    %script{ src: "#{app_root}/js/pj/dmr_analysis.js" }
+    %script{ src: "#{app_root}/js/pj/diff_analysis.js" }
     %script{ crossorigin: "anonymous", src: "https://kit.fontawesome.com/9c24e0099d.js" }

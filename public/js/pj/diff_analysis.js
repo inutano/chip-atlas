@@ -19,7 +19,7 @@ const putDefaultTitles = () => {
   }
 }
 
-// DMR Analysis post functions
+// Diff Analysis post functions
 const submitDMR = async () => {
   const genome = genomeSelected();
   // diable when blackout
@@ -98,7 +98,7 @@ const postDMR = async (data, genome) => {
 const openResultPage = (response, genome, data) => {
   const requestId = response.requestId;
   const calcm = $('a#' + genome + '-estimated-run-time').text().replace(/-/g, "");
-  // const redirectUrl = '/dmr_analysis_result?id=' + requestId + '&title=' + data['title'] + '&calcm=' + calcm;
+  // const redirectUrl = '/diff_analysis_result?id=' + requestId + '&title=' + data['title'] + '&calcm=' + calcm;
   const redirectUrl = '/enrichment_analysis_result?id=' + requestId + '&title=' + data['title'] + '&calcm=' + calcm;
   // window.open(redirectUrl, "_self", "");
 }

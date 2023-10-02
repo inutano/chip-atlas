@@ -295,18 +295,18 @@ class PeakJohn < Sinatra::Base
   end
 
   #
-  # DMR Analysis
+  # Diff Analysis
   #
 
-  get "/dmr_analysis" do
+  get "/diff_analysis" do
     @index_all_genome = settings.index_all_genome
     @list_of_genome = settings.list_of_genome
     @qval_range = settings.qval_range
-    haml :dmr_analysis
+    haml :diff_analysis
   end
 
-  get "/dmr_analysis_result" do
-    haml :dmr_analysis_result
+  get "/diff_analysis_result" do
+    haml :diff_analysis_result
   end
 
   #

@@ -8,7 +8,7 @@
     %meta{ :name => "description", :content => "Display the results of performed enrichment analysis." }
     %meta{ :name => "author", :content => "Shinya Oki, Tazro Ohta" }
 
-    %title= "ChIP-Atlas: DMR Analysis Result"
+    %title= "ChIP-Atlas: Diff Analysis Result"
 
     // Bootstrap core and typeahead CSS
     %link{ :href => "#{app_root}/css/bootstrap.min.css", :rel => "stylesheet" }
@@ -47,8 +47,8 @@
             %li.active
               %a{ :href => "#{app_root}/enrichment_analysis" }= "Enrichment Analysis"
             %li
-              %a{ href: "#{app_root}/dmr_analysis" }
-                DMR Analysis
+              %a{ href: "#{app_root}/diff_analysis" }
+                Diff Analysis
             %li
               %a{ :href => "#{app_root}/publications" }= "Publications"
             %li
@@ -151,5 +151,5 @@
     %script{ :src => "#{app_root}/js/bootstrap.min.js" }
     %script{ :src => "#{app_root}/js/ie10-viewport-bug-workaround.js" }
     %script{ :src => "#{app_root}/js/pj/pj.js" }
-    %script{ :src => "#{app_root}/js/pj/dmr_analysis_result.js" }
+    %script{ :src => "#{app_root}/js/pj/diff_analysis_result.js" }
     %script{ :crossorigin => "anonymous", :src => "https://kit.fontawesome.com/9c24e0099d.js" }
