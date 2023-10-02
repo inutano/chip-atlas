@@ -3,10 +3,11 @@ window.onload = async () => {
   putDefaultTitles();
   putExampleData();
   submitDMR();
+  // For each genome panel
+  setGenomePanel();
 }
 
 // UI Building
-
 const putDefaultTitles = () => {
   const defaultTitles = {
     'ProjectTitle': "My project",
@@ -225,4 +226,17 @@ const openResultPage = (response, genome, data) => {
   // const redirectUrl = '/diff_analysis_result?id=' + requestId + '&title=' + data['title'] + '&calcm=' + calcm;
   const redirectUrl = '/enrichment_analysis_result?id=' + requestId + '&title=' + data['title'] + '&calcm=' + calcm;
   // window.open(redirectUrl, "_self", "");
+}
+
+// Genome Panel
+const setGenomePanel = async () => {
+  let genomeListResponse = await fetch('/data/list_of_genome.json');
+  let genomeList = await genomeListResponse.json();
+  $.each(genomeList, function(i, genome) {
+    $('#' + genome + '-tab a').on('click', function(event) {
+      event.preventDefault();
+      $(this).tab('show');
+      putDefaultTitles();
+    });
+  });
 }
