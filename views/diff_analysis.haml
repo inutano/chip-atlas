@@ -118,11 +118,11 @@
                       %form
                         .checkbox.panel-input
                           %label
-                            %input{ type: "radio", id: "#{genome}UserDataBed", name: "bedORGene", value: "bed", checked: "checked" }
+                            %input{ type: "radio", id: "#{genome}ExpTypeDiff", name: "diffOrDMR", value: "diff", checked: "checked" }
                             ChIP/ATAC/DNase-seq
                         .checkbox.panel-input
                           %label
-                            %input{ type: "radio", id: "#{genome}UserDataGenes", name: "bedORGene", value: "gene" }
+                            %input{ type: "radio", id: "#{genome}ExpTypeDMR", name: "diffOrDMR", value: "DMR" }
                             Bisulfite-Seq
 
                 .col-md-3
@@ -142,7 +142,7 @@
                             .row
                               .col-md-5
                               .col-md-7
-                                %a.dataExample{ href: "#", id: "#{genome}dataSetA" }
+                                %a.dataExample{ href: "#", id: "#{genome}dataSetA", name: "dataSetA"  }
                                   Try with example
 
                 .col-md-3
@@ -162,7 +162,7 @@
                             .row
                               .col-md-5
                               .col-md-7
-                                %a.dataExample{ href: "#", id: "#{genome}dataSetB" }
+                                %a.dataExample{ href: "#", id: "#{genome}dataSetB", name: "dataSetB" }
                                   Try with example
 
                 .col-md-3
