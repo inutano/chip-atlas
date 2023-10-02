@@ -8,7 +8,8 @@
     %meta{ :name => "description", :content => "Display the results of performed enrichment analysis." }
     %meta{ :name => "author", :content => "Shinya Oki, Tazro Ohta" }
 
-    %title= "ChIP-Atlas: Diff Analysis Result"
+    %title
+      ChIP-Atlas: Diff Analysis Result
 
     // Bootstrap core and typeahead CSS
     %link{ :href => "#{app_root}/css/bootstrap.min.css", :rel => "stylesheet" }
@@ -43,9 +44,9 @@
               %a{ :href => "#{app_root}/target_genes" }= "Target Genes"
             %li
               %a{ :href => "#{app_root}/colo" }= "Colocalization"
-            %li.active
-              %a{ :href => "#{app_root}/enrichment_analysis" }= "Enrichment Analysis"
             %li
+              %a{ :href => "#{app_root}/enrichment_analysis" }= "Enrichment Analysis"
+            %li.active
               %a{ href: "#{app_root}/diff_analysis" }
                 Diff Analysis
             %li
@@ -70,8 +71,9 @@
       .header
         %h1
           %i.fas.fa-mountain
-          ChIP-Atlas: DMR
-        %p= "Analyze your data with public ChIP-seq data."
+          ChIP-Atlas: Diff Analysis
+        %p
+          Detect differences between given ChIP-Seq, ATAC-Seq or Bisulfite-Seq dataset groups
       .container.job-info
         %p
           Result page URL will be available for a week from the time when 'status' is 'finished'.

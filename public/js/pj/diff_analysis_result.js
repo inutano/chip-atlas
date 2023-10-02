@@ -24,8 +24,8 @@ const getUrlParameters = () => {
     title: parseUrlParameter('title'),
     genome: genome,
     calcm: parseUrlParameter('calcm'),
-    localIgvUrl: 'http://localhost:60151/load?file=https://chip-atlas.dbcls.jp/data/query/' + reqId + '.dmr.igv.bed&genome=' + genome,
-    zipUrl: "https://chip-atlas.dbcls.jp/data/query/" + reqId + '.dmr.zip',
+    localIgvUrl: 'http://localhost:60151/load?file=https://chip-atlas.dbcls.jp/data/query/' + reqId + '.igv.bed&genome=' + genome,
+    zipUrl: "https://chip-atlas.dbcls.jp/data/query/" + reqId + '.zip',
   };
 }
 

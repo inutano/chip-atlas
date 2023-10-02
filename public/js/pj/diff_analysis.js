@@ -190,7 +190,7 @@ const retrievePostData = (genome) => {
     format: 'text',
     result: 'www',
     cellClass: 'empty',
-    threshold: 1,
+    threshold: 5,
     permTime: 1,
   };
   console.log(data);
@@ -210,8 +210,8 @@ const postDMR = async (data, genome) => {
       success: function(response) {
         const requestId = response.requestId;
         const calcm = $('a#' + genome + '-estimated-run-time').text().replace(/-/g, "");
-        const redirectUrl = '/enrichment_analysis_result?id=' + requestId + '&title=' + data['title'] + '&calcm=' + calcm;
-        // window.open(redirectUrl, "_self", "");
+        const redirectUrl = '/diff_analysis_result?id=' + requestId + '&title=' + data['title'] + '&genome=' + genome + '&calcm=' + calcm;
+        window.open(redirectUrl, "_self", "");
       },
       error: function(response) {
         console.log(data);
