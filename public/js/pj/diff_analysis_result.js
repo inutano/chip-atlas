@@ -2,6 +2,7 @@ window.onload = async () => {
   const params = getUrlParameters();
   setTableValues(params);
   setClock(params);
+  checkWabiStatus(params);
 }
 
 const setTableValues = (params) => {
@@ -88,6 +89,7 @@ const activateClock = () => {
 
 const checkWabiStatus = (params) => {
   const tdStatus = $('td#status');
+  const reqId = params['reqId'];
   const interval = setInterval(() => {
     $.get("/wabi_chipatlas?id=" + reqId, (status) => {
       tdStatus.text(status);
@@ -104,6 +106,6 @@ const checkWabiStatus = (params) => {
 }
 
 const setResultALink = (params) => {
-  $('a#result-url').attr('href', params.localIgvUrl);
-  $('a#download-tsv').attr('href', params.zipUrl);
+  $('a#view-on-igv').attr('href', params.localIgvUrl);
+  $('a#download-result').attr('href', params.zipUrl);
 }
