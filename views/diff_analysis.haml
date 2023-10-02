@@ -110,55 +110,68 @@
             .tab-pane.fade{ role: "tabpanel", id: "#{genome}-tab-content", class: "#{(i == 0) ? 'in active' : ''}" }
               - index = @index_all_genome[genome]
               .row
-                .col-md-4
+                .col-md-3
                   .panel.panel-default
                     .panel-heading{ id: "#{genome}DataSetA" }
                       %h4.panel-title
-                        1. Enter dataset A
+                        1. Choose experiment type
                     .panel-body
                       %form
                         .checkbox.panel-input
-                          Experiment IDs (SRXs)
+                          %label
+                            %input{ type: "radio", id: "#{genome}UserDataBed", name: "bedORGene", value: "bed", checked: "checked" }
+                            ChIP/ATAC/DNase-seq
+                        .checkbox.panel-input
+                          %label
+                            %input{ type: "radio", id: "#{genome}UserDataGenes", name: "bedORGene", value: "gene" }
+                            Bisulfite-Seq
+
+                .col-md-3
+                  .panel.panel-default
+                    .panel-heading{ id: "#{genome}DataSetA" }
+                      %h4.panel-title
+                        2. Enter dataset A
+                    .panel-body
+                      %form
+                        .checkbox.panel-input
+                          Experiment IDs
                           %a.infoBtn{ value: "info", id: "#{genome}DataSetA" }
                             &#x24D8;
-
                         .panel-input.dataSetA
                           .form-group.panel-input-textarea
-                            %textarea.form-control{ name: "dataSetA", id: "#{genome}DataSetA", rows: 8, cols: 50, placeholder: "Click info buttons above to show the description format." }
-                          %row
-                            .col-md-6
-                            .col-md-5.col-md-offset-1
-                              .linkExample
+                            %textarea.form-control{ name: "dataSetA", id: "#{genome}DataSetA", rows: 8, cols: 50, placeholder: "SRX000001\nGSM000001" }
+                            .row
+                              .col-md-5
+                              .col-md-7
                                 %a.dataExample{ href: "#", id: "#{genome}dataSetA" }
                                   Try with example
 
-                .col-md-4
+                .col-md-3
                   .panel.panel-default
                     .panel-heading{ id: "#{genome}DataSetB" }
                       %h4.panel-title
-                        2. Enter dataset B
+                        3. Enter dataset B
                     .panel-body
                       %form
                         .checkbox.panel-input
-                          Experiment IDs (SRXs)
+                          Experiment IDs
                           %a.infoBtn{ value: "info", id: "#{genome}DataSetB" }
                             &#x24D8;
                         .panel-input.dataSetB
                           .form-group.panel-input-textarea
-                            %textarea.form-control{ name: "dataSetB", id: "#{genome}DataSetB", rows: 8, cols: 50, placeholder: "Click info buttons above to show the description format." }
-                          %row
-                            .col-md-6
-                            .col-md-5.col-md-offset-1
-                              .linkExample
+                            %textarea.form-control{ name: "dataSetB", id: "#{genome}DataSetB", rows: 8, cols: 50, placeholder: "SRX000001\nGSM000001" }
+                            .row
+                              .col-md-5
+                              .col-md-7
                                 %a.dataExample{ href: "#", id: "#{genome}dataSetB" }
                                   Try with example
 
-                .col-md-4
+                .col-md-3
                   .panel.panel-default
                     - panel = "#{genome}Desc"
                     .panel-heading{ id: panel }
                       %h4.panel-title
-                        3. Analysis description
+                        4. Analysis description
                     .panel-body
                       .panel-input.desc.form-inline
                         %p.form-control-static
