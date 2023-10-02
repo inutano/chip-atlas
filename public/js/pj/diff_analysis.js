@@ -155,9 +155,8 @@ const submitDMR = async () => {
     $("button#dmr-submit").click(function() {
       $(this).attr("disabled", true); // disable submit button
       const data = retrievePostData(genome);
-      const response = postDMR(data, genome);
       $(this).attr("disabled", false); // enable submit button
-      openResultPage(response, genome, data);
+      const response = postDMR(data, genome);
     });
   } else {
     $("button#dmr-submit").prop("disabled", true);
@@ -166,10 +165,20 @@ const submitDMR = async () => {
 }
 
 const retrievePostData = (genome) => {
-  var data = {
+  const expTypeVal = $('input[name="diffOrDMR"]:checked').val();
+  let expTypeClass;
+  switch (expTypeVal) {
+    case 'diff':
+      expTypeClass = 'diffbind';
+      break;
+    case 'DMR':
+      expTypeClass = 'dmr';
+      break;
+  }
+  const data = {
     // address: '',
     // qsubOptions: '-N test',
-    antigenClass: 'dmr',
+    antigenClass: expTypeClass,
     title: $('input#' + genome + 'ProjectTitle').val(),
     genome: genome,
     typeA: 'srx',
@@ -202,13 +211,12 @@ const postDMR = async (data, genome) => {
         const requestId = response.requestId;
         const calcm = $('a#' + genome + '-estimated-run-time').text().replace(/-/g, "");
         const redirectUrl = '/enrichment_analysis_result?id=' + requestId + '&title=' + data['title'] + '&calcm=' + calcm;
-        window.open(redirectUrl, "_self", "");
+        // window.open(redirectUrl, "_self", "");
       },
       error: function(response) {
         console.log(data);
         console.log(response);
         alert("Something went wrong: Please let us know to fix the problem, click 'contact us' below this page." + JSON.stringify(response));
-        //alert("Error: DDBJ supercomputer now unavailable: http://www.ddbj.nig.ac.jp/whatsnew");
       },
       complete: function() {
         button.attr("disabled", false);
@@ -218,14 +226,6 @@ const postDMR = async (data, genome) => {
     alert(e.message);
     button.prop("disabled", false);
   }
-}
-
-const openResultPage = (response, genome, data) => {
-  const requestId = response.requestId;
-  const calcm = $('a#' + genome + '-estimated-run-time').text().replace(/-/g, "");
-  // const redirectUrl = '/diff_analysis_result?id=' + requestId + '&title=' + data['title'] + '&calcm=' + calcm;
-  const redirectUrl = '/enrichment_analysis_result?id=' + requestId + '&title=' + data['title'] + '&calcm=' + calcm;
-  // window.open(redirectUrl, "_self", "");
 }
 
 // Genome Panel
