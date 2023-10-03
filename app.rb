@@ -190,7 +190,7 @@ class PeakJohn < Sinatra::Base
     request.body.rewind
     json = request.body.read
     content_type "application/json"
-    url = PJ::Location.new(JSON.parse(json)).archived_bed_url
+    url = PJ::Location.new(JSON.parse(json)).archive_url
     puts "DOWNLOAD: JSON: #{JSON.parse(json)}, URL: #{url}"
     JSON.dump({ "url" => url })
   end

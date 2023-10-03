@@ -103,6 +103,10 @@ module PJ
           {
             id: "Bisulfite-Seq",
             label: "Bisulfite-Seq"
+          },
+          {
+            id: "Annotation tracks",
+            label: "Annotation tracks"
           }
         ]
       end

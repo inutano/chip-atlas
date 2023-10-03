@@ -53,7 +53,7 @@ module PJ
       end
 
       def qval_range
-        self.where.not(agClass: 'Bisulfite-Seq').map{|r| r.qval }.uniq.sort
+        self.where.not(agClass: 'Bisulfite-Seq').where.not(agClass: 'Annotation tracks').map{|r| r.qval }.uniq.sort
       end
 
       def list_of_genome

@@ -183,16 +183,28 @@ const generateQvalOptions = async () => {
   document.querySelectorAll('#' + genome + 'qval option').forEach(option => option.remove());
 
   const agSelected = $('select#' + genome + 'agClass option:selected').val();
+
+  const opt = document.createElement('option');
+  let val;
   switch (agSelected) {
     case 'Bisulfite-Seq':
-      const opt = document.createElement('option');
       opt.setAttribute('value', 'bs');
       opt.setAttribute('selected', 'true');
 
-      const val = document.createTextNode('NA');
+      val = document.createTextNode('NA');
       opt.appendChild(val);
       select.appendChild(opt);
       break;
+
+    case 'Annotation tracks':
+      opt.setAttribute('value', 'anno');
+      opt.setAttribute('selected', 'true');
+
+      val = document.createTextNode('NA');
+      opt.appendChild(val);
+      select.appendChild(opt);
+      break;
+
     default:
       let response = await fetch('/qvalue_range');
       let qvList = await response.json();
