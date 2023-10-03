@@ -96,15 +96,20 @@
                       %li.divider
                     - else
                       %li
-                        %a{ href: "#{igv_linkout_base}/#{genome}/eachData/bs/methyl/#{@expid}.methyl.bw" }= "BigWig (Methylation rate)"
+                        - fname = URI.escape("Methylation rate (@ #{record[:clSubClass]}) #{@expid}")
+                        %a{ href: "#{igv_linkout_base}/#{genome}/eachData/bs/methyl/#{@expid}.methyl.bw&genome=#{genome}&name=#{fname}" }= "BigWig (Methylation rate)"
                       %li
-                        %a{ href: "#{igv_linkout_base}/#{genome}/eachData/bs/cover/#{@expid}.cover.bw" }= "BigWig (Coverage)"
+                        - fname = URI.escape("Coverage rate (@ #{record[:clSubClass]}) #{@expid}")
+                        %a{ href: "#{igv_linkout_base}/#{genome}/eachData/bs/cover/#{@expid}.cover.bw&genome=#{genome}&name=#{fname}" }= "BigWig (Coverage)"
                       %li
-                        %a{ href: "#{igv_linkout_base}/#{genome}/eachData/bs/hmr/BigBed/#{@expid}.hmr.bb" }= "Hypo MR"
+                        - fname = URI.escape("Hypo MR (@ #{record[:clSubClass]}) #{@expid}")
+                        %a{ href: "#{igv_linkout_base}/#{genome}/eachData/bs/hmr/BigBed/#{@expid}.hmr.bb&genome=#{genome}&name=#{fname}" }= "Hypo MR"
                       %li
-                        %a{ href: "#{igv_linkout_base}/#{genome}/eachData/bs/pmd/BigBed/#{@expid}.pmd.bb" }= "Partial MR"
+                        - fname = URI.escape("Partial MR (@ #{record[:clSubClass]}) #{@expid}")
+                        %a{ href: "#{igv_linkout_base}/#{genome}/eachData/bs/pmd/BigBed/#{@expid}.pmd.bb&genome=#{genome}&name=#{fname}" }= "Partial MR"
                       %li
-                        %a{ href: "#{igv_linkout_base}/#{genome}/eachData/bs/hypermr/BigBed/#{@expid}.hypermr.bb" }= "Hyper MR"
+                        - fname = URI.escape("Hyper MR (@ #{record[:clSubClass]}) #{@expid}")
+                        %a{ href: "#{igv_linkout_base}/#{genome}/eachData/bs/hypermr/BigBed/#{@expid}.hypermr.bb&genome=#{genome}&name=#{fname}" }= "Hyper MR"
                       %li.divider
 
                   %li.dropdown-header{ role: "presentation" }
