@@ -37,7 +37,7 @@ module PJ
       end
 
       def record_by_expid(exp_id)
-        records = self.where(:expid => exp_id)
+        records = self.where(:expid => exp_id).order(genome: :desc)
         records.map do |record|
           {
             :expid      => exp_id,
