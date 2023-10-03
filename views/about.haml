@@ -66,76 +66,137 @@
           %p.navbar-text.navbar-right
             Find By ID
 
-    .jumbotron
-      .container
+    -# .jumbotron
+    -#   .container
+    -#     %h1
+    -#       %i.fas.fa-mountain
+    -#       ChIP-Atlas
+    -#     %p.main-desc="An integrative, comprehensive database to explore public Epigenetic dataset, including ChIP-Seq, DNase-Seq, ATAC-Seq, and Bisulfite-Seq data: ChIP-Atlas covers almost all public data archived in Sequence Read Archive of NCBI, EBI, and DDBJ with over #{@number_of_experiments} experiments."
+    -#     %p.main-desc
+    -#       %a{ :href => "https://youtu.be/xbYpE9GE_rY", :target => "_blank" }
+    -#         Watch movie introduction
+    .container
+      .page-header
         %h1
           %i.fas.fa-mountain
           ChIP-Atlas
-        %p.main-desc="An integrative, comprehensive database to explore public Epigenetic dataset, including ChIP-Seq, DNase-Seq, ATAC-Seq, and Bisulfite-Seq data: ChIP-Atlas covers almost all public data archived in Sequence Read Archive of NCBI, EBI, and DDBJ with over #{@number_of_experiments} experiments."
-        %p.main-desc
-          %a{ :href => "https://youtu.be/xbYpE9GE_rY", :target => "_blank" }
-            Watch movie introduction
-    .container
+
+      .row.align-height
+        .col-md-4
+          .jumbotron
+            .row
+              .col-md-5
+                %h1
+                  %i.fas.fa-glasses
+              .col-md-7
+                %h3
+                  Peak Browser
+                .div
+                  %span.label.label-primary
+                    ChIP
+                  %span.label.label-primary
+                    ATAC
+                  %span.label.label-primary
+                    Bisulfite
+            -# %a{ :href => "#{app_root}/peak_browser" }
+            -# %p.main-desc
+            -#   Visualizes epigenetic features on
+            -#   %a{ href: "http://software.broadinstitute.org/software/igv/home", target: "_blank" }
+            -#     IGV
+            -#   %a{ :href => "https://youtu.be/qKNOkK-8hDo", :target => "_blank" }
+            -#     %i.fas.fa-play-circle
+
+        .col-md-4
+          .jumbotron
+            .row
+              .col-md-5
+                %h1
+                  %i.fas.fa-hand-holding-heart
+              .col-md-7
+                %h3
+                  Enrichment Analysis
+                .div
+                  %span.label.label-primary
+                    ChIP
+                  %span.label.label-primary
+                    ATAC
+                  %span.label.label-primary
+                    Bisulfite
+
+            -# %a{ :href => "#{app_root}/enrichment_analysis" }
+            -# %p.main-desc
+            -#   Predict proteins bound to given genomic loci and genes
+            -#   %a{ :href => "https://youtu.be/JBOB2PX5_-0", :target => "_blank"  }
+            -#     %i.fas.fa-play-circle
+
+        .col-md-4
+          .jumbotron
+            .row
+              .col-md-5
+                %h1
+                  %i.fas.fa-balance-scale-left
+              .col-md-7
+                %h3
+                  Diff Analysis
+                .div
+                  %span.label.label-primary
+                    ChIP
+                  %span.label.label-primary
+                    ATAC
+                  %span.label.label-primary
+                    Bisulfite
+            -# %a{ :href => "#{app_root}/diff_analysis" }
+            -# %p.main-desc
+            -#   Predict proteins bound to given genomic loci and genes
+
+      .row.align-height
+        .col-md-4
+          .jumbotron
+            %h2
+              %i.fas.fa-bullseye
+              Target Genes
+            %p
+              %span.label.label-primary
+                ChIP
+            -# %a{ :href => "#{app_root}/target_genes" }
+            -# %p.main-desc
+            -#   Predict target genes bound by given transcription factors
+            -#   %a{ :href => "https://youtu.be/Sp9DUAuKkvQ", :target => "_blank" }
+            -#     %i.fas.fa-play-circle
+
+        .col-md-4
+          .jumbotron
+            %h2
+              %i.fas.fa-compress-arrows-alt
+              Colocalization
+            %p
+              %span.label.label-primary
+                ChIP
+            -# %a{ :href => "#{app_root}/colo" }
+            -# %p.main-desc
+            -#   Predict partner proteins colocalizing with given transcription factors
+            -#   %a{ :href => "https://youtu.be/jhLnWNCe_No", :target => "_blank" }
+            -#     %i.fas.fa-play-circle
+
+        .col-md-4
+          .jumbotron
+            %h2
+              %i.fas.fa-search
+              Dataset Search
+            %p
+              %span.label.label-primary
+                ChIP
+              %span.label.label-primary
+                ATAC
+              %span.label.label-primary
+                Bisulfite
+            -# %a{ :href => "#{app_root}/search" }
+            -# %p.main-desc
+            -#   Predict partner proteins colocalizing with given transcription factors
+
       .row
         .col-md-12
           ~ markdown(:updates, layout: false, fenced_code_blocks: true, autolink: true)
-
-      %hr.introduction
-      .row
-        .col-md-3
-          %h2
-            %a{ :href => "#{app_root}/peak_browser" }
-              Peak Browser
-          %p.main-desc
-            Visualizes protein binding on given genomic loci with
-            %a{ href: "http://software.broadinstitute.org/software/igv/home", target: "_blank" }
-              IGV genome browser
-          %p.main-desc
-            %a{ :href => "https://youtu.be/qKNOkK-8hDo", :target => "_blank" }
-              Watch tutorial movie
-          %p
-            %a{ :href => "https://youtu.be/qKNOkK-8hDo", :target => "_blank" }
-              %img.pull-right{ src: "https://img.youtube.com/vi/qKNOkK-8hDo/mq3.jpg", width: 260 }
-
-        .col-md-3
-          %h2
-            %a{ :href => "#{app_root}/target_genes" }
-              Target Genes
-          %p.main-desc
-            Predict target genes bound by given transcription factors
-          %p.main-desc
-            %a{ :href => "https://youtu.be/Sp9DUAuKkvQ", :target => "_blank" }
-              Watch tutorial movie
-          %p
-            %a{ :href => "https://youtu.be/Sp9DUAuKkvQ", :target => "_blank" }
-              %img.pull-right{ src: "https://img.youtube.com/vi/Sp9DUAuKkvQ/mq3.jpg", width: 260 }
-
-        .col-md-3
-          %h2
-            %a{ :href => "#{app_root}/colo" }
-              Colocalization
-          %p.main-desc
-            Predict partner proteins colocalizing with given transcription factors
-          %p.main-desc
-            %a{ :href => "https://youtu.be/jhLnWNCe_No", :target => "_blank" }
-              Watch tutorial movie
-          %p
-            %a{ :href => "https://youtu.be/jhLnWNCe_No", :target => "_blank" }
-              %img.pull-right{ src: "https://img.youtube.com/vi/jhLnWNCe_No/mq2.jpg", width: 260 }
-
-        .col-md-3
-          %h2
-            %a{ :href => "#{app_root}/enrichment_analysis" }
-              Enrichment Analysis
-          %p.main-desc
-            Predict proteins bound to given genomic loci and genes
-          %p.main-desc
-            %a{ :href => "https://youtu.be/JBOB2PX5_-0", :target => "_blank"  }
-              Watch tutorial movie
-          %p
-            %a{ :href => "https://youtu.be/JBOB2PX5_-0", :target => "_blank" }
-              %img.pull-right{ src: "https://img.youtube.com/vi/JBOB2PX5_-0/mq2.jpg", width: 260 }
-
 
     %footer.footer
       .container
@@ -143,8 +204,6 @@
           .col-md-4.col-md-offset-4
             %a{ href: "http://www.mic.med.kyoto-u.ac.jp/dddm_en/", target: "_blank" }
               %img{ src: "/images/logo/kyoto_uni_logo.png", width: 120 }
-            %span.collaboration
-              in collaboration with
             %a{ href: "https://dbcls.rois.ac.jp", target: "_blank" }
               %img{ src: "/images/logo/dbcls_logo.png", width: 100 }
         %row

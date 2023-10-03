@@ -2,7 +2,18 @@
 $(function(){
   // experiment search button
   enableExperimentSearch();
+  setJumbotronHeight();
 });
+
+const setJumbotronHeight = () => {
+  let maxHeight = 0;
+  $(".jumbotron").each(function () {
+      var jumbotronHeight = $(this).height();
+      maxHeight = Math.max(maxHeight, jumbotronHeight);
+  });
+  // 各Jumbotronに最大高さを設定
+  $(".jumbotron").height(maxHeight);
+}
 
 // common functions
 
