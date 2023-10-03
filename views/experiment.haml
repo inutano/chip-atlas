@@ -294,14 +294,24 @@
                 %h2
                   .small= record[:genome]
                 %dl.dl-horizontal
-                  %dt{ style: 'white-space: normal;' }= "Number of total reads"
-                  %dd= readinfo[0]
-                  %dt{ style: 'white-space: normal;' }= "Reads aligned (%)"
-                  %dd= readinfo[1]
-                  %dt{ style: 'white-space: normal;' }= "Duplicates removed (%)"
-                  %dd= readinfo[2]
-                  %dt{ style: 'white-space: normal;' }= "Number of peaks"
-                  %dd= readinfo[3] + " (qval < 1E-05)"
+                  - if metadata[:agClass] != 'Bisulfite-Seq'
+                    %dt{ style: 'white-space: normal;' }= "Number of total reads"
+                    %dd= readinfo[0]
+                    %dt{ style: 'white-space: normal;' }= "Reads aligned (%)"
+                    %dd= readinfo[1]
+                    %dt{ style: 'white-space: normal;' }= "Duplicates removed (%)"
+                    %dd= readinfo[2]
+                    %dt{ style: 'white-space: normal;' }= "Number of peaks"
+                    %dd= readinfo[3] + " (qval < 1E-05)"
+                  - else
+                    %dt{ style: 'white-space: normal;' }= "Number of total reads"
+                    %dd= readinfo[0]
+                    %dt{ style: 'white-space: normal;' }= "Reads aligned (%)"
+                    %dd= readinfo[1]
+                    %dt{ style: 'white-space: normal;' }= "Coverage rate (×)"
+                    %dd= readinfo[2]
+                    %dt{ style: 'white-space: normal;' }= "Number of hyper MRs"
+                    %dd= readinfo[3] + " (qval < 1E-05)"
                 - if i != (records.size - 1)
                   %hr
 
