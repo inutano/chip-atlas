@@ -38,18 +38,29 @@
         #navbar.collapse.navbar-collapse
           %ul.nav.navbar-nav
             %li
-              %a{ :href => "#{app_root}/peak_browser" }= "Peak Browser"
+              %a{ :href => "#{app_root}/peak_browser" }
+                %i.fas.fa-glasses
+                Peak Browser
             %li
-              %a{ :href => "#{app_root}/target_genes" }= "Target Genes"
-            %li
-              %a{ :href => "#{app_root}/colo" }= "Colocalization"
-            %li
-              %a{ :href => "#{app_root}/enrichment_analysis" }= "Enrichment Analysis"
+              %a{ :href => "#{app_root}/enrichment_analysis" }
+                %i.fas.fa-hand-holding-heart
+                Enrichment Analysis
             %li
               %a{ href: "#{app_root}/diff_analysis" }
+                %i.fas.fa-balance-scale-left
                 Diff Analysis
             %li
-              %a{ :href => "#{app_root}/publications" }= "Publications"
+              %a{ :href => "#{app_root}/target_genes" }
+                %i.fas.fa-bullseye
+                Target Genes
+            %li
+              %a{ :href => "#{app_root}/colo" }
+                %i.fas.fa-compress-arrows-alt
+                Colocalization
+            %li
+              %a{ :href => "#{app_root}/publications" }
+                %i.fas.fa-book
+                Publications
             %li
               %a{ :href => "https://github.com/inutano/chip-atlas/wiki" }
                 %i.fab.fa-github
