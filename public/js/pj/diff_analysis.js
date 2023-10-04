@@ -7,6 +7,7 @@ window.onload = async () => {
   emptyDataSet();
   setGenomePanel();
   estimateTimeOnEdit();
+  alertHelpMessage();
 }
 
 // UI Building
@@ -288,3 +289,26 @@ const calculateEstimatedTime = () => {
     }
   });
 }
+
+const alertHelpMessage = () => {
+  $('.infoBtn').click(function() {
+    var genome = genomeSelected();
+    switch ($(this).attr('id')) {
+      case genome + 'DataSetADesc':
+        alert(helpText["datasetAdesc"]);
+        break;
+      case genome + 'DataSetBDesc':
+        alert(helpText["datasetBdesc"]);
+        break;
+      case genome + 'ProjectDesc':
+        alert(helpText["projectdesc"]);
+        break;
+    };
+  });
+}
+
+const helpText = {
+  projectdesc: 'Enter a title for this submission.\nAcceptable letters are alphanumeric (a-Z, 0-9), space ( ), underscore (_), period (.) and hyphen (-).',
+  datasetAdesc: 'Enter a title for the data selected in "2. Enter dataset A".\nAcceptable letters are alphanumeric (a-Z, 0-9), space ( ), underscore (_), period (.) and hyphen (-).',
+  datasetBdesc: 'Enter a title for the data selected in "3. Enter dataset B".\nAcceptable letters are alphanumeric (a-Z, 0-9), space ( ), underscore (_), period (.) and hyphen (-).',
+};
