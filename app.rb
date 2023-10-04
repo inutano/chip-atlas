@@ -309,6 +309,29 @@ class PeakJohn < Sinatra::Base
     haml :diff_analysis_result
   end
 
+  post "/diff_analysis_estimated_time" do
+    # Memo: from Zou-san
+    # X = Total # of reads
+    # Y = Time (sec)
+    # DMR: Y = 117.13 * ln(X) - 2012.5
+    # Diffbind: Y = 1.80 * 10^-6 X + 119.38
+
+    request.body.rewind
+    data = JSON.parse(request.body.read)
+    a_type = data["analysis"]
+    total_number_of_reads = PJ::Experiment.total_number_of_reads(data["ids"]).to_i
+    case a_type
+    when 'dmr'
+      seconds = 117.13 * Math.log(total_number_of_reads) - 2012.5
+      Rational(seconds, 60).to_f.round(1).to_s
+    when 'diffbind'
+      seconds = 1.80e-6 * total_number_of_reads + 119.38
+      Rational(seconds, 60).to_f.round(1).to_s
+    else
+      nil
+    end
+  end
+
   #
   # Experiment search
   #

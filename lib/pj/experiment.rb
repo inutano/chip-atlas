@@ -251,6 +251,10 @@ module PJ
         # Count number of entries but remove duplcation of multiple genome assemblies
         self.all.map{|n| n.expid }.uniq.size
       end
+
+      def total_number_of_reads(ids)
+        self.where(expid: ids).map{|n| n.readInfo.split(',')[0].to_i }.inject(0){|result, number| result + number }
+      end
     end
   end
 end
