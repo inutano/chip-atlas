@@ -164,32 +164,8 @@
                     %button.btn.btn-primary.btn-lg.btn-block.post{ :id => "download-gml", :type => "button" }= "Download (GML)"
 
 
-    %footer.footer
-      .container
-        %row
-          .col-md-4.col-md-offset-4
-            %a{ href: "http://www.mic.med.kyoto-u.ac.jp/dddm_en/", target: "_blank" }
-              %img{ src: "/images/logo/kyoto_uni_logo.png", width: 120 }
-            %span.collaboration
-              in collaboration with
-            %a{ href: "https://dbcls.rois.ac.jp", target: "_blank" }
-              %img{ src: "/images/logo/dbcls_logo.png", width: 100 }
-        %row
-          .col-md-6.col-md-offset-3
-            %p.acknowledgement
-              This work is supported by
-              %a{ href: "https://sc.ddbj.nig.ac.jp/" }
-                NIG Supercomputer system
-              and
-              %a{ href: "https://biosciencedbc.jp" }
-                National Bioscience Database Center.
-            %p
-              Need help? Create an issue on
-              %a{ href: "https://github.com/inutano/chip-atlas/issues" }
-                github
-              or
-              %a{ href: "mailto:oki.shinya.3w@kyoto-u.ac.jp" }
-                contact us
+    != haml :footer
+
     /
       Bootstrap Core Javascript
       =========================
