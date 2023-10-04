@@ -3,6 +3,7 @@ window.onload = async () => {
   putDefaultTitles();
   putExampleData();
   submitDMR();
+  emptyDataSet();
   // For each genome panel
   setGenomePanel();
 }
@@ -19,6 +20,15 @@ const putDefaultTitles = () => {
     const elm = document.getElementById(genome + id);
     elm.value = dvalue;
   }
+}
+
+// Change to empty textarea
+const emptyDataSet = () => {
+  $('input[name="diffOrDMR"]').change(function(){
+    const genome = genomeSelected();
+    $('textarea#' + genome + 'DataSetA').val('');
+    $('textarea#' + genome + 'DataSetB').val('');
+  });
 }
 
 // Example data
