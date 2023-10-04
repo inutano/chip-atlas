@@ -83,28 +83,30 @@
 
       .row.align-height
         .col-md-4
-          .jumbotron
-            .row
-              .col-md-5
-                %h1
-                  %i.fas.fa-glasses
-              .col-md-7
-                %h3
-                  Peak Browser
-                .div
-                  %span.label.label-primary
-                    ChIP
-                  %span.label.label-primary
-                    ATAC
-                  %span.label.label-primary
-                    Bisulfite
+          %a.jumbotron-link{ :href => "#{app_root}/peak_browser" }
+            .jumbotron
+              .row
+                .col-xs-12.col-sm-4.col-icon
+                  .icon
+                    %i.fas.fa-glasses
+                .col-xs-12.col-sm-8.col-labels
+                  .header-text
+                    %h3
+                      Peak Browser
+                  .labels
+                    -# %a{ :href => "https://youtu.be/qKNOkK-8hDo", :target => "_blank" }
+                    -#   %i.fas.fa-play-circle
+                    %span.label.label-primary
+                      ChIP
+                    %span.label.label-primary
+                      ATAC
+                    %span.label.label-primary
+                      Bisulfite
             -# %a{ :href => "#{app_root}/peak_browser" }
             -# %p.main-desc
             -#   Visualizes epigenetic features on
             -#   %a{ href: "http://software.broadinstitute.org/software/igv/home", target: "_blank" }
             -#     IGV
-            -#   %a{ :href => "https://youtu.be/qKNOkK-8hDo", :target => "_blank" }
-            -#     %i.fas.fa-play-circle
 
         .col-md-4
           .jumbotron
