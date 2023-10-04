@@ -320,15 +320,18 @@ class PeakJohn < Sinatra::Base
     data = JSON.parse(request.body.read)
     a_type = data["analysis"]
     total_number_of_reads = PJ::Experiment.total_number_of_reads(data["ids"]).to_i
-    case a_type
-    when 'dmr'
-      seconds = 117.13 * Math.log(total_number_of_reads) - 2012.5
-      Rational(seconds, 60).to_f.round(1).to_s
-    when 'diffbind'
-      seconds = 1.80e-6 * total_number_of_reads + 119.38
-      Rational(seconds, 60).to_f.round(1).to_s
+    seconds = case a_type
+      when 'DMR'
+        117.13 * Math.log(total_number_of_reads) - 2012.5
+      when 'diff'
+        1.80e-6 * total_number_of_reads + 119.38
+      else
+        nil
+      end
+    if seconds and !seconds.infinite?
+      JSON.dump({ minutes: Rational(seconds, 60).to_f.round(1) })
     else
-      nil
+      JSON.dump({ minutes: nil })
     end
   end
 

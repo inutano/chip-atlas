@@ -1,11 +1,12 @@
 window.onload = async () => {
-  // default value for dataset
+  // Initialize
   putDefaultTitles();
-  putExampleData();
   submitDMR();
+  // Events
+  putExampleData();
   emptyDataSet();
-  // For each genome panel
   setGenomePanel();
+  estimateTimeOnEdit();
 }
 
 // UI Building
@@ -28,6 +29,7 @@ const emptyDataSet = () => {
     const genome = genomeSelected();
     $('textarea#' + genome + 'DataSetA').val('');
     $('textarea#' + genome + 'DataSetB').val('');
+    $('a#' + genome + '-estimated-run-time').html('-');
   });
 }
 
@@ -48,6 +50,7 @@ const putExampleData = () => {
         $('textarea#' + genome + 'DataSetB').val(example);
         break;
     }
+    calculateEstimatedTime();
   });
 }
 
@@ -248,5 +251,40 @@ const setGenomePanel = async () => {
       $(this).tab('show');
       putDefaultTitles();
     });
+  });
+}
+
+// diff analysis time calculation
+const estimateTimeOnEdit = () => {
+  $('textarea').on('click keyup paste', function() {
+    calculateEstimatedTime();
+  });
+}
+
+const calculateEstimatedTime = () => {
+  const genome = genomeSelected();
+  const idListA = $('textarea#' + genome + 'DataSetA').val().split(/\r?\n/);
+  const idListB = $('textarea#' + genome + 'DataSetB').val().split(/\r?\n/);
+  const data = {
+    analysis: $('input[name="diffOrDMR"]:checked').val(),
+    ids: idListA.concat(idListB).filter(item => item !== "")
+  }
+
+  $.ajax({
+    type: 'post',
+    url: "/diff_analysis_estimated_time",
+    data: JSON.stringify(data),
+    contentType: 'application/json',
+    dataType: 'json',
+    scriptCharset: 'utf-8',
+    success: function(response) {
+      const minutes = response.minutes;
+      $('a#' + genome + '-estimated-run-time').html(minutes + ' mins');
+    },
+    error: function(response) {
+      console.log(data);
+      console.log(response);
+      alert("Something went wrong: Please let us know to fix the problem, click 'contact us' below this page." + JSON.stringify(response));
+    }
   });
 }
