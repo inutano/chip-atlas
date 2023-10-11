@@ -1,4 +1,4 @@
-class CreateExperiments < ActiveRecord::Migration
+class CreateExperiments < ActiveRecord::Migration[4.2]
   def up
     create_table(:experiments) do |t|
       t.string :expid
@@ -9,7 +9,7 @@ class CreateExperiments < ActiveRecord::Migration
       t.string :clSubClass
       t.string :title
       t.string :additional_attributes
-      t.timestamp
+      t.timestamp :timestamp
     end
     [ :expid, :agClass, :agSubClass, :clClass, :clSubClass ].each do |field|
       add_index :experiments, field

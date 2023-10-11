@@ -1,4 +1,4 @@
-class CreateBedfiles < ActiveRecord::Migration
+class CreateBedfiles < ActiveRecord::Migration[4.2]
   def up
     create_table(:bedfiles) do |t|
       t.string :filename
@@ -9,7 +9,7 @@ class CreateBedfiles < ActiveRecord::Migration
       t.string :clSubClass
       t.string :qval
       t.string :experiments
-      t.timestamp
+      t.timestamp :timestamp
     end
     [ :genome, :agClass, :agSubClass, :clClass, :clSubClass, :qval ].each do |field|
       add_index :bedfiles, field
