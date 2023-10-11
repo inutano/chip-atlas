@@ -330,7 +330,7 @@ class PeakJohn < Sinatra::Base
         nil
       end
     if seconds and !seconds.infinite?
-      JSON.dump({ minutes: Rational(seconds, 60).to_f.round(1) })
+      JSON.dump({ minutes: Rational(seconds, 60).to_f.round() })
     else
       JSON.dump({ minutes: nil })
     end
