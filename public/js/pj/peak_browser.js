@@ -102,10 +102,21 @@ const generateChIPAntigenOptions = async () => {
         let count = experiment['count'];
         let option = $('<option>')
                        .attr("value", id)
-        if (i==0) {
-          option.append(label).attr("selected", true);
-        } else {
-          option.append(label + ' (' + count + ')');
+
+        switch (agSelected) {
+          case 'Annotation tracks':
+            if (i==0) {
+              option.append(label).attr("selected", true);
+            } else {
+              option.append(label);
+            }
+            break;
+          default:
+            if (i==0) {
+              option.append(label).attr("selected", true);
+            } else {
+              option.append(label + ' (' + count + ')');
+            }
         }
 
         option.appendTo(select);
