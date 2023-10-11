@@ -95,7 +95,7 @@ const checkWabiStatus = (params) => {
       tdStatus.text(status);
       if (status == "finished") {
         tdStatus.css("color", "red");
-        setResultALink();
+        setResultALink(params);
         clearInterval(interval);
       } else if (status == "unavailable") {
         alert("No response from the DDBJ supercomputer system: please note the result URL to access later. It is possible that your job has been interrupted by the system error, in that case you may need to run the analysis again.");
