@@ -160,7 +160,6 @@ const diffExampleData = {
 
 // Diff Analysis post functions
 const submitDMR = async () => {
-  const genome = genomeSelected();
   // diable when blackout
   const endpointStatusUrl = "/wabi_endpoint_status"
   let endpointStatusResponse = await fetch(endpointStatusUrl);
@@ -168,9 +167,9 @@ const submitDMR = async () => {
   if (endpointStatus == 'chipatlas') {
     $("button#dmr-submit").click(function() {
       $(this).attr("disabled", true); // disable submit button
-      const data = retrievePostData(genome);
+      const data = retrievePostData();
       $(this).attr("disabled", false); // enable submit button
-      const response = postDMR(data, genome);
+      const response = postDMR(data);
     });
   } else {
     $("button#dmr-submit").prop("disabled", true);
@@ -178,7 +177,8 @@ const submitDMR = async () => {
   }
 }
 
-const retrievePostData = (genome) => {
+const retrievePostData = () => {
+  const genome = genomeSelected();
   const expTypeVal = $('input[name="diffOrDMR"]:checked').val();
   let expTypeClass;
   switch (expTypeVal) {
@@ -211,7 +211,8 @@ const retrievePostData = (genome) => {
   return data;
 }
 
-const postDMR = async (data, genome) => {
+const postDMR = async (data) => {
+  const genome = genomeSelected();
   const endpointUrl = '/wabi_chipatlas';
   try {
     $.ajax({
