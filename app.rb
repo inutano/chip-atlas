@@ -315,6 +315,7 @@ class PeakJohn < Sinatra::Base
     # Y = Time (sec)
     # DMR: Y = 117.13 * ln(X) - 2012.5
     # Diffbind: Y = 1.80 * 10^-6 X + 119.38
+    # add 10 mins for file conversion
 
     request.body.rewind
     data = JSON.parse(request.body.read)
@@ -322,9 +323,9 @@ class PeakJohn < Sinatra::Base
     total_number_of_reads = PJ::Experiment.total_number_of_reads(data["ids"]).to_i
     seconds = case a_type
       when 'DMR'
-        117.13 * Math.log(total_number_of_reads) - 2012.5
+        117.13 * Math.log(total_number_of_reads) - 2012.5 + 600
       when 'diff'
-        1.80e-6 * total_number_of_reads + 119.38
+        1.80e-6 * total_number_of_reads + 119.38 + 600
       else
         nil
       end
