@@ -39,6 +39,12 @@ module PJ
         results.first.filename
       end
 
+      def get_trackname(condition)
+        results = filesearch(condition)
+        raise NameError if results.size != 1
+        results.first.agSubClass
+      end
+
       def filesearch(condition)
         self.where(:genome => condition["genome"])
           .where(:agClass => condition["agClass"])
