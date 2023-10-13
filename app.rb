@@ -167,6 +167,10 @@ class PeakJohn < Sinatra::Base
     JSON(settings.qval_range)
   end
 
+  #
+  # Peak Browser
+  #
+
   get "/peak_browser" do
     @index_all_genome = settings.index_all_genome
     @list_of_genome   = settings.list_of_genome
@@ -174,11 +178,64 @@ class PeakJohn < Sinatra::Base
     haml :peak_browser
   end
 
+  post "/browse" do
+    request.body.rewind
+    json = request.body.read
+    content_type "application/json"
+    url = PJ::Location.new(JSON.parse(json)).igv_browsing_url
+    JSON.dump({ "url" => url })
+  end
+
+  post "/download" do
+    request.body.rewind
+    json = request.body.read
+    content_type "application/json"
+    url = PJ::Location.new(JSON.parse(json)).archive_url
+    puts "DOWNLOAD: JSON: #{JSON.parse(json)}, URL: #{url}"
+    JSON.dump({ "url" => url })
+  end
+
+  get "/view" do
+    @expid = params[:id]
+    if @expid =~ /^GSM/
+      redirect "/view?id=#{settings.gsm_to_srx[@expid]}"
+    end
+    redirect "not_found", 404 if !PJ::Experiment.id_valid?(@expid)
+    @ncbi  = PJ::SRA.new(@expid).fetch
+    haml :experiment
+  end
+
+  #
+  # Colocalization analysis
+  #
+
   get "/colo" do
     @index_all_genome = settings.index_all_genome
     @list_of_genome = settings.list_of_genome
     haml :colo
   end
+
+  post "/colo" do
+    request.body.rewind
+    json = request.body.read
+    content_type "application/json"
+    colo_url = PJ::Location.new(JSON.parse(json)).colo_url(params[:type])
+    JSON.dump({ "url" => colo_url })
+  end
+
+  get "/colo_result" do
+    @iframe_url = params[:base]
+    # haml :colo_result
+    if remotefile_available?(@iframe_url)
+      redirect @iframe_url
+    else
+      redirect "not_found", 404
+    end
+  end
+
+  #
+  # Target genes analysis
+  #
 
   get "/target_genes" do
     @index_all_genome = settings.index_all_genome
@@ -186,15 +243,33 @@ class PeakJohn < Sinatra::Base
     haml :target_genes
   end
 
+  post "/target_genes" do
+    request.body.rewind
+    json = request.body.read
+    content_type "application/json"
+    target_genes_url = PJ::Location.new(JSON.parse(json)).target_genes_url(params[:type])
+    JSON.dump({ "url" => target_genes_url })
+  end
+
+  get "/target_genes_result" do
+    @iframe_url = params[:base]
+    # haml :target_genes_result
+    if remotefile_available?(@iframe_url)
+      redirect @iframe_url
+    else
+      redirect "not_found", 404
+    end
+  end
+
+  #
+  # Enrichment analysis
+  #
+
   get "/enrichment_analysis" do
     @index_all_genome = settings.index_all_genome
     @list_of_genome = settings.list_of_genome
     @qval_range = settings.qval_range
     haml :enrichment_analysis
-  end
-
-  get "/search" do
-    haml :search
   end
 
   post "/enrichment_analysis" do
@@ -219,69 +294,86 @@ class PeakJohn < Sinatra::Base
     haml :enrichment_analysis_result
   end
 
-  post "/colo" do
-    request.body.rewind
-    json = request.body.read
-    content_type "application/json"
-    colo_url = PJ::Location.new(JSON.parse(json)).colo_url(params[:type])
-    JSON.dump({ "url" => colo_url })
+  #
+  # Diff Analysis
+  #
+
+  get "/diff_analysis" do
+    @index_all_genome = settings.index_all_genome
+    @list_of_genome = settings.list_of_genome
+    @qval_range = settings.qval_range
+    haml :diff_analysis
   end
 
-  get "/colo_result" do
-    @iframe_url = params[:base]
-    # haml :colo_result
-    if remotefile_available?(@iframe_url)
-      redirect @iframe_url
+  get "/diff_analysis_result" do
+    haml :diff_analysis_result
+  end
+
+  get "/diff_analysis_log" do
+    URI.open("https://chip-atlas.dbcls.jp/data/query/#{params[:id]}.log").read
+  end
+
+  post "/diff_analysis_estimated_time" do
+    # Memo: from Zou-san
+    # X = Total # of reads
+    # Y = Time (sec)
+    # DMR: Y = 117.13 * ln(X) - 2012.5
+    # Diffbind: Y = 1.80 * 10^-6 X + 119.38
+    # add 10 mins for file conversion
+
+    request.body.rewind
+    data = JSON.parse(request.body.read)
+    a_type = data["analysis"]
+    total_number_of_reads = PJ::Experiment.total_number_of_reads(data["ids"]).to_i
+    seconds = case a_type
+      when 'DMR'
+        117.13 * Math.log(total_number_of_reads) - 2012.5 + 600
+      when 'diff'
+        1.80e-6 * total_number_of_reads + 119.38 + 600
+      else
+        nil
+      end
+    if seconds and !seconds.infinite?
+      JSON.dump({ minutes: Rational(seconds, 60).to_f.round() })
     else
-      redirect "not_found", 404
+      JSON.dump({ minutes: nil })
     end
   end
 
-  post "/target_genes" do
-    request.body.rewind
-    json = request.body.read
-    content_type "application/json"
-    target_genes_url = PJ::Location.new(JSON.parse(json)).target_genes_url(params[:type])
-    JSON.dump({ "url" => target_genes_url })
+  #
+  # Experiment search
+  #
+
+  get "/search" do
+    haml :search
   end
 
-  get "/target_genes_result" do
-    @iframe_url = params[:base]
-    # haml :target_genes_result
-    if remotefile_available?(@iframe_url)
-      redirect @iframe_url
-    else
-      redirect "not_found", 404
-    end
+  #
+  # Publication page
+  #
+
+  get "/publications" do
+    haml :publications
   end
 
-  post "/browse" do
-    request.body.rewind
-    json = request.body.read
-    content_type "application/json"
-    url = PJ::Location.new(JSON.parse(json)).igv_browsing_url
-    JSON.dump({ "url" => url })
+  #
+  # 404 Not Found
+  #
+
+  not_found do
+    haml :not_found
   end
 
-  post "/download" do
-    request.body.rewind
-    json = request.body.read
-    content_type "application/json"
-    url = PJ::Location.new(JSON.parse(json)).archived_bed_url
-    puts "DOWNLOAD: JSON: #{JSON.parse(json)}, URL: #{url}"
-    JSON.dump({ "url" => url })
-  end
+  #
+  # DDBJ Supercomputer system WABI API
+  #
 
   get "/wabi_chipatlas" do
-    url = "http://ddbj.nig.ac.jp/wabi/chipatlas/" + params[:id] + "?info=result&format=html"
+    url = "http://ddbj.nig.ac.jp/wabi/chipatlas/" + params[:id] + "?format=json"
     if Net::HTTP.get_response(URI.parse(url)).code == "200"
-      if !open(url).read.empty?
-        "finished"
-      else
-        "running"
-      end
+      JSON.load(open(url).read)["status"]
     else
-      "queued"
+      "Error"
     end
   end
 
@@ -310,25 +402,7 @@ class PeakJohn < Sinatra::Base
     redirect "not_found", 404
   end
 
-  get "/view" do
-    @expid = params[:id]
-    if @expid =~ /^GSM/
-      redirect "/view?id=#{settings.gsm_to_srx[@expid]}"
-    end
-    redirect "not_found", 404 if !PJ::Experiment.id_valid?(@expid)
-    @ncbi  = PJ::SRA.new(@expid).fetch
-    haml :experiment
-  end
-
   get "/api/remoteUrlStatus" do
     Net::HTTP.get_response(URI.parse(params[:url])).code.to_i
-  end
-
-  get "/publications" do
-    haml :publications
-  end
-
-  not_found do
-    haml :not_found
   end
 end

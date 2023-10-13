@@ -39,6 +39,12 @@ module PJ
         results.first.filename
       end
 
+      def get_trackname(condition)
+        results = filesearch(condition)
+        raise NameError if results.size != 1
+        results.first.agSubClass
+      end
+
       def filesearch(condition)
         self.where(:genome => condition["genome"])
           .where(:agClass => condition["agClass"])
@@ -53,7 +59,7 @@ module PJ
       end
 
       def qval_range
-        self.where.not(agClass: 'Bisulfite-Seq').map{|r| r.qval }.uniq.sort
+        self.where.not(agClass: 'Bisulfite-Seq').where.not(agClass: 'Annotation tracks').map{|r| r.qval }.uniq.sort
       end
 
       def list_of_genome

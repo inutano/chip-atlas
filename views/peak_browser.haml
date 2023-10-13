@@ -38,32 +38,40 @@
             %span.icon-bar
           %a.navbar-brand{ href: "#{app_root}" }
             %i.fas.fa-mountain
-            ChIP-Atlas
         #navbar.collapse.navbar-collapse
           %ul.nav.navbar-nav
             %li.active
-              %a{ href: "#{app_root}/peak_browser" }
+              %a{ :href => "#{app_root}/peak_browser" }
+                %i.fas.fa-glasses
                 Peak Browser
             %li
-              %a{ href: "#{app_root}/target_genes" }
-                Target Genes
-            %li
-              %a{ href: "#{app_root}/colo" }
-                Colocalization
-            %li
-              %a{ href: "#{app_root}/enrichment_analysis" }
+              %a{ :href => "#{app_root}/enrichment_analysis" }
+                %i.fas.fa-hand-holding-heart
                 Enrichment Analysis
             %li
-              %a{ href: "#{app_root}/publications" }
+              %a{ href: "#{app_root}/diff_analysis" }
+                %i.fas.fa-balance-scale-left
+                Diff Analysis
+            %li
+              %a{ :href => "#{app_root}/target_genes" }
+                %i.fas.fa-bullseye
+                Target Genes
+            %li
+              %a{ :href => "#{app_root}/colo" }
+                %i.fas.fa-compress-arrows-alt
+                Colocalization
+            %li
+              %a{ :href => "#{app_root}/publications" }
+                %i.fas.fa-book
                 Publications
             %li
-              %a{ href: "https://github.com/inutano/chip-atlas/wiki" }
+              %a{ :href => "https://github.com/inutano/chip-atlas/wiki" }
                 %i.fab.fa-github
                 Docs
           %p.navbar-text.navbar-right
             %a{ href: "/search" }
               %i.fas.fa-search
-              Advanced
+              Search
           %form.navbar-form.navbar-right{ role: "search" }
             .form-group
               - id_example = ["GSM469863", "SRX018625"].sample(1)[0]
@@ -82,13 +90,15 @@
               %i.fas.fa-mountain
               ChIP-Atlas: Peak Browser
             %p
-              Visualizes protein binding on given genomic loci with
+              Visualize TF-binding, histone marks, chromatin accessibility, and DNA methylation on
               %a{ href: "http://software.broadinstitute.org/software/igv/home", target: "_blank" }
-                IGV genome browser
+                IGV
+
         .col-md-2
           .dropdown-help
             .dropdown
-              .button.btn.btn-default.dropdown-toggle{ type: "button", id: "movies-dropdown", "data-toggle": "dropdown", "aria-haspopup": true, "aria-expanded": true }
+              .button.btn.btn-primary.dropdown-toggle{ type: "button", id: "movies-dropdown", "data-toggle": "dropdown", "aria-haspopup": true, "aria-expanded": true }
+                %i.fas.fa-question-circle
                 Tutorial movies
                 %span.caret
               %ul.dropdown-menu{ "aria-labelledby": "movies-dropdown" }
@@ -178,32 +188,8 @@
                     %button.btn.btn-primary.btn-lg.btn-block{ id: "download", type: "button" }
                       Download BED file
 
-    %footer.footer
-      .container
-        %row
-          .col-md-4.col-md-offset-4
-            %a{ href: "http://www.mic.med.kyoto-u.ac.jp/dddm_en/", target: "_blank" }
-              %img{ src: "/images/logo/kyoto_uni_logo.png", width: 120 }
-            %span.collaboration
-              in collaboration with
-            %a{ href: "https://dbcls.rois.ac.jp", target: "_blank" }
-              %img{ src: "/images/logo/dbcls_logo.png", width: 100 }
-        %row
-          .col-md-6.col-md-offset-3
-            %p.acknowledgement
-              This work is supported by
-              %a{ href: "https://sc.ddbj.nig.ac.jp/" }
-                NIG Supercomputer system
-              and
-              %a{ href: "https://biosciencedbc.jp" }
-                National Bioscience Database Center.
-            %p
-              Need help? Create an issue on
-              %a{ href: "https://github.com/inutano/chip-atlas/issues" }
-                github
-              or
-              %a{ href: "mailto:oki.shinya.3w@kyoto-u.ac.jp" }
-                contact us
+    != haml :footer
+
     /
       Bootstrap Core Javascript
       =========================

@@ -37,7 +37,7 @@ module PJ
       end
 
       def record_by_expid(exp_id)
-        records = self.where(:expid => exp_id)
+        records = self.where(:expid => exp_id).order(genome: :desc)
         records.map do |record|
           {
             :expid      => exp_id,
@@ -103,6 +103,10 @@ module PJ
           {
             id: "Bisulfite-Seq",
             label: "Bisulfite-Seq"
+          },
+          {
+            id: "Annotation tracks",
+            label: "Annotation tracks"
           }
         ]
       end
@@ -246,6 +250,10 @@ module PJ
       def number_of_experiments
         # Count number of entries but remove duplcation of multiple genome assemblies
         self.all.map{|n| n.expid }.uniq.size
+      end
+
+      def total_number_of_reads(ids)
+        self.where(expid: ids).map{|n| n.readInfo.split(',')[0].to_i }.inject(0){|result, number| result + number }
       end
     end
   end

@@ -35,19 +35,32 @@
             %span.icon-bar
           %a.navbar-brand{ :href => "#{app_root}" }
             %i.fas.fa-mountain
-            ChIP-Atlas
         #navbar.collapse.navbar-collapse
           %ul.nav.navbar-nav
             %li
-              %a{ :href => "#{app_root}/peak_browser" }= "Peak Browser"
+              %a{ :href => "#{app_root}/peak_browser" }
+                %i.fas.fa-glasses
+                Peak Browser
             %li
-              %a{ :href => "#{app_root}/target_genes" }= "Target Genes"
+              %a{ :href => "#{app_root}/enrichment_analysis" }
+                %i.fas.fa-hand-holding-heart
+                Enrichment Analysis
             %li
-              %a{ :href => "#{app_root}/colo" }= "Colocalization"
+              %a{ href: "#{app_root}/diff_analysis" }
+                %i.fas.fa-balance-scale-left
+                Diff Analysis
             %li
-              %a{ :href => "#{app_root}/enrichment_analysis" }= "Enrichment Analysis"
+              %a{ :href => "#{app_root}/target_genes" }
+                %i.fas.fa-bullseye
+                Target Genes
             %li
-              %a{ :href => "#{app_root}/publications" }= "Publications"
+              %a{ :href => "#{app_root}/colo" }
+                %i.fas.fa-compress-arrows-alt
+                Colocalization
+            %li
+              %a{ :href => "#{app_root}/publications" }
+                %i.fas.fa-book
+                Publications
             %li
               %a{ :href => "https://github.com/inutano/chip-atlas/wiki" }
                 %i.fab.fa-github
@@ -55,7 +68,7 @@
           %p.navbar-text.navbar-right
             %a{ href: "/search" }
               %i.fas.fa-search
-              Advanced
+              Search
           %form.navbar-form.navbar-right{ role: "search" }
             .form-group
               - id_example = ["GSM469863", "SRX018625"].sample(1)[0]
@@ -94,15 +107,20 @@
                       %li.divider
                     - else
                       %li
-                        %a{ href: "#{igv_linkout_base}/#{genome}/eachData/bs/methyl/#{@expid}.methyl.bw" }= "BigWig (Methylation rate)"
+                        - fname = URI.escape("Methylation rate (@ #{record[:clSubClass]}) #{@expid}")
+                        %a{ href: "#{igv_linkout_base}/#{genome}/eachData/bs/methyl/#{@expid}.methyl.bw&genome=#{genome}&name=#{fname}" }= "BigWig (Methylation rate)"
                       %li
-                        %a{ href: "#{igv_linkout_base}/#{genome}/eachData/bs/cover/#{@expid}.cover.bw" }= "BigWig (Coverage)"
+                        - fname = URI.escape("Coverage rate (@ #{record[:clSubClass]}) #{@expid}")
+                        %a{ href: "#{igv_linkout_base}/#{genome}/eachData/bs/cover/#{@expid}.cover.bw&genome=#{genome}&name=#{fname}" }= "BigWig (Coverage)"
                       %li
-                        %a{ href: "#{igv_linkout_base}/#{genome}/eachData/bs/hmr/BigBed/#{@expid}.hmr.bb" }= "Hypo MR"
+                        - fname = URI.escape("Hypo MR (@ #{record[:clSubClass]}) #{@expid}")
+                        %a{ href: "#{igv_linkout_base}/#{genome}/eachData/bs/hmr/BigBed/#{@expid}.hmr.bb&genome=#{genome}&name=#{fname}" }= "Hypo MR"
                       %li
-                        %a{ href: "#{igv_linkout_base}/#{genome}/eachData/bs/pmd/BigBed/#{@expid}.pmd.bb" }= "Partial MR"
+                        - fname = URI.escape("Partial MR (@ #{record[:clSubClass]}) #{@expid}")
+                        %a{ href: "#{igv_linkout_base}/#{genome}/eachData/bs/pmd/BigBed/#{@expid}.pmd.bb&genome=#{genome}&name=#{fname}" }= "Partial MR"
                       %li
-                        %a{ href: "#{igv_linkout_base}/#{genome}/eachData/bs/hypermr/BigBed/#{@expid}.hypermr.bb" }= "Hyper MR"
+                        - fname = URI.escape("Hyper MR (@ #{record[:clSubClass]}) #{@expid}")
+                        %a{ href: "#{igv_linkout_base}/#{genome}/eachData/bs/hypermr/BigBed/#{@expid}.hypermr.bb&genome=#{genome}&name=#{fname}" }= "Hyper MR"
                       %li.divider
 
                   %li.dropdown-header{ role: "presentation" }
@@ -287,14 +305,24 @@
                 %h2
                   .small= record[:genome]
                 %dl.dl-horizontal
-                  %dt{ style: 'white-space: normal;' }= "Number of total reads"
-                  %dd= readinfo[0]
-                  %dt{ style: 'white-space: normal;' }= "Reads aligned (%)"
-                  %dd= readinfo[1]
-                  %dt{ style: 'white-space: normal;' }= "Duplicates removed (%)"
-                  %dd= readinfo[2]
-                  %dt{ style: 'white-space: normal;' }= "Number of peaks"
-                  %dd= readinfo[3] + " (qval < 1E-05)"
+                  - if metadata[:agClass] != 'Bisulfite-Seq'
+                    %dt{ style: 'white-space: normal;' }= "Number of total reads"
+                    %dd= readinfo[0]
+                    %dt{ style: 'white-space: normal;' }= "Reads aligned (%)"
+                    %dd= readinfo[1]
+                    %dt{ style: 'white-space: normal;' }= "Duplicates removed (%)"
+                    %dd= readinfo[2]
+                    %dt{ style: 'white-space: normal;' }= "Number of peaks"
+                    %dd= readinfo[3] + " (qval < 1E-05)"
+                  - else
+                    %dt{ style: 'white-space: normal;' }= "Number of total reads"
+                    %dd= readinfo[0]
+                    %dt{ style: 'white-space: normal;' }= "Reads aligned (%)"
+                    %dd= readinfo[1]
+                    %dt{ style: 'white-space: normal;' }= "Coverage rate (×)"
+                    %dd= readinfo[2]
+                    %dt{ style: 'white-space: normal;' }= "Number of hyper MRs"
+                    %dd= readinfo[3] + " (qval < 1E-05)"
                 - if i != (records.size - 1)
                   %hr
 
@@ -310,32 +338,8 @@
             .panel-body
               .sequence_quality
 
-    %footer.footer
-      .container
-        %row
-          .col-md-4.col-md-offset-4
-            %a{ href: "http://www.mic.med.kyoto-u.ac.jp/dddm_en/", target: "_blank" }
-              %img{ src: "/images/logo/kyoto_uni_logo.png", width: 120 }
-            %span.collaboration
-              in collaboration with
-            %a{ href: "https://dbcls.rois.ac.jp", target: "_blank" }
-              %img{ src: "/images/logo/dbcls_logo.png", width: 100 }
-        %row
-          .col-md-6.col-md-offset-3
-            %p.acknowledgement
-              This work is supported by
-              %a{ href: "https://sc.ddbj.nig.ac.jp/" }
-                NIG Supercomputer system
-              and
-              %a{ href: "https://biosciencedbc.jp" }
-                National Bioscience Database Center.
-            %p
-              Need help? Create an issue on
-              %a{ href: "https://github.com/inutano/chip-atlas/issues" }
-                github
-              or
-              %a{ href: "mailto:oki.shinya.3w@kyoto-u.ac.jp" }
-                contact us
+    != haml :footer
+
     /
       Bootstrap Core Javascript
       =========================

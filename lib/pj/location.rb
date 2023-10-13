@@ -18,6 +18,23 @@ module PJ
       ".bed"
     end
 
+    def archive_url
+      case @condition["agClass"]
+      when "Annotation tracks"
+        archived_annotation_url
+      else
+        archived_bed_url
+      end
+    end
+
+    def archived_annotation_url
+      @condition["clClass"] = 'All cell types'
+      filename  = PJ::Bedfile.get_filename(@condition)
+      File.join(archive_base, "annotations", @genome, filename)
+    rescue NameError
+      nil
+    end
+
     def archived_bed_url
       filename  = PJ::Bedfile.get_filename(@condition)
       File.join(archive_base, @genome, "assembled", filename + fileformat)
@@ -30,6 +47,19 @@ module PJ
     end
 
     def igv_browsing_url
+      case @condition["agClass"]
+      when "Annotation tracks"
+        igv_browse_annotations
+      else
+        igv_browse_bedfile
+      end
+    end
+
+    def igv_browse_annotations
+      "#{igv_url}/load?genome=#{@genome}&file=#{archived_annotation_url}&name=#{PJ::Bedfile.get_trackname(@condition)}"
+    end
+
+    def igv_browse_bedfile
       "#{igv_url}/load?genome=#{@genome}&file=#{archived_bed_url}"
     end
 
