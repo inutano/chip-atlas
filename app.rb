@@ -309,6 +309,10 @@ class PeakJohn < Sinatra::Base
     haml :diff_analysis_result
   end
 
+  get "/diff_analysis_log" do
+    URI.open("https://chip-atlas.dbcls.jp/data/query/#{params[:id]}.log").read
+  end
+
   post "/diff_analysis_estimated_time" do
     # Memo: from Zou-san
     # X = Total # of reads

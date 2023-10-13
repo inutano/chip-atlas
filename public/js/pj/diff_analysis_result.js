@@ -61,18 +61,18 @@ const dateFormat = (date) => {
 
 const setEstFinish = (now, params) => {
   const calcm = params.calcm;
-  var calcTime;
+  let calcTime;
   switch (true) {
     case "-" == calcm: {
-      let calcTime = 0;
+      calcTime = 0;
       break;
     }
     case /mins$/.test(calcm): {
-      let calcTime = calcm.split(" ")[0];
+      calcTime = calcm.split(" ")[0];
       break;
     }
     case /hr$/.test(calcm): {
-      let calcTime = calcm.split(" ")[0] * 60;
+      calcTime = calcm.split(" ")[0] * 60;
       break;
     }
   }
@@ -94,12 +94,13 @@ const checkWabiStatus = (params) => {
     $.get("/wabi_chipatlas?id=" + reqId, (status) => {
       tdStatus.text(status);
       if (status == "finished") {
+        clearInterval(interval);
         tdStatus.css("color", "red");
         setResultALink(params);
-        clearInterval(interval);
+        showExecutionLog(reqId);
       } else if (status == "unavailable") {
-        alert("No response from the DDBJ supercomputer system: please note the result URL to access later. It is possible that your job has been interrupted by the system error, in that case you may need to run the analysis again.");
         clearInterval(interval);
+        alert("No response from the DDBJ supercomputer system: please note the result URL to access later. It is possible that your job has been interrupted by the system error, in that case you may need to run the analysis again.");
       }
     });
   }, 10000);
@@ -108,4 +109,14 @@ const checkWabiStatus = (params) => {
 const setResultALink = (params) => {
   $('a#view-on-igv').attr('href', params.localIgvUrl);
   $('a#download-result').attr('href', params.zipUrl);
+}
+
+const showExecutionLog = (reqId) => {
+  $.get("/diff_analysis_log?id=" + reqId, (logContent) => {
+    pasteExecutionLog(logContent)
+  });
+}
+
+const pasteExecutionLog = (logText) => {
+  $('.container#executionLog').append('<h3>Execution Log</h3><pre><code>' + logText + '<code></pre>');
 }
