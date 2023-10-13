@@ -7,4 +7,5 @@ services:
       - ${PWD}:/app
     ports:
       - 9292:9292
-    command: bash -c "apt-get update -y && apt-get install -y libffi-dev build-essential libpq-dev libsqlite3-dev && echo \"Setup finished\" && tail -f /dev/null"
+    command: bash -c "apt-get update -y && apt-get install -y lftp libffi-dev build-essential libpq-dev libsqlite3-dev && echo \"Setup finished\" && tail -f /dev/null"
+
