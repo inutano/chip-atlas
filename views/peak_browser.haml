@@ -16,7 +16,9 @@
     %link{ href: "#{app_root}/css/typeaheadjs.css", rel: "stylesheet" }
 
     // Custom style for this website
-    %link{ href: "#{app_root}/style.css", rel: "stylesheet"}
+    %link{ :href => "#{app_root}/style.css", :rel => "stylesheet"}
+    %link{ :href => "#{app_root}/css/fontawesome.css", :rel => "stylesheet"}
+    %link{ :href => "#{app_root}/css/solid.css", :rel => "stylesheet"}
 
     // GA
     %script{ async: true, src: "https://www.googletagmanager.com/gtag/js?id=UA-117599014-1" }
@@ -201,4 +203,3 @@
     %script{ src: "#{app_root}/js/typeahead.bundle.js" }
     %script{ src: "#{app_root}/js/pj/pj.js" }
     %script{ src: "#{app_root}/js/pj/peak_browser.js" }
-    %script{ crossorigin: "anonymous", src: "https://kit.fontawesome.com/9c24e0099d.js" }
