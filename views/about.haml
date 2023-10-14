@@ -195,7 +195,7 @@
 
       .row
         .col-md-10.col-md-offset-2
-          ~ markdown(:updates, layout: false, fenced_code_blocks: true, autolink: true)
+          != markdown(:updates, layout: false, fenced_code_blocks: true, autolink: true)
 
     != haml :footer
 

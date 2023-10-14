@@ -80,7 +80,7 @@
     .container
       .row
         .col-md-8.col-md-offset-2.publication_list
-          ~ markdown(:publications, layout: false, fenced_code_blocks: true, autolink: true)
+          != markdown(:publications, layout: false, fenced_code_blocks: true, autolink: true)
 
     != haml :footer
 
