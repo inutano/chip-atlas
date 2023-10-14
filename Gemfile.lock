@@ -23,7 +23,7 @@ GEM
     connection_pool (2.4.1)
     drb (2.1.1)
       ruby2_keywords
-    ffi (1.16.3)
+    google-protobuf (3.24.4-aarch64-linux)
     haml (6.2.3)
       temple (>= 0.8.2)
       thor
@@ -43,19 +43,11 @@ GEM
       rack (~> 2.2, >= 2.2.4)
     raindrops (0.20.1)
     rake (13.0.6)
-    rb-fsevent (0.11.2)
-    rb-inotify (0.10.1)
-      ffi (~> 1.0)
     redcarpet (3.6.0)
     ruby2_keywords (0.0.5)
     rubyzip (2.3.2)
-    sass (3.7.4)
-      sass-listen (~> 4.0.0)
-    sass-listen (4.0.0)
-      rb-fsevent (~> 0.9, >= 0.9.4)
-      rb-inotify (~> 0.9, >= 0.9.7)
-    shotgun (0.9.2)
-      rack (>= 1.0)
+    sass-embedded (1.69.3-aarch64-linux-gnu)
+      google-protobuf (~> 3.23)
     sinatra (3.1.0)
       mustermann (~> 3.0)
       rack (~> 2.2, >= 2.2.4)
@@ -74,6 +66,7 @@ GEM
     unicorn (6.1.0)
       kgio (~> 2.6)
       raindrops (~> 0.7)
+    webrick (1.8.1)
 
 PLATFORMS
   aarch64-linux
@@ -86,12 +79,12 @@ DEPENDENCIES
   rake
   redcarpet
   rubyzip
-  sass
-  shotgun
+  sass-embedded
   sinatra
   sinatra-activerecord
   sqlite3
   unicorn
+  webrick
 
 BUNDLED WITH
    2.4.10

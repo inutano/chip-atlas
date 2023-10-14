@@ -27,7 +27,7 @@ module PJ
     end
 
     def get_uid
-      uid = JSON.load(open(esearch_url).read)["esearchresult"]["idlist"]
+      uid = JSON.load(URI.open(esearch_url).read)["esearchresult"]["idlist"]
       if uid.size == 1
         uid.first
       end
@@ -41,7 +41,7 @@ module PJ
 
     def ncbi_experiment_data
       if @uid
-        Nokogiri::XML(open(efetch_url))
+        Nokogiri::XML(URI.open(efetch_url))
       else
         nil
       end

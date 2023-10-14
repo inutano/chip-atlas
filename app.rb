@@ -4,19 +4,16 @@
 $LOAD_PATH << __dir__
 $LOAD_PATH << File.join(__dir__, "lib")
 
-require 'sinatra'
-require 'sinatra/activerecord'
-require 'haml'
-require 'sass'
 require 'open-uri'
 require 'timeout'
 require 'net/http'
 require 'uri'
 require 'json'
-require 'nokogiri'
-require 'lib/pj'
 require 'fileutils'
-require 'redcarpet'
+require 'bundler'
+Bundler.require
+require 'lib/pj'
+
 
 ENV["DATABASE_URL"] ||= "sqlite3:database.sqlite"
 
@@ -31,7 +28,7 @@ class PeakJohn < Sinatra::Base
 
     def wabi_endpoint_status
       Timeout.timeout(3) do
-        open(settings.wabi_endpoint).read
+        URI.open(settings.wabi_endpoint).read
       end
     rescue OpenURI::HTTPError
       nil
@@ -50,8 +47,8 @@ class PeakJohn < Sinatra::Base
       set :colo_analysis, PJ::Analysis.results(:colo)
       set :target_genes_analysis, PJ::Analysis.results(:target_genes)
       set :bedsizes, PJ::Bedsize.dump
-      set :experiment_list, JSON.load(open("https://chip-atlas.dbcls.jp/data/metadata/ExperimentList.json"))
-      set :experiment_list_adv, JSON.load(open("https://chip-atlas.dbcls.jp/data/metadata/ExperimentList_adv.json"))
+      set :experiment_list, JSON.load(URI.open("https://chip-atlas.dbcls.jp/data/metadata/ExperimentList.json"))
+      set :experiment_list_adv, JSON.load(URI.open("https://chip-atlas.dbcls.jp/data/metadata/ExperimentList_adv.json"))
       set :gsm_to_srx, Hash[settings.experiment_list["data"].map{|a| [a[2], a[0]] }]
       set :wabi_endpoint, "https://ddbj.nig.ac.jp/wabi/chipatlas/"
     rescue ActiveRecord::StatementInvalid
@@ -74,7 +71,7 @@ class PeakJohn < Sinatra::Base
   end
 
   after do
-    ActiveRecord::Base.clear_active_connections!
+    ActiveRecord::Base.connection_handler.clear_active_connections!
   end
 
   get "/:source.css" do
@@ -371,7 +368,7 @@ class PeakJohn < Sinatra::Base
   get "/wabi_chipatlas" do
     url = "http://ddbj.nig.ac.jp/wabi/chipatlas/" + params[:id] + "?format=json"
     if Net::HTTP.get_response(URI.parse(url)).code == "200"
-      JSON.load(open(url).read)["status"]
+      JSON.load(URI.open(url).read)["status"]
     else
       "Error"
     end
