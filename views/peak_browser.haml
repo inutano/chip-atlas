@@ -135,7 +135,8 @@
                     .panel.panel-default
                       - class_id = "#{genome}agClass"
                       .panel-heading{ id: "heading-#{class_id}" }
-                        %h4.panel-title= "1. Experiment type"
+                        %h4.panel-title
+                          1. Track type class
                       .panel-body
                         %select.form-control.classSelect.agClassSelect{ id: "#{class_id}", size: 8, name: "antigen" }
 
@@ -143,7 +144,7 @@
                       - class_id = "#{genome}agSubClass"
                       .panel-heading{ id: "heading-#{class_id}" }
                         %h4.panel-title
-                          ChIP Antigen (optional)
+                          Track type (optional)
                       .panel-body
                         .panel-message{ id: class_id }
                         // input box for typeahead
