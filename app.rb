@@ -368,9 +368,13 @@ class PeakJohn < Sinatra::Base
   get "/wabi_chipatlas" do
     url = "http://ddbj.nig.ac.jp/wabi/chipatlas/" + params[:id] + "?format=json"
     if Net::HTTP.get_response(URI.parse(url)).code == "200"
-      JSON.load(URI.open(url).read)["status"]
+      if !URI.open(url).read.empty?
+        "finished"
+      else
+        "running"
+      end
     else
-      "Error"
+      "queued"
     end
   end
 
