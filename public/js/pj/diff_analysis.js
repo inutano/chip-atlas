@@ -26,7 +26,7 @@ const putDefaultTitles = () => {
 
 // Change to empty textarea
 const emptyDataSet = () => {
-  $('input[name="diffOrDMR"]').change(function(){
+  $('input#diffOrDMR').change(function(){
     const genome = genomeSelected();
     $('textarea#' + genome + 'DataSetA').val('');
     $('textarea#' + genome + 'DataSetB').val('');
@@ -40,7 +40,7 @@ const putExampleData = () => {
     event.preventDefault();
     event.stopPropagation();
     const genome = genomeSelected();
-    const expType = $('input[name="diffOrDMR"]:checked').val();
+    const expType = $('input[name="' + genome + 'DiffOrDMR"]:checked').val();
     let set = $(this).attr("name");
     let example = diffExampleData[genome][expType][set].split(",").join("\n");
     switch (set) {
@@ -179,7 +179,7 @@ const submitDMR = async () => {
 
 const retrievePostData = () => {
   const genome = genomeSelected();
-  const expTypeVal = $('input[name="diffOrDMR"]:checked').val();
+  const expTypeVal = $('input[name="' + genome + 'DiffOrDMR"]:checked').val();
   let expTypeClass;
   switch (expTypeVal) {
     case 'diff':
@@ -268,7 +268,7 @@ const calculateEstimatedTime = () => {
   const idListA = $('textarea#' + genome + 'DataSetA').val().split(/\r?\n/);
   const idListB = $('textarea#' + genome + 'DataSetB').val().split(/\r?\n/);
   const data = {
-    analysis: $('input[name="diffOrDMR"]:checked').val(),
+    analysis: $('input[name="' + genome + 'DiffOrDMR"]:checked').val(),
     ids: idListA.concat(idListB).filter(item => item !== "")
   }
 

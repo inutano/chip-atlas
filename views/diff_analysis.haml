@@ -127,11 +127,11 @@
                       %form
                         .checkbox.panel-input
                           %label
-                            %input{ type: "radio", id: "#{genome}ExpTypeDiff", name: "diffOrDMR", value: "diff", checked: "checked" }
+                            %input{ type: "radio", id: "#{genome}ExpTypeDiff", class: "diffOrDMR", name: "#{genome}DiffOrDMR", value: "diff", checked: "checked" }
                             ChIP/ATAC/DNase-seq
                         .checkbox.panel-input
                           %label
-                            %input{ type: "radio", id: "#{genome}ExpTypeDMR", name: "diffOrDMR", value: "DMR" }
+                            %input{ type: "radio", id: "#{genome}ExpTypeDMR", class: "diffOrDMR", name: "#{genome}DiffOrDMR", value: "DMR" }
                             Bisulfite-Seq
 
                 .col-md-3
