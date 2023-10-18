@@ -276,7 +276,11 @@ const generateExperimentTypeOptions = async () => {
       .attr("value", id)
       .append(label + ' (' + count + ')');
     if (i == 0) option.attr("selected", true);
-    option.appendTo(select);
+
+    // don't add annotation tracks
+    if (label != 'Annotation tracks') {
+      option.appendTo(select);
+    }
   });
 
   let numRefResponse = await fetch('/data/number_of_lines.json');
