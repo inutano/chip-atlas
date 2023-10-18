@@ -56,16 +56,28 @@ const generateSampleTypeOptions = async () => {
   let response = await fetch('/data/sample_types?genome=' + genome + '&agClass=' + agSelected);
   let sampleList = await response.json();
 
-  sampleList.forEach((experiment, i) => {
-    let id = experiment['id'];
-    let label = experiment['label'];
-    let count = experiment['count'];
-    let option = $('<option>')
-                   .attr("value", id)
-                   .append(label + ' (' + count + ')');
-    if (i==0) option.attr("selected", true);
-    option.appendTo(select);
-  });
+  switch (agSelected) {
+    case 'Annotation tracks':
+      let option = $('<option>')
+                     .attr("value", 'NA')
+                     .attr("selected", true)
+                     .append('NA');
+      option.appendTo(select);
+      break;
+    default:
+      sampleList.forEach((experiment, i) => {
+        let id = experiment['id'];
+        let label = experiment['label'];
+        let count = experiment['count'];
+        let option = $('<option>')
+                       .attr("value", id)
+                       .append(label + ' (' + count + ')');
+        if (i==0) option.attr("selected", true);
+
+        option.appendTo(select);
+      });
+  }
+
 }
 
 /*
@@ -106,20 +118,24 @@ const generateChIPAntigenOptions = async () => {
         switch (agSelected) {
           case 'Annotation tracks':
             if (i==0) {
+              // option.append(label).attr("selected", true);
+            } else if (i==1) {
               option.append(label).attr("selected", true);
+              option.appendTo(select);
             } else {
               option.append(label);
+              option.appendTo(select);
             }
             break;
           default:
             if (i==0) {
               option.append(label).attr("selected", true);
+              option.appendTo(select);
             } else {
               option.append(label + ' (' + count + ')');
+              option.appendTo(select);
             }
         }
-
-        option.appendTo(select);
       });
       activateTypeAhead(genome, 'ag', agList);
   }
@@ -142,13 +158,22 @@ const generateCellTypeOptions = async () => {
     let count = experiment['count'];
     let option = $('<option>')
                    .attr("value", id)
-    if (i==0) {
-      option.append(label).attr("selected", true);
-    } else {
-      option.append(label + ' (' + count + ')');
-    }
 
-    option.appendTo(select);
+    switch (agSelected) {
+      case 'Annotation tracks':
+        label = 'NA';
+        option.append(label).attr("selected", true);
+        option.appendTo(select);
+        break;
+      default:
+        if (i==0) {
+          option.append(label).attr("selected", true);
+          option.appendTo(select);
+        } else {
+          option.append(label + ' (' + count + ')');
+          option.appendTo(select);
+        }
+    }
 
   });
   activateTypeAhead(genome, 'cl', clList);
