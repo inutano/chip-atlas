@@ -365,23 +365,20 @@ class PeakJohn < Sinatra::Base
   # DDBJ Supercomputer system WABI API
   #
 
-  get "/wabi_chipatlas" do
-    url = "http://ddbj.nig.ac.jp/wabi/chipatlas/" + params[:id] + "?format=json"
-    if Net::HTTP.get_response(URI.parse(url)).code == "200"
-      if !URI.open(url).read.empty?
-        "finished"
-      else
-        "running"
-      end
-    else
-      "queued"
-    end
-  end
-
   get "/wabi_endpoint_status" do
     wabi_endpoint_status
   end
 
+  # Checking the final html output rather than using Wabi API which is too slow due to its huge job history
+  get "/wabi_chipatlas" do
+    if Net::HTTP.get_response(URI.parse("http://ddbj.nig.ac.jp/wabi/chipatlas/" + params[:id] + "?info=result&format=html")).code == "200"
+      "finished"
+    else
+      "running"
+    end
+  end
+
+  # Post a job to DDBJ-SC via wabi API
   post "/wabi_chipatlas" do
     request.body.rewind
     request_body = request.body.read
