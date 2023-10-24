@@ -56,7 +56,7 @@ module PJ
     end
 
     def igv_browse_annotations
-      "#{igv_url}/load?genome=#{@genome}&file=#{archived_annotation_url}&name=#{PJ::Bedfile.get_trackname(@condition).gsub(',','')}"
+      "#{igv_url}/load?genome=#{@genome}&file=#{archived_annotation_url}&name=#{PJ::Bedfile.get_trackname(@condition).gsub(', ','_')}"
     end
 
     def igv_browse_bedfile
