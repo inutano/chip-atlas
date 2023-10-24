@@ -165,18 +165,17 @@ window.onload = async () => {
       generateExperimentTypeOptions();
       generateSampleTypeOptions();
       putDefaultTitles();
+      generateQvalOptions();
     });
     // put file content into the textarea
     $('input#' + genome + 'UserDataFile, input#' + genome + 'ComparedWithFile').on('change', function(event) {
       var fileId = $(this).attr('id');
       putFile2Textarea(fileId, event, timeCalculate.bind(this, numRef));
     });
-    $('a[data-toggle="tab"]').on('shown.bs.tab', function(e) {
-      var activatedTab = e.target;
-      var previousTab = e.relatedTarget;
-      // Append qvalue options
-      generateQvalOptions();
-    });
+    // $('a[data-toggle="tab"]').on('shown.bs.tab', function(e) {
+    //   var activatedTab = e.target;
+    //   var previousTab = e.relatedTarget;
+    // });
   });
 
   // Q & A
