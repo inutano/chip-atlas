@@ -26,7 +26,7 @@ const putDefaultTitles = () => {
 
 // Change to empty textarea
 const emptyDataSet = () => {
-  $('input#diffOrDMR').change(function(){
+  $('input.diffOrDMR').change(function() {
     const genome = genomeSelected();
     $('textarea#' + genome + 'DataSetA').val('');
     $('textarea#' + genome + 'DataSetB').val('');
