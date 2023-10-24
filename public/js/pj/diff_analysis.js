@@ -252,8 +252,27 @@ const setGenomePanel = async () => {
       event.preventDefault();
       $(this).tab('show');
       putDefaultTitles();
+      removeExampleIfCE();
     });
   });
+}
+
+const removeExampleIfCE = async () => {
+  const genome = genomeSelected();
+  switch (genome) {
+    case 'ce10':
+      $('textarea#ce10DataSetA').attr('placeholder', '');
+      $('textarea#ce10DataSetB').attr('placeholder', '');
+      $('a.dataExample#ce10dataSetA').html('no data available');
+      $('a.dataExample#ce10dataSetB').html('no data available');
+      break;
+    case 'ce11':
+      $('textarea#ce11ataSetA').attr('placeholder', '');
+      $('textarea#ce11DataSetB').attr('placeholder', '');
+      $('a.dataExample#ce11dataSetA').html('no data available');
+      $('a.dataExample#ce11dataSetB').html('no data available');
+      break;
+  }
 }
 
 // diff analysis time calculation
