@@ -4,6 +4,7 @@ window.onload = async () => {
   submitDMR();
   // Events
   putExampleData();
+  switchDataType();
   emptyDataSet();
   setGenomePanel();
   estimateTimeOnEdit();
@@ -25,13 +26,38 @@ const putDefaultTitles = () => {
 }
 
 // Change to empty textarea
-const emptyDataSet = () => {
+const switchDataType = () => {
   $('input.diffOrDMR').change(function() {
-    const genome = genomeSelected();
-    $('textarea#' + genome + 'DataSetA').val('');
-    $('textarea#' + genome + 'DataSetB').val('');
-    $('a#' + genome + '-estimated-run-time').html('-');
+    eraseTextarea();
+    removeExampleIfCEBisulfite();
   });
+}
+
+const eraseTextarea = () => {
+  const genome = genomeSelected();
+  $('textarea#' + genome + 'DataSetA').val('');
+  $('textarea#' + genome + 'DataSetB').val('');
+  $('a#' + genome + '-estimated-run-time').html('-');
+}
+
+const removeExampleIfCEBisulfite = () => {
+  const genome = genomeSelected();
+  if ($('input#' + genome + 'ExpTypeDMR').prop('checked')) {
+    switch (genome) {
+      case 'ce10':
+        $('textarea#ce10DataSetA').attr('placeholder', '');
+        $('textarea#ce10DataSetB').attr('placeholder', '');
+        $('a.dataExample#ce10dataSetA').replaceWith('<p>no public data available</p>')
+        $('a.dataExample#ce10dataSetB').replaceWith('<p>no public data available</p>')
+        break;
+      case 'ce11':
+        $('textarea#ce11DataSetA').attr('placeholder', '');
+        $('textarea#ce11DataSetB').attr('placeholder', '');
+        $('a.dataExample#ce11dataSetA').replaceWith('<p>no public data available</p>')
+        $('a.dataExample#ce11dataSetB').replaceWith('<p>no public data available</p>')
+        break;
+    }
+  }
 }
 
 // Example data
@@ -252,27 +278,8 @@ const setGenomePanel = async () => {
       event.preventDefault();
       $(this).tab('show');
       putDefaultTitles();
-      removeExampleIfCE();
     });
   });
-}
-
-const removeExampleIfCE = async () => {
-  const genome = genomeSelected();
-  switch (genome) {
-    case 'ce10':
-      $('textarea#ce10DataSetA').attr('placeholder', '');
-      $('textarea#ce10DataSetB').attr('placeholder', '');
-      $('a.dataExample#ce10dataSetA').html('no data available');
-      $('a.dataExample#ce10dataSetB').html('no data available');
-      break;
-    case 'ce11':
-      $('textarea#ce11ataSetA').attr('placeholder', '');
-      $('textarea#ce11DataSetB').attr('placeholder', '');
-      $('a.dataExample#ce11dataSetA').html('no data available');
-      $('a.dataExample#ce11dataSetB').html('no data available');
-      break;
-  }
 }
 
 // diff analysis time calculation
