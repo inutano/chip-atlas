@@ -165,18 +165,17 @@ window.onload = async () => {
       generateExperimentTypeOptions();
       generateSampleTypeOptions();
       putDefaultTitles();
+      generateQvalOptions();
     });
     // put file content into the textarea
     $('input#' + genome + 'UserDataFile, input#' + genome + 'ComparedWithFile').on('change', function(event) {
       var fileId = $(this).attr('id');
       putFile2Textarea(fileId, event, timeCalculate.bind(this, numRef));
     });
-    $('a[data-toggle="tab"]').on('shown.bs.tab', function(e) {
-      var activatedTab = e.target;
-      var previousTab = e.relatedTarget;
-      // Append qvalue options
-      generateQvalOptions();
-    });
+    // $('a[data-toggle="tab"]').on('shown.bs.tab', function(e) {
+    //   var activatedTab = e.target;
+    //   var previousTab = e.relatedTarget;
+    // });
   });
 
   // Q & A
@@ -276,7 +275,11 @@ const generateExperimentTypeOptions = async () => {
       .attr("value", id)
       .append(label + ' (' + count + ')');
     if (i == 0) option.attr("selected", true);
-    option.appendTo(select);
+
+    // don't add annotation tracks
+    if (label != 'Annotation tracks') {
+      option.appendTo(select);
+    }
   });
 
   let numRefResponse = await fetch('/data/number_of_lines.json');

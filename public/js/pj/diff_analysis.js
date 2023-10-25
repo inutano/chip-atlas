@@ -4,7 +4,7 @@ window.onload = async () => {
   submitDMR();
   // Events
   putExampleData();
-  emptyDataSet();
+  switchDataType();
   setGenomePanel();
   estimateTimeOnEdit();
   alertHelpMessage();
@@ -25,13 +25,38 @@ const putDefaultTitles = () => {
 }
 
 // Change to empty textarea
-const emptyDataSet = () => {
-  $('input[name="diffOrDMR"]').change(function(){
-    const genome = genomeSelected();
-    $('textarea#' + genome + 'DataSetA').val('');
-    $('textarea#' + genome + 'DataSetB').val('');
-    $('a#' + genome + '-estimated-run-time').html('-');
+const switchDataType = () => {
+  $('input.diffOrDMR').change(function() {
+    eraseTextarea();
+    removeExampleIfCEBisulfite();
   });
+}
+
+const eraseTextarea = () => {
+  const genome = genomeSelected();
+  $('textarea#' + genome + 'DataSetA').val('');
+  $('textarea#' + genome + 'DataSetB').val('');
+  $('a#' + genome + '-estimated-run-time').html('-');
+}
+
+const removeExampleIfCEBisulfite = () => {
+  const genome = genomeSelected();
+  if ($('input#' + genome + 'ExpTypeDMR').prop('checked')) {
+    switch (genome) {
+      case 'ce10':
+        $('textarea#ce10DataSetA').attr('placeholder', '');
+        $('textarea#ce10DataSetB').attr('placeholder', '');
+        $('a.dataExample#ce10dataSetA').replaceWith('<p>no public data available</p>')
+        $('a.dataExample#ce10dataSetB').replaceWith('<p>no public data available</p>')
+        break;
+      case 'ce11':
+        $('textarea#ce11DataSetA').attr('placeholder', '');
+        $('textarea#ce11DataSetB').attr('placeholder', '');
+        $('a.dataExample#ce11dataSetA').replaceWith('<p>no public data available</p>')
+        $('a.dataExample#ce11dataSetB').replaceWith('<p>no public data available</p>')
+        break;
+    }
+  }
 }
 
 // Example data
@@ -40,7 +65,7 @@ const putExampleData = () => {
     event.preventDefault();
     event.stopPropagation();
     const genome = genomeSelected();
-    const expType = $('input[name="diffOrDMR"]:checked').val();
+    const expType = $('input[name="' + genome + 'DiffOrDMR"]:checked').val();
     let set = $(this).attr("name");
     let example = diffExampleData[genome][expType][set].split(",").join("\n");
     switch (set) {
@@ -179,7 +204,7 @@ const submitDMR = async () => {
 
 const retrievePostData = () => {
   const genome = genomeSelected();
-  const expTypeVal = $('input[name="diffOrDMR"]:checked').val();
+  const expTypeVal = $('input[name="' + genome + 'DiffOrDMR"]:checked').val();
   let expTypeClass;
   switch (expTypeVal) {
     case 'diff':
@@ -268,7 +293,7 @@ const calculateEstimatedTime = () => {
   const idListA = $('textarea#' + genome + 'DataSetA').val().split(/\r?\n/);
   const idListB = $('textarea#' + genome + 'DataSetB').val().split(/\r?\n/);
   const data = {
-    analysis: $('input[name="diffOrDMR"]:checked').val(),
+    analysis: $('input[name="' + genome + 'DiffOrDMR"]:checked').val(),
     ids: idListA.concat(idListB).filter(item => item !== "")
   }
 

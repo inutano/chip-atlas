@@ -36,7 +36,7 @@ module PJ
       def fetch(dest_fpath)
         fname = dest_fpath.split("/").last
         url = nbdc_file_url(fname)
-        content = open(url).read
+        content = URI.open(url).read
         open(dest_fpath,"w"){|f| f.puts(content) }
       end
     end

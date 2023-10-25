@@ -16,7 +16,10 @@
     %link{ href: "#{app_root}/css/typeaheadjs.css", rel: "stylesheet" }
 
     // Custom style for this website
-    %link{ href: "#{app_root}/style.css", rel: "stylesheet"}
+    %link{ :href => "#{app_root}/style.css", :rel => "stylesheet"}
+    %link{ :href => "#{app_root}/css/fontawesome.css", :rel => "stylesheet"}
+    %link{ :href => "#{app_root}/css/brands.css", :rel => "stylesheet"}
+    %link{ :href => "#{app_root}/css/solid.css", :rel => "stylesheet"}
 
     // GA
     %script{ async: true, src: "https://www.googletagmanager.com/gtag/js?id=UA-117599014-1" }
@@ -132,7 +135,8 @@
                     .panel.panel-default
                       - class_id = "#{genome}agClass"
                       .panel-heading{ id: "heading-#{class_id}" }
-                        %h4.panel-title= "1. Experiment type"
+                        %h4.panel-title
+                          1. Track type class
                       .panel-body
                         %select.form-control.classSelect.agClassSelect{ id: "#{class_id}", size: 8, name: "antigen" }
 
@@ -140,7 +144,7 @@
                       - class_id = "#{genome}agSubClass"
                       .panel-heading{ id: "heading-#{class_id}" }
                         %h4.panel-title
-                          ChIP Antigen (optional)
+                          Track type (optional)
                       .panel-body
                         .panel-message{ id: class_id }
                         // input box for typeahead
@@ -196,10 +200,8 @@
     %link{ href: "#{app_root}/css/flexselect.css", rel: "stylesheet", type: "text/css", media: "screen" }
     %script{ src: "#{app_root}/js/jquery.min.js" }
     %script{ src: "#{app_root}/js/bootstrap.min.js" }
-    %script{ src: "#{app_root}/js/ie10-viewport-bug-workaround.js" }
     %script{ src: "#{app_root}/js/liquidmetal.js" }
     %script{ src: "#{app_root}/js/jquery.flexselect.js" }
     %script{ src: "#{app_root}/js/typeahead.bundle.js" }
     %script{ src: "#{app_root}/js/pj/pj.js" }
     %script{ src: "#{app_root}/js/pj/peak_browser.js" }
-    %script{ crossorigin: "anonymous", src: "https://kit.fontawesome.com/9c24e0099d.js" }

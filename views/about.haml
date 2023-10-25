@@ -15,6 +15,9 @@
 
     // Custom style for this website
     %link{ :href => "#{app_root}/style.css", :rel => "stylesheet"}
+    %link{ :href => "#{app_root}/css/fontawesome.css", :rel => "stylesheet"}
+    %link{ :href => "#{app_root}/css/brands.css", :rel => "stylesheet"}
+    %link{ :href => "#{app_root}/css/solid.css", :rel => "stylesheet"}
 
     // GA
     %script{:async => true, :src => "https://www.googletagmanager.com/gtag/js?id=UA-117599014-1"}
@@ -83,7 +86,7 @@
           %i.fas.fa-mountain
           ChIP-Atlas
         %p
-          A data-mining suite for exploring epigenomic landscapes by fully integrating ChIP-seq, ATAC-seq and Bisulfite-seq data
+          A data-mining suite for exploring epigenomic landscapes by fully integrating #{@number_of_experiments} ChIP-seq, ATAC-seq and Bisulfite-seq experiments.
 
       .row.align-height
         .col-md-4
@@ -195,7 +198,7 @@
 
       .row
         .col-md-10.col-md-offset-2
-          ~ markdown(:updates, layout: false, fenced_code_blocks: true, autolink: true)
+          != markdown(:updates, layout: false, fenced_code_blocks: true, autolink: true)
 
     != haml :footer
 
@@ -204,6 +207,4 @@
       =========================
     %script{ :src => "#{app_root}/js/jquery.min.js" }
     %script{ :src => "#{app_root}/js/bootstrap.min.js" }
-    %script{ :src => "#{app_root}/js/ie10-viewport-bug-workaround.js" }
     %script{ :src => "#{app_root}/js/pj/pj.js" }
-    %script{ :crossorigin => "anonymous", :src => "https://kit.fontawesome.com/9c24e0099d.js" }

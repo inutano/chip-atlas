@@ -15,7 +15,10 @@
     %link{ href: "#{app_root}/css/bootstrap.min.css", rel: "stylesheet" }
 
     // Custom style for this website
-    %link{ href: "#{app_root}/style.css", rel: "stylesheet"}
+    %link{ :href => "#{app_root}/style.css", :rel => "stylesheet"}
+    %link{ :href => "#{app_root}/css/fontawesome.css", :rel => "stylesheet"}
+    %link{ :href => "#{app_root}/css/brands.css", :rel => "stylesheet"}
+    %link{ :href => "#{app_root}/css/solid.css", :rel => "stylesheet"}
 
     // GA
     %script{ async: true, src: "https://www.googletagmanager.com/gtag/js?id=UA-117599014-1" }
@@ -124,11 +127,11 @@
                       %form
                         .checkbox.panel-input
                           %label
-                            %input{ type: "radio", id: "#{genome}ExpTypeDiff", name: "diffOrDMR", value: "diff", checked: "checked" }
+                            %input{ type: "radio", id: "#{genome}ExpTypeDiff", class: "diffOrDMR", name: "#{genome}DiffOrDMR", value: "diff", checked: "checked" }
                             ChIP/ATAC/DNase-seq
                         .checkbox.panel-input
                           %label
-                            %input{ type: "radio", id: "#{genome}ExpTypeDMR", name: "diffOrDMR", value: "DMR" }
+                            %input{ type: "radio", id: "#{genome}ExpTypeDMR", class: "diffOrDMR", name: "#{genome}DiffOrDMR", value: "DMR" }
                             Bisulfite-Seq
 
                 .col-md-3
@@ -213,7 +216,6 @@
       =========================
     %script{ src: "#{app_root}/js/jquery.min.js" }
     %script{ src: "#{app_root}/js/bootstrap.min.js" }
-    %script{ src: "#{app_root}/js/ie10-viewport-bug-workaround.js" }
     %script{ src: "#{app_root}/js/pj/pj.js" }
     %script{ type: "application/json", id: "ea_params" }
       :plain
@@ -224,4 +226,3 @@
           "genesetB": "#{@genesetB}"
         }
     %script{ src: "#{app_root}/js/pj/diff_analysis.js" }
-    %script{ crossorigin: "anonymous", src: "https://kit.fontawesome.com/9c24e0099d.js" }

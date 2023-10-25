@@ -1,3 +1,4 @@
+# bundle exe unicorn -c unicorn.rb -D
 @dir = File.expand_path(__dir__)
 
 worker_processes 2
