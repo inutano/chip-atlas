@@ -99,7 +99,7 @@
                   - igv_linkout_base = "http://localhost:60151/load?file=https://chip-atlas.dbcls.jp/data"
                   - records.each_with_index do |record, i|
                     - genome = record[:genome]
-                    - fname = URI.encode_www_form_component("#{record[:agSubClass]} (@ #{record[:clSubClass]}) #{@expid}").gsub(", ","_")
+                    - fname = URI.encode_www_form_component("#{record[:agSubClass]} (@ #{record[:clSubClass]}) #{@expid}".gsub(", ","_"))
 
                     %li.dropdown-header{ role: "presentation" }= "For #{genome}"
                     - if metadata[:agClass] != 'Bisulfite-Seq'
@@ -111,23 +111,23 @@
                       %li.divider
                     - else
                       %li
-                        - fname = URI.encode_www_form_component("Methylation rate (@ #{record[:clSubClass]}) #{@expid}").gsub(", ","_")
+                        - fname = URI.encode_www_form_component("Methylation rate (@ #{record[:clSubClass]}) #{@expid}".gsub(", ","_"))
 
                         %a{ href: "#{igv_linkout_base}/#{genome}/eachData/bs/methyl/#{@expid}.methyl.bw&genome=#{genome}&name=#{fname}" }= "BigWig (Methylation rate)"
                       %li
-                        - fname = URI.encode_www_form_component("Coverage rate (@ #{record[:clSubClass]}) #{@expid}").gsub(", ","_")
+                        - fname = URI.encode_www_form_component("Coverage rate (@ #{record[:clSubClass]}) #{@expid}".gsub(", ","_"))
 
                         %a{ href: "#{igv_linkout_base}/#{genome}/eachData/bs/cover/#{@expid}.cover.bw&genome=#{genome}&name=#{fname}" }= "BigWig (Coverage)"
                       %li
-                        - fname = URI.encode_www_form_component("Hypo MR (@ #{record[:clSubClass]}) #{@expid}").gsub(", ","_")
+                        - fname = URI.encode_www_form_component("Hypo MR (@ #{record[:clSubClass]}) #{@expid}".gsub(", ","_"))
 
                         %a{ href: "#{igv_linkout_base}/#{genome}/eachData/bs/hmr/BigBed/#{@expid}.hmr.bb&genome=#{genome}&name=#{fname}" }= "Hypo MR"
                       %li
-                        - fname = URI.encode_www_form_component("Partial MR (@ #{record[:clSubClass]}) #{@expid}").gsub(", ","_")
+                        - fname = URI.encode_www_form_component("Partial MR (@ #{record[:clSubClass]}) #{@expid}".gsub(", ","_"))
 
                         %a{ href: "#{igv_linkout_base}/#{genome}/eachData/bs/pmd/BigBed/#{@expid}.pmd.bb&genome=#{genome}&name=#{fname}" }= "Partial MR"
                       %li
-                        - fname = URI.encode_www_form_component("Hyper MR (@ #{record[:clSubClass]}) #{@expid}").gsub(", ","_")
+                        - fname = URI.encode_www_form_component("Hyper MR (@ #{record[:clSubClass]}) #{@expid}".gsub(", ","_"))
 
                         %a{ href: "#{igv_linkout_base}/#{genome}/eachData/bs/hypermr/BigBed/#{@expid}.hypermr.bb&genome=#{genome}&name=#{fname}" }= "Hyper MR"
                       %li.divider
