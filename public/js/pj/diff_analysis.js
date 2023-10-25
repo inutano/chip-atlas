@@ -5,7 +5,6 @@ window.onload = async () => {
   // Events
   putExampleData();
   switchDataType();
-  emptyDataSet();
   setGenomePanel();
   estimateTimeOnEdit();
   alertHelpMessage();
