@@ -1,0 +1,69 @@
+{
+  "hg": {
+    "diffbind": {
+      "dataSetA": ["SRX4099758", "SRX4099759"],
+      "dataSetB": ["SRX3481056", "SRX3481057"]
+    },
+    "dmr": {
+      "dataSetA": [
+        "SRX6831786",
+        "SRX6831787",
+        "SRX6831788",
+        "SRX6831789",
+        "SRX6831790",
+        "SRX6831791"
+      ],
+      "dataSetB": ["SRX6831796", "SRX6831797", "SRX6831798", "SRX6831799"]
+    }
+  },
+  "mm": {
+    "diffbind": {
+      "dataSetA": ["SRX18419259", "SRX18419260", "SRX18419261"],
+      "dataSetB": ["SRX18419262", "SRX18419263", "SRX18419264"]
+    },
+    "dmr": {
+      "dataSetA": ["SRX17849967", "SRX17849968"],
+      "dataSetB": ["SRX17849977", "SRX17849978"]
+    }
+  },
+  "rn": {
+    "diffbind": {
+      "dataSetA": ["SRX10580924", "SRX10580925"],
+      "dataSetB": ["SRX10580930", "SRX10580933"]
+    },
+    "dmr": {
+      "dataSetA": ["SRX9722277"],
+      "dataSetB": ["SRX9722279"]
+    }
+  },
+  "dm": {
+    "diffbind": {
+      "dataSetA": ["SRX7277007", "SRX7277009", "SRX7277010"],
+      "dataSetB": ["SRX7277008", "SRX7277011", "SRX7277012"]
+    },
+    "dmr": {
+      "dataSetA": ["SRX1552723"],
+      "dataSetB": ["SRX14560446"]
+    }
+  },
+  "ce": {
+    "diffbind": {
+      "dataSetA": ["SRX7246256", "SRX7246261"],
+      "dataSetB": ["SRX7246270", "SRX7246265"]
+    },
+    "dmr": {
+      "dataSetA": [],
+      "dataSetB": []
+    }
+  },
+  "sacCer": {
+    "diffbind": {
+      "dataSetA": ["SRX4555013", "SRX4555039", "SRX4555051"],
+      "dataSetB": ["SRX4555040", "SRX4555064"]
+    },
+    "dmr": {
+      "dataSetA": ["ERX4244102", "ERX4244103"],
+      "dataSetB": ["ERX4244104", "ERX4244105", "ERX4244106", "ERX4244107"]
+    }
+  }
+}
