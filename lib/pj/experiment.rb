@@ -37,8 +37,7 @@ module PJ
       end
 
       def record_by_expid(exp_id)
-        records = self.where(:expid => exp_id).order(genome: :desc)
-        records.map do |record|
+        records = self.where(:expid => exp_id).map do |record|
           {
             :expid      => exp_id,
             :genome     => record.genome,
@@ -52,6 +51,7 @@ module PJ
             :clSubClassInfo => record.clSubClassInfo,
            }
         end
+        records.sort_by{ |record| -record[:genome].match(/\d+/)[0].to_i }
       end
 
       def list_of_facets
