@@ -323,9 +323,9 @@ class PeakJohn < Sinatra::Base
     a_type = data["analysis"]
     total_number_of_reads = PJ::Experiment.total_number_of_reads(data["ids"]).to_i
     seconds = case a_type
-      when 'DMR'
+      when 'dmr'
         117.13 * Math.log(total_number_of_reads) - 2012.5 + 600
-      when 'diff'
+      when 'diffbind'
         1.80e-6 * total_number_of_reads + 119.38 + 600
       else
         nil
