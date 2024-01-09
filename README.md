@@ -26,7 +26,7 @@ Processed data including the peak-call data in bed, bigBed or bigWig format is a
 
 ## Disclaimer
 
-We use the google analytics to analyze the visitor information to improve our web service and report the summarized web access status to our funding agencies. The web server records the queries just for solving issues such as server error. We will not open or distribute those information without an announcement to the users.
+The web server records the queries just for solving issues such as server error. We will not open or distribute those information without an announcement to the users.
 
 ## Citation
 
