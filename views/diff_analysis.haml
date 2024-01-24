@@ -84,15 +84,14 @@
             %p
               Detect differential peaks or differentially methylated regions
         .col-md-2
-          -# .dropdown-help
-          -#   .dropdown
-          -#     .button.btn.btn-default.dropdown-toggle{ type: "button", id: "movies-dropdown", "data-toggle": "dropdown", "aria-haspopup": true, "aria-expanded": true }
-          -#       Tutorial movie
-          -#       %span.caret
-          -#     %ul.dropdown-menu{ "aria-labelledby": "movies-dropdown" }
-          -#       %li
-          -#         %a{ href: "", target: "_blank" }
-          -#           How to use
+          .dropdown-help
+            .dropdown
+              .button.btn.btn-default.dropdown-toggle{ type: "button", id: "movies-dropdown", "data-toggle": "dropdown", "aria-haspopup": true, "aria-expanded": true }
+                Tutorial
+                %span.caret
+              %ul.dropdown-menu{ "aria-labelledby": "movies-dropdown" }
+                %li
+                  %a{ href: "https://chip-atlas.dbcls.jp/data/manual/Diff_Analysis/Diff_Analysis.pdf", target: "_blank" }="PDF"
 
       // Navigation Tabs, links and contents
       .genomeTab{ role: "tabpanel"}
