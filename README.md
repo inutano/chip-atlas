@@ -2,9 +2,9 @@
 
 [ChIP-Atlas](https://chip-atlas.org) is a database collecting the bed files calculated from the ChIP-Seq, DNase-Seq, ATAC-Seq, and Bisulfite-seq data archived in Sequence Read Archive (SRA). The database has a web interface to explore the analysis results from the calculated peak call data. This repository contains the webapp code and the documentation of the database.
 
-## Downtime of Enrichment Analysis function
+## Downtime of Enrichment Analysis and Diff Analysis function
 
-ChIP-Atlas is providing online enrichment analysis function on [ChIP-Atlas - Enrichment Analysis](https://chip-atlas.org/enrichment_analysis). The background calculation relies on the [NIG supercomputer system](http://sc.ddbj.nig.ac.jp), hosted by [DNA Data Bank of Japan, National Institute of Genetics](http://ddbj.nig.ac.jp), while the webapp is hosted on its own cloud instance. Therefore, Enrichment Analysis may go down during the maintenance of the NIG supercomputer system. We announce when the function goes down, but if you encountered any trouble other than that period, please inform us from the issue page.
+ChIP-Atlas is providing online analysis function on ChIP-Atlas - [Enrichment Analysis](https://chip-atlas.org/enrichment_analysis) and [Diff Analysis](https://chip-atlas.org/diff_analysis). The background calculation relies on the [NIG supercomputer system](http://sc.ddbj.nig.ac.jp), hosted by [DNA Data Bank of Japan, National Institute of Genetics](http://ddbj.nig.ac.jp), while the webapp is hosted on its own cloud instance. Therefore, Enrichment Analysis may go down during the maintenance of the NIG supercomputer system. We announce when the function goes down, but if you encountered any trouble other than that period, please inform us from the issue page.
 
 ## Data availability
 
@@ -12,6 +12,8 @@ Processed data including the peak-call data in bed, bigBed or bigWig format is a
 
 ## History
 
+- Added Annotation tracks to Peak Browser, together with UI improvement (2023/10/25)
+- Launched Diff Analysis tool enabling to detect differential peaks or differentially methylated regions (2023/10/25)
 - **New publication** on the NAR web server issue! [https://doi.org/10.1093/nar/gkac199](https://doi.org/10.1093/nar/gkac199) (2022/03/24)
 - Minor bug fix: Peak Browser / Enrichment Analysis UI updates the number of experiments by selecting experiment type (2022/03/01)
 - Updated the order of the genome assembly tabs, now GRCh38 is default. And some minor fixes came together! (2022/02/08)
@@ -43,6 +45,9 @@ The web server records the queries just for solving issues such as server error.
 - Shinya Oki, Kyoto University
   - Metadata curation
   - Workflow management and execution
+- Zhaonan Zou, Kyoto University
+  - Data process
+  - Development of the Diff Analysis tool
 - Tazro Ohta, Database Center for Life Science (DBCLS)
   - Development/Maintenance of web application
   - Development of data model
