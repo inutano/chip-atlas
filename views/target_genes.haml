@@ -87,13 +87,15 @@
             .dropdown
               .button.btn.btn-primary.dropdown-toggle{ :type => "button", :id => "movies-dropdown", "data-toggle" => "dropdown", "aria-haspopup" => true, "aria-expanded" => true }
                 %i.fas.fa-question-circle
-                Tutorial movie
+                Tutorial
                 %span.caret
               %ul.dropdown-menu{ "aria-labelledby" => "movies-dropdown" }
                 %li
-                  %a{ :href => "https://youtu.be/Sp9DUAuKkvQ", :target => "_blank" }= "How to use"
+                  %a{ :href => "https://chip-atlas.dbcls.jp/data/manual/Target_Genes/Target_Genes.pdf", :target => "_blank" }="PDF"
                 %li
-                  %a{ :href => "http://doi.org/10.7875/togotv.2018.024", :target => "_blank" }= "How to use (統合TV, Japanese)"
+                  %a{ :href => "https://youtu.be/Sp9DUAuKkvQ", :target => "_blank" }= "Movie"
+                %li
+                  %a{ :href => "http://doi.org/10.7875/togotv.2018.024", :target => "_blank" }= "Movie (統合TV, Japanese)"
 
       // Navigation Tabs, links and contents
       .genomeTab{ :role => "tabpanel"}
