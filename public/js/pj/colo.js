@@ -140,11 +140,11 @@ function enableTypeAhead(panel, options) {
       hint: true,
       highlight: true,
       minLength: 1,
-      limit: 10,
     },
     {
       name: "list",
       source: list,
+      limit: 15,
     },
   );
   // sync textbox and input field

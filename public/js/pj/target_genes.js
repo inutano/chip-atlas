@@ -145,7 +145,7 @@ function enableTypeAhead(panel, options, genome) {
     {
       name: "list",
       source: list,
-      limit: 10,
+      limit: 15,
     },
   );
   // sync textbox and input field

@@ -210,11 +210,11 @@ const activateTypeAhead = (genome, panelType, listObject) => {
       hint: true,
       highlight: true,
       minLength: 1,
-      limit: 10,
     },
     {
       name: "list",
       source: list,
+      limit: 15,
     },
   );
   // sync
