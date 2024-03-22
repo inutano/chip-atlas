@@ -434,7 +434,7 @@ const showHelp = () => {
         break;
       case genome + "ViewOnIGV":
         if (window.confirm(helpText["viewOnIGV"])) {
-          window.open("https://www.broadinstitute.org/igv/download", "_blank");
+          window.open("https://igv.org/doc/desktop/#DownloadPage/", "_blank");
         }
         break;
     }
