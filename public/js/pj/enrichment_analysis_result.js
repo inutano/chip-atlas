@@ -33,8 +33,8 @@ function dateFormat(date) {
 }
 
 function dateFormatUTC(date) {
-  var f = Date.UTC(date).toString().split(" ");
-  return f[4] + " (" + f[1] + "-" + f[2] + "-" + f[3] + ")";
+  var f = date.toUTCString().split(" "); // 'Fri, 22 Mar 2024 06:13:17 GMT'
+  return f[4] + " (" + f[2] + "-" + f[1] + "-" + f[3] + ")";
 }
 
 // submit time and clock
