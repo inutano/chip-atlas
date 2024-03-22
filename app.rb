@@ -193,7 +193,7 @@ class PeakJohn < Sinatra::Base
   end
 
   get "/view" do
-    @expid = params[:id]
+    @expid = params[:id].upcase
     if @expid =~ /^GSM/
       redirect "/view?id=#{settings.gsm_to_srx[@expid]}"
     end
