@@ -141,11 +141,11 @@ function enableTypeAhead(panel, options, genome) {
       hint: true,
       highlight: true,
       minLength: 1,
-      limit: 10,
     },
     {
       name: "list",
       source: list,
+      limit: 10,
     },
   );
   // sync textbox and input field
