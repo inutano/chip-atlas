@@ -3,39 +3,43 @@ window.onload = async () => {
   setTableValues(params);
   setClock(params);
   checkWabiStatus(params);
-}
+};
 
 const setTableValues = (params) => {
   // const wabiUrl = "https://ddbj.nig.ac.jp/wabi/chipatlas/";
   // const reqUrl = wabiUrl + reqId;
   // const resultUrl = reqUrl + "?info=result";
 
-  $('td#project-title').text(params.title);
-  $('td#request-id').text(params.reqId);
-  $('a#view-on-igv').text(params.localIgvUrl);
-  $('a#download-result').text(params.zipUrl);
-}
+  $("td#project-title").text(params.title);
+  $("td#request-id").text(params.reqId);
+  $("a#view-on-igv").text(params.localIgvUrl);
+  $("a#download-result").text(params.zipUrl);
+};
 
 // get url parameter
 const getUrlParameters = () => {
-  const reqId = parseUrlParameter('id');
-  const genome = parseUrlParameter('genome');
+  const reqId = parseUrlParameter("id");
+  const genome = parseUrlParameter("genome");
   return {
     reqId: reqId,
-    title: parseUrlParameter('title'),
+    title: parseUrlParameter("title"),
     genome: genome,
-    calcm: parseUrlParameter('calcm'),
-    localIgvUrl: 'http://localhost:60151/load?file=https://chip-atlas.dbcls.jp/data/query/' + reqId + '.igv.bed&genome=' + genome,
-    zipUrl: "https://chip-atlas.dbcls.jp/data/query/" + reqId + '.zip',
+    calcm: parseUrlParameter("calcm"),
+    localIgvUrl:
+      "http://localhost:60151/load?file=https://chip-atlas.dbcls.jp/data/query/" +
+      reqId +
+      ".igv.bed&genome=" +
+      genome,
+    zipUrl: "https://chip-atlas.dbcls.jp/data/query/" + reqId + ".zip",
   };
-}
+};
 
 const parseUrlParameter = (sParam) => {
   const sPageURL = decodeURIComponent(window.location.search.substring(1));
-  const sURLVariables = sPageURL.split('&');
+  const sURLVariables = sPageURL.split("&");
 
   for (i = 0; i < sURLVariables.length; i++) {
-    sParameterName = sURLVariables[i].split('=');
+    sParameterName = sURLVariables[i].split("=");
     if (sParameterName[0] === sParam) {
       return sParameterName[1] === undefined ? true : sParameterName[1];
     }
@@ -48,16 +52,21 @@ const setClock = (params) => {
   setSubmitTime(now);
   setEstFinish(now, params);
   activateClock();
-}
+};
 
 const setSubmitTime = (now) => {
-  $('td#submitted-at').text(dateFormat(now));
-}
+  $("td#submitted-at").text(dateFormat(now) + " / UTC: " + dateFormatUTC(now));
+};
 
 const dateFormat = (date) => {
   const f = date.toString().split(" ");
   return f[4] + " (" + f[1] + "-" + f[2] + "-" + f[3] + ")";
-}
+};
+
+const dateFormatUTC = (date) => {
+  const f = date.toUTCString().split(" ");
+  return f[4] + " (" + f[2] + "-" + f[1] + "-" + f[3] + ")";
+};
 
 const setEstFinish = (now, params) => {
   const calcm = params.calcm;
@@ -76,20 +85,24 @@ const setEstFinish = (now, params) => {
       break;
     }
   }
-  const estFinish = new Date(now.setMinutes(now.getMinutes() + parseInt(calcTime, 10)));
-  $('td#estimated-finishing-time').text(dateFormat(estFinish));
-}
+  const estFinish = new Date(
+    now.setMinutes(now.getMinutes() + parseInt(calcTime, 10)),
+  );
+  $("td#estimated-finishing-time").text(
+    dateFormat(estFinish) + " / (UTC)" + dateFormatUTC(estFinish),
+  );
+};
 
 const activateClock = () => {
-  setInterval(function() {
+  setInterval(function () {
     t = new Date();
-    $('td#current-time').text(dateFormat(t));
+    $("td#current-time").text(dateFormat(t) + " / (UTC)" + dateFormatUTC(t));
   }, 1000);
-}
+};
 
 const checkWabiStatus = (params) => {
-  const tdStatus = $('td#status');
-  const reqId = params['reqId'];
+  const tdStatus = $("td#status");
+  const reqId = params["reqId"];
   const interval = setInterval(() => {
     $.get("/wabi_chipatlas?id=" + reqId, (status) => {
       tdStatus.text(status);
@@ -100,23 +113,27 @@ const checkWabiStatus = (params) => {
         showExecutionLog(reqId);
       } else if (status == "unavailable") {
         clearInterval(interval);
-        alert("No response from the DDBJ supercomputer system: please note the result URL to access later. It is possible that your job has been interrupted by the system error, in that case you may need to run the analysis again.");
+        alert(
+          "No response from the DDBJ supercomputer system: please note the result URL to access later. It is possible that your job has been interrupted by the system error, in that case you may need to run the analysis again.",
+        );
       }
     });
   }, 10000);
-}
+};
 
 const setResultALink = (params) => {
-  $('a#view-on-igv').attr('href', params.localIgvUrl);
-  $('a#download-result').attr('href', params.zipUrl);
-}
+  $("a#view-on-igv").attr("href", params.localIgvUrl);
+  $("a#download-result").attr("href", params.zipUrl);
+};
 
 const showExecutionLog = (reqId) => {
   $.get("/diff_analysis_log?id=" + reqId, (logContent) => {
-    pasteExecutionLog(logContent)
+    pasteExecutionLog(logContent);
   });
-}
+};
 
 const pasteExecutionLog = (logText) => {
-  $('.container#executionLog').append('<h3>Execution Log</h3><pre><code>' + logText + '<code></pre>');
-}
+  $(".container#executionLog").append(
+    "<h3>Execution Log</h3><pre><code>" + logText + "<code></pre>",
+  );
+};

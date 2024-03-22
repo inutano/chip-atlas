@@ -2,63 +2,63 @@
 var analysis;
 
 // onload
-$(function(){
+$(function () {
   // tab trigger event
   retrieveAnalysisHash();
   coloTabTriggerEvents();
 });
 
 // functions
-function coloTabTriggerEvents(){
-  $('a[data-toggle="tab"]').on('shown.bs.tab', function(e){
+function coloTabTriggerEvents() {
+  $('a[data-toggle="tab"]').on("shown.bs.tab", function (e) {
     var activatedTab = e.target;
     var previousTab = e.relatedTarget;
     retrieveAnalysisHash();
   });
 }
 
-function retrieveAnalysisHash(){
+function retrieveAnalysisHash() {
   // retrieve hash
   var genome = genomeSelected();
   $.ajax({
-    type: 'GET',
-    url: '/data/colo_analysis.json?genome=' + genome,
-    dataType: 'json',
-    success: function(json){
+    type: "GET",
+    url: "/data/colo_analysis.json?genome=" + genome,
+    dataType: "json",
+    success: function (json) {
       analysis = json;
       setPanelsByDefault(analysis);
       changePanelsByRadioButton(analysis);
       changePanelBySelectPrimary(analysis);
-    }
+    },
   });
 }
 
-function setPanelsByDefault(analysis){
+function setPanelsByDefault(analysis) {
   var genome = genomeSelected();
-  $("input#"+genome+"dataTypeAntigen").attr("checked","checked");
-  setPanel('PrimaryPanel', analysis);
-  setPanel('SecondaryPanel', analysis);
+  $("input#" + genome + "dataTypeAntigen").attr("checked", "checked");
+  setPanel("PrimaryPanel", analysis);
+  setPanel("SecondaryPanel", analysis);
 }
 
-function changePanelsByRadioButton(analysis){
+function changePanelsByRadioButton(analysis) {
   var genome = genomeSelected();
-  $.each(["Antigen","CellType"], function(i, type){
-    $('input[name="'+genome+'datatypeoption"]:radio').change(function(){
-      setPanel('PrimaryPanel', analysis);
-      setPanel('SecondaryPanel', analysis);
-    })
+  $.each(["Antigen", "CellType"], function (i, type) {
+    $('input[name="' + genome + 'datatypeoption"]:radio').change(function () {
+      setPanel("PrimaryPanel", analysis);
+      setPanel("SecondaryPanel", analysis);
+    });
   });
 }
 
-function changePanelBySelectPrimary(analysis){
+function changePanelBySelectPrimary(analysis) {
   // generate secondary options
   var genome = genomeSelected();
-  $('select#' + genome + 'PrimaryPanel-select').change(function(){
-    setPanel('SecondaryPanel', analysis)
+  $("select#" + genome + "PrimaryPanel-select").change(function () {
+    setPanel("SecondaryPanel", analysis);
   });
 }
 
-function setPanel(panel, analysis){
+function setPanel(panel, analysis) {
   changePanelTitle();
   removeCurrentOptions(panel);
   var options = getOptions(panel, analysis);
@@ -66,159 +66,169 @@ function setPanel(panel, analysis){
   enableTypeAhead(panel, options);
 }
 
-function changePanelTitle(){
+function changePanelTitle() {
   var genome = genomeSelected();
-  var type = $(':radio[name="'+genome+'datatypeoption"]:checked').val();
+  var type = $(':radio[name="' + genome + 'datatypeoption"]:checked').val();
   // change panel title
-  if(type == "antigen"){
-    $('#' + genome + 'PrimaryPanel h4').text("2. Choose Antigen");
-    $('#' + genome + 'SecondaryPanel h4').text("3. Choose Cell Type Class");
-  }else{
-    $('#' + genome + 'PrimaryPanel h4').text("2. Choose Cell Type Class");
-    $('#' + genome + 'SecondaryPanel h4').text("3. Choose Antigen");
+  if (type == "antigen") {
+    $("#" + genome + "PrimaryPanel h4").text("2. Choose Antigen");
+    $("#" + genome + "SecondaryPanel h4").text("3. Choose Cell Type Class");
+  } else {
+    $("#" + genome + "PrimaryPanel h4").text("2. Choose Cell Type Class");
+    $("#" + genome + "SecondaryPanel h4").text("3. Choose Antigen");
   }
 }
 
-function removeCurrentOptions(panel){
+function removeCurrentOptions(panel) {
   // panel = 'PrimaryPanel' or 'SecondaryPanel'
   var genome = genomeSelected();
-  var target = $('select#' + genome + panel + '-select');
+  var target = $("select#" + genome + panel + "-select");
   target.empty();
 }
 
-function getOptions(panel, analysis){
+function getOptions(panel, analysis) {
   var genome = genomeSelected();
-  var type = $(':radio[name="'+genome+'datatypeoption"]:checked').val();
+  var type = $(':radio[name="' + genome + 'datatypeoption"]:checked').val();
   var options;
-  switch(panel){
-    case 'PrimaryPanel':
-      options = $.map(analysis[genome][type], function(value, key){
+  switch (panel) {
+    case "PrimaryPanel":
+      options = $.map(analysis[genome][type], function (value, key) {
         return key;
       });
       break;
-    case 'SecondaryPanel':
-      var primaryType = $('select#' + genome + 'PrimaryPanel-select').val();
+    case "SecondaryPanel":
+      var primaryType = $("select#" + genome + "PrimaryPanel-select").val();
       options = analysis[genome][type][primaryType];
       break;
   }
   return options;
 }
 
-function appendOptions(panel, options){
+function appendOptions(panel, options) {
   var genome = genomeSelected();
-  var targetSelect = $('select#' + genome + panel + '-select');
+  var targetSelect = $("select#" + genome + panel + "-select");
   targetSelect.empty();
-  options.sort().forEach(function(element, index, array){
-    if(index==0){
-      $('<option>')
+  options.sort().forEach(function (element, index, array) {
+    if (index == 0) {
+      $("<option>")
         .attr("value", element)
-        .attr("selected","selected")
+        .attr("selected", "selected")
         .append(element)
         .appendTo(targetSelect);
-    }else{
-      $('<option>')
+    } else {
+      $("<option>")
         .attr("value", element)
         .append(element)
         .appendTo(targetSelect);
-    };
+    }
   });
 }
 
-function enableTypeAhead(panel, options){
+function enableTypeAhead(panel, options) {
   var genome = genomeSelected();
-  var typeaheadInput = $('#' + genome + panel + '-typeahead');
-  typeaheadInput.typeahead('destroy');  // Erase previous data set
-  var list = new Bloodhound({ // create list for incremental search
+  var typeaheadInput = $("#" + genome + panel + "-typeahead");
+  typeaheadInput.typeahead("destroy"); // Erase previous data set
+  var list = new Bloodhound({
+    // create list for incremental search
     datumTokenizer: Bloodhound.tokenizers.whitespace,
     queryTokenizer: Bloodhound.tokenizers.whitespace,
-    local: options
+    local: options,
   });
-  typeaheadInput.typeahead({ // activate typeahead
-    hint: true,
-    highlight: true,
-    minLength: 1
-  },{
-    name: 'list',
-    source: list
-  });
+  typeaheadInput.typeahead(
+    {
+      // activate typeahead
+      hint: true,
+      highlight: true,
+      minLength: 1,
+    },
+    {
+      name: "list",
+      source: list,
+      limit: 15,
+    },
+  );
   // sync textbox and input field
-  typeaheadInput.on('typeahead:select keyup', function(){
+  typeaheadInput.on("typeahead:select keyup", function () {
     var input = $(this).val();
-    if($.inArray(input,options) > -1){
-      $('select#' + genome + panel + '-select').val(input);
+    if ($.inArray(input, options) > -1) {
+      $("select#" + genome + panel + "-select").val(input);
     }
-    if($(this).attr("id") === genome + "PrimaryPanel-typeahead"){
-      setPanel('SecondaryPanel', analysis);
+    if ($(this).attr("id") === genome + "PrimaryPanel-typeahead") {
+      setPanel("SecondaryPanel", analysis);
     }
   });
 }
 
 // send data to view/download data
-$(function(){
-  $("button.post").click(function(){
+$(function () {
+  $("button.post").click(function () {
     var button = $(this);
     button.attr("disabled", true);
 
     var buttonId = $(this).attr("id");
     var suffix;
-    switch(buttonId){
-      case 'colo-submit':
-        suffix = 'submit';
+    switch (buttonId) {
+      case "colo-submit":
+        suffix = "submit";
         break;
-      case 'download-tsv':
-        suffix = 'tsv';
+      case "download-tsv":
+        suffix = "tsv";
         break;
-      case 'download-gml':
-        suffix = 'gml';
+      case "download-gml":
+        suffix = "gml";
         break;
-    };
+    }
 
     $.ajax({
-      type : 'post',
-      url : "/colo?type="+suffix,
+      type: "post",
+      url: "/colo?type=" + suffix,
       data: JSON.stringify(retrievePostData()),
-      contentType: 'application/json',
-      dataType: 'json',
-      scriptCharset: 'utf-8',
-      success : function(response) {
+      contentType: "application/json",
+      dataType: "json",
+      scriptCharset: "utf-8",
+      success: function (response) {
         // alert(JSON.stringify(response));
-        window.open(response.url, "_self", "")
+        window.open(response.url, "_self", "");
       },
-      error : function(response){
+      error: function (response) {
         // alert(JSON.stringify(response));
         alert("error!");
-        window.open("/not_found", "_self", "")
+        window.open("/not_found", "_self", "");
       },
-      complete: function(){
+      complete: function () {
         button.attr("disabled", false);
-      }
+      },
     });
-  })
-})
+  });
+});
 
-function retrievePostData(){
-  var genome = $('.genomeTab ul li.active a').attr('source').replace(/[\n\s ]/g, "");
-  var primaryType = $(':radio[name="'+genome+'datatypeoption"]:checked').val();
-  var primaryValue = $('select#' + genome + 'PrimaryPanel-select').val();
-  var secondaryValue = $('select#' + genome + 'SecondaryPanel-select').val();
+function retrievePostData() {
+  var genome = $(".genomeTab ul li.active a")
+    .attr("source")
+    .replace(/[\n\s ]/g, "");
+  var primaryType = $(
+    ':radio[name="' + genome + 'datatypeoption"]:checked',
+  ).val();
+  var primaryValue = $("select#" + genome + "PrimaryPanel-select").val();
+  var secondaryValue = $("select#" + genome + "SecondaryPanel-select").val();
   var data;
-  switch(primaryType){
-    case 'antigen':
+  switch (primaryType) {
+    case "antigen":
       data = {
         condition: {
           genome: genome,
           antigen: primaryValue,
-          cellline: secondaryValue
-        }
+          cellline: secondaryValue,
+        },
       };
       break;
-    case 'cellline':
+    case "cellline":
       data = {
         condition: {
           genome: genome,
           antigen: secondaryValue,
-          cellline: primaryValue
-        }
+          cellline: primaryValue,
+        },
       };
       break;
   }
