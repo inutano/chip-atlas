@@ -89,14 +89,14 @@ const setEstFinish = (now, params) => {
     now.setMinutes(now.getMinutes() + parseInt(calcTime, 10)),
   );
   $("td#estimated-finishing-time").text(
-    dateFormat(estFinish) + " / (UTC)" + dateFormatUTC(estFinish),
+    dateFormat(estFinish) + " / UTC: " + dateFormatUTC(estFinish),
   );
 };
 
 const activateClock = () => {
   setInterval(function () {
     t = new Date();
-    $("td#current-time").text(dateFormat(t) + " / (UTC)" + dateFormatUTC(t));
+    $("td#current-time").text(dateFormat(t) + " / UTC: " + dateFormatUTC(t));
   }, 1000);
 };
 
