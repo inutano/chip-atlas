@@ -47,7 +47,6 @@ Options:
   esac
 done
 
-# オプション解析終了後に不要となったオプション部分を shift コマンドで切り捨てる
 shift $(expr $OPTIND - 1)
 
 # Functions
@@ -72,7 +71,8 @@ define_variables() {
 }
 
 add_parameters_to_log() {
-  Start=$(date "+%Y-%m-%dT%H:%M:%S (JST)")
+  Start_jst=$(date "+%Y-%m-%dT%H:%M:%S+0900 (JST)")
+  Start_utc=$(date --utc "+%Y-%m-%dT%H:%M:%SZ (UTC)")
   echo "
 
 ========= Parameters ========" >> $LOGFILE
@@ -293,13 +293,13 @@ def_var2() {
   }')
 }
 
-check_bw_exist() {        # 指定の全ての SRXs の bw と narrowpeak が oki/chipatlas に存在するかを確認
+check_bw_exist() {
   count_error
 
   echo "Checking presence of queried experiments ... " >> $LOGFILE
   echo "" >> $LOGFILE
 
-  for srx in $(echo ${SRX_LST[@]}| tr ',' ' '); do # 入力となる bigWig/bed が存在しない場合
+  for srx in $(echo ${SRX_LST[@]}| tr ',' ' '); do
     if [[ $srx =~ ^url.+$ ]]; then
       if   [ ! -e $PREFIX.tmp/$srx.bw ]; then
         echo '  ![ERROR] '$srx': bigWig files were not correctly loaded.' >> $LOGFILE
@@ -316,7 +316,7 @@ check_bw_exist() {        # 指定の全ての SRXs の bw と narrowpeak が ok
   done
 }
 
-get_peak_list() {  # get peak list from all .narrowpeak files
+get_peak_list() {
   count_error
 
   echo "Peak multiinter ... " >> $LOGFILE
@@ -328,7 +328,7 @@ get_peak_list() {  # get peak list from all .narrowpeak files
   }'| cut -f1-4 > $PREFIX.tmp/peak_list.bed
 }
 
-get_meta() {  # srx_list を与えて，layout, nreads などの情報を抽出する
+get_meta() {
   count_error
   echo ${SRX_LST[@]}| tr ' ' ','| \
   awk -F"," -v OFS="	" -v names=$(echo "$names"| tr ' ' ',') -v grps=$(echo "$grps"| tr ' ' ',') \
@@ -375,7 +375,7 @@ get_meta() {  # srx_list を与えて，layout, nreads などの情報を抽出�
   READS_BASE=$PREFIX.tmp/SRX_reads_bases.tab
 }
 
-bw_to_bg() {   # 引数に srx を 1 つ与える
+bw_to_bg() {
   count_error
   srx="$1"
   if [[ $srx =~ ^url.+$ ]]; then
@@ -446,7 +446,7 @@ bg_to_count() {
   fi
 }
 
-bw_to_count() {   # 引数に srx_lst を 1 つ与える
+bw_to_count() {
   srx_lst="$1"
   for srx in $(echo $srx_lst| tr ',' ' '); do
     count_error
@@ -577,7 +577,7 @@ make_igv() {
   qsortBed -t $PREFIX.tmp/tmp4sort $PREFIX.tmp/diffbind.bed.tmp| tee $PREFIX.bed| \
   awk -F"	" -v OFS="	" -v LABEL1="${GROUP_LBL_USER[0]}" -v LABEL2="${GROUP_LBL_USER[1]}" \
     -v SRX_LST1="${SRX_LST[0]}" -v SRX_LST2="${SRX_LST[1]}" \
-    -v GENOME="$GENOME" -v thres="$BedTHRES" -v PROJECT_NAME="$PROJECT_NAME" ' # igv 閲覧用 bed9 を作る
+    -v GENOME="$GENOME" -v thres="$BedTHRES" -v PROJECT_NAME="$PROJECT_NAME" '
   BEGIN {
     print "track name=\""PROJECT_NAME"\" gffTags=\"on\""
   } $8 < -1 {
@@ -585,9 +585,9 @@ make_igv() {
     inverse_log2fc = $6 * (-1)
     metadata = "Analysis%20title="PROJECT_NAME";Genome="GENOME";SRXs%20("LABEL1")="SRX_LST1";SRXs%20("LABEL2")="SRX_LST2";Normalized%20count%20("LABEL1")="$4";Normalized%20count%20("LABEL2")="$5";Log2("LABEL1"/"LABEL2")="inverse_log2fc";Log%20P-val="$7";Log%20Q-val="$8
     score = -$8   # score = -log10Q
-    if (inverse_log2fc > 0) {        # SRX1 > SRX2 の場合，orange     edgeR では、logfc は g2/g1 で計算されている。
+    if (inverse_log2fc > 0) {        # when SRX1 > SRX2，orange     in edgeR, logfc is calculated by g2/g1.
       R = 222; G = 131; B = 68; #222,131,68
-    } else if (inverse_log2fc < 0) {    # SRX1 < SRX2 の場合，blue
+    } else if (inverse_log2fc < 0) {    # when SRX1 < SRX2，blue
       R = 106; G = 153; B = 208; #106,153,208
     }
     RGB = int(R)","int(G)","int(B)
@@ -679,9 +679,10 @@ make_igv_session() {
 
 count_diffbind() {
   count_error
-  End=$(date "+%Y-%m-%dT%H:%M:%S (JST)")
+  End_jst=$(date "+%Y-%m-%dT%H:%M:%S+0900 (JST)")
+  End_utc=$(date --utc "+%Y-%m-%dT%H:%M:%SZ (UTC)")
   cat $PREFIX.bed| awk -F"	" -v OFS="	" \
-  -v LABEL1="${GROUP_LBL_USER[0]}" -v LABEL2="${GROUP_LBL_USER[1]}" -v Start="$Start" -v End="$End" '{
+  -v LABEL1="${GROUP_LBL_USER[0]}" -v LABEL2="${GROUP_LBL_USER[1]}" -v Start_jst="$Start_jst" -v Start_utc="$Start_utc" -v End_jst="$End_jst" -v End_utc="$End_utc" '{
     if ($8 < -1) {
       if      ($6 < 0) label2_lt_label1++
       else if ($6 > 0) label1_lt_label2++
@@ -694,8 +695,8 @@ count_diffbind() {
     print "  Number of specific peaks to \""LABEL1"\" = "label2_lt_label1++
     print "  Number of specific peaks to \""LABEL2"\" = "label1_lt_label2++
     print ""
-    print "Start = "Start
-    print "End = "End
+    print "Start = "Start_jst"; "Start_utc
+    print "End = "End_jst"; "End_utc
   }' >> $LOGFILE
 }
 
