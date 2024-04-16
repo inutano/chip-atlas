@@ -94,18 +94,17 @@
             .dropdown
               .button.btn.btn-primary.dropdown-toggle{ type: "button", id: "movies-dropdown", "data-toggle": "dropdown", "aria-haspopup": true, "aria-expanded": true }
                 %i.fas.fa-question-circle
-                Tutorial movies
+                Tutorial
                 %span.caret
               %ul.dropdown-menu{ "aria-labelledby": "movies-dropdown" }
                 %li
-                  %a{ href: "https://youtu.be/JVWLlzIedw8", target: "_blank" }
-                    Requirements
+                  %a{ :href => "https://chip-atlas.dbcls.jp/data/manual/Peak_Browser/Peak_Browser.pdf", :target => "_blank" }="PDF"
                 %li
                   %a{ href: "https://youtu.be/qKNOkK-8hDo", target: "_blank" }
-                    How to use
+                    Movie
                 %li
                   %a{ href: "http://doi.org/10.7875/togotv.2018.023", target: "_blank" }
-                    How to use (統合TV, Japanese)
+                    Movie (統合TV, Japanese)
 
       // Navigation Tabs, links and contents
       .genomeTab{ role: "tabpanel"}

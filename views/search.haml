@@ -84,6 +84,16 @@
             %p
               Find experiments by keywords. For bulk processing, please use the
               %a{ :href => "https://github.com/inutano/chip-atlas/wiki#tables-summarizing-metadata-and-files" } metadata table
+        .col-md-2
+          .dropdown-help
+            .dropdown
+              .button.btn.btn-primary.dropdown-toggle{ :type => "button", :id => "movies-dropdown", "data-toggle" => "dropdown", "aria-haspopup" => true, "aria-expanded" => true }
+                %i.fas.fa-question-circle
+                Tutorial
+                %span.caret
+              %ul.dropdown-menu{ "aria-labelledby" => "movies-dropdown" }
+                %li
+                  %a{ :href => "https://chip-atlas.dbcls.jp/data/manual/Dataset_Search/Dataset_Search.pdf", :target => "_blank" }="PDF"
 
       .searchTab{ :role => "tabpanel"}
         %ul.nav.nav-tabs{ :role => "tablist" }
