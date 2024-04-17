@@ -516,16 +516,16 @@ getDegs() {
     keep <- filterByExpr(d, group=group)
     #低発現遺伝子をフィルタリング
     d <- d[keep, , keep.lib.sizes=FALSE]
-    d <- calcNormFactors(d)    #TMM正規化
+    d <- calcNormFactors(d)
 
-    if (is.na(estimateCommonDisp(d)$common.dispersion)) { # replicate なしの場合 (n1 vs n1)
-      d <- estimateGLMCommonDisp(d, method="deviance", robust=T, subset=NULL)    #モデル構築(common Dispersionを算出)
-    } else {                                                       # replicate ありの場合 (n3 vs n3   or   n1 vs n3)
-      d <- estimateCommonDisp(d)  #全遺伝子commonの分散を計算 （リンク）
-      d <- estimateTagwiseDisp(d) #moderated tagwise dispersionの計算 （リンク）
+    if (is.na(estimateCommonDisp(d)$common.dispersion)) {
+      d <- estimateGLMCommonDisp(d, method="deviance", robust=T, subset=NULL)
+    } else {
+      d <- estimateCommonDisp(d)
+      d <- estimateTagwiseDisp(d)
     }
 
-    result <- exactTest(d)       #exact test（リンク）
+    result <- exactTest(d)
     res <- as.data.frame(topTags(result, n=nrow(count)))[, c(1, 3, 4)]
 
     if (is.null(d$pseudo.counts)) {
