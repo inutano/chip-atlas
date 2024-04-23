@@ -1,0 +1,17 @@
+cff-version: 1.2.0
+message: "If you use ChIP-Atlas, please cite our publication. For software, please cite as below"
+authors:
+- family-names: "Ohta"
+  given-names: "Tazro"
+  orcid: "https://orcid.org/0000-0003-3777-5945"
+- family-names: "Zou"
+  given-names: "Zhaonan"
+  orcid: "https://orcid.org/0000-0002-1075-4936"
+- family-names: "Oki"
+  given-names: "Shinya"
+  orcid: "https://orcid.org/0000-0002-4767-3259"
+title: "ChIP-Atlas"
+version: 3.0.0
+doi: 10.5281/zenodo.11044059
+date-released: 2024-04-23
+url: "https://github.com/inutano/chip-atlas"
