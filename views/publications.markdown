@@ -1,8 +1,9 @@
 ## To cite ChIP-Atlas in your publication:
 
 - Paper
-  - Zou, Z., Ohta, T., Miura, F., Oki, S. ChIP-Atlas 2021 update: a data-mining suite for exploring epigenomic landscapes by fully integrating ChIP-seq, ATAC-seq and Bisulfite-seq data. __Nucleic Acids Res__. 50(W1), W175-W182, 2022. http://dx.doi.org/10.1093/nar/gkac199
-  - Oki, S., Ohta, T., Shioi, G., Hatanaka, H., Ogasawara, O., Okuda, Y., Kawaji, H., Nakaki, R., Sese, J., Meno, C. ChIP-Atlas: a data-mining suite powered by full integration of public ChIP-seq data. __EMBO Rep__. 19(12), e46255, 2018. http://dx.doi.org/10.15252/embr.201846255
+  - Zou, Z., Ohta, T., Oki, S. ChIP-Atlas 3.0: a data-mining suite to explore chromosome architecture together with large-scale regulome data. __***Nucleic Acids Res***__. gkae358, 2024. http://dx.doi.org/10.1093/nar/gkae358
+  - Zou, Z., Ohta, T., Miura, F., Oki, S. ChIP-Atlas 2021 update: a data-mining suite for exploring epigenomic landscapes by fully integrating ChIP-seq, ATAC-seq and Bisulfite-seq data. __***Nucleic Acids Res***__. 50(W1), W175-W182, 2022. http://dx.doi.org/10.1093/nar/gkac199
+  - Oki, S., Ohta, T., Shioi, G., Hatanaka, H., Ogasawara, O., Okuda, Y., Kawaji, H., Nakaki, R., Sese, J., Meno, C. ChIP-Atlas: a data-mining suite powered by full integration of public ChIP-seq data. __***EMBO Rep***__. 19(12), e46255, 2018. http://dx.doi.org/10.15252/embr.201846255
 - Web tool
   - Oki, S; Ohta, T (2015): ChIP-Atlas. https://chip-atlas.org
 
