@@ -35,6 +35,7 @@ The web server records the queries just for solving issues such as server error.
 ## Citation
 
 - Publication
+  - Zou Z, Ohta T, Oki S. ChIP-Atlas 3.0: a data-mining suite to explore chromosome architecture together with large-scale regulome data. Nucleic Acids Research. Oxford University Press (OUP); 2024. https://doi.org/10.1093/nar/gkae358
   - Zou Z, Ohta T, Miura F, Oki S. ChIP-Atlas 2021 update: a data-mining suite for exploring epigenomic landscapes by fully integrating ChIP-seq, ATAC-seq and Bisulfite-seq data. Nucleic Acids Research. Oxford University Press (OUP); 2022. http://dx.doi.org/10.1093/nar/gkac199
   - Oki S, Ohta T, Shioi G, Hatanaka H, Ogasawara O, Okuda Y, Kawaji H, Nakaki R, Sese J, Meno C. ChIP‐Atlas: a data‐mining suite powered by full integration of public ChIP‐seq data. Vol. 19, EMBO reports. EMBO; 2018. http://dx.doi.org/10.15252/embr.201846255
 - Website
