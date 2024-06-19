@@ -97,10 +97,6 @@ class PeakJohn < Sinatra::Base
              settings.target_genes_analysis
            when "number_of_lines"
              settings.bedsizes
-           when "fastqc_images"
-             PJ::FastQC.get_images_url(params[:expid], app_root)
-           when "fastqc_dir" # seems not to be used anywhere
-             PJ::FastQC.new(params[:runid], app_root).read_quality_dir
            when "index_subclass"
              genome        = params[:genome]
              ag_class      = params[:agClass]
