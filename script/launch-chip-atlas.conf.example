@@ -1,0 +1,5 @@
+# AWS EC2 Launch template ID
+AWS_EC2_LAUNCH_TEMPLATE_ID=""
+
+# ChIP Atlas AWS account ID
+CHIP_ATLAS_AWS_ACCOUNT_ID=""
