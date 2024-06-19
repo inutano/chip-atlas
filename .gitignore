@@ -10,3 +10,5 @@ log
 tmp
 rdf/data
 experimentList*json
+script/launch-chip-atlas.conf
+script/temporalInstance*
