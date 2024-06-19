@@ -20,5 +20,6 @@ Crawl-delay: 30
 Disallow: /api
 Disallow: /data
 Disallow: /browse
+Disallow: /browse
 Disallow: /download
 Disallow: /wabi_chipatlas
