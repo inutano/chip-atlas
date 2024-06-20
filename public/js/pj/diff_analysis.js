@@ -128,7 +128,7 @@ const submitDMR = async () => {
   } else {
     $("button#dmr-submit").prop("disabled", true);
     alert(
-      "DMR analysis is currently unavailable due to the background server issue. See maintainance schedule on top page.",
+      "Diff analysis is currently unavailable due to the background server issue. See maintainance schedule on top page.",
     );
   }
 };
