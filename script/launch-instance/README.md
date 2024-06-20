@@ -2,9 +2,10 @@
 
 ## 必要なもの
 
-- `awscli` がインストールされていること
+- [`awscli`](https://docs.aws.amazon.com/ja_jp/cli/latest/userguide/getting-started-install.html) がインストールされていること
   - `aws configure` で設定が完了していること
-- `launch-chip-atlas.conf` に必要な環境変数をセットしておく
+- [`jq`](https://jqlang.github.io/jq/download/) がインストールされていること
+- `launch-chip-atlas.conf` に必要な環境変数をセットしておく (`launch-chip-atlas.conf.example` を参考にする)
   - AWS_EC2_LAUNCH_TEMPLATE_ID
   - CHIP_ATLAS_AWS_ACCOUNT_ID
 
@@ -29,6 +30,8 @@ $ ./launch-chip-atlas.sh --stop <temporalInstance-XXXXXXXX-XXXXXX_info.json>
 ```bash
 $ ./launch-chip-atlas.sh --start <temporalInstance-XXXXXXXX-XXXXXX_info.json>
 ```
+
+しばらく待つと起動してIPが表示されます。*一度停止するとIPはリリースされます。初回時に起動したIPとは基本的に異なるIPが割り振られるので気をつけること。*
 
 ## 注意すること
 
