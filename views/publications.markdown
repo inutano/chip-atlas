@@ -374,7 +374,7 @@
 363. Zhang, Z., et al. Therapeutic potency of compound RMY-205 for pulmonary fibrosis induced by SARS-CoV-2 nucleocapsid protein. __Cell Chem Biol__ (2023). [Link](https://doi.org/doi:10.1016/J.CHEMBIOL.2023.02.004).
 364. Zhao, W., et al. Progesterone activates histone lactylation-Hif1α-glycolysis feedback loop to promote decidualization. __Endocrinology__ (2023). [Link](https://doi.org/doi:10.1210/ENDOCR/BQAD169).
 365. Zimmermann, B., et al. Topological structures and syntenic conservation in sea anemone genomes. __Nat Commun__ (2023). [Link](https://doi.org/doi:10.1038/S41467-023-44080-7).
-366. Zou, Z., et al. Elucidating disease-associated mechanisms triggered by pollutants via the epigenetic landscape using large-scale ChIP-Seq data. __bioRxiv__ (2023). [Link](https://doi.org/doi:10.1101/2023.05.18.541391).
+366. Zou, Z., et al. Elucidating disease-associated mechanisms triggered by pollutants via the epigenetic landscape using large-scale ChIP-Seq data. __Epigenetics Chromatin__ (2023). [Link](https://doi.org/10.1186/s13072-023-00510-w).
 367. Abdelfattah, N., et al. Sex-biased Yap1 oncogene function. __bioRxiv__ (2022). [Link](https://doi.org/doi:10.1101/2022.12.21.521494).
 368. Acevedo, AF., et al. BCL6 regulates the endothelial pro-immunogenic phenotype relevant to organ transplant rejection. __bioRxiv__ (2022). [Link](https://doi.org/doi:10.1101/2022.11.03.514941).
 369. Acevedo, AF., et al. The DNA binding protein BCL6 regulates NFκB-controlled endothelial inflammatory gene expression. __bioRxiv__ (2022). [Link](https://doi.org/doi:10.1101/2022.11.03.514942).
