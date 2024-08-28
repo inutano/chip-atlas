@@ -829,7 +829,7 @@ const generateQvalOptions = async () => {
 // should be exported to json file
 var helpText = {
   note1:
-    "Acceptable identifiers:\n  Official gene symbols (e.g. POU5F1)\n  Ensembl IDs (e.g. ENSG00000204531)\n  Uniprot IDs (e.g. Q01860)\n  RefSeq gene IDs (e.g. NM_002701)\n\nOfficial gene symbols must be entered according to following nomenclatures:\n  H. sapiens: HGNC\n  M. musculus: MGI\n  R. norvegicus: RGD\n  D. melanogaster: FlyBase\n  C. elegans: WormBase\n  S. cerevisiae: SGD\n\nAcceptable example:\n  POU5F1\n  SPI1\n  TP53\n\nBad example:\n  OCT4\n  PU.1\n  p53",
+    "Acceptable identifiers:\n  Official gene symbols (e.g. POU5F1)\n  Ensembl IDs (e.g. ENSG00000204531)\n  Uniprot IDs (e.g. Q01860)\n  RefSeq gene IDs (e.g. NM_002701)\n\nOfficial gene symbols must be entered according to following nomenclatures:\n  H. sapiens: HGNC\n  M. musculus: MGI\n  R. norvegicus: RGD\n  D. melanogaster: FlyBase\n  C. elegans: WormBase\n  S. cerevisiae: SGD\n\nAcceptable example:\n  POU5F1\n  TP53\n\nBad example:\n  OCT4\n  p53",
   note2:
     "Example 1. BED format (tab-delimited columns):\n  chr1\t531435\t543845\n  chr2\t738543\t742321\n\n  Acceptable genome assemblies:\n    hg19, hg38 (H. sapiens)\n    mm9, mm10 (M. musculus)\n    rn6 (R. norvegicus)\n    dm3, dm6 (D. melanogaster)\n    ce10, ce11 (C. elegans)\n    sacCer3 (S. cerevisiae)\n\nExample 2. A sequence motif:\n  ATGCAA\n\nExample 3. A sequence motif with degenerate base symbols (ATGC + WSMKRYBDHVN):\n  ACAMKGTA",
   userdatabed:
