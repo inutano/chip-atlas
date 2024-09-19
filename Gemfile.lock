@@ -22,7 +22,8 @@ GEM
     concurrent-ruby (1.2.3)
     connection_pool (2.4.1)
     drb (2.2.1)
-    google-protobuf (4.26.0-x86_64-linux)
+    google-protobuf (4.27.5-x86_64-linux)
+      bigdecimal
       rake (>= 13)
     haml (6.3.0)
       temple (>= 0.8.2)
