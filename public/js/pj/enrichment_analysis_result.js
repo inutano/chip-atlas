@@ -17,7 +17,7 @@ var getUrlParameter = function getUrlParameter(sParam) {
 var reqId = getUrlParameter("id");
 var title = getUrlParameter("title");
 
-var wabiUrl = "http://ddbj.nig.ac.jp/wabi/chipatlas/";
+var wabiUrl = "https://ddbj.nig.ac.jp/wabi/chipatlas/";
 var reqUrl = wabiUrl + reqId;
 var resultUrl = reqUrl + "?info=result";
 

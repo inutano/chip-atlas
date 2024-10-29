@@ -6,7 +6,7 @@
 
 ## Downtime of Enrichment Analysis and Diff Analysis function
 
-ChIP-Atlas is providing online analysis function on ChIP-Atlas - [Enrichment Analysis](https://chip-atlas.org/enrichment_analysis) and [Diff Analysis](https://chip-atlas.org/diff_analysis). The background calculation relies on the [NIG supercomputer system](http://sc.ddbj.nig.ac.jp), hosted by [DNA Data Bank of Japan, National Institute of Genetics](http://ddbj.nig.ac.jp), while the webapp is hosted on its own cloud instance. Therefore, Enrichment Analysis may go down during the maintenance of the NIG supercomputer system. We announce when the function goes down, but if you encountered any trouble other than that period, please inform us from the issue page.
+ChIP-Atlas is providing online analysis function on ChIP-Atlas - [Enrichment Analysis](https://chip-atlas.org/enrichment_analysis) and [Diff Analysis](https://chip-atlas.org/diff_analysis). The background calculation relies on the [NIG supercomputer system](https://sc.ddbj.nig.ac.jp), hosted by [DNA Data Bank of Japan, National Institute of Genetics](https://ddbj.nig.ac.jp), while the webapp is hosted on its own cloud instance. Therefore, Enrichment Analysis may go down during the maintenance of the NIG supercomputer system. We announce when the function goes down, but if you encountered any trouble other than that period, please inform us from the issue page.
 
 ## Data availability
 

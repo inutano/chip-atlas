@@ -367,7 +367,7 @@ class PeakJohn < Sinatra::Base
 
   # Checking the final html output rather than using Wabi API which is too slow due to its huge job history
   get "/wabi_chipatlas" do
-    if Net::HTTP.get_response(URI.parse("http://ddbj.nig.ac.jp/wabi/chipatlas/" + params[:id] + "?info=result&format=html")).code == "200"
+    if Net::HTTP.get_response(URI.parse("https://ddbj.nig.ac.jp/wabi/chipatlas/" + params[:id] + "?info=result&format=html")).code == "200"
       "finished"
     else
       "running"
