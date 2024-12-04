@@ -258,7 +258,7 @@ qsortBed() {
     mkdir -p "$tmpDir" || { echo "Failed to create temporary directory"; return 1; }
 
     # 入力を染色体ごとに分けてテンポラリファイルに保存
-    awk -F '\t' -v tmpDir="$tmpDir/" '{print > tmpDir $1}'
+    awk -F '\t' -v tmpDir="$tmpDir/" '{print > (tmpDir $1)}'
 
     # 各染色体ごとにソートして標準出力に出力
     for chr in $(ls "$tmpDir" | sort -k1,1); do
