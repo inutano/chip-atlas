@@ -391,7 +391,7 @@ bedL=$(cat $fileL | awk -F '\t' -v genome="$genome" -v antigenClass="$antigenCla
     th = (threshold + 0) / 10
   }
   if ($2 == genome && $3 == antigenClass && $5 == cellClass && $4$6 == "--" && $7 == th) {
-    printf "/home/w3oki/chipatlas/results/%s/public/%s.bed", genome, $1
+    printf "./results/%s/public/%s.bed", genome, $1
   }
 }') # chipatlas/results/mm9/public/ALL.ALL.05.AllAg.AllCell.bed
 echo $bedL
@@ -470,7 +470,7 @@ BEGIN {
   }
 }' | cut -f1-11 | tee $outTsv.tmp | awk -F '\t' -v descriptionA="$descriptionA" -v descriptionB="$descriptionB" -v hed="$hed" -v title="$title" -v wabiID="$wabiID" -v srxUrl=$srxUrl '  # html に変換
 BEGIN {
-  while ((getline < "/home/w3oki/bin/btbpToHtml.txt") > 0) {
+  while ((getline < "./btbpToHtml.txt") > 0) {
     gsub("___Title___", title, $0)
     gsub("___Targets___", descriptionA, $0)
     gsub("___References___", descriptionB, $0)
