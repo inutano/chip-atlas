@@ -243,7 +243,7 @@ function geneToBed() { # $1 = 入力 Bed ファイル名  $2 = Genome  $3 = dist
 }
 
 function cutBED() {
-  cat $1 | awk -F '\t' -v OFS='\t' '{
+  awk -F '\t' -v OFS='\t' '{
     if ($2 < 0) $2 = 0
     if ($3 < 0) $3 = 1
     if ($2 <= $3) print
