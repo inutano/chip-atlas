@@ -20,7 +20,7 @@
 "./geneList_A.txt" \
 "./geneList_B.txt" \
 "gene" \
-"gene" \
+"userlist" \
 "dataset A" \
 "dataset B" \
 "My project" \
