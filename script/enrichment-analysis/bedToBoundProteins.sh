@@ -1,7 +1,5 @@
 #!/bin/bash
 #$ -S /bin/bash
-export PS4='+ $LINENO: '
-set -ex
 
 # sh chipatlas/sh/analTools/bedToBoundProteins.sh A.bed B.bed L.bed out.tsv
 
@@ -73,44 +71,25 @@ descriptionA="My data"
 descriptionB="Comparison"
 title="My data vs Comparison"
 hed="Search for proteins significantly bound to your data."
-#wabiID=$(cat job_info.json | tr -d '"":,' | awk '$1 == "requestId" {printf "%s", $2}')
-wabiID="hogehoge"
+wabiID=$(cat job_info.json | tr -d '"":,' | awk '$1 == "requestId" {printf "%s", $2}')
 srxUrl="http://chip-atlas.org/view?id="
 
-# bedA="$1"
-# bedB="$2"
-# outTsv="$3"
-# outHtml="$4"
-# typeA="$5"
-# typeB="$6"
-# descriptionA="$7"
-# descriptionB="$8"
-# title="$9"
-# permTime="${10}"
-# distanceDown="${11}"
-# distanceUp="${12}"
-# genome="${13}"
-# antigenClass="${14}"
-# cellClass="${15}"
-# threshold="${16}"
-
-bedA=bed_A
-bedB=bed_B
-outTsv=wabi_result.tsv
-outHtml=wabi_result.html
-typeA="gene"
-typeB="rnd"
-descriptionA="dataset A"
-descriptionB="Control"
-title="My project"
-permTime=1
-distanceDown=5000
-distanceUp=5000
-genome="mm9"
-antigenClass="TFs and others"
-cellClass="All cell types"
-threshold=100
-
+bedA="$1"
+bedB="$2"
+outTsv="$3"
+outHtml="$4"
+typeA="$5"
+typeB="$6"
+descriptionA="$7"
+descriptionB="$8"
+title="$9"
+permTime="${10}"
+distanceDown="${11}"
+distanceUp="${12}"
+genome="${13}"
+antigenClass="${14}"
+cellClass="${15}"
+threshold="${16}"
 
 touch $wabiID.log
 
