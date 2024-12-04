@@ -29,6 +29,6 @@
 5000 \
 "mm9" \
 "TFs and others" \
-"All cell types" \
-100 \
+"Bone" \
+50 \
 "jobid-hogehoge"
