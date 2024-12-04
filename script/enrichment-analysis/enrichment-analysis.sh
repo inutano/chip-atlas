@@ -2,7 +2,7 @@
 
 # Variables for the script
 export LC_ALL=C
-export PS4='+ $LINENO: '
+export PS4='\[\033[36m\]+ $LINENO: \[\033[0m]'
 set -eux
 
 # Predefined variables
