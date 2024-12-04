@@ -1,9 +1,17 @@
 #!/bin/bash
 
-# Define variables
+# Variables for the script
 export LC_ALL=C
 export PS4='+ $LINENO: '
 set -eux
+
+# Predefined variables
+shufN=1
+descriptionA="My data"
+descriptionB="Comparison"
+title="My data vs Comparison"
+hed="Search for proteins significantly bound to your data."
+srxUrl="http://chip-atlas.org/view?id="
 
 # Positional parameters
 bedA="${1}"
@@ -20,7 +28,7 @@ genome="${11}"
 antigenClass="${12}"
 cellClass="${13}"
 threshold="${14}"
-job_id="${15}"
+wabiID="${15}"
 
 # Reference files
 expL="./experimentList.tab"
@@ -30,13 +38,10 @@ uniqueTSSBed="./uniqueTSS.${genome}.bed"
 chromSizes="./${genome}.chrom.sizes"
 
 # Output files
-tmpF="./${job_id}_ea.tmp"
-outTsv="./${job_id}_ea_result.tsv"
-outHtml="./${job_id}_ea_result.html"
+tmpF="./${wabiID}_ea.tmp"
+outTsv="./${wabiID}_ea_result.tsv"
+outHtml="./${wabiID}_ea_result.html"
 touch ${tmpF} ${outTsv} ${outHtml}
-
-# Other predefined variables
-shufN=1
 
 #
 # functions
