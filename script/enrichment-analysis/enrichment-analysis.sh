@@ -323,7 +323,6 @@ DDD
 }
 
 function fisheR() {
-    local key=$1
 Rscript - << 'DDD' $key
 args <- commandArgs(trailingOnly = T)
 
