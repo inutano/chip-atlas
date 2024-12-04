@@ -24,18 +24,17 @@ job_id="${15}"
 
 # Reference files
 expL="./experimentList.tab"
-filL="./fileList.tab"
+fileL="./fileList.tab"
 id2gene="./id2symbol.${genome}.tsv"
 uniqueTSSBed="./uniqueTSS.${genome}.bed"
 chromSizes="./${genome}.chrom.sizes"
 
 
 # Output files
-tmp="./${job_id}_ea.tmp"
-log="./${job_id}_ea.log"
+tmpF="./${job_id}_ea.tmp"
 outTsv="./${job_id}_ea_result.tsv"
 outHtml="./${job_id}_ea_result.html"
-touch ${tmp} ${log} ${outTsv} ${outHtml}
+touch ${tmpF} ${outTsv} ${outHtml}
 
 #
 # functions
