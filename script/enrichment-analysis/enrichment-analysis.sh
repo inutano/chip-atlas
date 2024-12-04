@@ -256,7 +256,7 @@ function cutBED() {
   }'
 }
 
-qsortBed() {
+function qsortBed() {
     # original https://github.com/shinyaoki/chipatlas/blob/master/sh/analTools/wabi/wabi_bin/qsortBed
     local tmpDir="/tmp/qsortBed_$RANDOM$RANDOM$RANDOM"
 
@@ -323,25 +323,28 @@ DDD
 }
 
 function fisheR() {
-Rscript - << 'DDD' 2
-args <- commandArgs(trailingOnly = T)
+  local fishRtmpF="/tmp/fisheR_$RANDOM$RANDOM$RANDOM"
+  cat - > $fishRtmpF
+  R --vanilla --args $fishRtmpF << 'DDD'
+    args <- commandArgs(trailingOnly = T)
+    d <- read.table(args[1], sep="\t", head=F)
+    k <- as.numeric("2")
 
-k <- as.numeric(args[1])
+    t <- d[,k:(k+3)]
+    f <- c(1:nrow(t))
 
-# 標準入力からデータを読み込む
-d <- read.table(file("stdin"), sep="\t", head=F)
+    for (i in 1:nrow(t)) {
+      tbl <- matrix(as.numeric(t[i,]), ncol=2, byrow=T)
+      f[i] <- fisher.test(tbl)[1]
+    }
+    out <- cbind(d, as.numeric(f))
 
-t <- d[,k:(k+3)]
-f <- c(1:nrow(t))
-
-for (i in 1:nrow(t)) {
-    tbl <- matrix(as.numeric(t[i,]), ncol=2, byrow=T)
-    f[i] <- fisher.test(tbl)[1]
-}
-out <- cbind(d, as.numeric(f))
-
-write.table(out, quote = FALSE, sep = "\t", file="", col.names=F, row.names=F)
+    outtsv <- paste(args[1], ".tmp___Rfisher", sep="")
+    write.table(out, quote = FALSE, sep = "\t", file=outtsv, append = FALSE, col.names=F, row.names=F)
 DDD
+  cat $fishRtmpF.tmp___Rfisher
+  rm $fishRtmpF.tmp___Rfisher
+  rm $fishRtmpF
 }
 
 #
