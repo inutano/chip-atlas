@@ -29,12 +29,14 @@ id2gene="./id2symbol.${genome}.tsv"
 uniqueTSSBed="./uniqueTSS.${genome}.bed"
 chromSizes="./${genome}.chrom.sizes"
 
-
 # Output files
 tmpF="./${job_id}_ea.tmp"
 outTsv="./${job_id}_ea_result.tsv"
 outHtml="./${job_id}_ea_result.html"
 touch ${tmpF} ${outTsv} ${outHtml}
+
+# Other predefined variables
+shufN=1
 
 #
 # functions
