@@ -249,20 +249,24 @@ function cutBED() {
   }'
 }
 
-function qsortBed() {
-  # imported from https://github.com/shinyaoki/chipatlas/blob/master/sh/analTools/wabi/wabi_bin/qsortBed
-  local tmpDir="/tmp/qsortBed"$RANDOM$RANDOM$RANDOM
-  shift `expr $OPTIND - 1`
+qsortBed() {
+    # original https://github.com/shinyaoki/chipatlas/blob/master/sh/analTools/wabi/wabi_bin/qsortBed
+    local tmpDir="/tmp/qsortBed_$RANDOM$RANDOM$RANDOM"
 
-  rm -rf "$tmpDir"
-  mkdir "$tmpDir"
-  awk -F '\t' -v tmpDir="$tmpDir""/" '{print > tmpDir $1}' $1
+    # 作業用ディレクトリ作成
+    rm -rf "$tmpDir"
+    mkdir -p "$tmpDir" || { echo "Failed to create temporary directory"; return 1; }
 
-  for chr in `ls "$tmpDir"| sort -k1,1`; do
-    sort -k2,2n "$tmpDir"/$chr
-  done
+    # 入力を染色体ごとに分けてテンポラリファイルに保存
+    awk -F '\t' -v tmpDir="$tmpDir/" '{print > tmpDir $1}'
 
-  rm -r "$tmpDir"
+    # 各染色体ごとにソートして標準出力に出力
+    for chr in $(ls "$tmpDir" | sort -k1,1); do
+        sort -k2,2n "$tmpDir/$chr"
+    done
+
+    # テンポラリディレクトリのクリーンアップ
+    rm -rf "$tmpDir"
 }
 
 function qval() {
