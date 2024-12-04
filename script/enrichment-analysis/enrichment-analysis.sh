@@ -284,7 +284,7 @@ function qval() {
     local Log=1
     local Exp=1
     local method=BH
-    local aRnd=`echo $RANDOM$RANDOM$RANDOM`
+    local Rnd=`echo $RANDOM$RANDOM$RANDOM`
     local tmpdir="/tmp"
     local tmpTxt="$tmpdir/qVal$Rnd.txt"
     local tmpR="$tmpdir/qVal$Rnd.R"
@@ -323,7 +323,7 @@ DDD
 }
 
 function fisheR() {
-Rscript - << 'DDD' $key
+Rscript - << 'DDD' 2
 args <- commandArgs(trailingOnly = T)
 
 k <- as.numeric(args[1])
