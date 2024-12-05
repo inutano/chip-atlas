@@ -1,0 +1,9 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: chip-atlas-enrichment-analysis
+    volumes:
+      - ./tmp:/tmp
+      - .:/app
