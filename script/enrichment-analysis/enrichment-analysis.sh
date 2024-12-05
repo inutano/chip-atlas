@@ -41,10 +41,11 @@ btbpToHtml="${21}"
 # Output files
 EA_TMPDIR="${22}"
 mkdir -p ${EA_TMPDIR}
-
 tmpF="${EA_TMPDIR}/${wabiID}_ea.tmp"
-outTsv="${EA_TMPDIR}/${wabiID}_ea_result.tsv"
-outHtml="${EA_TMPDIR}/${wabiID}_ea_result.html"
+
+EA_OUTDIR="${23}"
+outTsv="${EA_OUTDIR}/${wabiID}.result.tsv"
+outHtml="${EA_OUTDIR}/${wabiID}.result.html"
 touch ${tmpF} ${outTsv} ${outHtml}
 
 # Search and set reference files
