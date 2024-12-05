@@ -36,14 +36,15 @@ fileL="${17}"
 id2gene_dir="${18}"
 uniqueTSS_dir="${19}"
 chromSizes_dir="${20}"
-btbpToHtml="${21}"
+referenceBed_dir="${21}"
+btbpToHtml="${22}"
 
 # Output files
-EA_TMPDIR="${22}"
+EA_TMPDIR="${23}"
 mkdir -p ${EA_TMPDIR}
 tmpF="${EA_TMPDIR}/${wabiID}_ea.tmp"
 
-EA_OUTDIR="${23}"
+EA_OUTDIR="${24}"
 outTsv="${EA_OUTDIR}/${wabiID}.result.tsv"
 outHtml="${EA_OUTDIR}/${wabiID}.result.html"
 touch ${tmpF} ${outTsv} ${outHtml}
@@ -84,6 +85,12 @@ else
     echo "Error: ${chromSizes} does not exist."
     exit 1
   fi
+fi
+
+# Check if directory exists and the dir for the genome is in the directory, exit if not
+if [ ! -d "${referenceBed_dir}" ]; then
+  echo "Error: ${referenceBed_dir} does not exist."
+  exit 1
 fi
 
 #
@@ -439,14 +446,14 @@ if [ $wclAB = "0" ]; then
 fi
 
 # ライブラリファイルの選択
-bedL=$(cat $fileL | awk -F '\t' -v genome="$genome" -v antigenClass="$antigenClass" -v cellClass="$cellClass" -v threshold="$threshold" '{
+bedL=$(cat $fileL | awk -F '\t' -v referenceBed_dir="$referenceBed_dir" -v genome="$genome" -v antigenClass="$antigenClass" -v cellClass="$cellClass" -v threshold="$threshold" '{
   if (antigenClass == "Bisulfite-Seq") {
     th = "bs"
   } else {
     th = (threshold + 0) / 10
   }
   if ($2 == genome && $3 == antigenClass && $5 == cellClass && $4$6 == "--" && $7 == th) {
-    printf "./results/%s/public/%s.bed", genome, $1
+    printf referenceBed_dir "/%s/public/%s.bed", genome, $1
   }
 }') # chipatlas/results/mm9/public/ALL.ALL.05.AllAg.AllCell.bed
 echo $bedL
