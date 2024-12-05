@@ -25,7 +25,7 @@
 </style>
 </head>
 <body class="bodyMargin" onresize="location.reload()">
-<h1>ChIP-Atlas / in silico ChIP</h1>
+<h1>ChIP-Atlas / Enrichment Analysis</h1>
 <p>___Header___</p>
 
 <script>
@@ -51,7 +51,7 @@ jQuery.fn.dataTableExt.aTypes.unshift(
 				bDecimal = true;
 			}
 		}
-		
+
 		return 'numeric-comma';
 	}
 );
