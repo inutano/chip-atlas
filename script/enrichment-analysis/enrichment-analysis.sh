@@ -325,7 +325,7 @@ DDD
 function fisheR() {
   local fishRtmpF="/tmp/fisheR_$RANDOM$RANDOM$RANDOM"
   cat - > $fishRtmpF
-  R --vanilla --args $fishRtmpF << 'DDD'
+  R --vanilla --args $fishRtmpF << 'DDD' > /dev/null
     args <- commandArgs(trailingOnly = T)
     d <- read.table(args[1], sep="\t", head=F)
     k <- as.numeric("2")
