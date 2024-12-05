@@ -5,5 +5,5 @@ services:
       dockerfile: Dockerfile
     container_name: chip-atlas-enrichment-analysis
     volumes:
-      - ./tmp:/tmp
       - .:/app
+    working_dir: /app
