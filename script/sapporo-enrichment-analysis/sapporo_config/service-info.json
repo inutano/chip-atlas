@@ -1,0 +1,12 @@
+{
+  "workflow_type_versions": {
+    "enrichment-analysis": {
+      "workflow_type_version": ["1.0.0"]
+    }
+  },
+  "workflow_engine_versions": {
+    "enrichment-analysis": {
+      "workflow_engine_version": ["1.0.0"]
+    }
+  }
+}
