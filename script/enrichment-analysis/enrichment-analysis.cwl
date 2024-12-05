@@ -25,8 +25,8 @@ arguments:
   - $(inputs.uniqueTSS_dir)
   - $(inputs.chromSizes_dir)
   - $(inputs.btbpToHtml)
-  - $(inputs.tmpdir")
-  - $(inputs.outdir")
+  - $(inputs.tmpdir)
+  - $(inputs.outdir)
 inputs:
   - id: main_script
     type: File
