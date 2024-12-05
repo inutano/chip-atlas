@@ -30,18 +30,59 @@ cellClass="${13}"
 threshold="${14}"
 wabiID="${15}"
 
-# Reference files
-expL="./experimentList.tab"
-fileL="./fileList.tab"
-id2gene="./id2symbol.${genome}.tsv"
-uniqueTSSBed="./uniqueTSS.${genome}.bed"
-chromSizes="./${genome}.chrom.sizes"
+# Reference files from arguments
+expL="${16}"
+fileL="${17}"
+id2gene_dir="${18}"
+uniqueTSS_dir="${19}"
+chromSizes_dir="${20}"
 
 # Output files
-tmpF="./${wabiID}_ea.tmp"
-outTsv="./${wabiID}_ea_result.tsv"
-outHtml="./${wabiID}_ea_result.html"
+EA_TMPDIR="${21}"
+mkdir -p ${EA_TMPDIR}
+
+tmpF="${EA_TMPDIR}/${wabiID}_ea.tmp"
+outTsv="${EA_TMPDIR}/${wabiID}_ea_result.tsv"
+outHtml="${EA_TMPDIR}/${wabiID}_ea_result.html"
 touch ${tmpF} ${outTsv} ${outHtml}
+
+# Search and set reference files
+
+# Check if directory exists and the genome is in the directory, exit if not
+if [ ! -d "${id2gene_dir}" ]; then
+  echo "Error: ${id2gene_dir} does not exist."
+  exit 1
+else
+  id2gene="${id2gene_dir}/id2symbol.${genome}.tsv"
+  if [ ! -f "${id2gene}" ]; then
+    echo "Error: ${id2gene} does not exist."
+    exit 1
+  fi
+fi
+
+# Check if directory exists and the TSS info is in the directory, exit if not
+if [ ! -d "${uniqueTSS_dir}" ]; then
+  echo "Error: ${uniqueTSS_dir} does not exist."
+  exit 1
+else
+  uniqueTSSBed="${uniqueTSS_dir}/uniqueTSS.${genome}.bed"
+  if [ ! -f "${uniqueTSSBed}" ]; then
+    echo "Error: ${uniqueTSSBed} does not exist."
+    exit 1
+  fi
+fi
+
+# Check if directory exists and the chromSizes file is in the directory, exit if not
+if [ ! -d "${chromSizes_dir}" ]; then
+  echo "Error: ${chromSizes_dir} does not exist."
+  exit 1
+else
+  chromSizes="${chromSizes_dir}/${genome}.chrom.sizes"
+  if [ ! -f "${chromSizes}" ]; then
+    echo "Error: ${chromSizes} does not exist."
+    exit 1
+  fi
+fi
 
 #
 # functions
@@ -78,7 +119,7 @@ function motifbed() {
     local alldna_len=`expr 14 - $len`
   fi
 
-  local tmpdir="/tmp/motifbed_temp_"$RANDOM$RANDOM$RANDOM
+  local tmpdir="${EA_TMPDIR}/motifbed_temp_"$RANDOM$RANDOM$RANDOM
   mkdir -p $tmpdir
 
     for sequence in `NtoATGC $query`; do
@@ -106,7 +147,7 @@ function motifbed() {
 
 function NtoATGC() {
   # imported from https://github.com/shinyaoki/chipatlas/blob/master/sh/analTools/wabi/wabi_bin/NtoATGC
-  local tmpdir="/tmp/NtoATGC_tmp"$RANDOM$RANDOM$RANDOM
+  local tmpdir="${EA_TMPDIR}/NtoATGC_tmp"$RANDOM$RANDOM$RANDOM
   mkdir -p $tmpdir
 
   local len=`echo $1| wc -c`
@@ -258,7 +299,7 @@ function cutBED() {
 
 function qsortBed() {
     # original https://github.com/shinyaoki/chipatlas/blob/master/sh/analTools/wabi/wabi_bin/qsortBed
-    local tmpDir="/tmp/qsortBed_$RANDOM$RANDOM$RANDOM"
+    local tmpDir="${EA_TMPDIR}/qsortBed_$RANDOM$RANDOM$RANDOM"
 
     # 作業用ディレクトリ作成
     rm -rf "$tmpDir"
@@ -285,7 +326,7 @@ function qval() {
     local Exp=1
     local method=BH
     local Rnd=`echo $RANDOM$RANDOM$RANDOM`
-    local tmpdir="/tmp"
+    local tmpdir="${EA_TMPDIR}"
     local tmpTxt="$tmpdir/qVal$Rnd.txt"
     local tmpR="$tmpdir/qVal$Rnd.R"
 
@@ -323,7 +364,7 @@ DDD
 }
 
 function fisheR() {
-  local fishRtmpF="/tmp/fisheR_$RANDOM$RANDOM$RANDOM"
+  local fishRtmpF="${EA_TMPDIR}/fisheR_$RANDOM$RANDOM$RANDOM"
   cat - > $fishRtmpF
   R --vanilla --args $fishRtmpF << 'DDD' > /dev/null
     args <- commandArgs(trailingOnly = T)

@@ -33,4 +33,10 @@ mkdir -p results/mm9/public
 "TFs and others" \
 "Bone" \
 50 \
-"jobid-hogehoge"
+"jobid-hogehoge" \
+"./reference/experimentList.tab" \
+"./reference/fileList.tab" \
+"./reference" \
+"./reference" \
+"./reference" \
+"./tmp"
