@@ -36,9 +36,10 @@ fileL="${17}"
 id2gene_dir="${18}"
 uniqueTSS_dir="${19}"
 chromSizes_dir="${20}"
+btbpToHtml="${21}"
 
 # Output files
-EA_TMPDIR="${21}"
+EA_TMPDIR="${22}"
 mkdir -p ${EA_TMPDIR}
 
 tmpF="${EA_TMPDIR}/${wabiID}_ea.tmp"
@@ -521,9 +522,9 @@ BEGIN {
     for (i=6; i<=NF; i++) printf "%s\t", $i
     printf "\n"
   }
-}' | cut -f1-11 | tee $outTsv.tmp | awk -F '\t' -v descriptionA="$descriptionA" -v descriptionB="$descriptionB" -v hed="$hed" -v title="$title" -v wabiID="$wabiID" -v srxUrl=$srxUrl '  # html に変換
+}' | cut -f1-11 | tee $outTsv.tmp | awk -F '\t' -v btbpToHtml="${btbpToHtml}" -v descriptionA="$descriptionA" -v descriptionB="$descriptionB" -v hed="$hed" -v title="$title" -v wabiID="$wabiID" -v srxUrl=$srxUrl '  # html に変換
 BEGIN {
-  while ((getline < "./btbpToHtml.txt") > 0) {
+  while ((getline < btbpToHtml) > 0) {
     gsub("___Title___", title, $0)
     gsub("___Targets___", descriptionA, $0)
     gsub("___References___", descriptionB, $0)
