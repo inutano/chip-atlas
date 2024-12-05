@@ -1,0 +1,27 @@
+services:
+  sapporo:
+    image: ghcr.io/sapporo-wes/sapporo-service:2.0.4
+    container_name: sapporo-enrichment-analysis
+    volumes:
+      - ${PWD}/sapporo_config:/app/sapporo_config
+      # - ${PWD}/sapporo_run:${PWD}/sapporo_run
+      # - ${PWD}/shared_data:${PWD}/shared_data
+      - ${PWD}/../enrichment-analysis:/app/enrichment-analysis
+      - ${PWD}/../enrichment-analysis/reference:/app/reference
+      - ${PWD}/../enrichment-analysis/results:/app/results
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - SAPPORO_DEBUG=True
+      # - SAPPORO_RUN_DIR=${PWD}/sapporo_run
+      - SAPPORO_SERVICE_INFO=/app/sapporo_config/service-info.json
+      - SAPPORO_RUN_SH=/app/sapporo_config/run.sh
+      # - SHARED_DATA_DIR=${PWD}/shared_data
+      - ENRICHMENT_ANALYSIS_DIR=/app/enrichment-analysis
+      - ENRICHMENT_ANALYSIS_REFERENCE_DIR=/app/reference
+      - ENRICHMENT_ANALYSIS_RESULTS_DIR=/app/results
+    restart: on-failure
+    working_dir: /app
+    network_mode: host
+    command: ["sapporo"]
+    ports:
+      - "1122:1122"
