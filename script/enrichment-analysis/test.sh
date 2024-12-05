@@ -39,4 +39,5 @@ mkdir -p results/mm9/public
 "./reference" \
 "./reference" \
 "./reference" \
+"./reference/btbpToHtml.txt" \
 "./tmp"
