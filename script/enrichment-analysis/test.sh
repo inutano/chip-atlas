@@ -16,6 +16,8 @@
 # threshold="${14}"
 # job_id="${15}"
 
+mkdir -p results/mm9/public
+
 . ./enrichment-analysis.sh \
 "./geneList_A.txt" \
 "./geneList_B.txt" \
