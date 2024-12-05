@@ -1,0 +1,49 @@
+outdir: # type 'Directory'
+  class: Directory
+  path: ./out
+tmpdir: # type 'Directory'
+  class: Directory
+  path: ./tmp
+btbpToHtml: # type 'File'
+  class: File
+  path: ./reference/btbpToHtml.txt
+chromSizes_dir: # type 'Directory'
+  class: Directory
+  path: ./reference
+uniqueTSS_dir: # type 'Directory'
+  class: Directory
+  path: ./reference
+id2gene_dir: # type 'Directory'
+  class: Directory
+  path: ./reference
+referenceBed_dir:
+  class: Directory
+  path: ./results
+fileL: # type 'File'
+  class: File
+  path: ./reference/fileList.tab
+expL: # type 'File'
+  class: File
+  path: ./reference/experimentList.tab
+wabiID: enrichment-analysis # type 'string'
+threshold: 50 # type 'int'
+cellClass: "Bone" # type 'string'
+antigenClass: "TFs and others" # type 'string'
+genome: mm9 # type 'string'
+distanceUp: 5000 # type 'int'
+distanceDown: 5000 # type 'int'
+permTime: 1 # type 'int'
+title: "My project" # type 'string'
+descriptionB: "dataset B" # type 'string'
+descriptionA: "dataset A" # type 'string'
+typeB: "userlist" # enum; valid values: "file:///Users/inutano/repos/chip-atlas/script/enrichment-analysis/enrichment-analysis.cwl#typeB/rnd", "file:///Users/inutano/repos/chip-atlas/script/enrichment-analysis/enrichment-analysis.cwl#typeB/bed", "file:///Users/inutano/repos/chip-atlas/script/enrichment-analysis/enrichment-analysis.cwl#typeB/refseq", "file:///Users/inutano/repos/chip-atlas/script/enrichment-analysis/enrichment-analysis.cwl#typeB/userlist"
+typeA: "gene" # enum; valid values: "file:///Users/inutano/repos/chip-atlas/script/enrichment-analysis/enrichment-analysis.cwl#typeA/gene", "file:///Users/inutano/repos/chip-atlas/script/enrichment-analysis/enrichment-analysis.cwl#typeA/bed"
+bedB: # type 'File'
+  class: File
+  path: ./geneList_B.txt
+bedA: # type 'File'
+  class: File
+  path: ./geneList_A.txt
+main_script: # default value of type 'File'.
+  class: File
+  location: ./enrichment-analysis.sh

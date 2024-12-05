@@ -1,6 +1,20 @@
 #!/usr/bin/env cwl-runner
 class: CommandLineTool
 cwlVersion: v1.0
+hints:
+  DockerRequirement:
+    dockerPull: enrichment-analysis-app:latest
+requirements:
+  InitialWorkDirRequirement:
+    listing:
+      - entry: $(inputs.tmpdir)
+        writable: true
+      - entry: $(inputs.outdir)
+        writable: true
+      - entry: $(inputs.bedA)
+        writable: true
+      - entry: $(inputs.bedB)
+        writable: true
 baseCommand: bash
 arguments:
   - $(inputs.main_script)
@@ -24,6 +38,7 @@ arguments:
   - $(inputs.id2gene_dir)
   - $(inputs.uniqueTSS_dir)
   - $(inputs.chromSizes_dir)
+  - $(inputs.referenceBed_dir)
   - $(inputs.btbpToHtml)
   - $(inputs.tmpdir)
   - $(inputs.outdir)
@@ -83,6 +98,8 @@ inputs:
     type: Directory
   - id: chromSizes_dir
     type: Directory
+  - id: referenceBed_dir
+    type: Directory
   - id: btbpToHtml
     type: File
   - id: tmpdir
@@ -90,11 +107,7 @@ inputs:
   - id: outdir
     type: Directory
 outputs:
-  - id: output_tsv
-    type: File
+  - id: output_dir
+    type: Directory
     outputBinding:
-      glob: $(inputs.outdir.path)/*.tsv
-  - id: output_html
-    type: File
-    outputBinding:
-      glob: $(inputs.outdir.path)/*.html
+      glob: $(inputs.outdir.path)
