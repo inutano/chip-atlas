@@ -13,7 +13,8 @@ fi
 export PATH=$PATH:$HOME/minio-binaries/
 
 # Set up mc command alias
-mc alias set chip-atlas-dbcls https://chip-atlas.dbcls.jp ${1} ${2}
+. ${HOME}/.minio-env
+mc alias set chip-atlas-dbcls https://chip-atlas.dbcls.jp ${MINIO_ACCESS_KEY} ${MINIO_SECRET_KEY}
 
 # Create directories
 mkdir -p ${HOME}/chip-atlas/data/others/lib
