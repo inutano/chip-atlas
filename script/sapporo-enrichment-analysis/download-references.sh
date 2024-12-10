@@ -1,9 +1,15 @@
 #!/bin/bash
 # Usage:
 # bash download-references.sh <minio-access-key> <minio-secret-key>
+set -eux
 
 # Install mc command by apt if not found
-which mc || (sudo apt-get update -y && sudo apt-get install -y mc)
+curl https://dl.min.io/client/mc/release/linux-amd64/mc \
+  --create-dirs \
+  -o $HOME/minio-binaries/mc
+
+chmod +x $HOME/minio-binaries/mc
+export PATH=$PATH:$HOME/minio-binaries/
 
 # Set up mc command alias
 mc alias set chip-atlas-dbcls https://chip-atlas.dbcls.jp ${1} ${2}
