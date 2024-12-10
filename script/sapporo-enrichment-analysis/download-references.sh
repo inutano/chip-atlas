@@ -9,8 +9,8 @@ if [[ ! -e $HOME/minio-binaries/mc ]]; then
     --create-dirs \
     -o $HOME/minio-binaries/mc
   chmod +x $HOME/minio-binaries/mc
-  export PATH=$PATH:$HOME/minio-binaries/
 fi
+export PATH=$PATH:$HOME/minio-binaries/
 
 # Set up mc command alias
 mc alias set chip-atlas-dbcls https://chip-atlas.dbcls.jp ${1} ${2}
