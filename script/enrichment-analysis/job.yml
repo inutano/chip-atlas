@@ -9,13 +9,13 @@ btbpToHtml: # type 'File'
   path: ./reference/btbpToHtml.txt
 chromSizes_dir: # type 'Directory'
   class: Directory
-  path: ./reference
+  path: ./reference/genome_size
 uniqueTSS_dir: # type 'Directory'
   class: Directory
-  path: ./reference
+  path: ./reference/TSS
 id2gene_dir: # type 'Directory'
   class: Directory
-  path: ./reference
+  path: ./reference/id2symbol
 referenceBed_dir:
   class: Directory
   path: ./results
