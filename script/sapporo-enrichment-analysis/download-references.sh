@@ -8,6 +8,10 @@ which mc || (sudo apt-get update -y && sudo apt-get install -y mc)
 # Set up mc command alias
 mc alias set chip-atlas-dbcls https://chip-atlas.dbcls.jp ${1} ${2}
 
+# Create directories
+mkdir -p ${HOME}/chip-atlas/data/others/lib
+mkdir -p ${HOME}/chip-atlas/data/metadata
+
 # Sync data/others/lib/genome_size
 mc cp chip-atlas-dbcls/chip-atlas-data/others/lib/genome_size ${HOME}/chip-atlas/data/others/lib/genome_size
 
