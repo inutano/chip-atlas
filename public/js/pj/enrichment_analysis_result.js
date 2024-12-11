@@ -52,9 +52,11 @@ if (api == "wabi") {
   });
 } else {
   var resultUrl =
-    "https://chip-atlas.dbcls.jp/data/enrichment-analysis" + reqId;
-  $("a#result-url").text(resultUrl + reqId + ".result.html");
-  $("a#download-tsv").text(resultUrl + reqId + ".result.tsv");
+    "https://chip-atlas.dbcls.jp/data/enrichment-analysis/" + reqId;
+  var htmlUrl = resultUrl + "/" + reqId + ".result.html";
+  var tsvUrl = resultUrl + "/" + reqId + ".result.tsv";
+  $("a#result-url").text(htmlUrl);
+  $("a#download-tsv").text(tsvUrl);
 
   // check if the run state is complete
   // state api will return json object with key "state" and value like "RUNNING", "COMPLETE", "EXECUTOR_ERROR", etc.
@@ -66,8 +68,8 @@ if (api == "wabi") {
         tdStatus.text(state);
         if (state == "COMPLETE") {
           tdStatus.css("color", "red");
-          $("a#result-url").attr("href", resultUrl + reqId + ".result.html");
-          $("a#download-tsv").attr("href", resultUrl + reqId + ".result.tsv");
+          $("a#result-url").attr("href", htmlUrl);
+          $("a#download-tsv").attr("href", tsvUrl);
           clearInterval(interval);
         } else if (status == "EXECUTOR_ERROR") {
           alert(
