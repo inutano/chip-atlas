@@ -610,7 +610,7 @@ function post2sapporo(button, data) {
     formData.append("workflow_params", JSON.stringify(data));
     $.ajax({
       type: "post",
-      url: sapporoService + "/runs",
+      url: "http://" + sapporoService + "/runs",
       data: formData,
       contentType: false,
       processData: false,
