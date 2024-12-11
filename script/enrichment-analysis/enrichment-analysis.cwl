@@ -17,8 +17,8 @@ requirements:
 baseCommand: bash
 arguments:
   - $(inputs.main_script)
-  - $(inputs.bedA)
-  - $(inputs.bedB)
+  - $(inputs.bedAFile)
+  - $(inputs.bedBFile)
   - $(inputs.typeA)
   - $(inputs.typeB)
   - $(inputs.descriptionA)
@@ -47,9 +47,9 @@ inputs:
     default:
       class: File
       location: ./enrichment-analysis.sh
-  - id: bedA
+  - id: bedAFile
     type: string
-  - id: bedB
+  - id: bedBFile
     type: string
   - id: typeA
     type:
