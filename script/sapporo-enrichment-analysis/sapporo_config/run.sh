@@ -27,7 +27,7 @@ function run_wf() {
 
 function run_enrichment-analysis() {
   local ea_job=${ENRICHMENT_ANALYSIS_DIR}/$(basename ${run_dir}).json
-  jq -s add ${wf_params} ${ENRICHMENT_ANALYSIS_DIR}/job.reference.json > ${ea_job}
+  jq -s add ${wf_params} ${ENRICHMENT_ANALYSIS_DIR}/job.reference.json <(echo "{\"wabiID\":\"$(basename ${run_dir})\"}") > ${ea_job}
 
   local container="quay.io/commonwl/cwltool:3.1.20240508115724"
   local cmd_txt="${DOCKER_CMD} \
@@ -64,8 +64,8 @@ function upload() {
     -v ${run_dir}:${run_dir} \
     amazon/aws-cli \
     s3 cp \
-      ${outputs_dir} \
-      s3://data/enrichment-analysis/$(basename ${outputs_dir}) \
+      ${outputs_dir}/$(basename ${run_id}) \
+      s3://data/enrichment-analysis/$(basename ${run_dir}) \
     --endpoint-url https://chip-atlas.dbcls.jp \
     --recursive
 }
