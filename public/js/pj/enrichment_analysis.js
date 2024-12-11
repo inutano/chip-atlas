@@ -125,7 +125,7 @@ window.onload = async () => {
   } else {
     $("button#virtual-chip-submit").click(function () {
       var button = $(this);
-      var data = retrievePostDataSapporo();
+      var data = retrievePostData();
       post2sapporo(button, data);
     });
   }
@@ -498,35 +498,6 @@ function eraseTextarea(textareaId) {
   $("textarea#" + textareaId).val("");
 }
 
-function retrievePostDataSapporo() {
-  var genome = genomeSelected();
-  var permTime = $(
-    "#" + genome + '-tab-content input[name="numShuf"]:checked',
-  ).val();
-  permTime = permTime > 0 ? permTime : 1;
-  var data = {
-    threshold: $("select#" + genome + "qval option:selected").val(),
-    cellClass: $("select#" + genome + "clClass option:selected").val(),
-    antigenClass: $("select#" + genome + "agClass option:selected").val(),
-    genome: genome,
-    permTime: permTime,
-    title: $("input#" + genome + "ProjectTitle").val(),
-    descriptionA: $("input#" + genome + "UserDataTitle").val(),
-    descriptionB: $("input#" + genome + "ComparedWithTitle").val(),
-    distanceUp: $("input#" + genome + "DistanceUp").val(),
-    distanceDown: $("input#" + genome + "DistanceDown").val(),
-    typeB: $(
-      "#" + genome + '-tab-content input[name="comparedWith"]:checked',
-    ).val(),
-    typeA: $(
-      "#" + genome + '-tab-content input[name="bedORGene"]:checked',
-    ).val(),
-    bedB: retrieveInputData("ComparedWith"),
-    bedA: $("textarea#" + genome + "UserData").val(),
-  };
-  return data;
-}
-
 function retrievePostData() {
   var genome = genomeSelected();
   var permTime = $(
@@ -632,8 +603,7 @@ function post2sapporo(button, data) {
   // evaluate text input and reject if invalid characters are found
   try {
     evaluateText(data);
-    data["bedA"] = data["bedA"].replace(/[^a-zA-Z0-9\t_\n]/g, "_");
-    data["bedB"] = data["bedB"].replace(/[^a-zA-Z0-9\t_\n]/g, "_");
+    replaceDataChars(data);
 
     var formData = new FormData();
     formData.append("workflow_type", "enrichment-analysis");
