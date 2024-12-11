@@ -40,13 +40,15 @@ referenceBed_dir="${21}"
 btbpToHtml="${22}"
 
 # Output files
-EA_TMPDIR="${23}"
+EA_TMPDIR="${23}/${wabiID}"
 mkdir -p ${EA_TMPDIR}
 tmpF="${EA_TMPDIR}/${wabiID}_ea.tmp"
 
-EA_OUTDIR="${24}"
+EA_OUTDIR="${24}/${wabiID}"
+mkdir -p ${EA_OUTDIR}
 outTsv="${EA_OUTDIR}/${wabiID}.result.tsv"
 outHtml="${EA_OUTDIR}/${wabiID}.result.html"
+
 touch ${tmpF} ${outTsv} ${outHtml}
 
 # Search and set reference files
