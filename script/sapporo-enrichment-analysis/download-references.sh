@@ -30,10 +30,10 @@ mc cp --recursive chip-atlas-dbcls/data/others/lib/id2symbol ${HOME}/chip-atlas/
 mc cp --recursive chip-atlas-dbcls/data/others/lib/TSS ${HOME}/chip-atlas/data/others/lib/TSS
 
 # Sync data/metadata/experimentList.tab
-mc cp --recursive chip-atlas-dbcls/data/metadata/experimentList.tab ${HOME}/chip-atlas/data/metadata/experimentList.tab
+mc cp chip-atlas-dbcls/data/metadata/experimentList.tab ${HOME}/chip-atlas/data/metadata/experimentList.tab
 
 # Sync data/metadata/fileList.tab
-mc cp --recursive chip-atlas-dbcls/data/metadata/fileList.tab ${HOME}/chip-atlas/data/metadata/fileList.tab
+mc cp chip-atlas-dbcls/data/metadata/fileList.tab ${HOME}/chip-atlas/data/metadata/fileList.tab
 
 # Sync data/others/lib/inSilicoChIP
 mc cp --recursive chip-atlas-dbcls/data/others/lib/inSilicoChIP ${HOME}/chip-atlas/data/others/lib/inSilicoChIP
