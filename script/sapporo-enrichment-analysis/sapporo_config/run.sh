@@ -40,7 +40,7 @@ function run_enrichment-analysis() {
     ${ea_job} \
     1>${stdout} 2>${stderr}"
   echo ${cmd_txt} >${cmd}
-  eval ${cmd_txt} && mv ${ea_job} ${exe_dir} || executor_error
+  eval ${cmd_txt} && mv ${ea_job} ${outputs_dir} || executor_error
 }
 
 function cancel() {
