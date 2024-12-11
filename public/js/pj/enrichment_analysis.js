@@ -597,6 +597,12 @@ function replaceDataChars(data) {
   return data;
 }
 
+function convertJsonStringsToIntegers(data) {
+  data.permTime = parseInt(data.permTime, 10); // Convert to integer
+  data.threshold = parseInt(data.threshold, 10); // Convert to integer
+  return data; // Return the modified data object
+}
+
 function post2sapporo(button, data) {
   var genome = genomeSelected();
   button.attr("disabled", true);
@@ -604,6 +610,7 @@ function post2sapporo(button, data) {
   try {
     evaluateText(data);
     replaceDataChars(data);
+    convertJsonStringsToIntegers(data);
 
     var formData = new FormData();
     formData.append("workflow_type", "enrichment-analysis");
