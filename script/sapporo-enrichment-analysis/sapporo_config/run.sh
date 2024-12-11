@@ -24,8 +24,20 @@ function run_wf() {
   # generate_ro_crate
   exit 0
 }
-
 function run_enrichment-analysis() {
+  local container="quay.io/commonwl/cwltool:3.1.20240508115724"
+  local cmd_txt="${DOCKER_CMD} -v /home/ubuntu/chip-atlas:/home/ubuntu/chip-atlas ${container} \
+    --debug \
+    --outdir ${outputs_dir} \
+    ${wf_engine_params} \
+    ${ENRICHMENT_ANALYSIS_DIR}/enrichment-analysis.cwl \
+    ${ENRICHMENT_ANALYSIS_DIR}/job.yml \
+    1>${stdout} 2>${stderr}"
+  echo ${cmd_txt} >${cmd}
+  eval ${cmd_txt} || executor_error
+}
+
+function run_enrichment-analysis_bu() {
   local container="quay.io/commonwl/cwltool:3.1.20240508115724"
   local cmd_txt="${DOCKER_CMD} ${container} \
     --outdir ${outputs_dir} \
