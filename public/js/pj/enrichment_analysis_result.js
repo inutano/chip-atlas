@@ -51,7 +51,8 @@ if (api == "wabi") {
     }, 10000);
   });
 } else {
-  var resultUrl = "https://chip-atlas.dbcls.jp/data/enrichment-analysis" + reqId;
+  var resultUrl =
+    "https://chip-atlas.dbcls.jp/data/enrichment-analysis" + reqId;
   $("a#result-url").text(resultUrl + reqId + ".result.html");
   $("a#download-tsv").text(resultUrl + reqId + ".result.tsv");
 
@@ -60,7 +61,7 @@ if (api == "wabi") {
   $(function () {
     var tdStatus = $("td#status");
     var interval = setInterval(function () {
-      $.get('http://' + api + "/runs/" + reqId + "/status", function (status) {
+      $.get("http://" + api + "/runs/" + reqId + "/status", function (status) {
         var state = JSON.parse(status).state;
         tdStatus.text(state);
         if (state == "COMPLETE") {
@@ -77,6 +78,7 @@ if (api == "wabi") {
       });
     }, 10000);
   });
+}
 
 // date format converter function
 function dateFormat(date) {
