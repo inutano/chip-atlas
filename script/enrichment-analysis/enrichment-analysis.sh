@@ -14,8 +14,9 @@ hed="Search for proteins significantly bound to your data."
 srxUrl="http://chip-atlas.org/view?id="
 
 # Positional parameters
-bedA="${1}"
-bedB="${2}"
+bedA_string="${1}"
+bedB_string="${2}"
+
 typeA="${3}"
 typeB="${4}"
 descriptionA="${5}"
@@ -39,10 +40,15 @@ chromSizes_dir="${20}"
 referenceBed_dir="${21}"
 btbpToHtml="${22}"
 
-# Output files
+# Input/Output files
 EA_TMPDIR="${23}/${wabiID}"
 mkdir -p ${EA_TMPDIR}
 tmpF="${EA_TMPDIR}/${wabiID}_ea.tmp"
+
+bedA="${EA_TMPDIR}/${wabiID}_A.bed"
+bedB="${EA_TMPDIR}/${wabiID}_B.bed"
+echo -e "${bedA_string}" >${bedA}
+echo -e "${bedB_string}" >${bedB}
 
 EA_OUTDIR="${24}/${wabiID}"
 mkdir -p ${EA_OUTDIR}
