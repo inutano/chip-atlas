@@ -5,7 +5,7 @@ services:
     volumes:
       - ${PWD}/sapporo_config:/app/sapporo_config
       - ${PWD}/sapporo_run:${PWD}/sapporo_run
-      - ${PWD}/../../../chip-atlas:${PWD}/../../../chip-atla
+      - ${PWD}/../../../chip-atlas:${PWD}/../../../chip-atlas
       - /var/run/docker.sock:/var/run/docker.sock
     environment:
       - SAPPORO_DEBUG=True
