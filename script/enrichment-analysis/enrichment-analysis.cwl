@@ -4,6 +4,9 @@ cwlVersion: v1.0
 hints:
   DockerRequirement:
     dockerPull: enrichment-analysis-app:latest
+  http://commonwl.org/cwltool#LoadListingRequirement:
+    loadListing:
+      no_listing
 requirements:
   InitialWorkDirRequirement:
     listing:
@@ -110,4 +113,4 @@ outputs:
   - id: output_dir
     type: Directory
     outputBinding:
-      glob: $(inputs.outdir.path)
+      glob: $(inputs.outdir.path)/$(inputs.wabiID)
