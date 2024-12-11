@@ -38,12 +38,8 @@ descriptionB: "dataset B" # type 'string'
 descriptionA: "dataset A" # type 'string'
 typeB: "userlist" # enum; valid values: "file:///Users/inutano/repos/chip-atlas/script/enrichment-analysis/enrichment-analysis.cwl#typeB/rnd", "file:///Users/inutano/repos/chip-atlas/script/enrichment-analysis/enrichment-analysis.cwl#typeB/bed", "file:///Users/inutano/repos/chip-atlas/script/enrichment-analysis/enrichment-analysis.cwl#typeB/refseq", "file:///Users/inutano/repos/chip-atlas/script/enrichment-analysis/enrichment-analysis.cwl#typeB/userlist"
 typeA: "gene" # enum; valid values: "file:///Users/inutano/repos/chip-atlas/script/enrichment-analysis/enrichment-analysis.cwl#typeA/gene", "file:///Users/inutano/repos/chip-atlas/script/enrichment-analysis/enrichment-analysis.cwl#typeA/bed"
-bedB: # type 'File'
-  class: File
-  path: ./geneList_B.txt
-bedA: # type 'File'
-  class: File
-  path: ./geneList_A.txt
+bedB: "1110032F04Rik\n2810459M11Rik\nAbhd6\nAdhfe1\nAdrb1\nAida\nAim1\nAldh1a2\nAlx3\nAvpr1a\nBC021891\nBarx2\nBhlha9\nBhlhe23\nBmi1\nBmp6\nBnc1\nBrox\nC1ql2\nC2cd4d\nCar7\nCdk5r2\nCebpa\nCldn34d\nCoch\nCol19a1\nCrabp1\nCxcr4\nCyp1b1\nD430041D05Rik\nDchs1\nDlgap2\nDmrt2\nEmilin3\nEsrrb\nFam150b\nFam19a2\nFam43b\nFbll1\nFfar4\nFlnc\nFlt3\nFoxc2\nFoxd4\nFoxe3\nFoxi3\nFoxl1\nFrzb\nGhsr\nGm13889\nGm1979\nGnal\nGpr25\nGpr88\nGrem1\nGrm6\nGsg1l\nGsx2\nHoxa13\nHoxb2\nHoxd1\nHoxd13\nHs3st2\nHspa1a\nHspa1b\nHspa1l\nHspa2\nHtra1\nIkzf3\nIl31ra\nJakmip3\nKcnk13\nKcnk9\nKpna1\nLox\nLrrc38\nMafa\nMto1\nNell1\nNeurod2\nNfix\nNhlh2\nNkpd1\nNpas2\nNpbwr1\nNpr1\nNptx2\nNptxr\nNr5a1\nNwd2\nOlfr806\nOxtr\nPdzrn4\nPlxna4\nPlxnd1\nPou3f1\nPou4f2\nPparg\nProk2\nPrss12\nPtf1a\nPtger3\nPtpru\nRasd2\nRasgrf1\nRassf10\nRax\nRipply2\nRprml\nRrs1\nScn4b\nSema5b\nSfrp5\nSgpp2\nShc3\nSidt1\nSlc24a4\nSlc26a4\nSlc6a20a\nSnap91\nSost\nSowaha\nSox18\nSpag6l\nSpon1\nSrd5a2\nSspn\nSstr1\nSt8sia6\nSyt6\nTacstd2\nTal1\nTbc1d30\nTbr1\nTcf24\nTdrd6\nTlx2\nTmem125\nTmem163\nTmem56\nTrank1\nTrhde\nTrim2\nTrp73\nVgll2\nWdr8\nWwox\nZar1\nZbtb16\nZpbp2"
+bedA: "1700019D03Rik\n2610305D13Rik\nAbhd6\nAcp6\nAgo1\nAida\nBrox\nBtn2a2\nCcnc\nCdh10\nCdyl\nCldn34d\nCnpy1\nCtsf\nDab1\nDido1\nDll1\nDmtn\nDppa3\nDusp27\nEpb41l1\nFam169a\nFbxo15\nFgfr2\nGadd45g\nGid8\nGja1\nGm13139\nGm13242\nGm14325\nGm21992\nGnai2\nGpa33\nGprc5b\nGrsf1\nHsd17b14\nId3\nIl31ra\nIl6st\nJam2\nKat2b\nKat7\nKlf2\nKpna1\nLats2\nLefty1\nLefty2\nLima1\nLrrtm3\nMap4k4\nMapk1ip1\nMapk4\nMok\nMs4a10\nMtf2\nNampt\nNanog\nNes\nNeurog1\nNid2\nNt5e\nOlfr806\nPipox\nPlcg2\nPou5f1\nPpp2r2d\nPvrl3\nRarg\nRbm14\nReep3\nRest\nRif1\nRps19\nSdf2\nSetx\nSfi1\nSgk1\nShf\nSlc39a14\nSox2\nSpic\nSrrm4\nSupt6\nTcf7l1\nTfe3\nThbs2\nTmem181a\nTrp53\nTrp53bp1\nUhrf2\nUpp1\nUrgcp\nUtf1\nVegfc\nVmn1r1\nWrap53\nZbtb45\nZfp600\nZfp64\nZyg11a"
 main_script: # default value of type 'File'.
   class: File
   location: ./enrichment-analysis.sh
