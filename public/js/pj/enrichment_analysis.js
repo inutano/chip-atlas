@@ -598,9 +598,11 @@ function replaceDataChars(data) {
 }
 
 function convertJsonStringsToIntegers(data) {
-  data.permTime = parseInt(data.permTime, 10); // Convert to integer
-  data.threshold = parseInt(data.threshold, 10); // Convert to integer
-  return data; // Return the modified data object
+  data.permTime = parseInt(data.permTime, 10);
+  data.threshold = parseInt(data.threshold, 10);
+  data.distanceDown = parseInt(data.distanceDown, 10);
+  data.distanceUp = parseInt(data.distanceUp, 10);
+  return data;
 }
 
 function post2sapporo(button, data) {
