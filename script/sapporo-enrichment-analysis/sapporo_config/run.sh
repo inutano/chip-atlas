@@ -65,7 +65,7 @@ function upload() {
     amazon/aws-cli \
     s3 cp \
       ${outputs_dir}/$(basename ${run_id}) \
-      s3://data/enrichment-analysis/$(basename ${run_dir}) \
+      s3://data/enrichment-analysis/ \
     --endpoint-url https://chip-atlas.dbcls.jp \
     --recursive
 }
