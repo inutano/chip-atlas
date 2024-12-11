@@ -574,4 +574,4 @@ BEGIN {
 mv $outTsv.tmp $outTsv
 mv $outHtml.tmp $outHtml
 
-rm $tmpF "$tmpF"2 "$tmpF"3
+rm $tmpF "$tmpF"2 "$tmpF"3 $bedA $bedB
