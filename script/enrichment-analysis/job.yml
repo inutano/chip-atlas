@@ -1,31 +1,31 @@
 outdir: # type 'Directory'
   class: Directory
-  path: ./out
+  path: .
 tmpdir: # type 'Directory'
   class: Directory
-  path: ./tmp
+  path: .
 btbpToHtml: # type 'File'
   class: File
-  path: ./reference/btbpToHtml.txt
+  path: ./btbpToHtml.txt
 chromSizes_dir: # type 'Directory'
   class: Directory
-  path: ./reference/genome_size
+  path: ../../data/others/lib/genome_size
 uniqueTSS_dir: # type 'Directory'
   class: Directory
-  path: ./reference/TSS
+  path: ../../data/others/lib/TSS
 id2gene_dir: # type 'Directory'
   class: Directory
-  path: ./reference/id2symbol
+  path: ../../data/others/lib/id2symbol
 referenceBed_dir:
   class: Directory
-  path: ./results
+  path: ../../data/others/lib/inSilicoChIP/results
 fileL: # type 'File'
   class: File
-  path: ./reference/fileList.tab
+  path: ../../data/metadata/fileList.tab
 expL: # type 'File'
   class: File
-  path: ./reference/experimentList.tab
-wabiID: enrichment-analysis # type 'string'
+  path: ../../data/metadata/experimentList.tab
+wabiID: this-is-fake-wabi-id # type 'string'
 threshold: 50 # type 'int'
 cellClass: "Bone" # type 'string'
 antigenClass: "TFs and others" # type 'string'
