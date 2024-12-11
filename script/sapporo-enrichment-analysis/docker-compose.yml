@@ -14,6 +14,8 @@ services:
       - SAPPORO_RUN_SH=/app/sapporo_config/run.sh
       - ENRICHMENT_ANALYSIS_DIR=${PWD}/../enrichment-analysis
       - ENRICHMENT_ANALYSIS_DATA_DIR=${PWD}/../../data
+    env_file:
+      - .env
     restart: on-failure
     working_dir: /app
     network_mode: host
