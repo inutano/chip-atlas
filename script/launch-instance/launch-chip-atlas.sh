@@ -42,7 +42,7 @@ if [ "$1" == "--launch" ]; then
   LATEST_AMI_INFO=$(aws ec2 describe-images \
     --owners $CHIP_ATLAS_AWS_ACCOUNT_ID \
     --query 'Images[*].[ImageId,CreationDate,Name]' \
-    --output text | sort -k2 -r | head -1
+    --output text | grep -v 'sapporo' | sort -k2 -r | head -1
   )
   LATEST_AMI_ID=$(echo $LATEST_AMI_INFO | cut -d' ' -f1)
   INSTANCE_CREATION_DATE=$(echo $LATEST_AMI_INFO | cut -d' ' -f3 | cut -d'-' -f1)
