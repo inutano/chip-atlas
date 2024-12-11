@@ -21,13 +21,13 @@ mkdir -p ${HOME}/chip-atlas/data/others/lib
 mkdir -p ${HOME}/chip-atlas/data/metadata
 
 # Sync data/others/lib/genome_size
-mc cp --recursive chip-atlas-dbcls/data/others/lib/genome_size ${HOME}/chip-atlas/data/others/lib/genome_size
+mc cp --recursive chip-atlas-dbcls/data/others/lib/genome_size ${HOME}/chip-atlas/data/others/lib/
 
 # Sync data/others/lib/id2symbol
-mc cp --recursive chip-atlas-dbcls/data/others/lib/id2symbol ${HOME}/chip-atlas/data/others/lib/id2symbol
+mc cp --recursive chip-atlas-dbcls/data/others/lib/id2symbol ${HOME}/chip-atlas/data/others/lib/
 
 # Sync data/others/lib/TSS
-mc cp --recursive chip-atlas-dbcls/data/others/lib/TSS ${HOME}/chip-atlas/data/others/lib/TSS
+mc cp --recursive chip-atlas-dbcls/data/others/lib/TSS ${HOME}/chip-atlas/data/others/lib/
 
 # Sync data/metadata/experimentList.tab
 mc cp chip-atlas-dbcls/data/metadata/experimentList.tab ${HOME}/chip-atlas/data/metadata/experimentList.tab
@@ -36,4 +36,4 @@ mc cp chip-atlas-dbcls/data/metadata/experimentList.tab ${HOME}/chip-atlas/data/
 mc cp chip-atlas-dbcls/data/metadata/fileList.tab ${HOME}/chip-atlas/data/metadata/fileList.tab
 
 # Sync data/others/lib/inSilicoChIP
-mc cp --recursive chip-atlas-dbcls/data/others/lib/inSilicoChIP ${HOME}/chip-atlas/data/others/lib/inSilicoChIP
+mc cp --recursive chip-atlas-dbcls/data/others/lib/inSilicoChIP ${HOME}/chip-atlas/data/others/lib/
