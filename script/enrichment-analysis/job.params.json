@@ -1,0 +1,23 @@
+{
+  "wabiID": "this-is-fake-wabi-id",
+  "threshold": 50,
+  "cellClass": "Bone",
+  "antigenClass": "TFs and others",
+  "genome": "mm9",
+  "distanceUp": 5000,
+  "distanceDown": 5000,
+  "permTime": 1,
+  "title": "My project",
+  "descriptionB": "dataset B",
+  "descriptionA": "dataset A",
+  "typeB": "userlist",
+  "typeA": "gene",
+  "bedB": {
+    "class": "File",
+    "path": "./geneList_B.txt"
+  },
+  "bedA": {
+    "class": "File",
+    "path": "./geneList_A.txt"
+  }
+}

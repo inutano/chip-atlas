@@ -1,0 +1,42 @@
+{
+  "outdir": {
+    "class": "Directory",
+    "path": "."
+  },
+  "tmpdir": {
+    "class": "Directory",
+    "path": "."
+  },
+  "btbpToHtml": {
+    "class": "File",
+    "path": "./btbpToHtml.txt"
+  },
+  "chromSizes_dir": {
+    "class": "Directory",
+    "path": "../../data/others/lib/genome_size"
+  },
+  "uniqueTSS_dir": {
+    "class": "Directory",
+    "path": "../../data/others/lib/TSS"
+  },
+  "id2gene_dir": {
+    "class": "Directory",
+    "path": "../../data/others/lib/id2symbol"
+  },
+  "referenceBed_dir": {
+    "class": "Directory",
+    "path": "../../data/others/lib/inSilicoChIP/results"
+  },
+  "fileL": {
+    "class": "File",
+    "path": "../../data/metadata/fileList.tab"
+  },
+  "expL": {
+    "class": "File",
+    "path": "../../data/metadata/experimentList.tab"
+  },
+  "main_script": {
+    "class": "File",
+    "location": "./enrichment-analysis.sh"
+  }
+}
