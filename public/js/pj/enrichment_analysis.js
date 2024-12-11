@@ -831,20 +831,20 @@ var helpText = {
   note1:
     "Acceptable identifiers:\n  Official gene symbols (e.g. POU5F1)\n  Ensembl IDs (e.g. ENSG00000204531)\n  Uniprot IDs (e.g. Q01860)\n  RefSeq gene IDs (e.g. NM_002701)\n\nOfficial gene symbols must be entered according to following nomenclatures:\n  H. sapiens: HGNC\n  M. musculus: MGI\n  R. norvegicus: RGD\n  D. melanogaster: FlyBase\n  C. elegans: WormBase\n  S. cerevisiae: SGD\n\nAcceptable example:\n  POU5F1\n  TP53\n\nBad example:\n  OCT4\n  p53",
   note2:
-    "Example 1. BED format (tab-delimited columns):\n  chr1\t531435\t543845\n  chr2\t738543\t742321\n\n  Acceptable genome assemblies:\n    hg19, hg38 (H. sapiens)\n    mm9, mm10 (M. musculus)\n    rn6 (R. norvegicus)\n    dm3, dm6 (D. melanogaster)\n    ce10, ce11 (C. elegans)\n    sacCer3 (S. cerevisiae)\n\nExample 2. A sequence motif:\n  ATGCAA\n\nExample 3. A sequence motif with degenerate base symbols (ATGC + WSMKRYBDHVN):\n  ACAMKGTA",
+    "Example:\n  chr1\t531435\t543845\n  chr2\t738543\t742321\n\n  Acceptable genome assemblies:\n    hg19, hg38 (H. sapiens)\n    mm9, mm10 (M. musculus)\n    rn6 (R. norvegicus)\n    dm3, dm6 (D. melanogaster)\n    ce10, ce11 (C. elegans)\n    sacCer3 (S. cerevisiae)\n\n",
   userdatabed:
-    "Check this to search for proteins bound to given genomic regions (UCSC BED format) or to a sequence motif.\n\n",
+    "Check this to search for common epigenetic features within given genomic regions (UCSC BED format).\n\n",
   userdatagenes:
-    "Check this to search for proteins bound around given genes.\n\n",
+    "Check this to search for common epigenetic features around given genes.\n\n",
   comparedwithrandom:
     "Check this to compare ‘dataset A’ with a random background. In this case, each genomic location of ‘dataset A’ is permuted on a random chromosome at a random position for the specified times. Increasing the permutation times will provide a highly randomized background, or a high quality statistical test, but the calculation time will be longer.",
   comparedwithbed:
-    "Check this to compare 'dataset A' with another dataset (UCSC BED format or a sequence motif).\n\n",
+    "Check this to compare 'dataset A' with another dataset (UCSC BED format).\n\n",
   comparedwithrefseq:
     "Check this to compare 'dataset A' with RefSeq coding genes, excluding those listed in 'dataset A'.",
   comparedwithuserlist:
     "Check this to compare 'dataset A' with another gene list.\n\n",
-  tss: "To search for proteins binding to given genes, specify the distance range from the Transcription Start Sites (TSS).\nDefault is between -5000 and +5000 bp from the TSS.",
+  tss: "To search for common epigenetic features around given genes, specify the distance range from the Transcription Start Sites (TSS).\nDefault is between -5000 and +5000 bp from the TSS.",
   userdatadesc:
     'Enter a title for the data selected in "4. Enter dataset A".\nAcceptable letters are alphanumeric (a-Z, 0-9), space ( ), underscore (_), period (.) and hyphen (-).',
   comparedwithdesc:
@@ -852,7 +852,7 @@ var helpText = {
   projectdesc:
     "Enter a title for this submission.\nAcceptable letters are alphanumeric (a-Z, 0-9), space ( ), underscore (_), period (.) and hyphen (-).",
   disttss:
-    "To search for proteins binding to given genes, specify the distance range from the Transcription Start Sites (TSS).\nDefault is between -5000 and +5000 bp from the TSS.",
+    "To search for common epigenetic features around given genes, specify the distance range from the Transcription Start Sites (TSS).\nDefault is between -5000 and +5000 bp from the TSS.",
   threshold:
-    "Set the threshold for statistical significance values calculated by peak-caller MACS2 (-10*Log10[MACS2 Q-value]). If 50 is set here, peaks with Q value < 1E-05 are shown on genome browser IGV.",
+    "Set the threshold for statistical significance values calculated by peak-caller MACS2 (-10*Log10[MACS2 Q-value]). If set to 50, peaks with Q values < 1E-05 are used to evaluate overlap with data sets A and B. Ignore if experiment type is set to Bisulfite-seq.",
 };
