@@ -1,4 +1,7 @@
 // variables
+// switch enrichment analysis API endpoint if this constant is set to the IP address of the server
+const sapporoService = "52.69.0.138:1122";
+
 const genomesize = {
   ce10: 100286070,
   ce11: 100286070,
@@ -103,21 +106,28 @@ window.onload = async () => {
     eraseTextarea(genome + "ComparedWith");
   });
 
-  // post to wabi, diable when blackout
-  var endpointStatusUrl = "/wabi_endpoint_status";
-  let endpointStatusResponse = await fetch(endpointStatusUrl);
-  let endpointStatus = await endpointStatusResponse.text();
-  if (endpointStatus == "chipatlas") {
+  // check the endpoint status if the constant sapporoService is not set
+  if (sapporoService === "") {
+    let endpointStatusResponse = await fetch("/wabi_endpoint_status");
+    let endpointStatus = await endpointStatusResponse.text();
+    if (endpointStatus == "chipatlas") {
+      $("button#virtual-chip-submit").click(function () {
+        var button = $(this);
+        var data = retrievePostData();
+        post2wabi(button, data);
+      });
+    } else {
+      $("button#virtual-chip-submit").prop("disabled", true);
+      alert(
+        "Enrichment analysis is currently unavailable due to the background server issue. See maintainance schedule on top page.",
+      );
+    }
+  } else {
     $("button#virtual-chip-submit").click(function () {
       var button = $(this);
       var data = retrievePostData();
-      post2wabi(button, data);
+      post2sapporo(button, data);
     });
-  } else {
-    $("button#virtual-chip-submit").prop("disabled", true);
-    alert(
-      "Enrichment analysis is currently unavailable due to the background server issue. See maintainance schedule on top page.",
-    );
   }
 
   // calculate estimated running time
@@ -587,6 +597,57 @@ function replaceDataChars(data) {
   return data;
 }
 
+function post2sapporo(button, data) {
+  var genome = genomeSelected();
+  button.attr("disabled", true);
+  // evaluate text input and reject if invalid characters are found
+  try {
+    evaluateText(data);
+    data = replaceDataChars(data);
+    var formData = new FormData();
+    formData.append("workflow_type", "enrichment-analysis");
+    formData.append("workflow_engine", "enrichment-analysis");
+    formData.append("workflow_params", JSON.stringify(data));
+    $.ajax({
+      type: "post",
+      url: sapporoService + "/runs",
+      data: formData,
+      contentType: false,
+      processData: false,
+      success: function (response) {
+        var requestId = response.run_id;
+        var calcm = $("a#" + genome + "-estimated-run-time")
+          .text()
+          .replace(/-/g, "");
+        var redirectUrl =
+          "/enrichment_analysis_result?id=" +
+          requestId +
+          "&api=" +
+          sapporoService +
+          "&title=" +
+          data["title"] +
+          "&calcm=" +
+          calcm;
+        window.open(redirectUrl, "_self", "");
+      },
+      error: function (response) {
+        console.log(data);
+        console.log(response);
+        alert(
+          "Something went wrong: Please let us know to fix the problem, click 'contact us' below this page." +
+            JSON.stringify(response),
+        );
+      },
+      complete: function () {
+        button.attr("disabled", false);
+      },
+    });
+  } catch (e) {
+    alert(e.message);
+    button.prop("disabled", false);
+  }
+}
+
 function post2wabi(button, data) {
   var genome = genomeSelected();
   button.attr("disabled", true);
@@ -609,6 +670,7 @@ function post2wabi(button, data) {
         var redirectUrl =
           "/enrichment_analysis_result?id=" +
           requestId +
+          "&api=wabi" +
           "&title=" +
           data["title"] +
           "&calcm=" +

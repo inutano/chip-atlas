@@ -17,14 +17,66 @@ var getUrlParameter = function getUrlParameter(sParam) {
 var reqId = getUrlParameter("id");
 var title = getUrlParameter("title");
 
-var wabiUrl = "https://ddbj.nig.ac.jp/wabi/chipatlas/";
-var reqUrl = wabiUrl + reqId;
-var resultUrl = reqUrl + "?info=result";
-
 $("td#project-title").text(title);
 $("td#request-id").text(reqId);
-$("a#result-url").text(resultUrl + "&format=html");
-$("a#download-tsv").text(resultUrl + "&format=tsv");
+
+var api = getUrlParameter("api");
+
+// Change resultUrl by the API
+if (api == "wabi") {
+  var wabiUrl = "https://ddbj.nig.ac.jp/wabi/chipatlas/";
+  var reqUrl = wabiUrl + reqId;
+  var resultUrl = reqUrl + "?info=result";
+  $("a#result-url").text(resultUrl + "&format=html");
+  $("a#download-tsv").text(resultUrl + "&format=tsv");
+
+  // checking status
+  $(function () {
+    var tdStatus = $("td#status");
+    var interval = setInterval(function () {
+      $.get("/wabi_chipatlas?id=" + reqId, function (status) {
+        tdStatus.text(status);
+        if (status == "finished") {
+          tdStatus.css("color", "red");
+          $("a#result-url").attr("href", resultUrl + "&format=html");
+          $("a#download-tsv").attr("href", resultUrl + "&format=tsv");
+          clearInterval(interval);
+        } else if (status == "unavailable") {
+          alert(
+            "No response from the DDBJ supercomputer system: please note the result URL to access later. It is possible that your job has been interrupted by the system error, in that case you may need to run the analysis again.",
+          );
+          clearInterval(interval);
+        }
+      });
+    }, 10000);
+  });
+} else {
+  var resultUrl = "https://chip-atlas.dbcls.jp/data/enrichment-analysis" + reqId;
+  $("a#result-url").text(resultUrl + reqId + ".result.html");
+  $("a#download-tsv").text(resultUrl + reqId + ".result.tsv");
+
+  // check if the run state is complete
+  // state api will return json object with key "state" and value like "RUNNING", "COMPLETE", "EXECUTOR_ERROR", etc.
+  $(function () {
+    var tdStatus = $("td#status");
+    var interval = setInterval(function () {
+      $.get(api + "/runs/" + reqId + "/status", function (status) {
+        var state = JSON.parse(status).state;
+        tdStatus.text(state);
+        if (state == "COMPLETE") {
+          tdStatus.css("color", "red");
+          $("a#result-url").attr("href", resultUrl + reqId + ".result.html");
+          $("a#download-tsv").attr("href", resultUrl + reqId + ".result.tsv");
+          clearInterval(interval);
+        } else if (status == "EXECUTOR_ERROR") {
+          alert(
+            "The analysis has failed. Please try again. If the problem persists, please contact us.",
+          );
+          clearInterval(interval);
+        }
+      });
+    }, 10000);
+  });
 
 // date format converter function
 function dateFormat(date) {
@@ -67,25 +119,4 @@ $(function () {
     t = new Date();
     $("td#current-time").text(dateFormat(t) + " / UTC: " + dateFormatUTC(t));
   }, 1000);
-});
-
-// checking status
-$(function () {
-  var tdStatus = $("td#status");
-  var interval = setInterval(function () {
-    $.get("/wabi_chipatlas?id=" + reqId, function (status) {
-      tdStatus.text(status);
-      if (status == "finished") {
-        tdStatus.css("color", "red");
-        $("a#result-url").attr("href", resultUrl + "&format=html");
-        $("a#download-tsv").attr("href", resultUrl + "&format=tsv");
-        clearInterval(interval);
-      } else if (status == "unavailable") {
-        alert(
-          "No response from the DDBJ supercomputer system: please note the result URL to access later. It is possible that your job has been interrupted by the system error, in that case you may need to run the analysis again.",
-        );
-        clearInterval(interval);
-      }
-    });
-  }, 10000);
 });
