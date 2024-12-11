@@ -24,39 +24,23 @@ function run_wf() {
   # generate_ro_crate
   exit 0
 }
+
 function run_enrichment-analysis() {
+  local ea_job=${ENRICHMENT_ANALYSIS_DIR}/$(basename ${run_dir}).json
+  jq -s add ${wf_params} ${ENRICHMENT_ANALYSIS_DIR}/job.reference.json > ${ea_job}
+
   local container="quay.io/commonwl/cwltool:3.1.20240508115724"
-  local cmd_txt="${DOCKER_CMD} -v /home/ubuntu/chip-atlas:/home/ubuntu/chip-atlas ${container} \
+  local cmd_txt="${DOCKER_CMD} \
+    -v /home/ubuntu/chip-atlas:/home/ubuntu/chip-atlas \
+    ${container} \
     --debug \
     --outdir ${outputs_dir} \
     ${wf_engine_params} \
     ${ENRICHMENT_ANALYSIS_DIR}/enrichment-analysis.cwl \
-    ${ENRICHMENT_ANALYSIS_DIR}/job.yml \
+    ${ea_job} \
     1>${stdout} 2>${stderr}"
   echo ${cmd_txt} >${cmd}
-  eval ${cmd_txt} || executor_error
-}
-
-function run_enrichment-analysis_bu() {
-  local container="quay.io/commonwl/cwltool:3.1.20240508115724"
-  local cmd_txt="${DOCKER_CMD} ${container} \
-    --outdir ${outputs_dir} \
-    ${wf_engine_params} \
-    ${ENRICHMENT_ANALYSIS_DIR}/enrichment-analysis.cwl \
-    ${wf_params} \
-    --outdir ${outputs_dir} \
-    --tmpdir ${exe_dir} \
-    --btbpToHtml ${ENRICHMENT_ANALYSIS_REFERENCE_DIR}/btbpToHtml.txt \
-    --chromSizes_dir ${ENRICHMENT_ANALYSIS_REFERENCE_DIR}/genome_size \
-    --uniqueTSS_dir ${ENRICHMENT_ANALYSIS_REFERENCE_DIR}/TSS \
-    --id2gene_dir ${ENRICHMENT_ANALYSIS_REFERENCE_DIR}/id2symbol \
-    --referenceBed_dir ${ENRICHMENT_ANALYSIS_RESULTS_DIR} \
-    --fileL ${ENRICHMENT_ANALYSIS_REFERENCE_DIR}/fileList.txt \
-    --expL ${ENRICHMENT_ANALYSIS_REFERENCE_DIR}/experimentList.txt \
-    --main_script ${ENRICHMENT_ANALYSIS_DIR}/enrichment-analysis.sh
-    1>${stdout} 2>${stderr}"
-  echo ${cmd_txt} >${cmd}
-  eval ${cmd_txt} || executor_error
+  eval ${cmd_txt} && mv ${ea_job} ${exe_dir} || executor_error
 }
 
 function cancel() {
