@@ -632,7 +632,9 @@ function post2sapporo(button, data) {
   // evaluate text input and reject if invalid characters are found
   try {
     evaluateText(data);
-    data = replaceDataChars(data);
+    data["bedA"] = data["bedA"].replace(/[^a-zA-Z0-9\t_\n]/g, "_");
+    data["bedB"] = data["bedB"].replace(/[^a-zA-Z0-9\t_\n]/g, "_");
+
     var formData = new FormData();
     formData.append("workflow_type", "enrichment-analysis");
     formData.append("workflow_engine", "enrichment-analysis");
