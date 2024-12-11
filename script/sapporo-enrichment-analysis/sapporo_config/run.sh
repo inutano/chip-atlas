@@ -58,7 +58,16 @@ function cancel_cwltool() {
 
 function upload() {
   # Edit this function for environment-specific upload procedures
-  :
+  docker run --rm \
+    -e AWS_ACCESS_KEY_ID=${MINIO_ACCESS_KEY} \
+    -e AWS_SECRET_ACCESS_KEY=${MINIO_SECRET_KEY} \
+    -v ${run_dir}:${run_dir} \
+    amazon/aws-cli \
+    s3 cp \
+      ${outputs_dir} \
+      s3://data/enrichment-analysis/$(basename ${outputs_dir}) \
+    --endpoint-url https://chip-atlas.dbcls.jp \
+    --recursive
 }
 
 # ==============================================================
