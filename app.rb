@@ -7,6 +7,7 @@ $LOAD_PATH << File.join(__dir__, "lib")
 require 'open-uri'
 require 'timeout'
 require 'net/http'
+require 'net/ping'
 require 'uri'
 require 'json'
 require 'fileutils'
@@ -367,10 +368,18 @@ class PeakJohn < Sinatra::Base
 
   # Checking the final html output rather than using Wabi API which is too slow due to its huge job history
   get "/wabi_chipatlas" do
-    if Net::HTTP.get_response(URI.parse("https://ddbj.nig.ac.jp/wabi/chipatlas/" + params[:id] + "?info=result&format=html")).code == "200"
-      "finished"
+    server_url = "https://ddbj.nig.ac.jp"
+    endpoint = "/wabi/chipatlas/#{params[:id]}?info=result&format=html"
+
+    if Net::Ping::HTTP.new(server_url).ping
+      response = Net::HTTP.get_response(URI.parse(server_url + endpoint))
+      if response.code == "200"
+        "finished"
+      else
+        "running"
+      end
     else
-      "running"
+      "server unavailable"
     end
   end
 
