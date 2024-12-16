@@ -10,7 +10,7 @@ shufN=1
 descriptionA="My data"
 descriptionB="Comparison"
 title="My data vs Comparison"
-hed="Search for proteins significantly bound to your data."
+hed="Search for common epigenetic features in your data."
 srxUrl="http://chip-atlas.org/view?id="
 
 # Positional parameters
