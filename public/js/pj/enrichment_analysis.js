@@ -107,7 +107,7 @@ window.onload = async () => {
   });
 
   // check the endpoint status if the constant sapporoService is not set
-  if (sapporoService === "") {
+  if (typeof sapporoService === "undefined") {
     let endpointStatusResponse = await fetch("/wabi_endpoint_status");
     let endpointStatus = await endpointStatusResponse.text();
     if (endpointStatus == "chipatlas") {
