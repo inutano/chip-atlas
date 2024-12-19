@@ -63,7 +63,7 @@ if (api == "wabi") {
   $(function () {
     var tdStatus = $("td#status");
     var interval = setInterval(function () {
-      $.get("http://" + api + "/runs/" + reqId + "/status", function (status) {
+      $.get("https://" + api + "/runs/" + reqId + "/status", function (status) {
         var state = status.state;
         tdStatus.text(state);
         if (state == "COMPLETE") {

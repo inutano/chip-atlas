@@ -1,6 +1,6 @@
 // variables
 // switch enrichment analysis API endpoint if this constant is set to the IP address of the server
-const sapporoService = "52.69.0.138:1122";
+const sapporoService = "ea.chip-atlas.org";
 
 const genomesize = {
   ce10: 100286070,
@@ -620,7 +620,7 @@ function post2sapporo(button, data) {
     formData.append("workflow_params", JSON.stringify(data));
     $.ajax({
       type: "post",
-      url: "http://" + sapporoService + "/runs",
+      url: "https://" + sapporoService + "/runs",
       data: formData,
       contentType: false,
       processData: false,
