@@ -57,6 +57,10 @@ class PeakJohn < Sinatra::Base
     end
   end
 
+  configure :production do
+    set :host_authorization, { permitted_hosts: [".chip-atlas.org"] }
+  end
+
   before do
     rack_input = request.env["rack.input"].read
     if !rack_input.empty?
