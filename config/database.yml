@@ -4,3 +4,10 @@ development:
   pool: 50
   write_timeout: 300
   read_timeout: 300
+
+production:
+  adapter: sqlite3
+  database: db/database.sqlite
+  pool: 50
+  write_timeout: 300
+  read_timeout: 300
