@@ -1,4 +1,7 @@
 // variables
+// switch enrichment analysis API endpoint if this constant is set to the IP address of the server
+const sapporoService = "ea.chip-atlas.org";
+
 const genomesize = {
   ce10: 100286070,
   ce11: 100286070,
@@ -103,21 +106,28 @@ window.onload = async () => {
     eraseTextarea(genome + "ComparedWith");
   });
 
-  // post to wabi, diable when blackout
-  var endpointStatusUrl = "/wabi_endpoint_status";
-  let endpointStatusResponse = await fetch(endpointStatusUrl);
-  let endpointStatus = await endpointStatusResponse.text();
-  if (endpointStatus == "chipatlas") {
+  // check the endpoint status if the constant sapporoService is not set
+  if (typeof sapporoService === "undefined") {
+    let endpointStatusResponse = await fetch("/wabi_endpoint_status");
+    let endpointStatus = await endpointStatusResponse.text();
+    if (endpointStatus == "chipatlas") {
+      $("button#virtual-chip-submit").click(function () {
+        var button = $(this);
+        var data = retrievePostData();
+        post2wabi(button, data);
+      });
+    } else {
+      $("button#virtual-chip-submit").prop("disabled", true);
+      alert(
+        "Enrichment analysis is currently unavailable due to the background server issue. See maintainance schedule on top page.",
+      );
+    }
+  } else {
     $("button#virtual-chip-submit").click(function () {
       var button = $(this);
       var data = retrievePostData();
-      post2wabi(button, data);
+      post2sapporo(button, data);
     });
-  } else {
-    $("button#virtual-chip-submit").prop("disabled", true);
-    alert(
-      "Enrichment analysis is currently unavailable due to the background server issue. See maintainance schedule on top page.",
-    );
   }
 
   // calculate estimated running time
@@ -310,8 +320,8 @@ const generateSampleTypeOptions = async () => {
 
 function putDefaultTitles() {
   var defaultTitles = {
-    UserDataTitle: "dataset A",
-    ComparedWithTitle: "Control",
+    UserDataTitle: "Dataset A",
+    ComparedWithTitle: "Dataset B",
     ProjectTitle: "My project",
   };
   $.each(defaultTitles, function (id, dvalue) {
@@ -587,6 +597,67 @@ function replaceDataChars(data) {
   return data;
 }
 
+function convertJsonStringsToIntegers(data) {
+  data.permTime = parseInt(data.permTime, 10);
+  data.threshold = parseInt(data.threshold, 10);
+  data.distanceDown = parseInt(data.distanceDown, 10);
+  data.distanceUp = parseInt(data.distanceUp, 10);
+  return data;
+}
+
+function post2sapporo(button, data) {
+  var genome = genomeSelected();
+  button.attr("disabled", true);
+  // evaluate text input and reject if invalid characters are found
+  try {
+    evaluateText(data);
+    replaceDataChars(data);
+    convertJsonStringsToIntegers(data);
+
+    var formData = new FormData();
+    formData.append("workflow_type", "enrichment-analysis");
+    formData.append("workflow_engine", "enrichment-analysis");
+    formData.append("workflow_params", JSON.stringify(data));
+    $.ajax({
+      type: "post",
+      url: "https://" + sapporoService + "/runs",
+      data: formData,
+      contentType: false,
+      processData: false,
+      success: function (response) {
+        var requestId = response.run_id;
+        var calcm = $("a#" + genome + "-estimated-run-time")
+          .text()
+          .replace(/-/g, "");
+        var redirectUrl =
+          "/enrichment_analysis_result?id=" +
+          requestId +
+          "&api=" +
+          sapporoService +
+          "&title=" +
+          data["title"] +
+          "&calcm=" +
+          calcm;
+        window.open(redirectUrl, "_self", "");
+      },
+      error: function (response) {
+        console.log(data);
+        console.log(response);
+        alert(
+          "Something went wrong: Please let us know to fix the problem, click 'contact us' below this page." +
+            JSON.stringify(response),
+        );
+      },
+      complete: function () {
+        button.attr("disabled", false);
+      },
+    });
+  } catch (e) {
+    alert(e.message);
+    button.prop("disabled", false);
+  }
+}
+
 function post2wabi(button, data) {
   var genome = genomeSelected();
   button.attr("disabled", true);
@@ -609,6 +680,7 @@ function post2wabi(button, data) {
         var redirectUrl =
           "/enrichment_analysis_result?id=" +
           requestId +
+          "&api=wabi" +
           "&title=" +
           data["title"] +
           "&calcm=" +
@@ -831,7 +903,7 @@ var helpText = {
   note1:
     "Acceptable identifiers:\n  Official gene symbols (e.g. POU5F1)\n  Ensembl IDs (e.g. ENSG00000204531)\n  Uniprot IDs (e.g. Q01860)\n  RefSeq gene IDs (e.g. NM_002701)\n\nOfficial gene symbols must be entered according to following nomenclatures:\n  H. sapiens: HGNC\n  M. musculus: MGI\n  R. norvegicus: RGD\n  D. melanogaster: FlyBase\n  C. elegans: WormBase\n  S. cerevisiae: SGD\n\nAcceptable example:\n  POU5F1\n  TP53\n\nBad example:\n  OCT4\n  p53",
   note2:
-    "Example:\n  chr1\t531435\t543845\n  chr2\t738543\t742321\n\n  Acceptable genome assemblies:\n    hg19, hg38 (H. sapiens)\n    mm9, mm10 (M. musculus)\n    rn6 (R. norvegicus)\n    dm3, dm6 (D. melanogaster)\n    ce10, ce11 (C. elegans)\n    sacCer3 (S. cerevisiae)\n\n",
+    "Example:\n  chr1<tab>531435<tab>543845\n  chr2<tab>738543<tab>742321\n\nAcceptable genome assemblies:\n    hg19, hg38 (H. sapiens)\n    mm9, mm10 (M. musculus)\n    rn6 (R. norvegicus)\n    dm3, dm6 (D. melanogaster)\n    ce10, ce11 (C. elegans)\n    sacCer3 (S. cerevisiae)\n\n",
   userdatabed:
     "Check this to search for common epigenetic features within given genomic regions (UCSC BED format).\n\n",
   userdatagenes:

@@ -12,3 +12,6 @@ rdf/data
 experimentList*json
 script/launch-instance/launch-chip-atlas.conf
 script/launch-instance/temporalInstance*
+data
+.env
+sapporo_run
