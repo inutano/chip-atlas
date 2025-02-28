@@ -27,7 +27,19 @@ function run_wf() {
 
 function run_enrichment-analysis() {
   local ea_job=${ENRICHMENT_ANALYSIS_DIR}/$(basename ${run_dir}).json
-  jq -s add ${wf_params} ${ENRICHMENT_ANALYSIS_DIR}/job.reference.json <(echo "{\"wabiID\":\"$(basename ${run_dir})\"}") > ${ea_job}
+
+  # Modify JSON input to extract long parameters into files
+  local tmp_json=$(mktemp)
+  jq -s add ${wf_params} ${ENRICHMENT_ANALYSIS_DIR}/job.reference.json <(echo "{\"wabiID\":\"$(basename ${run_dir})\"}") > ${tmp_json}
+
+  local bedAFile_path=${ENRICHMENT_ANALYSIS_DIR}/bedAFile_$(basename ${run_dir}).bed
+  local bedBFile_path=${ENRICHMENT_ANALYSIS_DIR}/bedBFile_$(basename ${run_dir}).bed
+
+  jq -r '.bedAFile' ${tmp_json} > ${bedAFile_path}
+  jq -r '.bedBFile' ${tmp_json} > ${bedBFile_path}
+
+  jq '.bedAFile="'${bedAFile_path}'" | .bedBFile="'${bedBFile_path}'"' ${tmp_json} > ${ea_job}
+  rm ${tmp_json}
 
   local container="quay.io/commonwl/cwltool:3.1.20240508115724"
   local cmd_txt="${DOCKER_CMD} \
@@ -39,6 +51,7 @@ function run_enrichment-analysis() {
     ${ENRICHMENT_ANALYSIS_DIR}/enrichment-analysis.cwl \
     ${ea_job} \
     1>${stdout} 2>${stderr}"
+
   echo ${cmd_txt} >${cmd}
   eval ${cmd_txt} && mv ${ea_job} ${outputs_dir}/$(basename ${run_dir}) || executor_error
 }
