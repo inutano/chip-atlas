@@ -52,8 +52,12 @@ function run_enrichment-analysis() {
     ${ea_job} \
     1>${stdout} 2>${stderr}"
 
-  echo ${cmd_txt} >${cmd}
-  eval ${cmd_txt} && mv ${ea_job} ${outputs_dir}/$(basename ${run_dir}) || executor_error
+  local output_subdir=${outputs_dir}/$(basename ${run_dir})
+  eval ${cmd_txt} && {
+    mv ${ea_job} ${output_subdir}/
+    mv ${bedAFile_path} ${output_subdir}/
+    mv ${bedBFile_path} ${output_subdir}/
+  } || executor_error
 }
 
 function cancel() {
