@@ -48,9 +48,9 @@ inputs:
       class: File
       location: ./enrichment-analysis.sh
   - id: bedAFile
-    type: string
+    type: File
   - id: bedBFile
-    type: string
+    type: File
   - id: typeA
     type:
       type: enum
