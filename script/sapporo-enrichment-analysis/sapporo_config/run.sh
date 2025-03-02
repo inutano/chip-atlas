@@ -57,7 +57,6 @@ function run_enrichment-analysis() {
     mv ${ea_job} ${output_subdir}/
     mv ${bedAFile_path} ${output_subdir}/
     mv ${bedBFile_path} ${output_subdir}/
-    mv ${ea_job} ${output_subdir}/
   } || executor_error
 }
 
