@@ -26,14 +26,14 @@ function run_wf() {
 }
 
 function run_enrichment-analysis() {
-  local ea_job=${exe_dir}/$(basename ${run_dir}).json
+  local ea_job=${ENRICHMENT_ANALYSIS_DIR}/$(basename ${run_dir}).json
 
   # Modify JSON input to extract long parameters into files
   local tmp_json=$(mktemp)
   jq -s add ${wf_params} ${ENRICHMENT_ANALYSIS_DIR}/job.reference.json <(echo "{\"wabiID\":\"$(basename ${run_dir})\"}") > ${tmp_json}
 
-  local bedAFile_path=${exe_dir}/bedAFile_$(basename ${run_dir}).bed
-  local bedBFile_path=${exe_dir}/bedBFile_$(basename ${run_dir}).bed
+  local bedAFile_path=${ENRICHMENT_ANALYSIS_DIR}/bedAFile_$(basename ${run_dir}).bed
+  local bedBFile_path=${ENRICHMENT_ANALYSIS_DIR}/bedBFile_$(basename ${run_dir}).bed
 
   jq -r '.bedAFile' ${tmp_json} > ${bedAFile_path}
   jq -r '.bedBFile' ${tmp_json} > ${bedBFile_path}
@@ -57,6 +57,7 @@ function run_enrichment-analysis() {
     mv ${ea_job} ${output_subdir}/
     mv ${bedAFile_path} ${output_subdir}/
     mv ${bedBFile_path} ${output_subdir}/
+    mv ${ea_job} ${output_subdir}/
   } || executor_error
 }
 
