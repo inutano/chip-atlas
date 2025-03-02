@@ -14,6 +14,10 @@ requirements:
         writable: true
       - entry: $(inputs.outdir)
         writable: true
+      - entry: $(inputs.bedAFile)
+        writable: true
+      - entry: $(inputs.bedBFile)
+        writable: true
 baseCommand: bash
 arguments:
   - $(inputs.main_script)
