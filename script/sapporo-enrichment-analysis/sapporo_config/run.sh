@@ -38,7 +38,7 @@ function run_enrichment-analysis() {
   jq -r '.bedAFile' ${tmp_json} > ${bedAFile_path}
   jq -r '.bedBFile' ${tmp_json} > ${bedBFile_path}
 
-  jq '.bedAFile="'${bedAFile_path}'" | .bedBFile="'${bedBFile_path}'"' ${tmp_json} > ${ea_job}
+  jq '.bedAFile={"class": "File", "location": "'${bedAFile_path}'"} | .bedBFile={"class": "File", "location": "'${bedBFile_path}'"}' ${tmp_json} > ${ea_job}
   rm ${tmp_json}
 
   local container="quay.io/commonwl/cwltool:3.1.20240508115724"
