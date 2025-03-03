@@ -14,6 +14,10 @@ requirements:
         writable: true
       - entry: $(inputs.outdir)
         writable: true
+      - entry: $(inputs.bedAFile)
+        writable: true
+      - entry: $(inputs.bedBFile)
+        writable: true
 baseCommand: bash
 arguments:
   - $(inputs.main_script)
@@ -48,9 +52,9 @@ inputs:
       class: File
       location: ./enrichment-analysis.sh
   - id: bedAFile
-    type: string
+    type: File
   - id: bedBFile
-    type: string
+    type: File
   - id: typeA
     type:
       type: enum
