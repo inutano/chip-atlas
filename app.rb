@@ -308,7 +308,7 @@ class PeakJohn < Sinatra::Base
   end
 
   get "/diff_analysis_log" do
-    URI.open("https://chip-atlas.dbcls.jp/data/query/#{params[:id]}.log").read
+    URI.open("https://dtn1.ddbj.nig.ac.jp/wabi/chipatlas/#{params[:id]}?info=result&format=log").read
   end
 
   post "/diff_analysis_estimated_time" do
