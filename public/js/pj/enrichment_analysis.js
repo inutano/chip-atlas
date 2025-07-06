@@ -528,6 +528,9 @@ function retrievePostData() {
     distanceUp: $("input#" + genome + "DistanceUp").val(),
     distanceDown: $("input#" + genome + "DistanceDown").val(),
   };
+  if (data.antigenClass == "Bisulfite-Seq") {
+    data.sbatchOptions = "-p epyc -t 3:00:00";
+  }
   return data;
 }
 
