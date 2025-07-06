@@ -154,6 +154,9 @@ const retrievePostData = () => {
     threshold: 5,
     permTime: 1,
   };
+  if (data.antigenClass == "dmc" || data.antigenClass == "diffbind") {
+    data.sbatchOptions = "-p epyc -t 3:00:00";
+  }
   console.log(data);
   return data;
 };
