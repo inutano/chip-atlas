@@ -51,7 +51,7 @@ class PeakJohn < Sinatra::Base
       set :experiment_list, JSON.load(URI.open("https://chip-atlas.dbcls.jp/data/metadata/ExperimentList.json"))
       set :experiment_list_adv, JSON.load(URI.open("https://chip-atlas.dbcls.jp/data/metadata/ExperimentList_adv.json"))
       set :gsm_to_srx, Hash[settings.experiment_list["data"].map{|a| [a[2], a[0]] }]
-      set :wabi_endpoint, "https://ddbj.nig.ac.jp/wabi/chipatlas/"
+      set :wabi_endpoint, "https://dtn1.ddbj.nig.ac.jp/wabi/chipatlas/"
     rescue ActiveRecord::StatementInvalid
       # Ignore Statement Invalid error when the database is not yet prepared
     end
