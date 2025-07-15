@@ -151,7 +151,7 @@ const retrievePostData = () => {
     result: "www",
     cellClass: "empty",
     permTime: 1,
-    sbatchOptions: encodeURIComponent("-p epyc -t 3:00:00"),
+    sbatchOptions: "-p epyc -t 180",
   };
   if (data.antigenClass == "diffbind") {
     data.threshold = 50;
