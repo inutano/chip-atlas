@@ -137,8 +137,7 @@ const retrievePostData = () => {
   const genome = genomeSelected();
   const expTypeClass = $('input[name="' + genome + 'DiffOrDMR"]:checked').val();
   const data = {
-    // address: '',
-    // qsubOptions: '-N test',
+    address: "",
     antigenClass: expTypeClass,
     title: $("input#" + genome + "ProjectTitle").val(),
     genome: genome,
@@ -151,11 +150,13 @@ const retrievePostData = () => {
     format: "text",
     result: "www",
     cellClass: "empty",
-    threshold: 5,
     permTime: 1,
+    sbatchOptions: encodeURIComponent("-p epyc -t 3:00:00"),
   };
-  if (data.antigenClass == "dmc" || data.antigenClass == "diffbind") {
-    data.sbatchOptions = "-p epyc -t 3:00:00";
+  if (data.antigenClass == "diffbind") {
+    data.threshold = 50,
+  } else if (data.antigenClass == "dmr") {
+    data.threshold = "bs",
   }
   console.log(data);
   return data;
