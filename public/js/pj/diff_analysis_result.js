@@ -6,7 +6,7 @@ window.onload = async () => {
 };
 
 const setTableValues = (params) => {
-  // const wabiUrl = "https://ddbj.nig.ac.jp/wabi/chipatlas/";
+  // const wabiUrl = "https://dtn1.ddbj.nig.ac.jp/wabi/chipatlas/";
   // const reqUrl = wabiUrl + reqId;
   // const resultUrl = reqUrl + "?info=result";
 
