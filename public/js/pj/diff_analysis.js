@@ -154,9 +154,9 @@ const retrievePostData = () => {
     sbatchOptions: encodeURIComponent("-p epyc -t 3:00:00"),
   };
   if (data.antigenClass == "diffbind") {
-    data.threshold = 50,
+    data.threshold = 50;
   } else if (data.antigenClass == "dmr") {
-    data.threshold = "bs",
+    data.threshold = "bs";
   }
   console.log(data);
   return data;
