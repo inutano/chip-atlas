@@ -156,7 +156,7 @@ const retrievePostData = () => {
   if (data.antigenClass == "diffbind") {
     data.threshold = 50;
   } else if (data.antigenClass == "dmr") {
-    data.threshold = "bs";
+    data.threshold = 999;
   }
   console.log(data);
   return data;
