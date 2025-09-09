@@ -6,13 +6,13 @@ window.onload = async () => {
 };
 
 const setTableValues = (params) => {
-  // const wabiUrl = "https://ddbj.nig.ac.jp/wabi/chipatlas/";
+  // const wabiUrl = "https://dtn1.ddbj.nig.ac.jp/wabi/chipatlas/";
   // const reqUrl = wabiUrl + reqId;
   // const resultUrl = reqUrl + "?info=result";
 
   $("td#project-title").text(params.title);
   $("td#request-id").text(params.reqId);
-  $("a#view-on-igv").text(params.localIgvUrl);
+  // $("a#view-on-igv").text(params.localIgvUrl);
   $("a#download-result").text(params.zipUrl);
 };
 
@@ -30,7 +30,10 @@ const getUrlParameters = () => {
       reqId +
       ".igv.bed&genome=" +
       genome,
-    zipUrl: "https://chip-atlas.dbcls.jp/data/query/" + reqId + ".zip",
+    zipUrl:
+      "https://dtn1.ddbj.nig.ac.jp/wabi/chipatlas/" +
+      reqId +
+      "?info=result&format=zip",
   };
 };
 

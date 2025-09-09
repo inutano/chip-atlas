@@ -14,4 +14,4 @@ curl -X POST \
   -d "cellClass=empty" \
   -d "threshold=1" \
   -d "permTime=1" \
-  https://ddbj.nig.ac.jp/wabi/chipatlas/
+  https://dtn1.ddbj.nig.ac.jp/wabi/chipatlas/

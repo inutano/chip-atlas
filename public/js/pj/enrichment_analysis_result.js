@@ -24,7 +24,7 @@ var api = getUrlParameter("api");
 
 // Change resultUrl by the API
 if (api == "wabi") {
-  var wabiUrl = "https://ddbj.nig.ac.jp/wabi/chipatlas/";
+  var wabiUrl = "https://dtn1.ddbj.nig.ac.jp/wabi/chipatlas/";
   var reqUrl = wabiUrl + reqId;
   var resultUrl = reqUrl + "?info=result";
   $("a#result-url").text(resultUrl + "&format=html");

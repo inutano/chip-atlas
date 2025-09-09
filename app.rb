@@ -51,7 +51,7 @@ class PeakJohn < Sinatra::Base
       set :experiment_list, JSON.load(URI.open("https://chip-atlas.dbcls.jp/data/metadata/ExperimentList.json"))
       set :experiment_list_adv, JSON.load(URI.open("https://chip-atlas.dbcls.jp/data/metadata/ExperimentList_adv.json"))
       set :gsm_to_srx, Hash[settings.experiment_list["data"].map{|a| [a[2], a[0]] }]
-      set :wabi_endpoint, "https://ddbj.nig.ac.jp/wabi/chipatlas/"
+      set :wabi_endpoint, "https://dtn1.ddbj.nig.ac.jp/wabi/chipatlas/"
     rescue ActiveRecord::StatementInvalid
       # Ignore Statement Invalid error when the database is not yet prepared
     end
@@ -308,7 +308,7 @@ class PeakJohn < Sinatra::Base
   end
 
   get "/diff_analysis_log" do
-    URI.open("https://chip-atlas.dbcls.jp/data/query/#{params[:id]}.log").read
+    URI.open("https://dtn1.ddbj.nig.ac.jp/wabi/chipatlas/#{params[:id]}?info=result&format=log").read
   end
 
   post "/diff_analysis_estimated_time" do
@@ -372,7 +372,7 @@ class PeakJohn < Sinatra::Base
 
   # Checking the final html output rather than using Wabi API which is too slow due to its huge job history
   get "/wabi_chipatlas" do
-    server_url = "https://ddbj.nig.ac.jp"
+    server_url = "https://dtn1.ddbj.nig.ac.jp"
     endpoint = "/wabi/chipatlas/#{params[:id]}?info=result&format=html"
 
     if Net::Ping::HTTP.new(server_url).ping

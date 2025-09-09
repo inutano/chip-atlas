@@ -508,7 +508,6 @@ function retrievePostData() {
     address: "",
     format: "text",
     result: "www",
-    qsubOptions: "-N test",
     genome: genome,
     antigenClass: $("select#" + genome + "agClass option:selected").val(),
     cellClass: $("select#" + genome + "clClass option:selected").val(),
@@ -528,6 +527,9 @@ function retrievePostData() {
     distanceUp: $("input#" + genome + "DistanceUp").val(),
     distanceDown: $("input#" + genome + "DistanceDown").val(),
   };
+  if (data.antigenClass == "Bisulfite-Seq") {
+    data.sbatchOptions = "-p epyc -t 180";
+  }
   return data;
 }
 
