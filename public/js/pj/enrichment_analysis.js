@@ -1,6 +1,6 @@
 // variables
 // switch enrichment analysis API endpoint if this constant is set to the IP address of the server
-const sapporoService = "ea.chip-atlas.org";
+// const sapporoService = "ea.chip-atlas.org";
 
 const genomesize = {
   ce10: 100286070,
