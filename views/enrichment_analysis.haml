@@ -170,6 +170,12 @@
                             Gene list (Gene symbols or IDs)
                             %a.infoBtn{ id: "#{genome}UserDataGenes" }
                               &#x24D8;
+                        .checkbox.panel-input
+                          %label
+                            %input{ type: "radio", id: "#{genome}UserDataCount", name: "bedORGene", value: "count" }
+                            Gene count table
+                            %a.infoBtn{ id: "#{genome}UserDataCount" }
+                              &#x24D8;
                         .panel-input.bed-input.userData
                           .form-group.panel-input-textarea
                             %textarea.form-control{ name: "txtA", id: "#{genome}UserData", rows: 8, cols: 50, placeholder: "Click info buttons above to show the description format."}
