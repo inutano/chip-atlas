@@ -311,6 +311,10 @@ class PeakJohn < Sinatra::Base
     URI.open("https://dtn1.ddbj.nig.ac.jp/wabi/chipatlas/#{params[:id]}?info=result&format=log").read
   end
 
+  get "/enrichment_analysis_log" do
+    URI.open("https://dtn1.ddbj.nig.ac.jp/wabi/chipatlas/#{params[:id]}?info=result&format=log").read
+  end
+
   post "/diff_analysis_estimated_time" do
     # Memo: from Zou-san
     # X = Total # of reads
