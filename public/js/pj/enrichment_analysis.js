@@ -981,7 +981,7 @@ var helpText = {
   userdatagenes:
     "Check this to search for common epigenetic features around given genes.\n\n",
   userdatacount:
-    "Check this to upload a gene count table for differential expression analysis. The table should contain gene identifiers and their corresponding counts.\n\n",
+    "Check this to upload a two-group gene count table (CSV or TSV) to search for common epigenetic features around highly expressed genes in each group.\nSee the tutorial for details on the required table format.\n\n",
   comparedwithrandom:
     "Check this to compare ‘dataset A’ with a random background. In this case, each genomic location of ‘dataset A’ is permuted on a random chromosome at a random position for the specified times. Increasing the permutation times will provide a highly randomized background, or a high quality statistical test, but the calculation time will be longer.",
   comparedwithbed:
