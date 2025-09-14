@@ -579,9 +579,9 @@ function retrievePostData() {
   // Special handling for count type
   if (typeA === "count") {
     data.typeA = "count";
-    // For count type, put the content in dataset A and clear dataset B
-    data.bedBFile = "";
-    data.typeB = "";
+    // For count type, set dataset B to empty values as required by API
+    data.bedBFile = "empty";
+    data.typeB = "empty";
   }
 
   if (data.antigenClass == "Bisulfite-Seq") {
@@ -731,8 +731,7 @@ function post2wabi(button, data) {
     $.ajax({
       type: "post",
       url: "/wabi_chipatlas",
-      data: JSON.stringify(data),
-      contentType: "application/json",
+      data: data,
       dataType: "json",
       scriptCharset: "utf-8",
       success: function (response) {
