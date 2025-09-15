@@ -3,6 +3,7 @@ window.onload = async () => {
   setTableValues(params);
   setClock(params);
   checkWabiStatus(params);
+  startLogMonitoring(params.reqId);
 };
 
 const setTableValues = (params) => {
@@ -113,7 +114,6 @@ const checkWabiStatus = (params) => {
         clearInterval(interval);
         tdStatus.css("color", "red");
         setResultALink(params);
-        showExecutionLog(reqId);
       } else if (status == "unavailable") {
         clearInterval(interval);
         alert(
@@ -129,14 +129,40 @@ const setResultALink = (params) => {
   $("a#download-result").attr("href", params.zipUrl);
 };
 
-const showExecutionLog = (reqId) => {
+const startLogMonitoring = (reqId) => {
+  // Show log immediately and update every 10 seconds
+  updateExecutionLog(reqId);
+  setInterval(() => {
+    updateExecutionLog(reqId);
+  }, 10000);
+};
+
+const updateExecutionLog = (reqId) => {
   $.get("/diff_analysis_log?id=" + reqId, (logContent) => {
     pasteExecutionLog(logContent);
+  }).fail((xhr) => {
+    // If log is not available yet, show a message
+    if (xhr.status === 404) {
+      if ($(".container#executionLog").is(":empty")) {
+        $(".container#executionLog").html(
+          "<h3>Execution Log</h3><p>Log file not available yet. Please wait...</p>",
+        );
+      }
+    } else {
+      // Handle other errors
+      if ($(".container#executionLog").is(":empty")) {
+        $(".container#executionLog").html(
+          "<h3>Execution Log</h3><p>Error loading log file. Please try refreshing the page.</p>",
+        );
+      }
+    }
   });
 };
 
 const pasteExecutionLog = (logText) => {
-  $(".container#executionLog").append(
-    "<h3>Execution Log</h3><pre><code>" + logText + "<code></pre>",
-  );
+  if (logText && logText.trim()) {
+    $(".container#executionLog").html(
+      "<h3>Execution Log</h3><pre><code>" + logText + "</code></pre>",
+    );
+  }
 };

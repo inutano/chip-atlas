@@ -308,11 +308,21 @@ class PeakJohn < Sinatra::Base
   end
 
   get "/diff_analysis_log" do
-    URI.open("https://dtn1.ddbj.nig.ac.jp/wabi/chipatlas/#{params[:id]}?info=result&format=log").read
+    begin
+      URI.open("https://dtn1.ddbj.nig.ac.jp/wabi/chipatlas/#{params[:id]}?info=result&format=log").read
+    rescue => e
+      status 404
+      "Log file not available yet"
+    end
   end
 
   get "/enrichment_analysis_log" do
-    URI.open("https://dtn1.ddbj.nig.ac.jp/wabi/chipatlas/#{params[:id]}?info=result&format=log").read
+    begin
+      URI.open("https://dtn1.ddbj.nig.ac.jp/wabi/chipatlas/#{params[:id]}?info=result&format=log").read
+    rescue => e
+      status 404
+      "Log file not available yet"
+    end
   end
 
   post "/diff_analysis_estimated_time" do
