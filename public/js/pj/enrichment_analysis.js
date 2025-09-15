@@ -450,7 +450,7 @@ function positionCount() {
 
   var panels = {
     ".panel-input.rnd": "hide",
-    ".panel-input.distTSS": "hide",
+    ".panel-input.distTSS": "show",
     ".panel-input.gene.default-hide": "hide",
     ".panel-input.bed": "hide",
     ".panel-input.bed-input.comparedWith": "hide",
@@ -463,7 +463,7 @@ function positionCount() {
     ComparedWithUserlist: "unchecked",
   };
   setForms(panels, inputs);
-  setDistance(0);
+  setDistance(5000);
 }
 
 function setForms(panels, inputs) {
