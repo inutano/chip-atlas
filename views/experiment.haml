@@ -385,9 +385,10 @@
                           Checking for clustering data...
 
                       .text-center.download-container{ :style => "margin-top: 10px; display: none;" }
-                        %a.btn.btn-sm.btn-default{
-                          :href => correlation_tsv_url,
-                          :download => "#{@expid}_#{genome}_correlation.tsv",
+                        %a.btn.btn-sm.btn-default.download-tsv{
+                          :href => "#",
+                          "data-url" => correlation_tsv_url,
+                          "data-filename" => "#{@expid}_#{genome}_correlation.tsv",
                           :title => "Download correlation data as TSV file"
                         }
                           %i.fas.fa-download

@@ -243,8 +243,98 @@ function setupImageInteractions() {
   // Add cursor pointer style for clickable images
   $(".distribution-img, .correlation-img").css("cursor", "pointer");
 
+  // Add click handler for download buttons
+  $(".download-tsv").on("click", function (e) {
+    e.preventDefault();
+    var $button = $(this);
+    var url = $button.data("url");
+    var filename = $button.data("filename");
+
+    // Show loading state
+    var originalText = $button.html();
+    $button.html('<i class="fas fa-spinner fa-spin"></i> Downloading...');
+    $button.prop("disabled", true);
+
+    // Check if fetch is supported
+    if (
+      typeof fetch !== "undefined" &&
+      typeof window.URL !== "undefined" &&
+      window.URL.createObjectURL
+    ) {
+      // Use fetch to download the file as blob
+      fetch(url)
+        .then(function (response) {
+          if (!response.ok) {
+            throw new Error("Network response was not ok: " + response.status);
+          }
+          return response.blob();
+        })
+        .then(function (blob) {
+          // Create blob URL and download
+          var blobUrl = window.URL.createObjectURL(blob);
+          var link = document.createElement("a");
+          link.href = blobUrl;
+          link.download = filename;
+          link.style.display = "none";
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+
+          // Clean up blob URL
+          setTimeout(function () {
+            window.URL.revokeObjectURL(blobUrl);
+          }, 100);
+
+          // Restore button state
+          $button.html(originalText);
+          $button.prop("disabled", false);
+        })
+        .catch(function (error) {
+          console.error("Download failed:", error);
+
+          // Fallback to simple link approach
+          fallbackDownload(url, filename, $button, originalText);
+        });
+    } else {
+      // Fallback for older browsers
+      fallbackDownload(url, filename, $button, originalText);
+    }
+  });
+
+  // Fallback download function for older browsers
+  function fallbackDownload(url, filename, $button, originalText) {
+    try {
+      var link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      link.target = "_blank";
+      link.rel = "noopener noreferrer";
+      link.style.display = "none";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      // Restore button state
+      $button.html(originalText);
+      $button.prop("disabled", false);
+    } catch (error) {
+      console.error("Fallback download failed:", error);
+
+      // Final fallback - open in new window
+      window.open(url, "_blank");
+
+      // Restore button state
+      $button.html(originalText);
+      $button.prop("disabled", false);
+
+      alert(
+        "File opened in new tab. Use your browser's save function to download it.",
+      );
+    }
+  }
+
   // Add tooltip for download button
-  $('a[download*="correlation"]').attr(
+  $(".download-tsv").attr(
     "title",
     "Download detailed correlation data in TSV format",
   );
