@@ -52,8 +52,8 @@ function initResponsiveNavbar() {
     if (window.location.search.includes("debug=navbar")) {
       console.log("Navbar Debug Info:");
       console.log("Window width:", $(window).width());
-      console.log("Breakpoint: < 1346px for hamburger menu");
-      console.log("Should show hamburger:", $(window).width() < 1346);
+      console.log("Breakpoint: < 1376px for hamburger menu");
+      console.log("Should show hamburger:", $(window).width() < 1376);
       console.log("Hamburger visible:", $(".navbar-toggle").is(":visible"));
       console.log("Collapse state:", $(".navbar-collapse").hasClass("in"));
     }
@@ -79,7 +79,7 @@ function initResponsiveNavbar() {
 
   // Close navbar when clicking on menu items
   $(".navbar-nav li a").on("click", function () {
-    if ($(window).width() < 1346) {
+    if ($(window).width() < 1376) {
       $("#navbar").removeClass("in");
       $(".navbar-toggle").addClass("collapsed").attr("aria-expanded", "false");
     }
@@ -93,7 +93,7 @@ function initResponsiveNavbar() {
       window.open("/view?id=" + expid);
     }
     // Close navbar after search
-    if ($(window).width() < 1346) {
+    if ($(window).width() < 1376) {
       $("#navbar").removeClass("in");
       $(".navbar-toggle").addClass("collapsed").attr("aria-expanded", "false");
     }
@@ -101,7 +101,7 @@ function initResponsiveNavbar() {
 
   // Reset navbar state on window resize
   $(window).resize(function () {
-    if ($(window).width() >= 1346) {
+    if ($(window).width() >= 1376) {
       $("#navbar").removeClass("in");
       $(".navbar-toggle").addClass("collapsed").attr("aria-expanded", "false");
     }
