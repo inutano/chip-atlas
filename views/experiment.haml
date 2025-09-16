@@ -81,7 +81,7 @@
             .btn-toolbar.pull-right{ role: "toolbar" }
               // View on IGV button
               .btn-group{ role: "group" }
-                .button.btn.btn-success.dropdown-toggle{ type: "button", id: "view-igv-dropdown", "data-toggle" => "dropdown", "aria-haspopup" => true, "aria-expanded" => true, "experiment" => metadata[:agClass] }
+                .button.btn.btn-default.dropdown-toggle{ type: "button", id: "view-igv-dropdown", "data-toggle" => "dropdown", "aria-haspopup" => true, "aria-expanded" => true, "experiment" => metadata[:agClass] }
                   %i.fas.fa-eye
                   Visualize
                   %span.caret
@@ -131,7 +131,7 @@
 
               // View Analysis button
               .btn-group{ role: "group" }
-                .button.btn.btn-info.dropdown-toggle{ type: "button", id: "analyze-dropdown", "data-toggle" => "dropdown", "aria-haspopup" => true, "aria-expanded" => true, "experiment" => metadata[:agClass] }
+                .button.btn.btn-default.dropdown-toggle{ type: "button", id: "analyze-dropdown", "data-toggle" => "dropdown", "aria-haspopup" => true, "aria-expanded" => true, "experiment" => metadata[:agClass] }
                   %i.fas.fa-chart-line
                   Analyze
                   %span.caret
@@ -150,7 +150,7 @@
 
               // Download button
               .btn-group{ role: "group" }
-                .button.btn.btn-warning.dropdown-toggle{ :type => "button", :id => "download-dropdown", "data-toggle" => "dropdown", "aria-haspopup" => true, "aria-expanded" => true }
+                .button.btn.btn-default.dropdown-toggle{ :type => "button", :id => "download-dropdown", "data-toggle" => "dropdown", "aria-haspopup" => true, "aria-expanded" => true }
                   %i.fas.fa-download
                   Download
                   %span.caret
@@ -224,73 +224,68 @@
                       %a{ :href => "https://togovar.biosciencedbc.jp/?term=#{URI.encode_www_form_component(metadata[:agSubClass])}", target: "_blank" }= "TogoVar"
 
 
-            %h1.page-header{ style: 'margin-top: 0; padding-bottom: 15px; border-bottom: 3px solid #337ab7; background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); padding: 20px; border-radius: 8px 8px 0 0; margin-bottom: 30px;' }
-              %i.fas.fa-file-alt{ style: 'color: #337ab7; margin-right: 15px; font-size: 1.2em;' }
+            %h2
+              %i.fas.fa-file-alt
               = @expid
               %br
-              %small{ style: 'color: #666; font-weight: normal; font-size: 0.8em; margin-top: 5px; display: block;' }
-                %i.fas.fa-info-circle{ style: 'margin-right: 5px;' }
+              %small
                 = metadata[:title] != "-" ? metadata[:title] : "No title provided"
 
-      .row{ style: 'margin-bottom: 30px;' }
+      .row
         .col-md-10.col-md-offset-1
-          .panel.panel-default{ style: 'border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);' }
-            .panel-heading{ style: 'background: linear-gradient(135deg, #5bc0de 0%, #31b0d5 100%); color: white; border-radius: 8px 8px 0 0;' }
+          .panel.panel-default
+            .panel-heading
               %h3.panel-title
-                %i.fas.fa-dna{ style: 'margin-right: 8px;' }
+                %i.fas.fa-dna
                 Sample Information Curated by ChIP-Atlas
-            .panel-body.mdata{ style: 'padding: 25px;' }
+            .panel-body.mdata
               .row
                 .col-md-6
                   %h4
                     %i.fas.fa-tag
                     Antigen Information
                   %dl.dl-horizontal
-                    %dt{ style: 'white-space: normal; color: #337ab7;' }= "Antigen Class"
-                    %dd
-                      %span.label.label-primary= metadata[:agClass]
-                    %dt{ style: 'white-space: normal; color: #337ab7;' }= "Antigen"
-                    %dd
-                      %strong= metadata[:agSubClass]
+                    %dt{ style: 'white-space: normal;' }= "Antigen Class"
+                    %dd= metadata[:agClass]
+                    %dt{ style: 'white-space: normal;' }= "Antigen"
+                    %dd= metadata[:agSubClass]
                 .col-md-6
                   %h4
                     %i.fas.fa-microscope
                     Cell Type Information
                   %dl.dl-horizontal
-                    %dt{ style: 'white-space: normal; color: #337ab7;' }= "Cell Type Class"
-                    %dd
-                      %span.label.label-info= metadata[:clClass]
-                    %dt{ style: 'white-space: normal; color: #337ab7;' }= "Cell Type"
-                    %dd
-                      %strong= metadata[:clSubClass]
+                    %dt{ style: 'white-space: normal;' }= "Cell Type Class"
+                    %dd= metadata[:clClass]
+                    %dt{ style: 'white-space: normal;' }= "Cell Type"
+                    %dd= metadata[:clSubClass]
                     - metadata[:clSubClassInfo].split("|").each do |kv|
-                      %dt{ style: 'white-space: normal; color: #666;' }= kv.split("=").first
+                      %dt{ style: 'white-space: normal;' }= kv.split("=").first
                       %dd= kv.split("=").last
 
-      .row{ style: 'margin-bottom: 30px;' }
+      .row
         .col-md-10.col-md-offset-1
-          .panel.panel-default{ style: 'border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);' }
-            .panel-heading{ style: 'background: linear-gradient(135deg, #f0ad4e 0%, #ec971f 100%); color: white; border-radius: 8px 8px 0 0;' }
+          .panel.panel-default
+            .panel-heading
               %h3.panel-title
-                %i.fas.fa-user-edit{ style: 'margin-right: 8px;' }
+                %i.fas.fa-user-edit
                 Original Experimental Metadata
-            .panel-body.mdata{ style: 'padding: 25px;' }
+            .panel-body.mdata
               .row
                 .col-md-12
                   %h4
                     %i.fas.fa-flask
                     Sample Attributes
                   - if metadata[:attributes].strip.empty?
-                    .alert.alert-info
+                    %p.text-muted
                       %i.fas.fa-info-circle
                       No sample attributes were provided by the original submitter.
                   - else
                     %dl.dl-horizontal
                       - metadata[:attributes].split("\t").each do |kv|
-                        %dt{ style: 'white-space: normal; color: #337ab7;' }= kv.split("=").first
+                        %dt{ style: 'white-space: normal;' }= kv.split("=").first
                         %dd= kv.split("=").last
 
-              %hr{ style: 'border-color: #e5e5e5; margin: 20px 0;' }
+              %hr
 
               .row
                 .col-md-6
@@ -298,14 +293,14 @@
                     %i.fas.fa-book
                     Sequenced DNA Library
                   - if @ncbi[:library_description].values.uniq == [""]
-                    .alert.alert-warning
+                    %p.text-muted
                       %i.fas.fa-exclamation-triangle
                       No library information was found.
                   - else
                     %dl.dl-horizontal
                       - @ncbi[:library_description].each_pair do |k,v|
                         - if v != ""
-                          %dt{ style: 'white-space: normal; color: #337ab7;' }= k.to_s
+                          %dt{ style: 'white-space: normal;' }= k.to_s
                           %dd= v.to_s
 
                 .col-md-6
@@ -313,84 +308,68 @@
                     %i.fas.fa-server
                     Sequencing Platform
                   - if @ncbi[:platform_information].values.uniq == [""]
-                    .alert.alert-warning
+                    %p.text-muted
                       %i.fas.fa-exclamation-triangle
                       No platform information was found.
                   - else
                     %dl.dl-horizontal
                       - @ncbi[:platform_information].each_pair do |k,v|
                         - if v != ""
-                          %dt{ style: 'white-space: normal; color: #337ab7;' }= k.to_s
+                          %dt{ style: 'white-space: normal;' }= k.to_s
                           %dd= v.to_s
 
-      .row{ style: 'margin-bottom: 30px;' }
+      .row
         .col-md-10.col-md-offset-1
-          .panel.panel-default{ style: 'border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);' }
-            .panel-heading{ style: 'background: linear-gradient(135deg, #5cb85c 0%, #449d44 100%); color: white; border-radius: 8px 8px 0 0;' }
-              .pull-right
-                %a.btn.btn-xs.btn-success{ href: "https://github.com/inutano/chip-atlas/wiki#user-content-tables-summarizing-metadata-and-files", target: "_blank", style: 'margin-top: 5px;' }
+          .panel.panel-default
+            .panel-heading
+              %p.pull-right
+                %a{ href: "https://github.com/inutano/chip-atlas/wiki#user-content-tables-summarizing-metadata-and-files", target: "_blank" }
                   %i.fas.fa-external-link-alt
-                  Processing Logs
+                  Where can I get the processing logs?
               %h3.panel-title
-                %i.fas.fa-cogs{ style: 'margin-right: 8px;' }
-                %a{ :href => "https://github.com/inutano/chip-atlas/wiki#2-primary-processing", target: "_blank", style: 'color: white;' }
+                %i.fas.fa-cogs
+                %a{ :href => "https://github.com/inutano/chip-atlas/wiki#2-primary-processing", target: "_blank" }
                   Read Processing Pipeline
-            .panel-body.mdata{ style: 'padding: 25px;' }
+            .panel-body.mdata
               - records.each.with_index do |record,i|
                 - readinfo = record[:readInfo].split(',')
                 - genome = record[:genome]
                 .processing-section{ 'data-genome' => genome }
-                  %h4
-                    %i.fas.fa-dna{ style: 'color: #5cb85c;' }
-                    = "#{genome} Assembly Results"
-
-                  .row
+                  %h2
+                    %small
+                      %i.fas.fa-dna
+                      = genome
+                  %dl.dl-horizontal
                     - if metadata[:agClass] != 'Bisulfite-Seq'
-                      .col-md-3
-                        .stat-box{ style: 'text-align: center; padding: 15px; background-color: #f9f9f9; border-radius: 4px; margin-bottom: 10px;' }
-                          %h4.stat-number{ style: 'margin: 0; color: #337ab7; font-size: 24px;' }= readinfo[0]
-                          %p.stat-label{ style: 'margin: 0; color: #666; font-size: 12px;' }= "Total Reads"
-                      .col-md-3
-                        .stat-box{ style: 'text-align: center; padding: 15px; background-color: #f9f9f9; border-radius: 4px; margin-bottom: 10px;' }
-                          %h4.stat-number{ style: 'margin: 0; color: #5cb85c; font-size: 24px;' }= readinfo[1]
-                          %p.stat-label{ style: 'margin: 0; color: #666; font-size: 12px;' }= "Aligned (%)"
-                      .col-md-3
-                        .stat-box{ style: 'text-align: center; padding: 15px; background-color: #f9f9f9; border-radius: 4px; margin-bottom: 10px;' }
-                          %h4.stat-number{ style: 'margin: 0; color: #f0ad4e; font-size: 24px;' }= readinfo[2]
-                          %p.stat-label{ style: 'margin: 0; color: #666; font-size: 12px;' }= "Duplicates Removed (%)"
-                      .col-md-3
-                        .stat-box{ style: 'text-align: center; padding: 15px; background-color: #f9f9f9; border-radius: 4px; margin-bottom: 10px;' }
-                          %h4.stat-number{ style: 'margin: 0; color: #d9534f; font-size: 24px;' }= readinfo[3]
-                          %p.stat-label{ style: 'margin: 0; color: #666; font-size: 12px;' }= "Peaks (q < 1E-05)"
+                      %dt{ style: 'white-space: normal;' }= "Number of total reads"
+                      %dd= readinfo[0]
+                      %dt{ style: 'white-space: normal;' }= "Reads aligned (%)"
+                      %dd= readinfo[1]
+                      %dt{ style: 'white-space: normal;' }= "Duplicates removed (%)"
+                      %dd= readinfo[2]
+                      %dt{ style: 'white-space: normal;' }= "Number of peaks"
+                      %dd= readinfo[3] + " (qval < 1E-05)"
                     - else
-                      .col-md-3
-                        .stat-box{ style: 'text-align: center; padding: 15px; background-color: #f9f9f9; border-radius: 4px; margin-bottom: 10px;' }
-                          %h4.stat-number{ style: 'margin: 0; color: #337ab7; font-size: 24px;' }= readinfo[0]
-                          %p.stat-label{ style: 'margin: 0; color: #666; font-size: 12px;' }= "Total Reads"
-                      .col-md-3
-                        .stat-box{ style: 'text-align: center; padding: 15px; background-color: #f9f9f9; border-radius: 4px; margin-bottom: 10px;' }
-                          %h4.stat-number{ style: 'margin: 0; color: #5cb85c; font-size: 24px;' }= readinfo[1]
-                          %p.stat-label{ style: 'margin: 0; color: #666; font-size: 12px;' }= "Aligned (%)"
-                      .col-md-3
-                        .stat-box{ style: 'text-align: center; padding: 15px; background-color: #f9f9f9; border-radius: 4px; margin-bottom: 10px;' }
-                          %h4.stat-number{ style: 'margin: 0; color: #f0ad4e; font-size: 24px;' }= readinfo[2]
-                          %p.stat-label{ style: 'margin: 0; color: #666; font-size: 12px;' }= "Coverage Rate (×)"
-                      .col-md-3
-                        .stat-box{ style: 'text-align: center; padding: 15px; background-color: #f9f9f9; border-radius: 4px; margin-bottom: 10px;' }
-                          %h4.stat-number{ style: 'margin: 0; color: #d9534f; font-size: 24px;' }= readinfo[3]
-                          %p.stat-label{ style: 'margin: 0; color: #666; font-size: 12px;' }= "Hyper MRs (q < 1E-05)"
+                      %dt{ style: 'white-space: normal;' }= "Number of total reads"
+                      %dd= readinfo[0]
+                      %dt{ style: 'white-space: normal;' }= "Reads aligned (%)"
+                      %dd= readinfo[1]
+                      %dt{ style: 'white-space: normal;' }= "Coverage rate (×)"
+                      %dd= readinfo[2]
+                      %dt{ style: 'white-space: normal;' }= "Number of hyper MRs"
+                      %dd= readinfo[3] + " (qval < 1E-05)"
 
                 - if i != (records.size - 1)
-                  %hr{ style: 'border-color: #e5e5e5; margin: 30px 0;' }
+                  %hr
 
-      .row{ style: 'margin-bottom: 30px;' }
+      .row
         .col-md-10.col-md-offset-1
-          #statistics-panel.panel.panel-default{ :style => "display: none; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);" }
-            .panel-heading{ style: 'background: linear-gradient(135deg, #d9534f 0%, #c9302c 100%); color: white; border-radius: 8px 8px 0 0;' }
+          #statistics-panel.panel.panel-default{ :style => "display: none;" }
+            .panel-heading
               %h3.panel-title
-                %i.fas.fa-chart-bar{ style: 'margin-right: 8px;' }
+                %i.fas.fa-chart-bar
                 Data Quality and Distribution Statistics
-            .panel-body.mdata{ style: 'padding: 25px;' }
+            .panel-body.mdata
               - records.each.with_index do |record,i|
                 - genome = record[:genome]
                 - agSubClass = record[:agSubClass].gsub(/[^a-zA-Z0-9_-]/, '_')

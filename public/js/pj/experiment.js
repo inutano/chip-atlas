@@ -356,44 +356,8 @@ function setupSeparators() {
 }
 
 function enhancePanelVisuals() {
-  // Add hover effects to stat boxes
-  $(".stat-box").hover(
-    function () {
-      $(this).css({
-        transform: "translateY(-2px)",
-        "box-shadow": "0 4px 8px rgba(0,0,0,0.1)",
-        transition: "all 0.3s ease",
-      });
-    },
-    function () {
-      $(this).css({
-        transform: "translateY(0)",
-        "box-shadow": "none",
-        transition: "all 0.3s ease",
-      });
-    },
-  );
-
-  // Add animation to processing sections
-  $(".processing-section").each(function (index) {
-    var $section = $(this);
-    setTimeout(function () {
-      $section.css({
-        opacity: "1",
-        transform: "translateY(0)",
-        transition: "all 0.5s ease",
-      });
-    }, index * 200);
-  });
-
-  // Initially hide processing sections for animation
-  $(".processing-section").css({
-    opacity: "0",
-    transform: "translateY(20px)",
-  });
-
   // Add click-to-copy functionality for experiment ID
-  $("h1.page-header")
+  $("h2")
     .css("cursor", "pointer")
     .on("click", function () {
       var expid = $(this).text().trim().split("\n")[0];
@@ -418,16 +382,6 @@ function enhancePanelVisuals() {
     var text = $btn.text().trim();
     $btn.attr("title", "Click to see " + text.toLowerCase() + " options");
   });
-
-  // Add visual feedback to labels
-  $(".label").hover(
-    function () {
-      $(this).css("transform", "scale(1.1)");
-    },
-    function () {
-      $(this).css("transform", "scale(1)");
-    },
-  );
 }
 
 function fallbackCopyToClipboard(text) {
@@ -460,40 +414,19 @@ function showTooltip(message) {
 
   // Create and show tooltip
   var tooltip = $(
-    '<div class="copy-tooltip" style="position: fixed; top: 20px; right: 20px; background: #333; color: white; padding: 10px 15px; border-radius: 4px; z-index: 9999; font-size: 14px;">' +
+    '<div class="copy-tooltip" style="position: fixed; top: 20px; right: 20px; background: #666; color: white; padding: 8px 12px; border-radius: 3px; z-index: 9999; font-size: 12px; font-family: monospace;">' +
       message +
       "</div>",
   );
 
   $("body").append(tooltip);
 
-  // Animate in
-  tooltip
-    .css({
-      opacity: "0",
-      transform: "translateY(-10px)",
-    })
-    .animate(
-      {
-        opacity: "1",
-        transform: "translateY(0)",
-      },
-      300,
-    );
-
-  // Remove after 3 seconds
+  // Remove after 2 seconds
   setTimeout(function () {
-    tooltip.animate(
-      {
-        opacity: "0",
-        transform: "translateY(-10px)",
-      },
-      300,
-      function () {
-        tooltip.remove();
-      },
-    );
-  }, 3000);
+    tooltip.fadeOut(300, function () {
+      tooltip.remove();
+    });
+  }, 2000);
 }
 
 var helpText = {
