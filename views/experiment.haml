@@ -330,6 +330,85 @@
                 - if i != (records.size - 1)
                   %hr
 
+      .row
+        .col-md-10.col-md-offset-1
+          #statistics-panel.panel.panel-default{ :style => "display: none;" }
+            .panel-heading
+              %h3.panel-title
+                %i.fas.fa-chart-bar
+                Data Quality and Distribution Statistics
+            .panel-body.mdata
+              - records.each.with_index do |record,i|
+                - genome = record[:genome]
+                - agSubClass = record[:agSubClass].gsub(/[^a-zA-Z0-9_-]/, '_')
+                - clSubClass = record[:clSubClass].gsub(/[^a-zA-Z0-9_-]/, '_')
+                - base_url = "https://chip-atlas.dbcls.jp/data/#{genome}/quality"
+                - distribution_url = "#{base_url}/distribution/#{@expid}.distribution.png"
+                - correlation_png_url = "#{base_url}/correlation/png/#{@expid}.cor.png"
+                - correlation_tsv_url = "#{base_url}/correlation/#{genome}__#{agSubClass}__#{clSubClass}.correlation.tsv"
+
+                .statistics-section{ 'data-genome' => genome, 'data-distribution-url' => distribution_url, 'data-correlation-url' => correlation_png_url, 'data-correlation-tsv' => correlation_tsv_url }
+                  %h2
+                    .small= "#{genome} Statistics"
+
+                  .row
+                    .col-md-6
+                      %h4
+                        %i.fas.fa-chart-line
+                        Reads vs Peaks Distribution
+                      %p.text-muted
+                        Distribution of correlation between sequence reads and called peaks across all experiments
+                      .text-center.distribution-container
+                        %img.img-responsive.center-block.distribution-img{
+                          :src => distribution_url,
+                          :alt => "Reads vs Peaks distribution for #{@expid}",
+                          :style => "max-width: 100%; height: auto; border: 1px solid #ddd; border-radius: 4px; display: none;"
+                        }
+                        %div.loading-indicator{ :style => "padding: 20px; background-color: #f9f9f9; border-radius: 4px; color: #666;" }
+                          %i.fas.fa-spinner.fa-spin
+                          Checking for distribution data...
+
+                    .col-md-6
+                      %h4
+                        %i.fas.fa-project-diagram
+                        Experiment Clustering
+                      %p.text-muted
+                        Clustering result based on peak call similarity with related experiments
+                      .text-center.correlation-container
+                        %img.img-responsive.center-block.correlation-img{
+                          :src => correlation_png_url,
+                          :alt => "Clustering result for #{@expid}",
+                          :style => "max-width: 100%; height: auto; border: 1px solid #ddd; border-radius: 4px; display: none;"
+                        }
+                        %div.loading-indicator{ :style => "padding: 20px; background-color: #f9f9f9; border-radius: 4px; color: #666;" }
+                          %i.fas.fa-spinner.fa-spin
+                          Checking for clustering data...
+
+                      .text-center.download-container{ :style => "margin-top: 10px; display: none;" }
+                        %a.btn.btn-sm.btn-default{
+                          :href => correlation_tsv_url,
+                          :download => "#{@expid}_#{genome}_correlation.tsv",
+                          :title => "Download correlation data as TSV file"
+                        }
+                          %i.fas.fa-download
+                          Download Correlation Data
+
+                  .row.info-section{ :style => "display: none;" }
+                    .col-md-12
+                      %hr{ :style => "margin: 20px 0;" }
+                      %h4
+                        %i.fas.fa-info-circle
+                        About These Statistics
+                      %p.text-muted
+                        %strong Distribution Plot:
+                        Shows where this experiment falls within the overall distribution of read count vs peak count correlation across all experiments in the database.
+                      %p.text-muted
+                        %strong Clustering Analysis:
+                        Groups experiments with similar peak calling patterns. This helps identify experiments with comparable biological or technical characteristics.
+
+                  - if i != (records.size - 1)
+                    %hr
+
     != haml :footer
 
     /

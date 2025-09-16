@@ -5,6 +5,7 @@ $(function () {
   showHelp();
   loadImages();
   hideAnalysis();
+  handleStatisticsImages();
 });
 
 // variables
@@ -110,6 +111,137 @@ function hideAnalysis() {
   if (expType == "Bisulfite-Seq") {
     analysisButton.hide();
   }
+}
+
+function loadImages() {
+  // Placeholder for image loading functionality
+  // This function was being called but not defined
+}
+
+function handleStatisticsImages() {
+  var $statisticsPanel = $("#statistics-panel");
+  var hasAvailableData = false;
+  var sectionsToCheck = $(".statistics-section").length;
+  var sectionsChecked = 0;
+
+  // Check each statistics section
+  $(".statistics-section").each(function () {
+    var $section = $(this);
+    var distributionUrl = $section.data("distribution-url");
+    var correlationUrl = $section.data("correlation-url");
+    var $distributionImg = $section.find(".distribution-img");
+    var $correlationImg = $section.find(".correlation-img");
+    var $distributionContainer = $section.find(".distribution-container");
+    var $correlationContainer = $section.find(".correlation-container");
+    var $downloadContainer = $section.find(".download-container");
+    var $infoSection = $section.find(".info-section");
+
+    var sectionHasData = false;
+
+    // Check distribution image
+    var distributionPromise = new Promise(function (resolve) {
+      var testImg = new Image();
+      testImg.onload = function () {
+        $distributionContainer.find(".loading-indicator").hide();
+        $distributionImg.show();
+        sectionHasData = true;
+        resolve(true);
+      };
+      testImg.onerror = function () {
+        $distributionContainer.find(".loading-indicator").hide();
+        resolve(false);
+      };
+      testImg.src = distributionUrl;
+    });
+
+    // Check correlation image
+    var correlationPromise = new Promise(function (resolve) {
+      var testImg = new Image();
+      testImg.onload = function () {
+        $correlationContainer.find(".loading-indicator").hide();
+        $correlationImg.show();
+        $downloadContainer.show();
+        sectionHasData = true;
+        resolve(true);
+      };
+      testImg.onerror = function () {
+        $correlationContainer.find(".loading-indicator").hide();
+        resolve(false);
+      };
+      testImg.src = correlationUrl;
+    });
+
+    // Wait for both images to be checked
+    Promise.all([distributionPromise, correlationPromise]).then(function () {
+      sectionsChecked++;
+
+      if (sectionHasData) {
+        hasAvailableData = true;
+        $infoSection.show();
+      }
+
+      // If all sections have been checked, show/hide panel accordingly
+      if (sectionsChecked === sectionsToCheck) {
+        if (hasAvailableData) {
+          $statisticsPanel.show();
+          setupImageInteractions();
+        }
+        // If no data available, panel remains hidden
+      }
+    });
+  });
+}
+
+function setupImageInteractions() {
+  // Add click handlers for image zoom functionality
+  $(".distribution-img, .correlation-img").on("click", function () {
+    var $img = $(this);
+    var imgSrc = $img.attr("src");
+    var imgAlt = $img.attr("alt");
+
+    // Create modal for zoomed view
+    var modalHtml =
+      '<div class="modal fade" id="imageModal" tabindex="-1" role="dialog">' +
+      '<div class="modal-dialog modal-lg" role="document">' +
+      '<div class="modal-content">' +
+      '<div class="modal-header">' +
+      '<button type="button" class="close" data-dismiss="modal" aria-label="Close">' +
+      '<span aria-hidden="true">&times;</span>' +
+      "</button>" +
+      '<h4 class="modal-title">' +
+      imgAlt +
+      "</h4>" +
+      "</div>" +
+      '<div class="modal-body text-center">' +
+      '<img src="' +
+      imgSrc +
+      '" class="img-responsive" alt="' +
+      imgAlt +
+      '" style="max-width: 100%; height: auto;">' +
+      "</div>" +
+      '<div class="modal-footer">' +
+      '<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>' +
+      "</div>" +
+      "</div>" +
+      "</div>" +
+      "</div>";
+
+    // Remove existing modal if any
+    $("#imageModal").remove();
+
+    // Add modal to body and show
+    $("body").append(modalHtml);
+    $("#imageModal").modal("show");
+  });
+
+  // Add cursor pointer style for clickable images
+  $(".distribution-img, .correlation-img").css("cursor", "pointer");
+
+  // Add tooltip for download button
+  $('a[download*="correlation"]').attr(
+    "title",
+    "Download detailed correlation data in TSV format",
+  );
 }
 
 var helpText = {
