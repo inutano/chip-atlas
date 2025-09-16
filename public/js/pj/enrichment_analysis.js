@@ -404,6 +404,8 @@ function positionBed() {
     ".panel-input.gene.default-hide": "hide",
     ".panel-input.distTSS": "hide",
     ".panel-input.bed-input.comparedWith": "hide",
+    ".panel-input.dataset-title-a": "show",
+    ".panel-input.dataset-title-b": "show",
   };
   var inputs = {
     ComparedWithRandom: "checked",
@@ -414,6 +416,7 @@ function positionBed() {
   };
   setForms(panels, inputs);
   setDistance(0);
+  clearDatasetTitleDummyValues(genome);
 }
 
 function positionGene() {
@@ -429,6 +432,8 @@ function positionGene() {
     ".panel-input.gene.default-hide": "show",
     ".panel-input.bed": "hide",
     ".panel-input.bed-input.comparedWith": "hide",
+    ".panel-input.dataset-title-a": "show",
+    ".panel-input.dataset-title-b": "show",
   };
   var inputs = {
     ComparedWithRefseq: "checked",
@@ -439,6 +444,7 @@ function positionGene() {
   };
   setForms(panels, inputs);
   setDistance(5000);
+  clearDatasetTitleDummyValues(genome);
 }
 
 function positionCount() {
@@ -454,6 +460,8 @@ function positionCount() {
     ".panel-input.gene.default-hide": "hide",
     ".panel-input.bed": "hide",
     ".panel-input.bed-input.comparedWith": "hide",
+    ".panel-input.dataset-title-a": "hide",
+    ".panel-input.dataset-title-b": "hide",
   };
   var inputs = {
     ComparedWithRefseq: "unchecked",
@@ -464,6 +472,29 @@ function positionCount() {
   };
   setForms(panels, inputs);
   setDistance(5000);
+
+  // Set dummy values for dataset titles when count is selected
+  $("input#" + genome + "UserDataTitle").val(
+    "Dataset A (from count table header)",
+  );
+  $("input#" + genome + "ComparedWithTitle").val(
+    "Dataset B (not applicable for count table)",
+  );
+}
+
+function clearDatasetTitleDummyValues(genome) {
+  // Clear dummy values when switching from count to other options
+  var userDataTitle = $("input#" + genome + "UserDataTitle");
+  var comparedWithTitle = $("input#" + genome + "ComparedWithTitle");
+
+  if (userDataTitle.val() === "Dataset A (from count table header)") {
+    userDataTitle.val("");
+  }
+  if (
+    comparedWithTitle.val() === "Dataset B (not applicable for count table)"
+  ) {
+    comparedWithTitle.val("");
+  }
 }
 
 function setForms(panels, inputs) {
