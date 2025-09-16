@@ -68,13 +68,22 @@ function initResponsiveNavbar() {
     var windowWidth = $(window).width();
     var $toggle = $(".navbar-toggle");
     var $collapse = $(".navbar-collapse");
+    var $nav = $(".navbar-nav");
 
     if (windowWidth < 1346) {
       $toggle.show().removeClass("hidden");
-      $collapse.addClass("collapse").removeClass("in");
+      $collapse
+        .addClass("collapse")
+        .removeClass("in")
+        .attr("aria-expanded", "false");
+      $toggle.addClass("collapsed").attr("aria-expanded", "false");
+      // Hide regular nav items, they'll show in collapsed menu
+      $nav.hide();
     } else {
       $toggle.hide();
       $collapse.removeClass("collapse in").removeAttr("style");
+      // Show regular nav items
+      $nav.show();
     }
   }
 
@@ -85,7 +94,18 @@ function initResponsiveNavbar() {
   // Ensure navbar collapses properly on small screens
   $(".navbar-toggle").on("click", function () {
     var target = $(this).attr("data-target");
-    $(target).collapse("toggle");
+    var $target = $(target);
+    var $nav = $target.find(".navbar-nav");
+
+    if ($target.hasClass("in")) {
+      $target.removeClass("in").attr("aria-expanded", "false");
+      $(this).addClass("collapsed").attr("aria-expanded", "false");
+      $nav.hide();
+    } else {
+      $target.addClass("in").attr("aria-expanded", "true");
+      $(this).removeClass("collapsed").attr("aria-expanded", "true");
+      $nav.show();
+    }
     debugNavbar();
   });
 
@@ -123,20 +143,20 @@ function initResponsiveNavbar() {
     }
   });
 
-  // Force hamburger menu to work even if Bootstrap collapse is not working
+  // Additional click handler to ensure proper toggling
   $(".navbar-toggle").on("click", function (e) {
-    e.preventDefault();
-    var $target = $($(this).attr("data-target"));
+    // Let the first click handler run first, then this one
+    var self = this;
+    setTimeout(function () {
+      var $target = $($(self).attr("data-target"));
+      var $nav = $target.find(".navbar-nav");
 
-    // Fallback manual toggle if Bootstrap collapse fails
-    if (!$target.hasClass("collapsing")) {
-      if ($target.hasClass("in") || $target.is(":visible")) {
-        $target.removeClass("in").hide();
-        $(this).addClass("collapsed").attr("aria-expanded", "false");
+      // Ensure nav visibility matches collapse state
+      if ($target.hasClass("in")) {
+        $nav.show();
       } else {
-        $target.addClass("in").show();
-        $(this).removeClass("collapsed").attr("aria-expanded", "true");
+        $nav.hide();
       }
-    }
+    }, 50);
   });
 }

@@ -217,24 +217,52 @@ footer
 
 // responsive navbar
 @media (max-width: 1345px)
+  // Hide regular navigation items when hamburger is active
   .navbar-nav
-    .open .dropdown-menu
-      position: static
-      float: none
-      width: auto
-      margin-top: 0
-      background-color: transparent
-      border: 0
-      box-shadow: none
-    .open .dropdown-menu > li > a
-      padding: 5px 15px 5px 25px
-      color: #9d9d9d
-    .open .dropdown-menu > li > a:hover,
-    .open .dropdown-menu > li > a:focus
-      color: #fff
-      background-color: transparent
+    display: none
+
+  .navbar-collapse.collapse
+    display: block !important
+    height: auto !important
+    padding-bottom: 0
+    overflow: visible !important
+    visibility: visible !important
+
+  .navbar-collapse.collapse.in
+    overflow-y: visible
+
+  .navbar-collapse.collapse .navbar-nav
+    display: block !important
+    float: none !important
+    margin: 0
+
+  .navbar-collapse.collapse .navbar-nav > li
+    display: block
+    float: none
+
+  .navbar-collapse.collapse .navbar-nav > li > a
+    padding: 10px 15px
+    color: #9d9d9d
+    display: block
+
+  .navbar-collapse.collapse .navbar-nav > li > a:hover,
+  .navbar-collapse.collapse .navbar-nav > li > a:focus
+    color: #fff
+    background-color: #262626
+
+  .navbar-text
+    display: none
 
   .navbar-form
+    display: none
+
+  .navbar-collapse.collapse.in .navbar-text
+    display: block
+    float: none
+    margin: 15px 0
+
+  .navbar-collapse.collapse.in .navbar-form
+    display: block
     width: 100%
     padding: 10px 15px
     margin: 8px -15px
@@ -242,12 +270,8 @@ footer
     border-bottom: 1px solid transparent
     box-shadow: inset 0 1px 0 rgba(255,255,255,.1), 0 1px 0 rgba(255,255,255,.1)
 
-  .navbar-form .form-group
+  .navbar-collapse.collapse.in .navbar-form .form-group
     margin-bottom: 5px
-
-  .navbar-text
-    float: none
-    margin: 15px 0
 
   .container-fluid
     padding: .25em 1em
@@ -264,8 +288,8 @@ footer
     clear: both
     max-height: none
 
-  .navbar-nav
-    margin: 7.5px -15px
+  .navbar-right
+    float: none !important
 
 @media (min-width: 1346px)
   .navbar-toggle
@@ -308,17 +332,6 @@ footer
 
 // Additional styles for larger breakpoint
 @media (max-width: 1345px)
-  .navbar-text,
-  .navbar-form
-    clear: left
-    float: none !important
-    display: block
-    width: 100%
-    margin: 10px 0
-
-  .navbar-right
-    float: none !important
-
   .navbar-brand
     display: inline-block
     margin-right: 20px
