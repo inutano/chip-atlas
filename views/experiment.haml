@@ -347,7 +347,7 @@
                 - correlation_png_url = "#{base_url}/correlation/png/#{@expid}.cor.png"
                 - correlation_tsv_url = "#{base_url}/correlation/#{genome}__#{agSubClass}__#{clSubClass}.correlation.tsv"
 
-                .statistics-section{ 'data-genome' => genome, 'data-distribution-url' => distribution_url, 'data-correlation-url' => correlation_png_url, 'data-correlation-tsv' => correlation_tsv_url }
+                .statistics-section{ 'data-genome' => genome, 'data-distribution-url' => distribution_url, 'data-correlation-url' => correlation_png_url, 'data-correlation-tsv' => correlation_tsv_url, :style => "display: none;" }
                   %h2
                     .small= "#{genome} Statistics"
 
@@ -406,8 +406,7 @@
                         %strong Clustering Analysis:
                         Groups experiments with similar peak calling patterns. This helps identify experiments with comparable biological or technical characteristics.
 
-                  - if i != (records.size - 1)
-                    %hr
+                  %hr.genome-separator{ :style => "display: none;" }
 
     != haml :footer
 

@@ -178,6 +178,11 @@ function handleStatisticsImages() {
       if (sectionHasData) {
         hasAvailableData = true;
         $infoSection.show();
+        // Show the entire section including the genome header
+        $section.show();
+      } else {
+        // Hide the entire section if no data is available
+        $section.hide();
       }
 
       // If all sections have been checked, show/hide panel accordingly
@@ -185,6 +190,7 @@ function handleStatisticsImages() {
         if (hasAvailableData) {
           $statisticsPanel.show();
           setupImageInteractions();
+          setupSeparators();
         }
         // If no data available, panel remains hidden
       }
@@ -242,6 +248,20 @@ function setupImageInteractions() {
     "title",
     "Download detailed correlation data in TSV format",
   );
+}
+
+function setupSeparators() {
+  // Show separators between visible genome sections
+  var $visibleSections = $(".statistics-section:visible");
+
+  if ($visibleSections.length > 1) {
+    // Show separators for all visible sections except the last one
+    $visibleSections.each(function (index) {
+      if (index < $visibleSections.length - 1) {
+        $(this).find(".genome-separator").show();
+      }
+    });
+  }
 }
 
 var helpText = {
