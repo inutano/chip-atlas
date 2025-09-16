@@ -475,10 +475,10 @@ function positionCount() {
 
   // Set dummy values for dataset titles when count is selected
   $("input#" + genome + "UserDataTitle").val(
-    "Dataset A (from count table header)",
+    "Dataset A from count table header",
   );
   $("input#" + genome + "ComparedWithTitle").val(
-    "Dataset B (not applicable for count table)",
+    "Dataset B not applicable for count table",
   );
 }
 
