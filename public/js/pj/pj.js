@@ -52,6 +52,8 @@ function initResponsiveNavbar() {
     if (window.location.search.includes("debug=navbar")) {
       console.log("Navbar Debug Info:");
       console.log("Window width:", $(window).width());
+      console.log("Breakpoint: < 1346px for hamburger menu");
+      console.log("Should show hamburger:", $(window).width() < 1346);
       console.log("Hamburger visible:", $(".navbar-toggle").is(":visible"));
       console.log(
         "Navbar collapsed:",
@@ -67,7 +69,7 @@ function initResponsiveNavbar() {
     var $toggle = $(".navbar-toggle");
     var $collapse = $(".navbar-collapse");
 
-    if (windowWidth < 768) {
+    if (windowWidth < 1346) {
       $toggle.show().removeClass("hidden");
       $collapse.addClass("collapse").removeClass("in");
     } else {
@@ -89,7 +91,7 @@ function initResponsiveNavbar() {
 
   // Close navbar when clicking on menu items (on mobile)
   $(".navbar-nav li a").on("click", function () {
-    if ($(window).width() < 768) {
+    if ($(window).width() < 1346) {
       $(".navbar-collapse").collapse("hide");
     }
   });
@@ -102,7 +104,7 @@ function initResponsiveNavbar() {
 
   // Improve search form behavior on mobile
   $("#jumpToExperiment").on("focus", function () {
-    if ($(window).width() < 768) {
+    if ($(window).width() < 1346) {
       // Scroll to top to ensure search field is visible
       $("html, body").animate({ scrollTop: 0 }, 300);
     }
@@ -116,7 +118,7 @@ function initResponsiveNavbar() {
       window.open("/view?id=" + expid);
     }
     // Close navbar on mobile after search
-    if ($(window).width() < 768) {
+    if ($(window).width() < 1346) {
       $(".navbar-collapse").collapse("hide");
     }
   });

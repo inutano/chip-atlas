@@ -216,7 +216,7 @@ footer
   padding-bottom: 15px
 
 // responsive navbar
-@media (max-width: 767px)
+@media (max-width: 1345px)
   .navbar-nav
     .open .dropdown-menu
       position: static
@@ -267,7 +267,7 @@ footer
   .navbar-nav
     margin: 7.5px -15px
 
-@media (min-width: 768px)
+@media (min-width: 1346px)
   .navbar-toggle
     display: none
 
@@ -282,14 +282,59 @@ footer
 .navbar-toggle
   border: 1px solid #333
   background-color: transparent
+  padding: 4px 6px
+  border-radius: 4px
+  transition: all 0.3s ease
 
 .navbar-toggle:hover,
 .navbar-toggle:focus
   background-color: #333
+  border-color: #fff
 
 .navbar-toggle .icon-bar
+  display: block
+  width: 22px
+  height: 2px
   background-color: #ccc
+  border-radius: 1px
+  transition: all 0.3s ease
+
+.navbar-toggle .icon-bar + .icon-bar
+  margin-top: 4px
 
 .navbar-toggle:hover .icon-bar,
 .navbar-toggle:focus .icon-bar
   background-color: #fff
+
+// Additional styles for larger breakpoint
+@media (max-width: 1345px)
+  .navbar-text,
+  .navbar-form
+    clear: left
+    float: none !important
+    display: block
+    width: 100%
+    margin: 10px 0
+
+  .navbar-right
+    float: none !important
+
+  .navbar-brand
+    display: inline-block
+    margin-right: 20px
+
+  // Smooth animation for navbar collapse
+  .navbar-collapse
+    transition: height 0.35s ease
+    overflow: hidden
+
+  .navbar-collapse.collapsing
+    transition: height 0.35s ease
+
+  // Make hamburger more prominent at larger breakpoint
+  .navbar-toggle
+    display: block !important
+    float: right
+    margin-top: 8px
+    margin-right: 15px
+    margin-bottom: 8px
