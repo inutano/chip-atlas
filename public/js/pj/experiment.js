@@ -6,6 +6,7 @@ $(function () {
   loadImages();
   hideAnalysis();
   handleStatisticsImages();
+  enhancePanelVisuals();
 });
 
 // variables
@@ -352,6 +353,147 @@ function setupSeparators() {
       }
     });
   }
+}
+
+function enhancePanelVisuals() {
+  // Add hover effects to stat boxes
+  $(".stat-box").hover(
+    function () {
+      $(this).css({
+        transform: "translateY(-2px)",
+        "box-shadow": "0 4px 8px rgba(0,0,0,0.1)",
+        transition: "all 0.3s ease",
+      });
+    },
+    function () {
+      $(this).css({
+        transform: "translateY(0)",
+        "box-shadow": "none",
+        transition: "all 0.3s ease",
+      });
+    },
+  );
+
+  // Add animation to processing sections
+  $(".processing-section").each(function (index) {
+    var $section = $(this);
+    setTimeout(function () {
+      $section.css({
+        opacity: "1",
+        transform: "translateY(0)",
+        transition: "all 0.5s ease",
+      });
+    }, index * 200);
+  });
+
+  // Initially hide processing sections for animation
+  $(".processing-section").css({
+    opacity: "0",
+    transform: "translateY(20px)",
+  });
+
+  // Add click-to-copy functionality for experiment ID
+  $("h1.page-header")
+    .css("cursor", "pointer")
+    .on("click", function () {
+      var expid = $(this).text().trim().split("\n")[0];
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard
+          .writeText(expid)
+          .then(function () {
+            showTooltip("Experiment ID copied to clipboard!");
+          })
+          .catch(function () {
+            // Fallback for older browsers
+            fallbackCopyToClipboard(expid);
+          });
+      } else {
+        fallbackCopyToClipboard(expid);
+      }
+    });
+
+  // Add tooltips to action buttons
+  $(".btn.dropdown-toggle").each(function () {
+    var $btn = $(this);
+    var text = $btn.text().trim();
+    $btn.attr("title", "Click to see " + text.toLowerCase() + " options");
+  });
+
+  // Add visual feedback to labels
+  $(".label").hover(
+    function () {
+      $(this).css("transform", "scale(1.1)");
+    },
+    function () {
+      $(this).css("transform", "scale(1)");
+    },
+  );
+}
+
+function fallbackCopyToClipboard(text) {
+  var textArea = document.createElement("textarea");
+  textArea.value = text;
+  textArea.style.position = "fixed";
+  textArea.style.left = "-999999px";
+  textArea.style.top = "-999999px";
+  document.body.appendChild(textArea);
+  textArea.focus();
+  textArea.select();
+
+  try {
+    var successful = document.execCommand("copy");
+    if (successful) {
+      showTooltip("Experiment ID copied to clipboard!");
+    } else {
+      showTooltip("Copy failed. Please copy manually: " + text);
+    }
+  } catch (err) {
+    showTooltip("Copy not supported. ID: " + text);
+  }
+
+  document.body.removeChild(textArea);
+}
+
+function showTooltip(message) {
+  // Remove existing tooltip
+  $(".copy-tooltip").remove();
+
+  // Create and show tooltip
+  var tooltip = $(
+    '<div class="copy-tooltip" style="position: fixed; top: 20px; right: 20px; background: #333; color: white; padding: 10px 15px; border-radius: 4px; z-index: 9999; font-size: 14px;">' +
+      message +
+      "</div>",
+  );
+
+  $("body").append(tooltip);
+
+  // Animate in
+  tooltip
+    .css({
+      opacity: "0",
+      transform: "translateY(-10px)",
+    })
+    .animate(
+      {
+        opacity: "1",
+        transform: "translateY(0)",
+      },
+      300,
+    );
+
+  // Remove after 3 seconds
+  setTimeout(function () {
+    tooltip.animate(
+      {
+        opacity: "0",
+        transform: "translateY(-10px)",
+      },
+      300,
+      function () {
+        tooltip.remove();
+      },
+    );
+  }, 3000);
 }
 
 var helpText = {
