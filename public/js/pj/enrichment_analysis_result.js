@@ -191,7 +191,7 @@ const updateExecutionLog = (reqId) => {
       // Handle other errors
       if ($(".container#executionLog").is(":empty")) {
         $(".container#executionLog").html(
-          "<h3>Execution Log</h3><p>Error loading log file. Please try refreshing the page.</p>",
+          "<h3>Execution Log</h3><p>Fetching log file… The page will refresh automatically.</p>",
         );
       }
     }
