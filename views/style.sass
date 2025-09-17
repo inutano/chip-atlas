@@ -206,3 +206,48 @@ footer
   margin:
     top: .5em
   line-height: 1.5
+
+// navbar height fix
+.navbar-fixed-top
+  min-height: 50px
+
+.navbar-inverse .navbar-nav > li > a
+  padding-top: 15px
+  padding-bottom: 15px
+
+// responsive navbar with abbreviations
+// Show full text by default
+.full-text
+  display: inline
+
+.abbrev-text
+  display: none
+
+// On smaller screens, show abbreviations instead
+@media (max-width: 1375px)
+  .full-text
+    display: none
+
+  .abbrev-text
+    display: inline
+
+  // Adjust container padding for smaller screens
+  .container-fluid
+    padding: .25em 1em
+
+  // Reduce navbar padding to save space
+  .navbar-nav > li > a
+    padding-left: 10px
+    padding-right: 10px
+
+  // Adjust form width
+  .navbar-form
+    margin-right: 5px
+
+  .navbar-form .form-control
+    width: 80px
+
+  // Adjust text spacing
+  .navbar-text
+    margin-left: 5px
+    margin-right: 5px

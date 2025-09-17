@@ -20,57 +20,8 @@
     %link{ :href => "#{app_root}/css/solid.css", :rel => "stylesheet"}
 
   %body
-    %nav.navbar.navbar-inverse.navbar-fixed-top
-      .container-fluid
-        .navbar-header
-          %button.navbar-toggle.collapsed{ :type => "button", "data-toggle" => "collapse", "data-target" => "#navbar", "aria-expanded" => "false", "aria-controls" => "navbar" }
-            %span.sr-only Toggle navigation
-            %span.icon-bar
-            %span.icon-bar
-            %span.icon-bar
-          %a.navbar-brand{ :href => "#{app_root}" }
-            %i.fas.fa-mountain
-        #navbar.collapse.navbar-collapse
-          %ul.nav.navbar-nav
-            %li
-              %a{ :href => "#{app_root}/peak_browser" }
-                %i.fas.fa-glasses
-                Peak Browser
-            %li
-              %a{ :href => "#{app_root}/enrichment_analysis" }
-                %i.fas.fa-hand-holding-heart
-                Enrichment Analysis
-            %li
-              %a{ href: "#{app_root}/diff_analysis" }
-                %i.fas.fa-balance-scale-left
-                Diff Analysis
-            %li
-              %a{ :href => "#{app_root}/target_genes" }
-                %i.fas.fa-bullseye
-                Target Genes
-            %li
-              %a{ :href => "#{app_root}/colo" }
-                %i.fas.fa-compress-arrows-alt
-                Colo
-            %li
-              %a{ :href => "#{app_root}/publications" }
-                %i.fas.fa-book
-                Publications
-            %li
-              %a{ :href => "https://github.com/inutano/chip-atlas/wiki" }
-                %i.fab.fa-github
-                Docs
-          %p.navbar-text.navbar-right
-            %a{ href: "/search" }
-              %i.fas.fa-search
-              Search
-          %form.navbar-form.navbar-right{ role: "search" }
-            .form-group
-              - id_example = ["GSM469863", "SRX018625"].sample(1)[0]
-              %input.form-control#jumpToExperiment{ type: "text", value: "#{id_example}" }
-            %button.btn.btn-default.go-experiment{ type: "submit", }= "Go"
-          %p.navbar-text.navbar-right
-            ID:
+    - @active_menu = nil
+    != haml :_navigation
 
     - records = PJ::Experiment.record_by_expid(@expid)
     - metadata = records[0]
@@ -81,7 +32,8 @@
             .btn-toolbar.pull-right{ role: "toolbar" }
               // View on IGV button
               .btn-group{ role: "group" }
-                .button.btn.btn-primary.dropdown-toggle{ type: "button", id: "view-igv-dropdown", "data-toggle" => "dropdown", "aria-haspopup" => true, "aria-expanded" => true, "experiment" => metadata[:agClass] }
+                .button.btn.btn-default.dropdown-toggle{ type: "button", id: "view-igv-dropdown", "data-toggle" => "dropdown", "aria-haspopup" => true, "aria-expanded" => true, "experiment" => metadata[:agClass] }
+                  %i.fas.fa-eye
                   Visualize
                   %span.caret
                 %ul.dropdown-menu{ "aria-labelledby" => "igv-dropdown" }
@@ -130,7 +82,8 @@
 
               // View Analysis button
               .btn-group{ role: "group" }
-                .button.btn.btn-primary.dropdown-toggle{ type: "button", id: "analyze-dropdown", "data-toggle" => "dropdown", "aria-haspopup" => true, "aria-expanded" => true, "experiment" => metadata[:agClass] }
+                .button.btn.btn-default.dropdown-toggle{ type: "button", id: "analyze-dropdown", "data-toggle" => "dropdown", "aria-haspopup" => true, "aria-expanded" => true, "experiment" => metadata[:agClass] }
+                  %i.fas.fa-chart-line
                   Analyze
                   %span.caret
                 %ul.dropdown-menu{ "aria-labelledby" => "igv-dropdown" }
@@ -148,7 +101,8 @@
 
               // Download button
               .btn-group{ role: "group" }
-                .button.btn.btn-primary.dropdown-toggle{ :type => "button", :id => "download-dropdown", "data-toggle" => "dropdown", "aria-haspopup" => true, "aria-expanded" => true }
+                .button.btn.btn-default.dropdown-toggle{ :type => "button", :id => "download-dropdown", "data-toggle" => "dropdown", "aria-haspopup" => true, "aria-expanded" => true }
+                  %i.fas.fa-download
                   Download
                   %span.caret
                 %ul.dropdown-menu{ "aria-labelledby" => "download-dropdown" }
@@ -182,7 +136,8 @@
 
               // SRA linkout button
               .btn-group{ role: "group" }
-                .button.btn.btn-primary.dropdown-toggle{ :type => "button", :id => "linkout-dropdown", "data-toggle" => "dropdown", "aria-haspopup" => true, "aria-expanded" => true }
+                .button.btn.btn-default.dropdown-toggle{ :type => "button", :id => "linkout-dropdown", "data-toggle" => "dropdown", "aria-haspopup" => true, "aria-expanded" => true }
+                  %i.fas.fa-external-link-alt
                   Link Out
                   %span.caret
                 %ul.dropdown-menu{ "aria-labelledby" => "linkout-dropdown" }
@@ -221,114 +176,221 @@
 
 
             %h2
+              %i.fas.fa-file-alt
               = @expid
-              .small
-                = metadata[:title] != "-" ? metadata[:title] : "no title"
+              %br
+              %small
+                = metadata[:title] != "-" ? metadata[:title] : "No title provided"
 
       .row
         .col-md-10.col-md-offset-1
           .panel.panel-default
             .panel-heading
               %h3.panel-title
-                Sample information curated by ChIP-Atlas
+                %i.fas.fa-dna
+                Sample Information Curated by ChIP-Atlas
             .panel-body.mdata
-              %h2
-                .small
-                  Antigen
-              %dl.dl-horizontal
-                %dt{ style: 'white-space: normal;' }= "Antigen Class"
-                %dd= metadata[:agClass]
-                %dt{ style: 'white-space: normal;' }= "Antigen"
-                %dd= metadata[:agSubClass]
-              %hr
-              %h2
-                .small
-                  Cell type
-              %dl.dl-horizontal
-                %dt{ style: 'white-space: normal;' }= "Cell type Class"
-                %dd= metadata[:clClass]
-                %dt{ style: 'white-space: normal;' }= "Cell type"
-                %dd= metadata[:clSubClass]
-                - metadata[:clSubClassInfo].split("|").each do |kv|
-                  %dt{ style: 'white-space: normal;' }= kv.split("=").first
-                  %dd= kv.split("=").last
+              .row
+                .col-md-6
+                  %h4
+                    %i.fas.fa-tag
+                    Antigen Information
+                  %dl.dl-horizontal
+                    %dt{ style: 'white-space: normal;' }= "Antigen Class"
+                    %dd= metadata[:agClass]
+                    %dt{ style: 'white-space: normal;' }= "Antigen"
+                    %dd= metadata[:agSubClass]
+                .col-md-6
+                  %h4
+                    %i.fas.fa-microscope
+                    Cell Type Information
+                  %dl.dl-horizontal
+                    %dt{ style: 'white-space: normal;' }= "Cell Type Class"
+                    %dd= metadata[:clClass]
+                    %dt{ style: 'white-space: normal;' }= "Cell Type"
+                    %dd= metadata[:clSubClass]
+                    - metadata[:clSubClassInfo].split("|").each do |kv|
+                      %dt{ style: 'white-space: normal;' }= kv.split("=").first
+                      %dd= kv.split("=").last
 
       .row
         .col-md-10.col-md-offset-1
           .panel.panel-default
             .panel-heading
               %h3.panel-title
-                Attributes by original data submitter
+                %i.fas.fa-user-edit
+                Original Experimental Metadata
             .panel-body.mdata
-              %h2
-                .small
-                  Sample
-              %dl.dl-horizontal
-                - metadata[:attributes].split("\t").each do |kv|
-                  %dt{ style: 'white-space: normal;' }= kv.split("=").first
-                  %dd= kv.split("=").last
+              .row
+                .col-md-12
+                  %h4
+                    %i.fas.fa-flask
+                    Sample Attributes
+                  - if metadata[:attributes].strip.empty?
+                    %p.text-muted
+                      %i.fas.fa-info-circle
+                      No sample attributes were provided by the original submitter.
+                  - else
+                    %dl.dl-horizontal
+                      - metadata[:attributes].split("\t").each do |kv|
+                        %dt{ style: 'white-space: normal;' }= kv.split("=").first
+                        %dd= kv.split("=").last
+
               %hr
-              %h2
-                .small
-                  Sequenced DNA Library
-              %dl.dl-horizontal
-                - if @ncbi[:library_description].values.uniq == [""]
-                  %span.italic
-                    No library information was found.
-                - @ncbi[:library_description].each_pair do |k,v|
-                  - if v != ""
-                    %dt{ style: 'white-space: normal;' }= k.to_s
-                    %dd= v.to_s
-              %hr
-              %h2
-                .small
-                  Sequencing Platform
-              %dl.dl-horizontal
-                - if @ncbi[:platform_information].values.uniq == [""]
-                  %span.italic
-                    No platform information was found.
-                - @ncbi[:platform_information].each_pair do |k,v|
-                  - if v != ""
-                    %dt{ style: 'white-space: normal;' }= k.to_s
-                    %dd= v.to_s
+
+              .row
+                .col-md-6
+                  %h4
+                    %i.fas.fa-book
+                    Sequenced DNA Library
+                  - if @ncbi[:library_description].values.uniq == [""]
+                    %p.text-muted
+                      %i.fas.fa-exclamation-triangle
+                      No library information was found.
+                  - else
+                    %dl.dl-horizontal
+                      - @ncbi[:library_description].each_pair do |k,v|
+                        - if v != ""
+                          %dt{ style: 'white-space: normal;' }= k.to_s
+                          %dd= v.to_s
+
+                .col-md-6
+                  %h4
+                    %i.fas.fa-server
+                    Sequencing Platform
+                  - if @ncbi[:platform_information].values.uniq == [""]
+                    %p.text-muted
+                      %i.fas.fa-exclamation-triangle
+                      No platform information was found.
+                  - else
+                    %dl.dl-horizontal
+                      - @ncbi[:platform_information].each_pair do |k,v|
+                        - if v != ""
+                          %dt{ style: 'white-space: normal;' }= k.to_s
+                          %dd= v.to_s
 
       .row
         .col-md-10.col-md-offset-1
           .panel.panel-default
             .panel-heading
               %p.pull-right
-                %a{ href: "https://github.com/inutano/chip-atlas/wiki#user-content-tables-summarizing-metadata-and-files" }
+                %a{ href: "https://github.com/inutano/chip-atlas/wiki#user-content-tables-summarizing-metadata-and-files", target: "_blank" }
+                  %i.fas.fa-external-link-alt
                   Where can I get the processing logs?
               %h3.panel-title
-                %a{ :href => "https://github.com/inutano/chip-atlas/wiki#2-primary-processing" }
-                  Read processing pipeline
-                log
+                %i.fas.fa-cogs
+                %a{ :href => "https://github.com/inutano/chip-atlas/wiki#2-primary-processing", target: "_blank" }
+                  Read Processing Pipeline
             .panel-body.mdata
               - records.each.with_index do |record,i|
                 - readinfo = record[:readInfo].split(',')
-                %h2
-                  .small= record[:genome]
-                %dl.dl-horizontal
-                  - if metadata[:agClass] != 'Bisulfite-Seq'
-                    %dt{ style: 'white-space: normal;' }= "Number of total reads"
-                    %dd= readinfo[0]
-                    %dt{ style: 'white-space: normal;' }= "Reads aligned (%)"
-                    %dd= readinfo[1]
-                    %dt{ style: 'white-space: normal;' }= "Duplicates removed (%)"
-                    %dd= readinfo[2]
-                    %dt{ style: 'white-space: normal;' }= "Number of peaks"
-                    %dd= readinfo[3] + " (qval < 1E-05)"
-                  - else
-                    %dt{ style: 'white-space: normal;' }= "Number of total reads"
-                    %dd= readinfo[0]
-                    %dt{ style: 'white-space: normal;' }= "Reads aligned (%)"
-                    %dd= readinfo[1]
-                    %dt{ style: 'white-space: normal;' }= "Coverage rate (×)"
-                    %dd= readinfo[2]
-                    %dt{ style: 'white-space: normal;' }= "Number of hyper MRs"
-                    %dd= readinfo[3] + " (qval < 1E-05)"
+                - genome = record[:genome]
+                .processing-section{ 'data-genome' => genome }
+                  %h2
+                    %small
+                      %i.fas.fa-dna
+                      = genome
+                  %dl.dl-horizontal
+                    - if metadata[:agClass] != 'Bisulfite-Seq'
+                      %dt{ style: 'white-space: normal;' }= "Number of total reads"
+                      %dd= readinfo[0]
+                      %dt{ style: 'white-space: normal;' }= "Reads aligned (%)"
+                      %dd= readinfo[1]
+                      %dt{ style: 'white-space: normal;' }= "Duplicates removed (%)"
+                      %dd= readinfo[2]
+                      %dt{ style: 'white-space: normal;' }= "Number of peaks"
+                      %dd= readinfo[3] + " (qval < 1E-05)"
+                    - else
+                      %dt{ style: 'white-space: normal;' }= "Number of total reads"
+                      %dd= readinfo[0]
+                      %dt{ style: 'white-space: normal;' }= "Reads aligned (%)"
+                      %dd= readinfo[1]
+                      %dt{ style: 'white-space: normal;' }= "Coverage rate (×)"
+                      %dd= readinfo[2]
+                      %dt{ style: 'white-space: normal;' }= "Number of hyper MRs"
+                      %dd= readinfo[3] + " (qval < 1E-05)"
+
                 - if i != (records.size - 1)
                   %hr
+
+      .row
+        .col-md-10.col-md-offset-1
+          #statistics-panel.panel.panel-default{ :style => "display: none;" }
+            .panel-heading
+              %h3.panel-title
+                %i.fas.fa-chart-bar
+                Data Quality and Distribution Statistics
+            .panel-body.mdata
+              - records.each.with_index do |record,i|
+                - genome = record[:genome]
+                - agSubClass = record[:agSubClass].gsub(/[^a-zA-Z0-9_-]/, '_')
+                - clSubClass = record[:clSubClass].gsub(/[^a-zA-Z0-9_-]/, '_')
+                - base_url = "https://chip-atlas.dbcls.jp/data/#{genome}/quality"
+                - distribution_url = "#{base_url}/distribution/#{@expid}.distribution.png"
+                - correlation_png_url = "#{base_url}/correlation/png/#{@expid}.cor.png"
+                - correlation_tsv_url = "#{base_url}/correlation/#{genome}__#{agSubClass}__#{clSubClass}.correlation.tsv"
+
+                .statistics-section{ 'data-genome' => genome, 'data-distribution-url' => distribution_url, 'data-correlation-url' => correlation_png_url, 'data-correlation-tsv' => correlation_tsv_url, :style => "display: none;" }
+                  %h2
+                    .small= "#{genome} Statistics"
+
+                  .row
+                    .col-md-6
+                      %h4
+                        %i.fas.fa-chart-line
+                        Reads vs Peaks Distribution
+                      %p.text-muted
+                        Distribution of correlation between sequence reads and called peaks across all experiments
+                      .text-center.distribution-container
+                        %img.img-responsive.center-block.distribution-img{
+                          :src => distribution_url,
+                          :alt => "Reads vs Peaks distribution for #{@expid}",
+                          :style => "max-width: 100%; height: auto; border: 1px solid #ddd; border-radius: 4px; display: none;"
+                        }
+                        %div.loading-indicator{ :style => "padding: 20px; background-color: #f9f9f9; border-radius: 4px; color: #666;" }
+                          %i.fas.fa-spinner.fa-spin
+                          Checking for distribution data...
+
+                    .col-md-6
+                      %h4
+                        %i.fas.fa-project-diagram
+                        Experiment Clustering
+                      %p.text-muted
+                        Clustering result based on peak call similarity with related experiments
+                      .text-center.correlation-container
+                        %img.img-responsive.center-block.correlation-img{
+                          :src => correlation_png_url,
+                          :alt => "Clustering result for #{@expid}",
+                          :style => "max-width: 100%; height: auto; border: 1px solid #ddd; border-radius: 4px; display: none;"
+                        }
+                        %div.loading-indicator{ :style => "padding: 20px; background-color: #f9f9f9; border-radius: 4px; color: #666;" }
+                          %i.fas.fa-spinner.fa-spin
+                          Checking for clustering data...
+
+                      .text-center.download-container{ :style => "margin-top: 10px; display: none;" }
+                        %a.btn.btn-sm.btn-default.download-tsv{
+                          :href => "#",
+                          "data-url" => correlation_tsv_url,
+                          "data-filename" => "#{@expid}_#{genome}_correlation.tsv",
+                          :title => "Download correlation data as TSV file"
+                        }
+                          %i.fas.fa-download
+                          Download Correlation Data
+
+                  .row.info-section{ :style => "display: none;" }
+                    .col-md-12
+                      %hr{ :style => "margin: 20px 0;" }
+                      %h4
+                        %i.fas.fa-info-circle
+                        About These Statistics
+                      %p.text-muted
+                        %strong Distribution Plot:
+                        Shows where this experiment falls within the overall distribution of read count vs peak count correlation across all experiments in the database.
+                      %p.text-muted
+                        %strong Clustering Analysis:
+                        Groups experiments with similar peak calling patterns. This helps identify experiments with comparable biological or technical characteristics.
+
+                  %hr.genome-separator{ :style => "display: none;" }
 
     != haml :footer
 

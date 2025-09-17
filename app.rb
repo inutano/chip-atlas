@@ -308,7 +308,21 @@ class PeakJohn < Sinatra::Base
   end
 
   get "/diff_analysis_log" do
-    URI.open("https://dtn1.ddbj.nig.ac.jp/wabi/chipatlas/#{params[:id]}?info=result&format=log").read
+    begin
+      URI.open("https://dtn1.ddbj.nig.ac.jp/wabi/chipatlas/#{params[:id]}?info=result&format=log").read
+    rescue => e
+      status 404
+      "Log file not available yet"
+    end
+  end
+
+  get "/enrichment_analysis_log" do
+    begin
+      URI.open("https://dtn1.ddbj.nig.ac.jp/wabi/chipatlas/#{params[:id]}?info=result&format=log").read
+    rescue => e
+      status 404
+      "Log file not available yet"
+    end
   end
 
   post "/diff_analysis_estimated_time" do
@@ -389,19 +403,24 @@ class PeakJohn < Sinatra::Base
 
   # Post a job to DDBJ-SC via wabi API
   post "/wabi_chipatlas" do
-    request.body.rewind
-    request_body = request.body.read
-
     if wabi_endpoint_status != 'chipatlas'
       status 503
     else
-      wabi_response = Net::HTTP.post_form(URI.parse(settings.wabi_endpoint), JSON.parse(request_body))
+      # Handle both JSON and form data
+      post_data = if request.content_type&.include?('application/json')
+        request.body.rewind
+        JSON.parse(request.body.read)
+      else
+        params
+      end
+
+      wabi_response = Net::HTTP.post_form(URI.parse(settings.wabi_endpoint), post_data)
       wabi_response_body = wabi_response.body
       if wabi_response_body
         id = wabi_response_body.split("\n").select{|n| n =~ /^requestId/ }.first.split("\s").last
         JSON.dump({ "requestId" => id })
       else
-        JSON.dump({ "request_body" => wabi_request_body })
+        JSON.dump({ "request_body" => post_data.to_s })
       end
     end
   rescue => e

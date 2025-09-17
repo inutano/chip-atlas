@@ -1,0 +1,55 @@
+%nav.navbar.navbar-inverse.navbar-fixed-top
+  .container-fluid
+    .navbar-header
+      %a.navbar-brand{ :href => "#{app_root}" }
+        %i.fas.fa-mountain
+    .navbar-collapse
+      %ul.nav.navbar-nav
+        %li{ :class => (@active_menu == 'peak_browser') ? 'active' : '' }
+          %a{ :href => "#{app_root}/peak_browser" }
+            %i.fas.fa-glasses
+            %span.full-text Peak Browser
+            %span.abbrev-text PB
+        %li{ :class => (@active_menu == 'enrichment_analysis') ? 'active' : '' }
+          %a{ :href => "#{app_root}/enrichment_analysis" }
+            %i.fas.fa-hand-holding-heart
+            %span.full-text Enrichment Analysis
+            %span.abbrev-text EA
+        %li{ :class => (@active_menu == 'diff_analysis') ? 'active' : '' }
+          %a{ href: "#{app_root}/diff_analysis" }
+            %i.fas.fa-balance-scale-left
+            %span.full-text Diff Analysis
+            %span.abbrev-text DA
+        %li{ :class => (@active_menu == 'target_genes') ? 'active' : '' }
+          %a{ :href => "#{app_root}/target_genes" }
+            %i.fas.fa-bullseye
+            %span.full-text Target Genes
+            %span.abbrev-text TG
+        %li{ :class => (@active_menu == 'colo') ? 'active' : '' }
+          %a{ :href => "#{app_root}/colo" }
+            %i.fas.fa-compress-arrows-alt
+            %span.full-text Colo
+            %span.abbrev-text Colo
+        %li{ :class => (@active_menu == 'publications') ? 'active' : '' }
+          %a{ :href => "#{app_root}/publications" }
+            %i.fas.fa-book
+            %span.full-text Publications
+            %span.abbrev-text Pub
+        %li
+          %a{ :href => "https://github.com/inutano/chip-atlas/wiki" }
+            %i.fab.fa-github
+            %span.full-text Docs
+            %span.abbrev-text Doc
+      %p.navbar-text.navbar-right
+        %a{ href: "/search" }
+          %i.fas.fa-search
+          %span.full-text Search
+          %span.abbrev-text ?
+      %form.navbar-form.navbar-right{ role: "search" }
+        .form-group
+          - id_example = ["GSM469863", "SRX018625"].sample(1)[0]
+          %input.form-control#jumpToExperiment{ type: "text", value: "#{id_example}" }
+        %button.btn.btn-default.go-experiment{ type: "submit", }= "Go"
+      %p.navbar-text.navbar-right
+        %span.full-text ID:
+        %span.abbrev-text ID:

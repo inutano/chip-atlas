@@ -1,0 +1,321 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Enrichment Analysis Test</title>
+        <link
+            href="https://cdn.jsdelivr.net/npm/bootstrap@3.4.1/dist/css/bootstrap.min.css"
+            rel="stylesheet"
+        />
+        <script src="https://code.jquery.com/jquery-2.2.4.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@3.4.1/dist/js/bootstrap.min.js"></script>
+    </head>
+    <body>
+        <div class="container">
+            <h1>Test Enrichment Analysis Changes</h1>
+
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h4 class="panel-title">4. Enter dataset A</h4>
+                </div>
+                <div class="panel-body">
+                    <form>
+                        <div class="checkbox panel-input">
+                            <label>
+                                <input
+                                    type="radio"
+                                    id="hg19UserDataBed"
+                                    name="bedORGene"
+                                    value="bed"
+                                    checked="checked"
+                                />
+                                Genomic regions (BED)
+                            </label>
+                        </div>
+                        <div class="checkbox panel-input">
+                            <label>
+                                <input
+                                    type="radio"
+                                    id="hg19UserDataGenes"
+                                    name="bedORGene"
+                                    value="gene"
+                                />
+                                Gene list (Gene symbols or IDs)
+                            </label>
+                        </div>
+                        <div class="checkbox panel-input">
+                            <label>
+                                <input
+                                    type="radio"
+                                    id="hg19UserDataCount"
+                                    name="bedORGene"
+                                    value="count"
+                                />
+                                Gene count table
+                            </label>
+                        </div>
+                        <div class="panel-input bed-input userData">
+                            <div class="form-group panel-input-textarea">
+                                <textarea
+                                    class="form-control"
+                                    name="txtA"
+                                    id="hg19UserData"
+                                    rows="8"
+                                    cols="50"
+                                    placeholder="Enter your data here..."
+                                ></textarea>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="panel panel-default" id="hg19TargetDB-panel">
+                <div class="panel-heading" id="hg19TargetDB">
+                    <h4 class="panel-title">5. Enter dataset B</h4>
+                </div>
+                <div class="panel-body">
+                    <p>
+                        This panel should be hidden when Gene count table is
+                        selected
+                    </p>
+                    <div class="checkbox panel-input bed">
+                        <label>
+                            <input
+                                type="radio"
+                                id="hg19ComparedWithRandom"
+                                name="comparedWith"
+                                value="rnd"
+                                checked="checked"
+                            />
+                            Random permutation of dataset A
+                        </label>
+                    </div>
+                    <div class="checkbox panel-input bed">
+                        <label>
+                            <input
+                                type="radio"
+                                id="hg19ComparedWithBed"
+                                name="comparedWith"
+                                value="bed"
+                            />
+                            Genomic regions (BED)
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <button class="btn btn-primary" id="test-submit">
+                        Test Submit
+                    </button>
+                    <div
+                        id="output"
+                        style="
+                            margin-top: 20px;
+                            padding: 10px;
+                            background-color: #f5f5f5;
+                            border-radius: 4px;
+                        "
+                    >
+                        <strong>Output will appear here...</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            // Mock functions from the original file for testing
+            function genomeSelected() {
+                return "hg19";
+            }
+
+            function hideAndShow(element, type) {
+                switch (type) {
+                    case "show":
+                        $(element).show();
+                        break;
+                    case "hide":
+                        $(element).hide();
+                        break;
+                }
+            }
+
+            function inputChange(id, type) {
+                var genome = genomeSelected();
+                switch (type) {
+                    case "checked":
+                        $("input#" + genome + id).prop("checked", true);
+                        break;
+                    case "unchecked":
+                        $("input#" + genome + id).prop("checked", false);
+                        break;
+                }
+            }
+
+            function setForms(panels, inputs) {
+                $.each(panels, function (id, type) {
+                    hideAndShow(id, type);
+                });
+                $.each(inputs, function (id, type) {
+                    inputChange(id, type);
+                });
+            }
+
+            function setDistance(distValue) {
+                // Mock function - not needed for this test
+            }
+
+            function eraseTextarea(id) {
+                $("#" + id).val("");
+            }
+
+            function positionBed() {
+                var genome = genomeSelected();
+                // Show panel 5 (dataset B) when bed is selected
+                $("#" + genome + "TargetDB")
+                    .parent()
+                    .show();
+
+                var panels = {
+                    ".panel-input.bed": "show",
+                    ".panel-input.rnd": "show",
+                    ".panel-input.gene.default-hide": "hide",
+                    ".panel-input.distTSS": "hide",
+                    ".panel-input.bed-input.comparedWith": "hide",
+                };
+                var inputs = {
+                    ComparedWithRandom: "checked",
+                    ComparedWithRandomx1: "checked",
+                    ComparedWithBed: "unchecked",
+                    ComparedWithRefseq: "unchecked",
+                    ComparedWithUserlist: "unchecked",
+                };
+                setForms(panels, inputs);
+                setDistance(0);
+            }
+
+            function positionGene() {
+                var genome = genomeSelected();
+                // Show panel 5 (dataset B) when gene is selected
+                $("#" + genome + "TargetDB")
+                    .parent()
+                    .show();
+
+                var panels = {
+                    ".panel-input.rnd": "show",
+                    ".panel-input.distTSS": "show",
+                    ".panel-input.gene.default-hide": "show",
+                    ".panel-input.bed": "hide",
+                    ".panel-input.bed-input.comparedWith": "hide",
+                };
+                var inputs = {
+                    ComparedWithRefseq: "checked",
+                    ComparedWithBed: "unchecked",
+                    ComparedWithRandom: "unchecked",
+                    ComparedWithRandomx1: "unchecked",
+                    ComparedWithUserlist: "unchecked",
+                };
+                setForms(panels, inputs);
+                setDistance(5000);
+            }
+
+            function positionCount() {
+                var genome = genomeSelected();
+                // Hide panel 5 (dataset B) completely when count is selected
+                $("#" + genome + "TargetDB")
+                    .parent()
+                    .hide();
+
+                var panels = {
+                    ".panel-input.rnd": "hide",
+                    ".panel-input.distTSS": "hide",
+                    ".panel-input.gene.default-hide": "hide",
+                    ".panel-input.bed": "hide",
+                    ".panel-input.bed-input.comparedWith": "hide",
+                };
+                var inputs = {
+                    ComparedWithRefseq: "unchecked",
+                    ComparedWithBed: "unchecked",
+                    ComparedWithRandom: "unchecked",
+                    ComparedWithRandomx1: "unchecked",
+                    ComparedWithUserlist: "unchecked",
+                };
+                setForms(panels, inputs);
+                setDistance(0);
+            }
+
+            function retrievePostData() {
+                var genome = genomeSelected();
+                var typeA = $("input[name='bedORGene']:checked").val();
+                var data = {
+                    address: "",
+                    format: "text",
+                    result: "www",
+                    genome: genome,
+                    typeA: typeA,
+                    bedAFile: $("textarea#" + genome + "UserData").val(),
+                    typeB: $("input[name='comparedWith']:checked").val(),
+                    bedBFile: "",
+                };
+
+                // Special handling for count type
+                if (typeA === "count") {
+                    data.typeA = "count";
+                    // For count type, put the content in dataset A and clear dataset B
+                    data.bedBFile = "";
+                    data.typeB = "";
+                }
+
+                return data;
+            }
+
+            // Main event handlers
+            $(document).ready(function () {
+                // Form Layout: User Data
+                $("input[name='bedORGene']").change(function () {
+                    var genome = genomeSelected();
+                    switch ($(this).val()) {
+                        case "bed":
+                            positionBed();
+                            break;
+                        case "gene":
+                            positionGene();
+                            break;
+                        case "count":
+                            positionCount();
+                            break;
+                    }
+                    eraseTextarea(genome + "UserData");
+                });
+
+                // Test submit button
+                $("#test-submit").click(function () {
+                    var data = retrievePostData();
+                    $("#output").html(
+                        "<strong>Test Results:</strong><br>" +
+                            "<strong>Type A:</strong> " +
+                            data.typeA +
+                            "<br>" +
+                            "<strong>Type B:</strong> " +
+                            (data.typeB || "Not set") +
+                            "<br>" +
+                            "<strong>Panel 5 visible:</strong> " +
+                            ($("#hg19TargetDB-panel").is(":visible")
+                                ? "Yes"
+                                : "No") +
+                            "<br>" +
+                            "<strong>Full data:</strong><br><pre>" +
+                            JSON.stringify(data, null, 2) +
+                            "</pre>",
+                    );
+                });
+
+                // Initialize with bed selected
+                positionBed();
+            });
+        </script>
+    </body>
+</html>

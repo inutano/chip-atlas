@@ -21,57 +21,8 @@
     %link{ :href => "#{app_root}/css/solid.css", :rel => "stylesheet"}
 
   %body
-    %nav.navbar.navbar-inverse.navbar-fixed-top
-      .container-fluid
-        .navbar-header
-          %button.navbar-toggle.collapsed{ :type => "button", "data-toggle" => "collapse", "data-target" => "#navbar", "aria-expanded" => "false", "aria-controls" => "navbar" }
-            %span.sr-only Toggle navigation
-            %span.icon-bar
-            %span.icon-bar
-            %span.icon-bar
-          %a.navbar-brand{ :href => "#{app_root}" }
-            %i.fas.fa-mountain
-        #navbar.collapse.navbar-collapse
-          %ul.nav.navbar-nav
-            %li
-              %a{ :href => "#{app_root}/peak_browser" }
-                %i.fas.fa-glasses
-                Peak Browser
-            %li
-              %a{ :href => "#{app_root}/enrichment_analysis" }
-                %i.fas.fa-hand-holding-heart
-                Enrichment Analysis
-            %li
-              %a{ href: "#{app_root}/diff_analysis" }
-                %i.fas.fa-balance-scale-left
-                Diff Analysis
-            %li.active
-              %a{ :href => "#{app_root}/target_genes" }
-                %i.fas.fa-bullseye
-                Target Genes
-            %li
-              %a{ :href => "#{app_root}/colo" }
-                %i.fas.fa-compress-arrows-alt
-                Colo
-            %li
-              %a{ :href => "#{app_root}/publications" }
-                %i.fas.fa-book
-                Publications
-            %li
-              %a{ :href => "https://github.com/inutano/chip-atlas/wiki" }
-                %i.fab.fa-github
-                Docs
-          %p.navbar-text.navbar-right
-            %a{ href: "/search" }
-              %i.fas.fa-search
-              Search
-          %form.navbar-form.navbar-right{ role: "search" }
-            .form-group
-              - id_example = ["GSM469863", "SRX018625"].sample(1)[0]
-              %input.form-control#jumpToExperiment{ type: "text", value: "#{id_example}" }
-            %button.btn.btn-default.go-experiment{ type: "submit", }= "Go"
-          %p.navbar-text.navbar-right
-            ID:
+    - @active_menu = 'target_genes'
+    != haml :_navigation
 
     .container
       .row
@@ -120,7 +71,7 @@
                     .panel-body
                       %input.typeahead.form-control{ :type => "text", :placeholder => "type to search", :id => "#{panel}-typeahead" }
                       %hr
-                      %select.form-control.flexselect{ :id => "#{panel}-select",  :size => 8 }
+                      %select.form-control.flexselect{ :id => "#{panel}-select", :size => 8 }
 
                 .col-md-3
                   .panel.panel-default
@@ -131,7 +82,7 @@
                       %form{ :id => "#{panel}-form" }
                         .radio
                           %label
-                            %input{ :type => "radio", :id => genome + "Distance1k", :value => "1", :name => genome +  "DistanceOption", checked: true }
+                            %input{ :type => "radio", :id => genome + "Distance1k", :value => "1", :name => genome + "DistanceOption", checked: true }
                             = " ±1k "
                         .radio
                           %label
@@ -139,7 +90,7 @@
                             = " ±5k "
                         .radio
                           %label
-                            %input{ :type => "radio", :id => genome + "Distance10k", :value => "10", :name => genome +  "DistanceOption" }
+                            %input{ :type => "radio", :id => genome + "Distance10k", :value => "10", :name => genome + "DistanceOption" }
                             = " ±10k "
 
               .row
@@ -147,7 +98,6 @@
                   .button-submit
                     %button.btn.btn-primary.btn-lg.btn-block.post{ :id => "target-gene-submit", :type => "button" }= "View Potential Target Genes"
                     %button.btn.btn-primary.btn-lg.btn-block.post{ :id => "target-gene-download", :type => "button" }= "Download (TSV)"
-
 
     != haml :footer
 

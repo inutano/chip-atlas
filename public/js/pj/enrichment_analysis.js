@@ -82,6 +82,9 @@ window.onload = async () => {
       case "gene":
         positionGene();
         break;
+      case "count":
+        positionCount();
+        break;
     }
     eraseTextarea(genome + "UserData");
   });
@@ -185,6 +188,9 @@ window.onload = async () => {
         break;
       case genome + "UserDataGenes":
         alert(helpText["userdatagenes"] + helpText["note1"]);
+        break;
+      case genome + "UserDataCount":
+        alert(helpText["userdatacount"]);
         break;
       case genome + "ComparedWithRandom":
         alert(helpText["comparedwithrandom"]);
@@ -357,6 +363,9 @@ function putUserData(type) {
     case "gene":
       getExampleData(genome, "geneA.txt", genome + "UserData");
       break;
+    case "count":
+      getExampleData(genome, "countA.txt", genome + "UserData");
+      break;
   }
 }
 
@@ -383,12 +392,20 @@ function getExampleData(genome, fname, textareaId) {
 }
 
 function positionBed() {
+  var genome = genomeSelected();
+  // Show panel 5 (dataset B) when bed is selected
+  $("#" + genome + "TargetDB")
+    .parent()
+    .show();
+
   var panels = {
     ".panel-input.bed": "show",
     ".panel-input.rnd": "show",
     ".panel-input.gene.default-hide": "hide",
     ".panel-input.distTSS": "hide",
     ".panel-input.bed-input.comparedWith": "hide",
+    ".panel-input.dataset-title-a": "show",
+    ".panel-input.dataset-title-b": "show",
   };
   var inputs = {
     ComparedWithRandom: "checked",
@@ -399,15 +416,24 @@ function positionBed() {
   };
   setForms(panels, inputs);
   setDistance(0);
+  clearDatasetTitleDummyValues(genome);
 }
 
 function positionGene() {
+  var genome = genomeSelected();
+  // Show panel 5 (dataset B) when gene is selected
+  $("#" + genome + "TargetDB")
+    .parent()
+    .show();
+
   var panels = {
     ".panel-input.rnd": "show",
     ".panel-input.distTSS": "show",
     ".panel-input.gene.default-hide": "show",
     ".panel-input.bed": "hide",
     ".panel-input.bed-input.comparedWith": "hide",
+    ".panel-input.dataset-title-a": "show",
+    ".panel-input.dataset-title-b": "show",
   };
   var inputs = {
     ComparedWithRefseq: "checked",
@@ -418,6 +444,57 @@ function positionGene() {
   };
   setForms(panels, inputs);
   setDistance(5000);
+  clearDatasetTitleDummyValues(genome);
+}
+
+function positionCount() {
+  var genome = genomeSelected();
+  // Hide panel 5 (dataset B) completely when count is selected
+  $("#" + genome + "TargetDB")
+    .parent()
+    .hide();
+
+  var panels = {
+    ".panel-input.rnd": "hide",
+    ".panel-input.distTSS": "show",
+    ".panel-input.gene.default-hide": "hide",
+    ".panel-input.bed": "hide",
+    ".panel-input.bed-input.comparedWith": "hide",
+    ".panel-input.dataset-title-a": "hide",
+    ".panel-input.dataset-title-b": "hide",
+  };
+  var inputs = {
+    ComparedWithRefseq: "unchecked",
+    ComparedWithBed: "unchecked",
+    ComparedWithRandom: "unchecked",
+    ComparedWithRandomx1: "unchecked",
+    ComparedWithUserlist: "unchecked",
+  };
+  setForms(panels, inputs);
+  setDistance(5000);
+
+  // Set dummy values for dataset titles when count is selected
+  $("input#" + genome + "UserDataTitle").val(
+    "Dataset A from count table header",
+  );
+  $("input#" + genome + "ComparedWithTitle").val(
+    "Dataset B not applicable for count table",
+  );
+}
+
+function clearDatasetTitleDummyValues(genome) {
+  // Clear dummy values when switching from count to other options
+  var userDataTitle = $("input#" + genome + "UserDataTitle");
+  var comparedWithTitle = $("input#" + genome + "ComparedWithTitle");
+
+  if (userDataTitle.val() === "Dataset A (from count table header)") {
+    userDataTitle.val("");
+  }
+  if (
+    comparedWithTitle.val() === "Dataset B (not applicable for count table)"
+  ) {
+    comparedWithTitle.val("");
+  }
 }
 
 function setForms(panels, inputs) {
@@ -504,6 +581,10 @@ function retrievePostData() {
     "#" + genome + '-tab-content input[name="numShuf"]:checked',
   ).val();
   permTime = permTime > 0 ? permTime : 1;
+  var typeA = $(
+    "#" + genome + '-tab-content input[name="bedORGene"]:checked',
+  ).val();
+
   var data = {
     address: "",
     format: "text",
@@ -512,9 +593,7 @@ function retrievePostData() {
     antigenClass: $("select#" + genome + "agClass option:selected").val(),
     cellClass: $("select#" + genome + "clClass option:selected").val(),
     threshold: $("select#" + genome + "qval option:selected").val(),
-    typeA: $(
-      "#" + genome + '-tab-content input[name="bedORGene"]:checked',
-    ).val(),
+    typeA: typeA,
     bedAFile: $("textarea#" + genome + "UserData").val(),
     typeB: $(
       "#" + genome + '-tab-content input[name="comparedWith"]:checked',
@@ -527,6 +606,15 @@ function retrievePostData() {
     distanceUp: $("input#" + genome + "DistanceUp").val(),
     distanceDown: $("input#" + genome + "DistanceDown").val(),
   };
+
+  // Special handling for count type
+  if (typeA === "count") {
+    data.typeA = "count";
+    // For count type, set dataset B to empty values as required by API
+    data.bedBFile = "empty";
+    data.typeB = "empty";
+  }
+
   if (data.antigenClass == "Bisulfite-Seq") {
     data.sbatchOptions = "-p epyc -t 180";
   }
@@ -549,12 +637,16 @@ function evaluateText(data) {
   var descSet = [
     [data["bedAFile"], "bed", "User data bed file"],
     [data["descriptionA"], "desc", "User data title"],
-    [data["bedBFile"], "bed", "Compared data bed file"],
-    [data["descriptionB"], "desc", "Compared data title"],
     [data["distanceUp"], "dist", "Distance down range"],
     [data["distanceDown"], "dist", "Distance up range"],
     [data["title"], "desc", "Project title"],
   ];
+
+  // Only validate bedBFile and descriptionB if not using count type
+  if (data["typeA"] !== "count") {
+    descSet.push([data["bedBFile"], "bed", "Compared data bed file"]);
+    descSet.push([data["descriptionB"], "desc", "Compared data title"]);
+  }
   var allowedChars = {
     bed: "alphanumerics, tab, underscore(_)",
     desc: "- alphanumerics (abcABC123)\n- space ( )\n- underscore (_)\n- period (.)\n- hyphen (-)",
@@ -670,8 +762,7 @@ function post2wabi(button, data) {
     $.ajax({
       type: "post",
       url: "/wabi_chipatlas",
-      data: JSON.stringify(data),
-      contentType: "application/json",
+      data: data,
       dataType: "json",
       scriptCharset: "utf-8",
       success: function (response) {
@@ -809,6 +900,15 @@ function estimateTime(userData, comparedWith, numRef) {
           break;
       }
       break;
+    case "count":
+      // For count type, use a simple estimation since no dataset B comparison
+      var seconds = getSeconds(
+        numLinesUserData,
+        0, // no dataset B for count type
+        numRef,
+        "bed",
+      );
+      break;
   }
   var minutes = Math.round(seconds / 60);
   if (minutes < 60) {
@@ -910,6 +1010,8 @@ var helpText = {
     "Check this to search for common epigenetic features within given genomic regions (UCSC BED format).\n\n",
   userdatagenes:
     "Check this to search for common epigenetic features around given genes.\n\n",
+  userdatacount:
+    "Check this to upload a two-group gene count table (CSV or TSV) to search for common epigenetic features around highly expressed genes in each group.\nSee the tutorial for details on the required table format.\n\n",
   comparedwithrandom:
     "Check this to compare ‘dataset A’ with a random background. In this case, each genomic location of ‘dataset A’ is permuted on a random chromosome at a random position for the specified times. Increasing the permutation times will provide a highly randomized background, or a high quality statistical test, but the calculation time will be longer.",
   comparedwithbed:
