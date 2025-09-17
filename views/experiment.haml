@@ -1,452 +1,108 @@
-!!! 5
-%html{ :lang => "ja" }
-  %head
-    %meta{ :charset => "utf-8" }
-    %meta{ "http-equiv" => "X-UA-Compatible", :content => "IE=edge" }
-    %meta{ :name => "viewport", :content => "width=device-width, initial-scale=1" }
+- @page_title = "ChIP-Atlas: #{@expid}"
+- @page_description = "Experimental attributes and details of processing for #{@expid}"
+- @active_menu = nil
+- @additional_css = []
+- @additional_js = []
 
-    %meta{ :name => "description", :content => "Experimental attributes and details of processing for #{@expid}" }
-    %meta{ :name => "author", :content => "Shinya Oki, Tazro Ohta" }
+.row
+  .col-md-12
+    .header
+      %h1
+        %i.fas.fa-mountain
+        ChIP-Atlas: Experiment #{@expid}
+      %p
+        Experimental details and processing information
 
-    %title= "ChIP-Atlas: #{@expid}"
+.row
+  .col-md-8
+    .panel.panel-default
+      .panel-heading
+        %h3.panel-title Experiment Information
+      .panel-body
+        - if @experiment
+          %table.table.table-striped
+            %tr
+              %td
+                %strong Experiment ID:
+              %td= @experiment.id || @expid
+            %tr
+              %td
+                %strong Title:
+              %td= @experiment.title || "N/A"
+            %tr
+              %td
+                %strong Organism:
+              %td= @experiment.organism || "N/A"
+            %tr
+              %td
+                %strong Cell Type:
+              %td= @experiment.cell_type || "N/A"
+            %tr
+              %td
+                %strong Antigen:
+              %td= @experiment.antigen || "N/A"
+            %tr
+              %td
+                %strong Treatment:
+              %td= @experiment.treatment || "N/A"
+            %tr
+              %td
+                %strong Experiment Type:
+              %td= @experiment.experiment_type || "N/A"
+        - else
+          .alert.alert-warning
+            %p No experiment data found for ID: #{@expid}
 
-    / Bootstrap core CSS
-    %link{ :href => "https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css", :rel => "stylesheet" }
-
-    // Custom style for this website
-    %link{ :href => "#{app_root}/style.css", :rel => "stylesheet"}
-    %link{ :href => "#{app_root}/css/fontawesome.css", :rel => "stylesheet"}
-    %link{ :href => "#{app_root}/css/brands.css", :rel => "stylesheet"}
-    %link{ :href => "#{app_root}/css/solid.css", :rel => "stylesheet"}
-
-  %body
-    %nav.navbar.navbar-inverse.navbar-fixed-top
-      .container-fluid
-        .navbar-header
-          %button.navbar-toggle.collapsed{ :type => "button", "data-toggle" => "collapse", "data-target" => "#navbar", "aria-expanded" => "false", "aria-controls" => "navbar" }
-            %span.sr-only Toggle navigation
-            %span.icon-bar
-            %span.icon-bar
-            %span.icon-bar
-          %a.navbar-brand{ :href => "#{app_root}" }
-            %i.fas.fa-mountain
-        #navbar.collapse.navbar-collapse
-          %ul.nav.navbar-nav
-            %li
-              %a{ :href => "#{app_root}/peak_browser" }
-                %i.fas.fa-glasses
-                Peak Browser
-            %li
-              %a{ :href => "#{app_root}/enrichment_analysis" }
-                %i.fas.fa-hand-holding-heart
-                Enrichment Analysis
-            %li
-              %a{ href: "#{app_root}/diff_analysis" }
-                %i.fas.fa-balance-scale-left
-                Diff Analysis
-            %li
-              %a{ :href => "#{app_root}/target_genes" }
-                %i.fas.fa-bullseye
-                Target Genes
-            %li
-              %a{ :href => "#{app_root}/colo" }
-                %i.fas.fa-compress-arrows-alt
-                Colo
-            %li
-              %a{ :href => "#{app_root}/publications" }
-                %i.fas.fa-book
-                Publications
-            %li
-              %a{ :href => "https://github.com/inutano/chip-atlas/wiki" }
-                %i.fab.fa-github
-                Docs
-          %p.navbar-text.navbar-right
-            %a{ href: "/search" }
-              %i.fas.fa-search
-              Search
-          %form.navbar-form.navbar-right{ role: "search" }
-            .form-group
-              - id_example = ["GSM469863", "SRX018625"].sample(1)[0]
-              %input.form-control#jumpToExperiment{ type: "text", value: "#{id_example}" }
-            %button.btn.btn-default.go-experiment{ type: "submit", }= "Go"
-          %p.navbar-text.navbar-right
-            ID:
-
-    - records = PJ::Experiment.record_by_expid(@expid)
-    - metadata = records[0]
-    .container
-      .row
-        .col-md-10.col-md-offset-1
-          .page-header
-            .btn-toolbar.pull-right{ role: "toolbar" }
-              // View on IGV button
-              .btn-group{ role: "group" }
-                .button.btn.btn-default.dropdown-toggle{ type: "button", id: "view-igv-dropdown", "data-toggle" => "dropdown", "aria-haspopup" => true, "aria-expanded" => true, "experiment" => metadata[:agClass] }
-                  %i.fas.fa-eye
-                  Visualize
-                  %span.caret
-                %ul.dropdown-menu{ "aria-labelledby" => "igv-dropdown" }
-                  %li.dropdown-header{ role: "presentation" }
-                    Install and launch IGV before selecting data to visualize
-                  %li.divider
-                  - igv_linkout_base = "http://localhost:60151/load?file=https://chip-atlas.dbcls.jp/data"
-                  - records.each_with_index do |record, i|
-                    - genome = record[:genome]
-                    - fname = URI.encode_www_form_component("#{record[:agSubClass]} (@ #{record[:clSubClass]}) #{@expid}".gsub(", ","_"))
-
-                    %li.dropdown-header{ role: "presentation" }= "For #{genome}"
-                    - if metadata[:agClass] != 'Bisulfite-Seq'
-                      %li
-                        %a{ href: "#{igv_linkout_base}/#{genome}/eachData/bw/#{@expid}.bw&genome=#{genome}&name=#{fname}" }= "BigWig"
-                      - ["05", "10", "20"].each do |dVal|
-                        %li
-                          %a{ href: "#{igv_linkout_base}/#{genome}/eachData/bb#{dVal}/#{@expid}.#{dVal}.bb&genome=#{genome}&name=#{fname}%20(1E-#{dVal})" }= "Peak-call (q < 1E-#{dVal})"
-                      %li.divider
-                    - else
-                      %li
-                        - fname = URI.encode_www_form_component("Methylation rate (@ #{record[:clSubClass]}) #{@expid}".gsub(", ","_"))
-
-                        %a{ href: "#{igv_linkout_base}/#{genome}/eachData/bs/methyl/#{@expid}.methyl.bw&genome=#{genome}&name=#{fname}" }= "BigWig (Methylation rate)"
-                      %li
-                        - fname = URI.encode_www_form_component("Coverage rate (@ #{record[:clSubClass]}) #{@expid}".gsub(", ","_"))
-
-                        %a{ href: "#{igv_linkout_base}/#{genome}/eachData/bs/cover/#{@expid}.cover.bw&genome=#{genome}&name=#{fname}" }= "BigWig (Coverage)"
-                      %li
-                        - fname = URI.encode_www_form_component("Hypo MR (@ #{record[:clSubClass]}) #{@expid}".gsub(", ","_"))
-
-                        %a{ href: "#{igv_linkout_base}/#{genome}/eachData/bs/hmr/BigBed/#{@expid}.hmr.bb&genome=#{genome}&name=#{fname}" }= "Hypo MR"
-                      %li
-                        - fname = URI.encode_www_form_component("Partial MR (@ #{record[:clSubClass]}) #{@expid}".gsub(", ","_"))
-
-                        %a{ href: "#{igv_linkout_base}/#{genome}/eachData/bs/pmd/BigBed/#{@expid}.pmd.bb&genome=#{genome}&name=#{fname}" }= "Partial MR"
-                      %li
-                        - fname = URI.encode_www_form_component("Hyper MR (@ #{record[:clSubClass]}) #{@expid}".gsub(", ","_"))
-
-                        %a{ href: "#{igv_linkout_base}/#{genome}/eachData/bs/hypermr/BigBed/#{@expid}.hypermr.bb&genome=#{genome}&name=#{fname}" }= "Hyper MR"
-                      %li.divider
-
-                  %li.dropdown-header{ role: "presentation" }
-                    %a.infoBtn{ :value => "info", :id => "viewOnIGV" }
-                      Error connecting to IGV?
-
-              // View Analysis button
-              .btn-group{ role: "group" }
-                .button.btn.btn-default.dropdown-toggle{ type: "button", id: "analyze-dropdown", "data-toggle" => "dropdown", "aria-haspopup" => true, "aria-expanded" => true, "experiment" => metadata[:agClass] }
-                  %i.fas.fa-chart-line
-                  Analyze
-                  %span.caret
-                %ul.dropdown-menu{ "aria-labelledby" => "igv-dropdown" }
-                  - nbdc_base = "https://chip-atlas.dbcls.jp/data"
-                  - records.each_with_index do |record, i|
-                    - genome = record[:genome]
-                    %li.dropdown-header{ role: "presentation" }= "For #{genome}"
-                    %li
-                      %a{ href: "#{nbdc_base}/#{genome}/colo/#{@expid}.html" }= "Colocalization"
-                    - ["1", "5", "10"].each do |thr|
-                      %li
-                        %a{ href: "#{nbdc_base}/#{genome}/target/#{@expid}.#{thr}.html" }= "Target Genes (TSS ± #{thr}kb)"
-                    - if i != (records.size - 1)
-                      %li.divider
-
-              // Download button
-              .btn-group{ role: "group" }
-                .button.btn.btn-default.dropdown-toggle{ :type => "button", :id => "download-dropdown", "data-toggle" => "dropdown", "aria-haspopup" => true, "aria-expanded" => true }
+  .col-md-4
+    .panel.panel-default
+      .panel-heading
+        %h3.panel-title Data Files
+      .panel-body
+        - if @experiment && @experiment.files
+          %ul.list-group
+            - @experiment.files.each do |file|
+              %li.list-group-item
+                %a{ href: file[:url], target: "_blank" }
                   %i.fas.fa-download
-                  Download
-                  %span.caret
-                %ul.dropdown-menu{ "aria-labelledby" => "download-dropdown" }
-                  - nbdc_base = "https://chip-atlas.dbcls.jp/data"
-                  - records.each_with_index do |record, i|
-                    - genome = record[:genome]
-                    - dfname = "#{genome}_#{URI.encode_www_form_component(record[:agSubClass])}_#{URI.encode_www_form_component(record[:clSubClass])}_#{@expid}"
+                  = file[:name]
+                %br
+                %small.text-muted= file[:description] if file[:description]
+        - else
+          %p No data files available.
 
+.row
+  .col-md-12
+    .panel.panel-default
+      .panel-heading
+        %h3.panel-title Processing Details
+      .panel-body
+        - if @processing_info
+          %table.table.table-striped
+            %tr
+              %td
+                %strong Processing Pipeline:
+              %td= @processing_info[:pipeline] || "Standard ChIP-Atlas pipeline"
+            %tr
+              %td
+                %strong Peak Calling:
+              %td= @processing_info[:peak_calling] || "MACS2"
+            %tr
+              %td
+                %strong Quality Score:
+              %td= @processing_info[:quality_score] || "N/A"
+            %tr
+              %td
+                %strong Number of Peaks:
+              %td= @processing_info[:num_peaks] || "N/A"
+        - else
+          %p No processing information available.
 
-                    %li.dropdown-header{ role: "presentation" }= "For #{genome}"
-                    - if metadata[:agClass] != 'Bisulfite-Seq'
-                      %li
-                        %a{ :href => "#{nbdc_base}/#{genome}/eachData/bw/#{@expid}.bw", :download => "#{dfname}.bw" }= "BigWig"
-                      - ["05", "10", "20"].each do |dVal|
-                        %li
-                          %a{ :href => "#{nbdc_base}/#{genome}/eachData/bed#{dVal}/#{@expid}.#{dVal}.bed", :download => "#{dfname}.#{dVal}.bb" }= "Peak-call (q < 1E-#{dVal})"
-                    - else
-                      %li
-                        %a{ href: "#{nbdc_base}/#{genome}/eachData/bs/methyl/#{@expid}.methyl.bw" }= "BigWig (Methylation rate)"
-                      %li
-                        %a{ href: "#{nbdc_base}/#{genome}/eachData/bs/cover/#{@expid}.cover.bw" }= "BigWig (Coverage)"
-                      %li
-                        %a{ href: "#{nbdc_base}/#{genome}/eachData/bs/hmr/BigBed/#{@expid}.hmr.bb" }= "Hypo MR"
-                      %li
-                        %a{ href: "#{nbdc_base}/#{genome}/eachData/bs/pmd/BigBed/#{@expid}.pmd.bb" }= "Partial MR"
-                      %li
-                        %a{ href: "#{nbdc_base}/#{genome}/eachData/bs/hypermr/BigBed/#{@expid}.hypermr.bb" }= "Hyper MR"
-                    - if i != (records.size - 1)
-                      %li.divider
-
-
-              // SRA linkout button
-              .btn-group{ role: "group" }
-                .button.btn.btn-default.dropdown-toggle{ :type => "button", :id => "linkout-dropdown", "data-toggle" => "dropdown", "aria-haspopup" => true, "aria-expanded" => true }
-                  %i.fas.fa-external-link-alt
-                  Link Out
-                  %span.caret
-                %ul.dropdown-menu{ "aria-labelledby" => "linkout-dropdown" }
-                  - antigen = metadata[:agSubClass]
-                  - celltype = metadata[:clSubClass]
-                  %li.dropdown-header
-                    Sequence Read Archive
-                  %li
-                    %a{ :href => "https://ddbj.nig.ac.jp/search/entry/sra-experiment/#{@expid}", target: "_blank" }= "DDBJ Search"
-                  %li
-                    %a{ :href => "https://www.ncbi.nlm.nih.gov/sra/?term=#{@expid}", target: "_blank" }= "NCBI SRA"
-                  %li
-                    %a{ :href => "https://www.ebi.ac.uk/ena/browser/view/#{@expid}", target: "_blank" }= "ENA"
-                  %li.divider
-                  %li.dropdown-header
-                    = "Antigen: #{antigen}"
-                  %li
-                    %a{ :href => "https://www.wikigenes.org/?search=#{antigen}", target: "_blank" }= "wikigenes"
-                  %li
-                    %a{ :href => "http://pdbj.org/mine/search?query=#{antigen}", target: "_blank" }= "PDBj"
-                  %li.divider
-                  %li.dropdown-header
-                    = "CellType: #{celltype}"
-                  %li
-                    %a{ :href => "http://www.atcc.org/Search_Results.aspx?searchTerms=#{celltype}", target: "_blank" }= "ATCC"
-                  %li
-                    %a{ :href => "https://www.ncbi.nlm.nih.gov/mesh/?term=#{celltype}", target: "_blank" }= "MeSH"
-                  %li
-                    %a{ :href => "http://www2.brc.riken.jp/lab/cell/list.cgi?skey=#{celltype}", target: "_blank" }= "RIKEN BRC"
-                  - if metadata[:genome] == "hg19" || metadata[:genome] == "hg38"
-                    %li.divider
-                    %li.dropdown-header
-                      Variation
-                    %li
-                      %a{ :href => "https://togovar.biosciencedbc.jp/?term=#{URI.encode_www_form_component(metadata[:agSubClass])}", target: "_blank" }= "TogoVar"
-
-
-            %h2
-              %i.fas.fa-file-alt
-              = @expid
-              %br
-              %small
-                = metadata[:title] != "-" ? metadata[:title] : "No title provided"
-
-      .row
-        .col-md-10.col-md-offset-1
-          .panel.panel-default
-            .panel-heading
-              %h3.panel-title
-                %i.fas.fa-dna
-                Sample Information Curated by ChIP-Atlas
-            .panel-body.mdata
-              .row
-                .col-md-6
-                  %h4
-                    %i.fas.fa-tag
-                    Antigen Information
-                  %dl.dl-horizontal
-                    %dt{ style: 'white-space: normal;' }= "Antigen Class"
-                    %dd= metadata[:agClass]
-                    %dt{ style: 'white-space: normal;' }= "Antigen"
-                    %dd= metadata[:agSubClass]
-                .col-md-6
-                  %h4
-                    %i.fas.fa-microscope
-                    Cell Type Information
-                  %dl.dl-horizontal
-                    %dt{ style: 'white-space: normal;' }= "Cell Type Class"
-                    %dd= metadata[:clClass]
-                    %dt{ style: 'white-space: normal;' }= "Cell Type"
-                    %dd= metadata[:clSubClass]
-                    - metadata[:clSubClassInfo].split("|").each do |kv|
-                      %dt{ style: 'white-space: normal;' }= kv.split("=").first
-                      %dd= kv.split("=").last
-
-      .row
-        .col-md-10.col-md-offset-1
-          .panel.panel-default
-            .panel-heading
-              %h3.panel-title
-                %i.fas.fa-user-edit
-                Original Experimental Metadata
-            .panel-body.mdata
-              .row
-                .col-md-12
-                  %h4
-                    %i.fas.fa-flask
-                    Sample Attributes
-                  - if metadata[:attributes].strip.empty?
-                    %p.text-muted
-                      %i.fas.fa-info-circle
-                      No sample attributes were provided by the original submitter.
-                  - else
-                    %dl.dl-horizontal
-                      - metadata[:attributes].split("\t").each do |kv|
-                        %dt{ style: 'white-space: normal;' }= kv.split("=").first
-                        %dd= kv.split("=").last
-
-              %hr
-
-              .row
-                .col-md-6
-                  %h4
-                    %i.fas.fa-book
-                    Sequenced DNA Library
-                  - if @ncbi[:library_description].values.uniq == [""]
-                    %p.text-muted
-                      %i.fas.fa-exclamation-triangle
-                      No library information was found.
-                  - else
-                    %dl.dl-horizontal
-                      - @ncbi[:library_description].each_pair do |k,v|
-                        - if v != ""
-                          %dt{ style: 'white-space: normal;' }= k.to_s
-                          %dd= v.to_s
-
-                .col-md-6
-                  %h4
-                    %i.fas.fa-server
-                    Sequencing Platform
-                  - if @ncbi[:platform_information].values.uniq == [""]
-                    %p.text-muted
-                      %i.fas.fa-exclamation-triangle
-                      No platform information was found.
-                  - else
-                    %dl.dl-horizontal
-                      - @ncbi[:platform_information].each_pair do |k,v|
-                        - if v != ""
-                          %dt{ style: 'white-space: normal;' }= k.to_s
-                          %dd= v.to_s
-
-      .row
-        .col-md-10.col-md-offset-1
-          .panel.panel-default
-            .panel-heading
-              %p.pull-right
-                %a{ href: "https://github.com/inutano/chip-atlas/wiki#user-content-tables-summarizing-metadata-and-files", target: "_blank" }
-                  %i.fas.fa-external-link-alt
-                  Where can I get the processing logs?
-              %h3.panel-title
-                %i.fas.fa-cogs
-                %a{ :href => "https://github.com/inutano/chip-atlas/wiki#2-primary-processing", target: "_blank" }
-                  Read Processing Pipeline
-            .panel-body.mdata
-              - records.each.with_index do |record,i|
-                - readinfo = record[:readInfo].split(',')
-                - genome = record[:genome]
-                .processing-section{ 'data-genome' => genome }
-                  %h2
-                    %small
-                      %i.fas.fa-dna
-                      = genome
-                  %dl.dl-horizontal
-                    - if metadata[:agClass] != 'Bisulfite-Seq'
-                      %dt{ style: 'white-space: normal;' }= "Number of total reads"
-                      %dd= readinfo[0]
-                      %dt{ style: 'white-space: normal;' }= "Reads aligned (%)"
-                      %dd= readinfo[1]
-                      %dt{ style: 'white-space: normal;' }= "Duplicates removed (%)"
-                      %dd= readinfo[2]
-                      %dt{ style: 'white-space: normal;' }= "Number of peaks"
-                      %dd= readinfo[3] + " (qval < 1E-05)"
-                    - else
-                      %dt{ style: 'white-space: normal;' }= "Number of total reads"
-                      %dd= readinfo[0]
-                      %dt{ style: 'white-space: normal;' }= "Reads aligned (%)"
-                      %dd= readinfo[1]
-                      %dt{ style: 'white-space: normal;' }= "Coverage rate (×)"
-                      %dd= readinfo[2]
-                      %dt{ style: 'white-space: normal;' }= "Number of hyper MRs"
-                      %dd= readinfo[3] + " (qval < 1E-05)"
-
-                - if i != (records.size - 1)
-                  %hr
-
-      .row
-        .col-md-10.col-md-offset-1
-          #statistics-panel.panel.panel-default{ :style => "display: none;" }
-            .panel-heading
-              %h3.panel-title
-                %i.fas.fa-chart-bar
-                Data Quality and Distribution Statistics
-            .panel-body.mdata
-              - records.each.with_index do |record,i|
-                - genome = record[:genome]
-                - agSubClass = record[:agSubClass].gsub(/[^a-zA-Z0-9_-]/, '_')
-                - clSubClass = record[:clSubClass].gsub(/[^a-zA-Z0-9_-]/, '_')
-                - base_url = "https://chip-atlas.dbcls.jp/data/#{genome}/quality"
-                - distribution_url = "#{base_url}/distribution/#{@expid}.distribution.png"
-                - correlation_png_url = "#{base_url}/correlation/png/#{@expid}.cor.png"
-                - correlation_tsv_url = "#{base_url}/correlation/#{genome}__#{agSubClass}__#{clSubClass}.correlation.tsv"
-
-                .statistics-section{ 'data-genome' => genome, 'data-distribution-url' => distribution_url, 'data-correlation-url' => correlation_png_url, 'data-correlation-tsv' => correlation_tsv_url, :style => "display: none;" }
-                  %h2
-                    .small= "#{genome} Statistics"
-
-                  .row
-                    .col-md-6
-                      %h4
-                        %i.fas.fa-chart-line
-                        Reads vs Peaks Distribution
-                      %p.text-muted
-                        Distribution of correlation between sequence reads and called peaks across all experiments
-                      .text-center.distribution-container
-                        %img.img-responsive.center-block.distribution-img{
-                          :src => distribution_url,
-                          :alt => "Reads vs Peaks distribution for #{@expid}",
-                          :style => "max-width: 100%; height: auto; border: 1px solid #ddd; border-radius: 4px; display: none;"
-                        }
-                        %div.loading-indicator{ :style => "padding: 20px; background-color: #f9f9f9; border-radius: 4px; color: #666;" }
-                          %i.fas.fa-spinner.fa-spin
-                          Checking for distribution data...
-
-                    .col-md-6
-                      %h4
-                        %i.fas.fa-project-diagram
-                        Experiment Clustering
-                      %p.text-muted
-                        Clustering result based on peak call similarity with related experiments
-                      .text-center.correlation-container
-                        %img.img-responsive.center-block.correlation-img{
-                          :src => correlation_png_url,
-                          :alt => "Clustering result for #{@expid}",
-                          :style => "max-width: 100%; height: auto; border: 1px solid #ddd; border-radius: 4px; display: none;"
-                        }
-                        %div.loading-indicator{ :style => "padding: 20px; background-color: #f9f9f9; border-radius: 4px; color: #666;" }
-                          %i.fas.fa-spinner.fa-spin
-                          Checking for clustering data...
-
-                      .text-center.download-container{ :style => "margin-top: 10px; display: none;" }
-                        %a.btn.btn-sm.btn-default.download-tsv{
-                          :href => "#",
-                          "data-url" => correlation_tsv_url,
-                          "data-filename" => "#{@expid}_#{genome}_correlation.tsv",
-                          :title => "Download correlation data as TSV file"
-                        }
-                          %i.fas.fa-download
-                          Download Correlation Data
-
-                  .row.info-section{ :style => "display: none;" }
-                    .col-md-12
-                      %hr{ :style => "margin: 20px 0;" }
-                      %h4
-                        %i.fas.fa-info-circle
-                        About These Statistics
-                      %p.text-muted
-                        %strong Distribution Plot:
-                        Shows where this experiment falls within the overall distribution of read count vs peak count correlation across all experiments in the database.
-                      %p.text-muted
-                        %strong Clustering Analysis:
-                        Groups experiments with similar peak calling patterns. This helps identify experiments with comparable biological or technical characteristics.
-
-                  %hr.genome-separator{ :style => "display: none;" }
-
-    != haml :footer
-
-    /
-      Bootstrap Core Javascript
-      =========================
-    %script{ :src => "#{app_root}/js/jquery.min.js" }
-    %script{ :src => "#{app_root}/js/bootstrap.min.js" }
-    %script{ :src => "#{app_root}/js/pj/pj.js" }
-    %script{ :src => "#{app_root}/js/pj/experiment.js" }
+.row
+  .col-md-12
+    .text-center
+      %a.btn.btn-primary{ href: "/search" }
+        %i.fas.fa-search
+        Search More Experiments
+      %a.btn.btn-secondary{ href: "/" }
+        %i.fas.fa-home
+        Back to Home

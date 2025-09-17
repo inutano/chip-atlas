@@ -1,198 +1,119 @@
-!!! 5
-%html{ lang: "en" }
-  %head
-    %meta{ charset: "utf-8" }
-    %meta{ 'http-equiv': "X-UA-Compatible", content: "IE=edge" }
-    %meta{ name: "viewport", content: "width=device-width, initial-scale=1" }
+- @page_title = "ChIP-Atlas: Peak Browser"
+- @page_description = "Visualize all peaks of the public ChIP-Seq data on IGV."
+- @active_menu = 'peak_browser'
+- @additional_css = [
+-   { href: "#{app_root}/css/typeaheadjs.css" },
+-   { href: "#{app_root}/css/flexselect.css", media: "screen" }
+- ]
+- @additional_js = [
+-   "#{app_root}/js/liquidmetal.js",
+-   "#{app_root}/js/jquery.flexselect.js",
+-   "#{app_root}/js/typeahead.bundle.js",
+-   "#{app_root}/js/pj/peak_browser.js"
+- ]
 
-    %meta{ name: "description", content: "Visualize all peaks of the public ChIP-Seq data on IGV." }
-    %meta{ name: "author", content: "Shinya Oki, Tazro Ohta" }
+// The original title 'peak john' was rejected.
+.row
+  .col-md-10
+    .header
+      %h1
+        %i.fas.fa-mountain
+        ChIP-Atlas: Peak Browser
+      %p
+        Visualize TF-binding, histone marks, chromatin accessibility, and DNA methylation on
+        %a{ href: "http://software.broadinstitute.org/software/igv/home", target: "_blank" }
+          IGV
 
-    %title
-      ChIP-Atlas: Peak Browser
+  .col-md-2
+    .dropdown-help
+      .dropdown
+        .button.btn.btn-primary.dropdown-toggle{ type: "button", id: "movies-dropdown", "data-toggle": "dropdown", "aria-haspopup": true, "aria-expanded": true }
+          %i.fas.fa-question-circle
+          Tutorial
+          %span.caret
+        %ul.dropdown-menu{ "aria-labelledby": "movies-dropdown" }
+          %li
+            %a{ :href => "https://chip-atlas.dbcls.jp/data/manual/Peak_Browser/Peak_Browser.pdf", :target => "_blank" }="PDF"
+          %li
+            %a{ href: "https://youtu.be/qKNOkK-8hDo", target: "_blank" }
+              Movie
+          %li
+            %a{ href: "http://doi.org/10.7875/togotv.2018.023", target: "_blank" }
+              Movie (統合TV, Japanese)
 
-    // Bootstrap core and typeahead CSS
-    %link{ href: "#{app_root}/css/bootstrap.min.css", rel: "stylesheet" }
-    %link{ href: "#{app_root}/css/typeaheadjs.css", rel: "stylesheet" }
+// Navigation Tabs, links and contents
+.genomeTab{ role: "tabpanel"}
+  // Tabs
+  %ul.nav.nav-tabs{ role: "tablist" }
+    - @list_of_genome.keys.each.with_index do |genome, i|
+      %li{ role: "presentation", class: "#{(i == 0) ? 'active' : '' }", id: "#{genome}-tab" }
+        %a{ href: "##{genome}-tab-content", "aria-controls": "#{genome}-tab-content", role: "tab", "data-toggle": "tab", source: genome }
+          = "#{@list_of_genome[genome]}"
 
-    // Custom style for this website
-    %link{ :href => "#{app_root}/style.css", :rel => "stylesheet"}
-    %link{ :href => "#{app_root}/css/fontawesome.css", :rel => "stylesheet"}
-    %link{ :href => "#{app_root}/css/brands.css", :rel => "stylesheet"}
-    %link{ :href => "#{app_root}/css/solid.css", :rel => "stylesheet"}
+  // Contents
+  .tab-content
+    - @list_of_genome.keys.each.with_index do |genome, i|
+      .tab-pane.fade{ role: "tabpanel", id: "#{genome}-tab-content", class: "#{(i == 0) ? 'in active' : ''}" }
+        - index = @index_all_genome[genome]
+        .row
+          .col-md-4
+            %form
+              .panel.panel-default
+                - class_id = "#{genome}agClass"
+                .panel-heading{ id: "heading-#{class_id}" }
+                  %h4.panel-title
+                    1. Track type class
+                .panel-body
+                  %select.form-control.classSelect.agClassSelect{ id: "#{class_id}", size: 8, name: "antigen" }
 
-  %body
-    %nav.navbar.navbar-inverse.navbar-fixed-top
-      .container-fluid
-        .navbar-header
-          %button.navbar-toggle.collapsed{ type: "button", "data-toggle": "collapse", "data-target": "#navbar", "aria-expanded": "false", "aria-controls": "navbar" }
-            %span.sr-only
-              Toggle navigation
-            %span.icon-bar
-            %span.icon-bar
-            %span.icon-bar
-          %a.navbar-brand{ href: "#{app_root}" }
-            %i.fas.fa-mountain
-        #navbar.collapse.navbar-collapse
-          %ul.nav.navbar-nav
-            %li.active
-              %a{ :href => "#{app_root}/peak_browser" }
-                %i.fas.fa-glasses
-                Peak Browser
-            %li
-              %a{ :href => "#{app_root}/enrichment_analysis" }
-                %i.fas.fa-hand-holding-heart
-                Enrichment Analysis
-            %li
-              %a{ href: "#{app_root}/diff_analysis" }
-                %i.fas.fa-balance-scale-left
-                Diff Analysis
-            %li
-              %a{ :href => "#{app_root}/target_genes" }
-                %i.fas.fa-bullseye
-                Target Genes
-            %li
-              %a{ :href => "#{app_root}/colo" }
-                %i.fas.fa-compress-arrows-alt
-                Colo
-            %li
-              %a{ :href => "#{app_root}/publications" }
-                %i.fas.fa-book
-                Publications
-            %li
-              %a{ :href => "https://github.com/inutano/chip-atlas/wiki" }
-                %i.fab.fa-github
-                Docs
-          %p.navbar-text.navbar-right
-            %a{ href: "/search" }
-              %i.fas.fa-search
-              Search
-          %form.navbar-form.navbar-right{ role: "search" }
-            .form-group
-              - id_example = ["GSM469863", "SRX018625"].sample(1)[0]
-              %input.form-control#jumpToExperiment{ type: "text", value: "#{id_example}" }
-            %button.btn.btn-default.go-experiment{ type: "submit", }
-              Go
-          %p.navbar-text.navbar-right
-            ID:
+              .panel.panel-default
+                - class_id = "#{genome}agSubClass"
+                .panel-heading{ id: "heading-#{class_id}" }
+                  %h4.panel-title
+                    Track type (optional)
+                .panel-body
+                  .panel-message{ id: class_id }
+                  // input box for typeahead
+                  %input.typeahead.form-control{ type: "text", placeholder: "type to search", id: class_id }
+                  %select.form-control.flexselect{ id: class_id, size: 8 }
 
-    .container
-      // The original title 'peak john' was rejected.
-      .row
-        .col-md-10
-          .header
-            %h1
-              %i.fas.fa-mountain
-              ChIP-Atlas: Peak Browser
-            %p
-              Visualize TF-binding, histone marks, chromatin accessibility, and DNA methylation on
-              %a{ href: "http://software.broadinstitute.org/software/igv/home", target: "_blank" }
-                IGV
+          .col-md-4
+            %form
+              - class_id = "#{genome}clClass"
+              .panel.panel-default
+                .panel-heading{ id: "heading-#{class_id}"}
+                  %h4.panel-title
+                    2. Cell type Class
+                .panel-body
+                  %select.form-control.classSelect.clClassSelect{ id: class_id, size: 8, name: "celltype" }
+                    %option{ value: 'All cell types', selected: true }
+                      All cell types
 
-        .col-md-2
-          .dropdown-help
-            .dropdown
-              .button.btn.btn-primary.dropdown-toggle{ type: "button", id: "movies-dropdown", "data-toggle": "dropdown", "aria-haspopup": true, "aria-expanded": true }
-                %i.fas.fa-question-circle
-                Tutorial
-                %span.caret
-              %ul.dropdown-menu{ "aria-labelledby": "movies-dropdown" }
-                %li
-                  %a{ :href => "https://chip-atlas.dbcls.jp/data/manual/Peak_Browser/Peak_Browser.pdf", :target => "_blank" }="PDF"
-                %li
-                  %a{ href: "https://youtu.be/qKNOkK-8hDo", target: "_blank" }
-                    Movie
-                %li
-                  %a{ href: "http://doi.org/10.7875/togotv.2018.023", target: "_blank" }
-                    Movie (統合TV, Japanese)
+              .panel.panel-default
+                - class_id = "#{genome}clSubClass"
+                .panel-heading{ id: "heading-#{class_id}" }
+                  %h4.panel-title
+                    Cell type (optional)
+                .panel-body
+                  .panel-message{ id: class_id }
+                  %input.typeahead.form-control{ type: 'text', placeholder: 'type to search', id: class_id }
+                  %select.form-control.flexselect{ id: class_id, size: 8 }
 
-      // Navigation Tabs, links and contents
-      .genomeTab{ role: "tabpanel"}
-        // Tabs
-        %ul.nav.nav-tabs{ role: "tablist" }
-          - @list_of_genome.keys.each.with_index do |genome, i|
-            %li{ role: "presentation", class: "#{(i == 0) ? 'active' : '' }", id: "#{genome}-tab" }
-              %a{ href: "##{genome}-tab-content", "aria-controls": "#{genome}-tab-content", role: "tab", "data-toggle": "tab", source: genome }
-                = "#{@list_of_genome[genome]}"
+          .col-md-4
+            %form
+              .panel.panel-default
+                .panel-heading{ id: "heading-#{genome}qval"}
+                  %h4.panel-title
+                    3. Threshold for Significance
+                    %a.infoBtn{ value: "info", id: "#{genome}Threshold" }
+                      &#x24D8;
+                .panel-body
+                  %select.form-control{ id: "#{genome}qval", size: 5 }
 
-        // Contents
-        .tab-content
-          - @list_of_genome.keys.each.with_index do |genome, i|
-            .tab-pane.fade{ role: "tabpanel", id: "#{genome}-tab-content", class: "#{(i == 0) ? 'in active' : ''}" }
-              - index = @index_all_genome[genome]
-              .row
-                .col-md-4
-                  %form
-                    .panel.panel-default
-                      - class_id = "#{genome}agClass"
-                      .panel-heading{ id: "heading-#{class_id}" }
-                        %h4.panel-title
-                          1. Track type class
-                      .panel-body
-                        %select.form-control.classSelect.agClassSelect{ id: "#{class_id}", size: 8, name: "antigen" }
-
-                    .panel.panel-default
-                      - class_id = "#{genome}agSubClass"
-                      .panel-heading{ id: "heading-#{class_id}" }
-                        %h4.panel-title
-                          Track type (optional)
-                      .panel-body
-                        .panel-message{ id: class_id }
-                        // input box for typeahead
-                        %input.typeahead.form-control{ type: "text", placeholder: "type to search", id: class_id }
-                        %select.form-control.flexselect{ id: class_id, size: 8 }
-
-                .col-md-4
-                  %form
-                    - class_id = "#{genome}clClass"
-                    .panel.panel-default
-                      .panel-heading{ id: "heading-#{class_id}"}
-                        %h4.panel-title
-                          2. Cell type Class
-                      .panel-body
-                        %select.form-control.classSelect.clClassSelect{ id: class_id, size: 8, name: "celltype" }
-                          %option{ value: 'All cell types', selected: true }
-                            All cell types
-
-                    .panel.panel-default
-                      - class_id = "#{genome}clSubClass"
-                      .panel-heading{ id: "heading-#{class_id}" }
-                        %h4.panel-title
-                          Cell type (optional)
-                      .panel-body
-                        .panel-message{ id: class_id }
-                        %input.typeahead.form-control{ type: 'text', placeholder: 'type to search', id: class_id }
-                        %select.form-control.flexselect{ id: class_id, size: 8 }
-
-                .col-md-4
-                  %form
-                    .panel.panel-default
-                      .panel-heading{ id: "heading-#{genome}qval"}
-                        %h4.panel-title
-                          3. Threshold for Significance
-                          %a.infoBtn{ value: "info", id: "#{genome}Threshold" }
-                            &#x24D8;
-                      .panel-body
-                        %select.form-control{ id: "#{genome}qval", size: 5 }
-
-                  .button-submit.down
-                    %button.btn.btn-primary.btn-lg.btn-block{ id: "submit", type: "button" }
-                      View on IGV
-                    %a.pull-right.infoBtn{ value: "info", id: "#{genome}ViewOnIGV" }
-                      Error connecting to IGV?
-                    %button.btn.btn-primary.btn-lg.btn-block{ id: "download", type: "button" }
-                      Download BED file
-
-    != haml :footer
-
-    /
-      Bootstrap Core Javascript
-      =========================
-    %link{ href: "#{app_root}/css/flexselect.css", rel: "stylesheet", type: "text/css", media: "screen" }
-    %script{ src: "#{app_root}/js/jquery.min.js" }
-    %script{ src: "#{app_root}/js/bootstrap.min.js" }
-    %script{ src: "#{app_root}/js/liquidmetal.js" }
-    %script{ src: "#{app_root}/js/jquery.flexselect.js" }
-    %script{ src: "#{app_root}/js/typeahead.bundle.js" }
-    %script{ src: "#{app_root}/js/pj/pj.js" }
-    %script{ src: "#{app_root}/js/pj/peak_browser.js" }
+            .button-submit.down
+              %button.btn.btn-primary.btn-lg.btn-block{ id: "submit", type: "button" }
+                View on IGV
+              %a.pull-right.infoBtn{ value: "info", id: "#{genome}ViewOnIGV" }
+                Error connecting to IGV?
+              %button.btn.btn-primary.btn-lg.btn-block{ id: "download", type: "button" }
+                Download BED file

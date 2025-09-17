@@ -1,221 +1,108 @@
-!!! 5
-%html{ lang: "en" }
-  %head
-    %meta{ charset: "utf-8" }
-    %meta{ "http-equiv": "X-UA-Compatible", content: "IE=edge" }
-    %meta{ name: "viewport", content: "width=device-width, initial-scale=1" }
+- @page_title = "ChIP-Atlas: Diff Analysis"
+- @page_description = "Compare ChIP-seq datasets to identify differential binding sites."
+- @active_menu = 'diff_analysis'
+- @additional_js = [
+-   "#{app_root}/js/pj/diff_analysis.js"
+- ]
 
-    %meta{ name: "description", content: "Detect differential peaks or differentially methylated regions." }
-    %meta{ name: "author", content: "Shinya Oki, Tazro Ohta" }
+.row
+  .col-md-10
+    .header
+      %h1
+        %i.fas.fa-mountain
+        ChIP-Atlas: Diff Analysis
+      %p
+        Compare ChIP-seq datasets to identify differential binding sites
+  .col-md-2
+    .dropdown-help
+      .dropdown
+        .button.btn.btn-primary.dropdown-toggle{ type: "button", id: "movies-dropdown", "data-toggle": "dropdown", "aria-haspopup": true, "aria-expanded": true }
+          %i.fas.fa-question-circle
+          Tutorial
+          %span.caret
+        %ul.dropdown-menu{ "aria-labelledby": "movies-dropdown" }
+          %li
+            %a{ href: "https://chip-atlas.dbcls.jp/data/manual/Diff_Analysis/Diff_Analysis.pdf", target: "_blank" }="PDF"
+          %li
+            %a{ href: "https://youtu.be/diff_analysis_movie", target: "_blank" }= "Movie"
 
-    %title
-      ChIP-Atlas: Diff Analysis
+// Navigation Tabs, links and contents
+.genomeTab{ role: "tabpanel"}
+  // Tabs
+  %ul.nav.nav-tabs{ role: "tablist" }
+    - @list_of_genome.keys.each.with_index do |genome, i|
+      %li{ role: "presentation", class: "#{(i == 0) ? 'active' : '' }", id: "#{genome}-tab" }
+        %a{ href: "##{genome}-tab-content", "aria-controls": "#{genome}-tab-content", role: "tab", "data-toggle": "tab", source: genome }
+          = "#{@list_of_genome[genome]}"
 
-    // Bootstrap core and typeahead CSS
-    %link{ href: "#{app_root}/css/bootstrap.min.css", rel: "stylesheet" }
+  // Contents
+  .tab-content
+    - @list_of_genome.keys.each.with_index do |genome, i|
+      .tab-pane.fade{ role: "tabpanel", id: "#{genome}-tab-content", class: "#{(i == 0) ? 'in active' : ''}" }
+        .row
+          .col-md-4
+            .panel.panel-default
+              .panel-heading
+                %h4.panel-title
+                  1. Select First Dataset
+              .panel-body
+                %form
+                  .panel-input
+                    .form-group
+                      %label{ for: "#{genome}Dataset1" } Dataset A
+                      %textarea.form-control{ name: "dataset1", id: "#{genome}Dataset1", rows: 8, cols: 50, placeholder: "Enter BED format data or upload file" }
+                    .form-group
+                      %input{ type: "file", id: "#{genome}Dataset1File" }
+                      %p.help-block Choose local file
 
-    // Custom style for this website
-    %link{ :href => "#{app_root}/style.css", :rel => "stylesheet"}
-    %link{ :href => "#{app_root}/css/fontawesome.css", :rel => "stylesheet"}
-    %link{ :href => "#{app_root}/css/brands.css", :rel => "stylesheet"}
-    %link{ :href => "#{app_root}/css/solid.css", :rel => "stylesheet"}
+          .col-md-4
+            .panel.panel-default
+              .panel-heading
+                %h4.panel-title
+                  2. Select Second Dataset
+              .panel-body
+                %form
+                  .panel-input
+                    .form-group
+                      %label{ for: "#{genome}Dataset2" } Dataset B
+                      %textarea.form-control{ name: "dataset2", id: "#{genome}Dataset2", rows: 8, cols: 50, placeholder: "Enter BED format data or upload file" }
+                    .form-group
+                      %input{ type: "file", id: "#{genome}Dataset2File" }
+                      %p.help-block Choose local file
 
-  %body
-    %nav.navbar.navbar-inverse.navbar-fixed-top
-      .container-fluid
-        .navbar-header
-          %button.navbar-toggle.collapsed{ type: "button", "data-toggle": "collapse", "data-target": "#navbar", "aria-expanded": "false", "aria-controls": "navbar" }
-            %span.sr-only
-              Toggle navigation
-            %span.icon-bar
-            %span.icon-bar
-            %span.icon-bar
-          %a.navbar-brand{ href: "#{app_root}" }
-            %i.fas.fa-mountain
-        #navbar.collapse.navbar-collapse
-          %ul.nav.navbar-nav
-            %li
-              %a{ :href => "#{app_root}/peak_browser" }
-                %i.fas.fa-glasses
-                Peak Browser
-            %li
-              %a{ :href => "#{app_root}/enrichment_analysis" }
-                %i.fas.fa-hand-holding-heart
-                Enrichment Analysis
-            %li.active
-              %a{ href: "#{app_root}/diff_analysis" }
-                %i.fas.fa-balance-scale-left
-                Diff Analysis
-            %li
-              %a{ :href => "#{app_root}/target_genes" }
-                %i.fas.fa-bullseye
-                Target Genes
-            %li
-              %a{ :href => "#{app_root}/colo" }
-                %i.fas.fa-compress-arrows-alt
-                Colo
-            %li
-              %a{ :href => "#{app_root}/publications" }
-                %i.fas.fa-book
-                Publications
-            %li
-              %a{ :href => "https://github.com/inutano/chip-atlas/wiki" }
-                %i.fab.fa-github
-                Docs
-          %p.navbar-text.navbar-right
-            %a{ href: "/search" }
-              %i.fas.fa-search
-              Search
-          %form.navbar-form.navbar-right{ role: "search" }
-            .form-group
-              - id_example = ["GSM469863", "SRX018625"].sample(1)[0]
-              %input.form-control#jumpToExperiment{ type: "text", value: "#{id_example}" }
-            %button.btn.btn-default.go-experiment{ type: "submit", }= "Go"
-          %p.navbar-text.navbar-right
-            ID:
+          .col-md-4
+            .panel.panel-default
+              .panel-heading
+                %h4.panel-title
+                  3. Analysis Parameters
+              .panel-body
+                .form-group
+                  %label Analysis Title
+                  %input.form-control{ type: "text", id: "#{genome}AnalysisTitle", placeholder: "Enter analysis title" }
+                .form-group
+                  %label Minimum Overlap (bp)
+                  %select.form-control{ id: "#{genome}MinOverlap" }
+                    %option{ value: "1" } 1 bp
+                    %option{ value: "50", selected: true } 50 bp
+                    %option{ value: "100" } 100 bp
+                    %option{ value: "200" } 200 bp
 
-    .container
-      .row
-        .col-md-10
-          .header
-            %h1
-              %i.fas.fa-mountain
-              ChIP-Atlas: Diff Analysis
-            %p
-              Detect differential peaks or differentially methylated regions
-        .col-md-2
-          .dropdown-help
-            .dropdown
-              .button.btn.btn-primary.dropdown-toggle{ type: "button", id: "movies-dropdown", "data-toggle": "dropdown", "aria-haspopup": true, "aria-expanded": true }
-                %i.fas.fa-question-circle
-                Tutorial
-                %span.caret
-              %ul.dropdown-menu{ "aria-labelledby": "movies-dropdown" }
-                %li
-                  %a{ href: "https://chip-atlas.dbcls.jp/data/manual/Diff_Analysis/Diff_Analysis.pdf", target: "_blank" }="PDF"
+                .button-submit
+                  %button.btn.btn-primary.btn-lg.btn-block{ id: "#{genome}DiffSubmit", type: "button" }
+                    Submit Analysis
 
-      // Navigation Tabs, links and contents
-      .genomeTab{ role: "tabpanel"}
-
-        // Tabs
-        %ul.nav.nav-tabs{ role: "tablist" }
-          - @list_of_genome.keys.each.with_index do |genome, i|
-            %li{ role: "presentation", class: "#{(i == 0) ? 'active' : '' }", id: "#{genome}-tab" }
-              %a{ href: "##{genome}-tab-content", "aria-controls": "#{genome}-tab-content", role: "tab", "data-toggle": "tab", "source": genome }
-                = "#{@list_of_genome[genome]}"
-
-        // Contents
-        .tab-content
-          - @list_of_genome.keys.each.with_index do |genome, i|
-            .tab-pane.fade{ role: "tabpanel", id: "#{genome}-tab-content", class: "#{(i == 0) ? 'in active' : ''}" }
-              - index = @index_all_genome[genome]
-              .row
-                .col-md-3
-                  .panel.panel-default
-                    .panel-heading{ id: "#{genome}DataSetA" }
-                      %h4.panel-title
-                        1. Choose experiment type
-                    .panel-body
-                      %form
-                        .checkbox.panel-input
-                          %label
-                            %input{ type: "radio", id: "#{genome}ExpTypeDiff", class: "diffOrDMR", name: "#{genome}DiffOrDMR", value: "diffbind", checked: "checked" }
-                            ChIP/ATAC/DNase-seq
-                        .checkbox.panel-input
-                          %label
-                            %input{ type: "radio", id: "#{genome}ExpTypeDMR", class: "diffOrDMR", name: "#{genome}DiffOrDMR", value: "dmr" }
-                            Bisulfite-seq
-
-                .col-md-3
-                  .panel.panel-default
-                    .panel-heading{ id: "#{genome}DataSetA" }
-                      %h4.panel-title
-                        2. Enter dataset A
-                    .panel-body
-                      %form
-                        .checkbox.panel-input
-                          Experiment IDs
-                        .panel-input.dataSetA
-                          .form-group.panel-input-textarea
-                            %textarea.form-control{ name: "dataSetA", id: "#{genome}DataSetA", rows: 8, cols: 50, placeholder: "SRX or GSM ID(s)" }
-                            .row
-                              .col-md-5
-                              .col-md-7
-                                %a.dataExample{ href: "#", id: "#{genome}dataSetA", name: "dataSetA"  }
-                                  Try with example
-
-                .col-md-3
-                  .panel.panel-default
-                    .panel-heading{ id: "#{genome}DataSetB" }
-                      %h4.panel-title
-                        3. Enter dataset B
-                    .panel-body
-                      %form
-                        .checkbox.panel-input
-                          Experiment IDs
-                        .panel-input.dataSetB
-                          .form-group.panel-input-textarea
-                            %textarea.form-control{ name: "dataSetB", id: "#{genome}DataSetB", rows: 8, cols: 50, placeholder: "SRX or GSM ID(s)" }
-                            .row
-                              .col-md-5
-                              .col-md-7
-                                %a.dataExample{ href: "#", id: "#{genome}dataSetB", name: "dataSetB" }
-                                  Try with example
-
-                .col-md-3
-                  .panel.panel-default
-                    - panel = "#{genome}Desc"
-                    .panel-heading{ id: panel }
-                      %h4.panel-title
-                        4. Analysis description
-                    .panel-body
-                      .panel-input.desc.form-inline
-                        %p.form-control-static
-                          Analysis title
-                          %a.infoBtn{ value: "info", id: "#{genome}ProjectDesc" }
-                            &#x24D8;
-                        %input.form-control{ type: "text", id: "#{genome}ProjectTitle"}
-                      .panel-input.desc.form-inline
-                        %p.form-control-static
-                          Dataset A title
-                          %a.infoBtn{ value: "info", id: "#{genome}DataSetADesc" }
-                            &#x24D8;
-                        %input.form-control{ type: "text", id: "#{genome}DataSetATitle"}
-                      .panel-input.desc.form-inline
-                        %p.form-control-static
-                          Dataset B title
-                          %a.infoBtn{ value: "info", id: "#{genome}DataSetBDesc" }
-                            &#x24D8;
-                        %input.form-control{ type: "text", id: "#{genome}DataSetBTitle"}
-
-                      .button-submit
-                        %button.btn.btn-primary.btn-lg.btn-block{ id: "dmr-submit", type: "button" }
-                          submit
-                      .estimated-run-time
-                        Estimated run time:
-                        %a{ id: "#{genome}-estimated-run-time" }
-                          \-
-
-                      %p
-                        %a{ href: "https://sc.ddbj.nig.ac.jp/en/operation/job_queue_status/", target: "_blank" }
-                          node status (epyc.q)
-
-
-
-    != haml :footer
-
-    /
-      Bootstrap Core Javascript
-      =========================
-    %script{ src: "#{app_root}/js/jquery.min.js" }
-    %script{ src: "#{app_root}/js/bootstrap.min.js" }
-    %script{ src: "#{app_root}/js/pj/pj.js" }
-    %script{ type: "application/json", id: "ea_params" }
-      :plain
-        {
-          "genes": "#{@genes}",
-          "taxonomy": "#{@taxonomy}",
-          "genesetA": "#{@genesetA}",
-          "genesetB": "#{@genesetB}"
-        }
-    %script{ src: "#{app_root}/js/pj/diff_analysis.js" }
+        .row
+          .col-md-12
+            .panel.panel-default{ style: "margin-top: 20px;" }
+              .panel-heading
+                %h4.panel-title Analysis Instructions
+              .panel-body
+                %p
+                  This tool compares two ChIP-seq datasets to identify differential binding sites.
+                %ul
+                  %li Upload BED format files containing peak coordinates
+                  %li Set the minimum overlap threshold for peak comparison
+                  %li Results will show peaks unique to each dataset and overlapping regions
+                %p
+                  %strong Note:
+                  Analysis may take several minutes depending on dataset size.

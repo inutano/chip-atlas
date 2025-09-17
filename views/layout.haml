@@ -1,0 +1,41 @@
+!!! 5
+%html{ :lang => "en" }
+  %head
+    %meta{ :charset => "utf-8" }
+    %meta{ "http-equiv" => "X-UA-Compatible", :content => "IE=edge" }
+    %meta{ :name => "viewport", :content => "width=device-width, initial-scale=1" }
+
+    %meta{ :name => "description", :content => @page_description || "Browse and analyse the public ChIP-Seq/DNase-Seq/ATAC-Seq/Bisulfite-Seq data on your browser." }
+    %meta{ :name => "author", :content => "Shinya Oki, Tazro Ohta" }
+
+    %title= @page_title || "ChIP-Atlas"
+
+    // Bootstrap core and typeahead CSS
+    %link{ :href => "#{app_root}/css/bootstrap.min.css", :rel => "stylesheet" }
+    - if @additional_css
+      - @additional_css.each do |css|
+        %link{ :href => css[:href], :rel => "stylesheet", :type => css[:type] || "text/css", :media => css[:media] || "screen" }
+
+    // Custom style for this website
+    %link{ :href => "#{app_root}/style.css", :rel => "stylesheet"}
+    %link{ :href => "#{app_root}/css/fontawesome.css", :rel => "stylesheet"}
+    %link{ :href => "#{app_root}/css/brands.css", :rel => "stylesheet"}
+    %link{ :href => "#{app_root}/css/solid.css", :rel => "stylesheet"}
+
+  %body
+    != haml :_navigation
+
+    .container
+      = yield
+
+    != haml :footer
+
+    /
+      Bootstrap Core Javascript
+      =========================
+    %script{ :src => "#{app_root}/js/jquery.min.js" }
+    %script{ :src => "#{app_root}/js/bootstrap.min.js" }
+    %script{ :src => "#{app_root}/js/pj/pj.js" }
+    - if @additional_js
+      - @additional_js.each do |js|
+        %script{ :src => js }

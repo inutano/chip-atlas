@@ -1,139 +1,60 @@
-!!! 5
-%html{ :lang => "en" }
-  %head
-    %meta{ :charset => "utf-8" }
-    %meta{ "http-equiv" => "X-UA-Compatible", :content => "IE=edge" }
-    %meta{ :name => "viewport", :content => "width=device-width, initial-scale=1" }
+- @page_title = "ChIP-Atlas: Enrichment Analysis Result"
+- @page_description = "Display the results of performed enrichment analysis."
+- @active_menu = 'enrichment_analysis'
+- @additional_js = [
+-   "#{app_root}/js/pj/enrichment_analysis_result.js"
+- ]
 
-    %meta{ :name => "description", :content => "Display the results of performed enrichment analysis." }
-    %meta{ :name => "author", :content => "Shinya Oki, Tazro Ohta" }
+.row
+  .col-md-12
+    .header
+      %h1
+        %i.fas.fa-mountain
+        ChIP-Atlas: Enrichment Analysis Result
+      %p
+        Analysis ID: #{@analysis_id}
 
-    %title= "ChIP-Atlas: Enrichment Analysis Result"
+.row
+  .col-md-12
+    - if @result_data
+      .panel.panel-default
+        .panel-heading
+          %h3.panel-title Analysis Results
+        .panel-body
+          .table-responsive
+            %table.table.table-striped.table-bordered
+              %thead
+                %tr
+                  %th Rank
+                  %th Antigen
+                  %th Cell Type
+                  %th Overlap
+                  %th P-value
+                  %th Q-value
+                  %th Fold Enrichment
+              %tbody
+                - @result_data.each_with_index do |result, index|
+                  %tr
+                    %td= index + 1
+                    %td= result['antigen']
+                    %td= result['celltype']
+                    %td= result['overlap']
+                    %td= result['pvalue']
+                    %td= result['qvalue']
+                    %td= result['fold_enrichment']
+    - else
+      .alert.alert-warning
+        %p No results found for this analysis.
 
-    // Bootstrap core and typeahead CSS
-    %link{ :href => "#{app_root}/css/bootstrap.min.css", :rel => "stylesheet" }
-
-    // Custom style for this website
-    %link{ :href => "#{app_root}/style.css", :rel => "stylesheet"}
-    %link{ :href => "#{app_root}/css/fontawesome.css", :rel => "stylesheet"}
-    %link{ :href => "#{app_root}/css/brands.css", :rel => "stylesheet"}
-    %link{ :href => "#{app_root}/css/solid.css", :rel => "stylesheet"}
-
-  %body
-    %nav.navbar.navbar-inverse.navbar-fixed-top
-      .container-fluid
-        .navbar-header
-          %button.navbar-toggle.collapsed{ :type => "button", "data-toggle" => "collapse", "data-target" => "#navbar", "aria-expanded" => "false", "aria-controls" => "navbar" }
-            %span.sr-only Toggle navigation
-            %span.icon-bar
-            %span.icon-bar
-            %span.icon-bar
-          %a.navbar-brand{ :href => "#{app_root}" }
-            %i.fas.fa-mountain
-        #navbar.collapse.navbar-collapse
-          %ul.nav.navbar-nav
-            %li
-              %a{ :href => "#{app_root}/peak_browser" }
-                %i.fas.fa-glasses
-                Peak Browser
-            %li.active
-              %a{ :href => "#{app_root}/enrichment_analysis" }
-                %i.fas.fa-hand-holding-heart
-                Enrichment Analysis
-            %li
-              %a{ href: "#{app_root}/diff_analysis" }
-                %i.fas.fa-balance-scale-left
-                Diff Analysis
-            %li
-              %a{ :href => "#{app_root}/target_genes" }
-                %i.fas.fa-bullseye
-                Target Genes
-            %li
-              %a{ :href => "#{app_root}/colo" }
-                %i.fas.fa-compress-arrows-alt
-                Colo
-            %li
-              %a{ :href => "#{app_root}/publications" }
-                %i.fas.fa-book
-                Publications
-            %li
-              %a{ :href => "https://github.com/inutano/chip-atlas/wiki" }
-                %i.fab.fa-github
-                Docs
-          %p.navbar-text.navbar-right
-            %a{ href: "/search" }
-              %i.fas.fa-search
-              Search
-          %form.navbar-form.navbar-right{ role: "search" }
-            .form-group
-              - id_example = ["GSM469863", "SRX018625"].sample(1)[0]
-              %input.form-control#jumpToExperiment{ type: "text", value: "#{id_example}" }
-            %button.btn.btn-default.go-experiment{ type: "submit", }= "Go"
-          %p.navbar-text.navbar-right
-            ID:
-
-    .container
-      .header
-        %h1
-          %i.fas.fa-mountain
-          ChIP-Atlas: Enrichment Analysis
-        %p
-          identify common epigenetic features of a given set of genomic loci and genes
-      .container.job-info
-        %p
-          Result page URL will be available for a week from the time when 'status' is 'finished'.
-        %table.table
-          %tr
-            %td
-              Project title
-            %td#project-title
-          %tr
-            %td
-              Request ID
-            %td#request-id
-          %tr
-            %td
-              Submitted at:
-            %td#submitted-at
-          %tr
-            %td
-              Estimated finishing time:
-            %td#estimated-finishing-time
-          %tr
-            %td
-              Current time:
-            %td#current-time
-          %tr
-            %td
-              Status
-            %td#status
-              Requesting
-          %tr
-            %td
-              Result URL:
-            %td
-              %a#result-url
-          %tr
-            %td
-              Download TSV:
-            %td
-              %a#download-tsv
-
-        .container#executionLog
-        %hr
-
-        %p
-          As this function uses the NIG supercomputer system, it may take time to start your job when the nodes are busy. Please check computation node status
-          %a{ href: "https://sc.ddbj.nig.ac.jp/en/operation/job_queue_status/", target: "_blank" }
-            here
-          (short.q)
-
-    != haml :footer
-
-    /
-      Bootstrap Core Javascript
-      =========================
-    %script{ :src => "#{app_root}/js/jquery.min.js" }
-    %script{ :src => "#{app_root}/js/bootstrap.min.js" }
-    %script{ :src => "#{app_root}/js/pj/pj.js" }
-    %script{ :src => "#{app_root}/js/pj/enrichment_analysis_result.js" }
+.row
+  .col-md-12
+    .panel.panel-default
+      .panel-heading
+        %h3.panel-title Download Results
+      .panel-body
+        %a.btn.btn-primary{ href: "/data/enrichment_analysis/#{@analysis_id}/result.tsv" }
+          %i.fas.fa-download
+          Download TSV
+        %a.btn.btn-secondary{ href: "/enrichment_analysis" }
+          %i.fas.fa-arrow-left
+          Back to Analysis

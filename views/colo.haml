@@ -1,176 +1,113 @@
-!!! 5
-%html{ :lang => "en" }
-  %head
-    %meta{ :charset => "utf-8" }
-    %meta{ "http-equiv" => "X-UA-Compatible", :content => "IE=edge" }
-    %meta{ :name => "viewport", :content => "width=device-width, initial-scale=1" }
+- @page_title = "ChIP-Atlas: Colocalization"
+- @page_description = "Prediction of colocalization pertners of transcription factors."
+- @active_menu = 'colo'
+- @additional_css = [
+-   { href: "#{app_root}/css/typeaheadjs.css" },
+-   { href: "#{app_root}/css/flexselect.css", media: "screen" }
+- ]
+- @additional_js = [
+-   "#{app_root}/js/liquidmetal.js",
+-   "#{app_root}/js/jquery.flexselect.js",
+-   "#{app_root}/js/typeahead.bundle.js",
+-   "#{app_root}/js/pj/colo.js"
+- ]
 
-    %meta{ :name => "description", :content => "Prediction of colocalization pertners of transcription factors." }
-    %meta{ :name => "author", :content => "Shinya Oki, Tazro Ohta" }
+.row
+  .col-md-10
+    .header
+      %h1
+        %i.fas.fa-mountain
+        ChIP-Atlas: Colocalization
+      %p
+        Predict colocalization of two transcription factors
+  .col-md-2
+    .dropdown-help
+      .dropdown
+        .button.btn.btn-primary.dropdown-toggle{ :type => "button", :id => "movies-dropdown", "data-toggle" => "dropdown", "aria-haspopup" => true, "aria-expanded" => true }
+          %i.fas.fa-question-circle
+          Tutorial
+          %span.caret
+        %ul.dropdown-menu{ "aria-labelledby" => "movies-dropdown" }
+          %li
+            %a{ :href => "https://chip-atlas.dbcls.jp/data/manual/Colocalization/Colocalization.pdf", :target => "_blank" }="PDF"
+          %li
+            %a{ :href => "https://youtu.be/_8GseZCMZWs", :target => "_blank" }= "Movie"
+          %li
+            %a{ :href => "http://doi.org/10.7875/togotv.2018.026", :target => "_blank" }= "Movie (統合TV, Japanese)"
 
-    %title= "ChIP-Atlas: Colocalization"
+// Navigation Tabs, links and contents
+.genomeTab{ :role => "tabpanel"}
 
-    // Bootstrap core and typeahead CSS
-    %link{ :href => "#{app_root}/css/bootstrap.min.css", :rel => "stylesheet" }
-    %link{ :href => "#{app_root}/css/typeaheadjs.css", :rel => "stylesheet" }
+  // Tabs
+  %ul.nav.nav-tabs{ :role => "tablist" }
+    - @list_of_genome.keys.each.with_index do |genome, i|
+      %li{ :role => "presentation", :class => "#{(i == 0) ? 'active' : '' }", :id => "#{genome}-tab" }
+        %a{ :href => "##{genome}-tab-content", "aria-controls" => "#{genome}-tab-content", :role => "tab", "data-toggle" => "tab", "source" => genome }
+          = "#{@list_of_genome[genome]}"
 
-    // Custom style for this website
-    %link{ :href => "#{app_root}/style.css", :rel => "stylesheet"}
-    %link{ :href => "#{app_root}/css/fontawesome.css", :rel => "stylesheet"}
-    %link{ :href => "#{app_root}/css/brands.css", :rel => "stylesheet"}
-    %link{ :href => "#{app_root}/css/solid.css", :rel => "stylesheet"}
+  // Contents
+  .tab-content
+    - @list_of_genome.keys.each.with_index do |genome, i|
+      .tab-pane.fade{ :role => "tabpanel", :id => "#{genome}-tab-content", :class => "#{(i == 0) ? 'in active' : ''}" }
+        .row
+          .col-md-3
+            .panel.panel-default
+              - panel = "#{genome}AntigenPanel"
+              .panel-heading{ :id => panel }
+                %h4.panel-title= "1. Choose first Antigen"
+              .panel-body
+                %input.typeahead.form-control{ :type => "text", :placeholder => "Type to search", :id => "#{genome}Antigen1" }
+                %select.form-control.flexselect{ :id => "#{genome}Antigen1", :size => 5 }
 
-  %body
-    %nav.navbar.navbar-inverse.navbar-fixed-top
-      .container-fluid
-        .navbar-header
-          %button.navbar-toggle.collapsed{ :type => "button", "data-toggle" => "collapse", "data-target" => "#navbar", "aria-expanded" => "false", "aria-controls" => "navbar" }
-            %span.sr-only Toggle navigation
-            %span.icon-bar
-            %span.icon-bar
-            %span.icon-bar
-          %a.navbar-brand{ :href => "#{app_root}" }
-            %i.fas.fa-mountain
-        #navbar.collapse.navbar-collapse
-          %ul.nav.navbar-nav
-            %li
-              %a{ :href => "#{app_root}/peak_browser" }
-                %i.fas.fa-glasses
-                Peak Browser
-            %li
-              %a{ :href => "#{app_root}/enrichment_analysis" }
-                %i.fas.fa-hand-holding-heart
-                Enrichment Analysis
-            %li
-              %a{ href: "#{app_root}/diff_analysis" }
-                %i.fas.fa-balance-scale-left
-                Diff Analysis
-            %li
-              %a{ :href => "#{app_root}/target_genes" }
-                %i.fas.fa-bullseye
-                Target Genes
-            %li.active
-              %a{ :href => "#{app_root}/colo" }
-                %i.fas.fa-compress-arrows-alt
-                Colo
-            %li
-              %a{ :href => "#{app_root}/publications" }
-                %i.fas.fa-book
-                Publications
-            %li
-              %a{ :href => "https://github.com/inutano/chip-atlas/wiki" }
-                %i.fab.fa-github
-                Docs
-          %p.navbar-text.navbar-right
-            %a{ href: "/search" }
-              %i.fas.fa-search
-              Search
-          %form.navbar-form.navbar-right{ role: "search" }
-            .form-group
-              - id_example = ["GSM469863", "SRX018625"].sample(1)[0]
-              %input.form-control#jumpToExperiment{ type: "text", value: "#{id_example}" }
-            %button.btn.btn-default.go-experiment{ type: "submit", }= "Go"
-          %p.navbar-text.navbar-right
-            ID:
+          .col-md-3
+            .panel.panel-default
+              - panel = "#{genome}Antigen2Panel"
+              .panel-heading{ :id => panel }
+                %h4.panel-title= "2. Choose second Antigen"
+              .panel-body
+                %input.typeahead.form-control{ :type => "text", :placeholder => "Type to search", :id => "#{genome}Antigen2" }
+                %select.form-control.flexselect{ :id => "#{genome}Antigen2", :size => 5 }
 
-    .container
-      .row
-        .col-md-10
-          .header
-            %h1
-              %i.fas.fa-mountain
-              ChIP-Atlas: Colocalization
-            %p
-              Predict potential partner proteins that form complexes with given TFs
-        .col-md-2
-          .dropdown-help
-            .dropdown
-              .button.btn.btn-primary.dropdown-toggle{ :type => "button", :id => "movies-dropdown", "data-toggle" => "dropdown", "aria-haspopup" => true, "aria-expanded" => true }
-                %i.fas.fa-question-circle
-                Tutorial
-                %span.caret
-              %ul.dropdown-menu{ "aria-labelledby" => "movies-dropdown" }
-                %li
-                  %a{ :href => "https://chip-atlas.dbcls.jp/data/manual/Colocalization/Colocalization.pdf", :target => "_blank" }="PDF"
-                %li
-                  %a{ :href => "https://youtu.be/jhLnWNCe_No", :target => "_blank" }= "Movie"
-                %li
-                  %a{ :href => "http://doi.org/10.7875/togotv.2018.028", :target => "_blank" }= "Movie (統合TV, Japanese)"
+          .col-md-3
+            .panel.panel-default
+              - panel = "#{genome}CelltypePanel"
+              .panel-heading{ :id => panel }
+                %h4.panel-title= "3. Choose Cell type Class"
+              .panel-body
+                %select.form-control{ :id => "#{genome}CelltypeClass", :size => 5 }
 
+          .col-md-3
+            .panel.panel-default
+              - panel = "#{genome}CelltypeSubPanel"
+              .panel-heading{ :id => panel }
+                %h4.panel-title= "4. Choose Cell type (optional)"
+              .panel-body
+                %input.typeahead.form-control{ :type => "text", :placeholder => "Type to search", :id => "#{genome}Celltype" }
+                %select.form-control.flexselect{ :id => "#{genome}Celltype", :size => 5 }
 
-      // Navigation Tabs, links and contents
-      .genomeTab{ :role => "tabpanel"}
+        .row
+          .col-md-offset-9.col-md-3
+            .button-submit
+              %button.btn.btn-primary.btn-lg.btn-block{ :id => "#{genome}submit", :type => "button" }= "Submit"
 
-        // Tabs
-        %ul.nav.nav-tabs{ :role => "tablist" }
-          - @list_of_genome.keys.each.with_index do |genome, i|
-            %li{ :role => "presentation", :class => "#{(i == 0) ? 'active' : '' }", :id => "#{genome}-tab" }
-              %a{ :href => "##{genome}-tab-content", "aria-controls" => "#{genome}-tab-content", :role => "tab", "data-toggle" => "tab", "source" => genome }
-                = "#{@list_of_genome[genome]}"
-
-        // Contents
-        .tab-content
-          - @list_of_genome.keys.each.with_index do |genome, i|
-            .tab-pane.fade{ :role => "tabpanel", :id => "#{genome}-tab-content", :class => "#{(i == 0) ? 'in active' : ''}" }
-              .row
-                .col-md-3
-                  .panel.panel-default
-                    - panel = "#{genome}StartingPanel"
-                    .panel-heading{ :id => panel }
-                      %h4.panel-title= "1. Search mode"
-                    .panel-body
-                      %form{ :id => "#{panel}-form" }
-                        .radio
-                          %label
-                            %input{ :type => "radio", :id => genome + "dataTypeAntigen", :value => "antigen", :name => genome + "datatypeoption", :checked => "checked" }
-                            = " Antigens → Cell Type "
-                        .radio
-                          %label
-                            %input{ :type => "radio", :id => genome + "dataTypeCellType", :value => "cellline", :name => genome + "datatypeoption" }
-                            = " Cell Type → Antigen "
-                .col-md-3
-                  .panel.panel-default
-                    - panel = "#{genome}PrimaryPanel"
-                    .panel-heading{ :id => panel }
-                      %h4.panel-title= "2. Choose Primary Type"
-                    .panel-body
-                      %input.typeahead.form-control{ :type => "text", :placeholder => "type to search", :id => "#{panel}-typeahead" }
-                      %hr
-                      %select.form-control.flexselect.primary{ :id => "#{panel}-select", :size => 8 }
-
-                .col-md-3
-                  .panel.panel-default
-                    - panel = "#{genome}SecondaryPanel"
-                    .panel-heading{ :id => panel }
-                      %h4.panel-title= "3. Choose Secondary Type"
-                    .panel-body
-                      %input.typeahead.form-control{ :type => "text", :placeholder => "type to search", :id => "#{panel}-typeahead" }
-                      %hr
-                      %select.form-control.flexselect.secondary{ :id => "#{panel}-select", :size => 8 }
-
-              .row
-                .col-md-6.col-md-offset-3
-                  .button-submit.down
-                    %button.btn.btn-primary.btn-lg.btn-block.post{ :id => "colo-submit", :type => "button" }= "View Colocalization Data"
-              .row.colo-download
-                .col-md-3.col-md-offset-3
-                  .button-submit
-                    %button.btn.btn-primary.btn-lg.btn-block.post{ :id => "download-tsv", :type => "button" }= "Download (TSV)"
-                .col-md-3
-                  .button-submit
-                    %button.btn.btn-primary.btn-lg.btn-block.post{ :id => "download-gml", :type => "button" }= "Download (GML)"
-
-
-    != haml :footer
-
-    /
-      Bootstrap Core Javascript
-      =========================
-    %link{ :href => "#{app_root}/css/flexselect.css", :rel => "stylesheet", :type => "text/css", :media => "screen" }
-    %script{ :src => "#{app_root}/js/jquery.min.js" }
-    %script{ :src => "#{app_root}/js/bootstrap.min.js" }
-    %script{ :src => "#{app_root}/js/liquidmetal.js" }
-    %script{ :src => "#{app_root}/js/jquery.flexselect.js" }
-    %script{ :src => "#{app_root}/js/typeahead.bundle.js" }
-    %script{ :src => "#{app_root}/js/pj/pj.js" }
-    %script{ :src => "#{app_root}/js/pj/colo.js" }
+        .row
+          .col-md-12
+            - if @colo_analysis[genome] && @colo_analysis[genome].size > 0
+              %table.table.table-striped{ :id => "#{genome}ColoTable" }
+                %thead
+                  %tr
+                    %td{ :width => "10%" }= "Index"
+                    %td{ :width => "20%" }= "First Antigen"
+                    %td{ :width => "20%" }= "Second Antigen"
+                    %td{ :width => "30%" }= "Cell type"
+                    %td{ :width => "20%" }= "Download"
+                %tbody
+                  - @colo_analysis[genome].each.with_index do |rec, i|
+                    %tr
+                      %td= "#{i + 1}"
+                      %td= "#{rec["antigen1"]}"
+                      %td= "#{rec["antigen2"]}"
+                      %td= "#{rec["celltype"]}"
+                      %td
+                        %a{ :href => "/data/colo/#{rec["genome"]}/#{rec["filename"]}" }
+                          %button.btn.btn-primary= "TSV"

@@ -1,164 +1,115 @@
-!!! 5
-%html{ :lang => "en" }
-  %head
-    %meta{ :charset => "utf-8" }
-    %meta{ "http-equiv" => "X-UA-Compatible", :content => "IE=edge" }
-    %meta{ :name => "viewport", :content => "width=device-width, initial-scale=1" }
+- @page_title = "ChIP-Atlas: Target Genes"
+- @page_description = "Prediction of potential target genes of transcription factors based on experimental results."
+- @active_menu = 'target_genes'
+- @additional_css = [
+-   { href: "#{app_root}/css/typeaheadjs.css" },
+-   { href: "#{app_root}/css/flexselect.css", media: "screen" }
+- ]
+- @additional_js = [
+-   "#{app_root}/js/liquidmetal.js",
+-   "#{app_root}/js/jquery.flexselect.js",
+-   "#{app_root}/js/typeahead.bundle.js",
+-   "#{app_root}/js/pj/target_genes.js"
+- ]
 
-    %meta{ :name => "description", :content => "Prediction of potential target genes of transcription factors based on experimental results." }
-    %meta{ :name => "author", :content => "Shinya Oki, Tazro Ohta" }
+.row
+  .col-md-10
+    .header
+      %h1
+        %i.fas.fa-mountain
+        ChIP-Atlas: Target Genes
+      %p
+        Search for genes bound by given transcription factors
+  .col-md-2
+    .dropdown-help
+      .dropdown
+        .button.btn.btn-primary.dropdown-toggle{ :type => "button", :id => "movies-dropdown", "data-toggle" => "dropdown", "aria-haspopup" => true, "aria-expanded" => true }
+          %i.fas.fa-question-circle
+          Tutorial
+          %span.caret
+        %ul.dropdown-menu{ "aria-labelledby" => "movies-dropdown" }
+          %li
+            %a{ :href => "https://chip-atlas.dbcls.jp/data/manual/Target_Genes/Target_Genes.pdf", :target => "_blank" }="PDF"
+          %li
+            %a{ :href => "https://youtu.be/Sp9DUAuKkvQ", :target => "_blank" }= "Movie"
+          %li
+            %a{ :href => "http://doi.org/10.7875/togotv.2018.024", :target => "_blank" }= "Movie (統合TV, Japanese)"
 
-    %title= "ChIP-Atlas: Target Genes"
+// Navigation Tabs, links and contents
+.genomeTab{ :role => "tabpanel"}
 
-    // Bootstrap core and typeahead CSS
-    %link{ :href => "#{app_root}/css/bootstrap.min.css", :rel => "stylesheet" }
-    %link{ :href => "#{app_root}/css/typeaheadjs.css", :rel => "stylesheet" }
+  // Tabs
+  %ul.nav.nav-tabs{ :role => "tablist" }
+    - @list_of_genome.keys.each.with_index do |genome, i|
+      %li{ :role => "presentation", :class => "#{(i == 0) ? 'active' : '' }", :id => "#{genome}-tab" }
+        %a{ :href => "##{genome}-tab-content", "aria-controls" => "#{genome}-tab-content", :role => "tab", "data-toggle" => "tab", "source" => genome }
+          = "#{@list_of_genome[genome]}"
 
-    // Custom style for this website
-    %link{ :href => "#{app_root}/style.css", :rel => "stylesheet"}
-    %link{ :href => "#{app_root}/css/fontawesome.css", :rel => "stylesheet"}
-    %link{ :href => "#{app_root}/css/brands.css", :rel => "stylesheet"}
-    %link{ :href => "#{app_root}/css/solid.css", :rel => "stylesheet"}
+  // Contents
+  .tab-content
+    - @list_of_genome.keys.each.with_index do |genome, i|
+      .tab-pane.fade{ :role => "tabpanel", :id => "#{genome}-tab-content", :class => "#{(i == 0) ? 'in active' : ''}" }
+        .row
+          .col-md-3
+            .panel.panel-default
+              - panel = "#{genome}AntigenPanel"
+              .panel-heading{ :id => panel }
+                %h4.panel-title= "1. Choose Antigen"
+              .panel-body
+                %input.typeahead.form-control{ :type => "text", :placeholder => "Type to search", :id => "#{genome}Antigen" }
+                %select.form-control.flexselect{ :id => "#{genome}Antigen", :size => 5 }
 
-  %body
-    %nav.navbar.navbar-inverse.navbar-fixed-top
-      .container-fluid
-        .navbar-header
-          %button.navbar-toggle.collapsed{ :type => "button", "data-toggle" => "collapse", "data-target" => "#navbar", "aria-expanded" => "false", "aria-controls" => "navbar" }
-            %span.sr-only Toggle navigation
-            %span.icon-bar
-            %span.icon-bar
-            %span.icon-bar
-          %a.navbar-brand{ :href => "#{app_root}" }
-            %i.fas.fa-mountain
-        #navbar.collapse.navbar-collapse
-          %ul.nav.navbar-nav
-            %li
-              %a{ :href => "#{app_root}/peak_browser" }
-                %i.fas.fa-glasses
-                Peak Browser
-            %li
-              %a{ :href => "#{app_root}/enrichment_analysis" }
-                %i.fas.fa-hand-holding-heart
-                Enrichment Analysis
-            %li
-              %a{ href: "#{app_root}/diff_analysis" }
-                %i.fas.fa-balance-scale-left
-                Diff Analysis
-            %li.active
-              %a{ :href => "#{app_root}/target_genes" }
-                %i.fas.fa-bullseye
-                Target Genes
-            %li
-              %a{ :href => "#{app_root}/colo" }
-                %i.fas.fa-compress-arrows-alt
-                Colo
-            %li
-              %a{ :href => "#{app_root}/publications" }
-                %i.fas.fa-book
-                Publications
-            %li
-              %a{ :href => "https://github.com/inutano/chip-atlas/wiki" }
-                %i.fab.fa-github
-                Docs
-          %p.navbar-text.navbar-right
-            %a{ href: "/search" }
-              %i.fas.fa-search
-              Search
-          %form.navbar-form.navbar-right{ role: "search" }
-            .form-group
-              - id_example = ["GSM469863", "SRX018625"].sample(1)[0]
-              %input.form-control#jumpToExperiment{ type: "text", value: "#{id_example}" }
-            %button.btn.btn-default.go-experiment{ type: "submit", }= "Go"
-          %p.navbar-text.navbar-right
-            ID:
+          .col-md-3
+            .panel.panel-default
+              - panel = "#{genome}CelltypePanel"
+              .panel-heading{ :id => panel }
+                %h4.panel-title= "2. Choose Cell type Class"
+              .panel-body
+                %select.form-control{ :id => "#{genome}CelltypeClass", :size => 5 }
 
-    .container
-      .row
-        .col-md-10
-          .header
-            %h1
-              %i.fas.fa-mountain
-              ChIP-Atlas: Target Genes
-            %p
-              Search for genes bound by given transcription factors
-        .col-md-2
-          .dropdown-help
-            .dropdown
-              .button.btn.btn-primary.dropdown-toggle{ :type => "button", :id => "movies-dropdown", "data-toggle" => "dropdown", "aria-haspopup" => true, "aria-expanded" => true }
-                %i.fas.fa-question-circle
-                Tutorial
-                %span.caret
-              %ul.dropdown-menu{ "aria-labelledby" => "movies-dropdown" }
-                %li
-                  %a{ :href => "https://chip-atlas.dbcls.jp/data/manual/Target_Genes/Target_Genes.pdf", :target => "_blank" }="PDF"
-                %li
-                  %a{ :href => "https://youtu.be/Sp9DUAuKkvQ", :target => "_blank" }= "Movie"
-                %li
-                  %a{ :href => "http://doi.org/10.7875/togotv.2018.024", :target => "_blank" }= "Movie (統合TV, Japanese)"
+          .col-md-3
+            .panel.panel-default
+              - panel = "#{genome}CelltypeSubPanel"
+              .panel-heading{ :id => panel }
+                %h4.panel-title= "3. Choose Cell type (optional)"
+              .panel-body
+                %input.typeahead.form-control{ :type => "text", :placeholder => "Type to search", :id => "#{genome}Celltype" }
+                %select.form-control.flexselect{ :id => "#{genome}Celltype", :size => 5 }
 
-      // Navigation Tabs, links and contents
-      .genomeTab{ :role => "tabpanel"}
+          .col-md-3
+            .panel.panel-default
+              - panel = "#{genome}DistancePanel"
+              .panel-heading{ :id => panel }
+                %h4.panel-title= "4. Choose Distance"
+              .panel-body
+                %select.form-control{ :id => "#{genome}Distance", :size => 5 }
+                  %option{ :value => "1", :selected => true }= "1kb"
+                  %option{ :value => "5" }= "5kb"
+                  %option{ :value => "10" }= "10kb"
 
-        // Tabs
-        %ul.nav.nav-tabs{ :role => "tablist" }
-          - @list_of_genome.keys.each.with_index do |genome, i|
-            %li{ :role => "presentation", :class => "#{(i == 0) ? 'active' : '' }", :id => "#{genome}-tab" }
-              %a{ :href => "##{genome}-tab-content", "aria-controls" => "#{genome}-tab-content", :role => "tab", "data-toggle" => "tab", "source" => genome }
-                = "#{@list_of_genome[genome]}"
+        .row
+          .col-md-offset-9.col-md-3
+            .button-submit
+              %button.btn.btn-primary.btn-lg.btn-block{ :id => "#{genome}submit", :type => "button" }= "Submit"
 
-        // Contents
-        .tab-content
-          - @list_of_genome.keys.each.with_index do |genome, i|
-            .tab-pane.fade{ :role => "tabpanel", :id => "#{genome}-tab-content", :class => "#{(i == 0) ? 'in active' : ''}" }
-              .row
-                .col-md-3
-                  .panel.panel-default
-                    - panel = "#{genome}AntigenPanel"
-                    .panel-heading{ :id => panel }
-                      %h4.panel-title= "1. Choose Antigen"
-                    .panel-body
-                      %input.typeahead.form-control{ :type => "text", :placeholder => "type to search", :id => "#{panel}-typeahead" }
-                      %hr
-                      %select.form-control.flexselect{ :id => "#{panel}-select",  :size => 8 }
-
-                .col-md-3
-                  .panel.panel-default
-                    - panel = "#{genome}DistancePanel"
-                    .panel-heading{ :id => panel }
-                      %h4.panel-title= "2. Choose Distance from TSS"
-                    .panel-body
-                      %form{ :id => "#{panel}-form" }
-                        .radio
-                          %label
-                            %input{ :type => "radio", :id => genome + "Distance1k", :value => "1", :name => genome +  "DistanceOption", checked: true }
-                            = " ±1k "
-                        .radio
-                          %label
-                            %input{ :type => "radio", :id => genome + "Distance5k", :value => "5", :name => genome + "DistanceOption" }
-                            = " ±5k "
-                        .radio
-                          %label
-                            %input{ :type => "radio", :id => genome + "Distance10k", :value => "10", :name => genome +  "DistanceOption" }
-                            = " ±10k "
-
-              .row
-                .col-md-6.col-md-offset-3
-                  .button-submit
-                    %button.btn.btn-primary.btn-lg.btn-block.post{ :id => "target-gene-submit", :type => "button" }= "View Potential Target Genes"
-                    %button.btn.btn-primary.btn-lg.btn-block.post{ :id => "target-gene-download", :type => "button" }= "Download (TSV)"
-
-
-    != haml :footer
-
-    /
-      Bootstrap Core Javascript
-      =========================
-    %link{ :href => "#{app_root}/css/flexselect.css", :rel => "stylesheet", :type => "text/css", :media => "screen" }
-    %script{ :src => "#{app_root}/js/jquery.min.js" }
-    %script{ :src => "#{app_root}/js/bootstrap.min.js" }
-    %script{ :src => "#{app_root}/js/liquidmetal.js" }
-    %script{ :src => "#{app_root}/js/jquery.flexselect.js" }
-    %script{ :src => "#{app_root}/js/typeahead.bundle.js" }
-    %script{ :src => "#{app_root}/js/pj/pj.js" }
-    %script{ :src => "#{app_root}/js/pj/target_genes.js" }
+        .row
+          .col-md-12
+            - if @target_genes_analysis[genome] && @target_genes_analysis[genome].size > 0
+              %table.table.table-striped{ :id => "#{genome}TargetGenesTable" }
+                %thead
+                  %tr
+                    %td{ :width => "10%" }= "Index"
+                    %td{ :width => "30%" }= "Antigen"
+                    %td{ :width => "30%" }= "Cell type"
+                    %td{ :width => "15%" }= "Distance"
+                    %td{ :width => "15%" }= "Download"
+                %tbody
+                  - @target_genes_analysis[genome].each.with_index do |rec, i|
+                    %tr
+                      %td= "#{i + 1}"
+                      %td= "#{rec["antigen"]}"
+                      %td= "#{rec["celltype"]}"
+                      %td= "#{rec["distance"]}kb"
+                      %td
+                        %a{ :href => "/data/target_genes/#{rec["genome"]}/#{rec["filename"]}" }
+                          %button.btn.btn-primary= "TSV"
