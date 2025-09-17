@@ -215,149 +215,39 @@ footer
   padding-top: 15px
   padding-bottom: 15px
 
-// responsive navbar
+// responsive navbar with abbreviations
+// Show full text by default
+.full-text
+  display: inline
+
+.abbrev-text
+  display: none
+
+// On smaller screens, show abbreviations instead
 @media (max-width: 1375px)
-  // Force hide all navbar elements except hamburger and brand
-  .navbar-nav
-    display: none !important
+  .full-text
+    display: none
 
-  .navbar-text
-    display: none !important
+  .abbrev-text
+    display: inline
 
-  .navbar-form
-    display: none !important
-
-  .navbar-right
-    display: none !important
-
-  // Only show hamburger button
-  .navbar-toggle
-    display: block !important
-
-  // Hide collapsed content by default
-  .navbar-collapse
-    display: none !important
-    height: 0 !important
-    max-height: 0 !important
-    overflow: hidden !important
-
-  // Show collapsed content when expanded
-  .navbar-collapse.in
-    display: block !important
-    height: auto !important
-    max-height: 1000px !important
-    overflow: visible !important
-    padding-bottom: 0
-    border-top: 1px solid #484848
-
-  // Style navigation items within expanded collapse
-  .navbar-collapse.in .navbar-nav
-    display: block !important
-    float: none !important
-    margin: 0
-    width: 100%
-
-  .navbar-collapse.in .navbar-nav > li
-    display: block !important
-    float: none !important
-    width: 100%
-
-  .navbar-collapse.in .navbar-nav > li > a
-    padding: 12px 15px
-    color: #9d9d9d !important
-    display: block !important
-    border-bottom: 1px solid #383838
-
-  .navbar-collapse.in .navbar-nav > li > a:hover,
-  .navbar-collapse.in .navbar-nav > li > a:focus
-    color: #fff !important
-    background-color: #262626 !important
-
-  // Show search form and text in expanded collapse
-  .navbar-collapse.in .navbar-text
-    display: block !important
-    float: none !important
-    margin: 15px 0
-    color: #9d9d9d
-
-  .navbar-collapse.in .navbar-form
-    display: block !important
-    width: 100%
-    padding: 10px 15px
-    margin: 8px 0
-    border-top: 1px solid #484848
-    border-bottom: 1px solid #484848
-
-  .navbar-collapse.in .navbar-form .form-group
-    margin-bottom: 5px
-
+  // Adjust container padding for smaller screens
   .container-fluid
     padding: .25em 1em
 
-  // Fix navbar spacing issues
-  .navbar-header
-    min-height: 50px
+  // Reduce navbar padding to save space
+  .navbar-nav > li > a
+    padding-left: 10px
+    padding-right: 10px
 
-  .navbar-brand
-    padding: 15px
+  // Adjust form width
+  .navbar-form
+    margin-right: 5px
 
-@media (min-width: 1376px)
-  .navbar-toggle
-    display: none
+  .navbar-form .form-control
+    width: 80px
 
-  // Reset mobile overrides
-  .navbar-nav
-    margin: 0
-
-  .navbar-collapse
-    max-height: 340px
-
-// hamburger menu enhancement
-.navbar-toggle
-  border: 1px solid #333
-  background-color: transparent
-  padding: 4px 6px
-  border-radius: 4px
-  transition: all 0.3s ease
-
-.navbar-toggle:hover,
-.navbar-toggle:focus
-  background-color: #333
-  border-color: #fff
-
-.navbar-toggle .icon-bar
-  display: block
-  width: 22px
-  height: 2px
-  background-color: #ccc
-  border-radius: 1px
-  transition: all 0.3s ease
-
-.navbar-toggle .icon-bar + .icon-bar
-  margin-top: 4px
-
-.navbar-toggle:hover .icon-bar,
-.navbar-toggle:focus .icon-bar
-  background-color: #fff
-
-// Additional styles for larger breakpoint
-@media (max-width: 1375px)
-  .navbar-brand
-    display: inline-block
-    margin-right: 20px
-
-  // Smooth animation for navbar collapse
-  .navbar-collapse
-    transition: height 0.35s ease
-    overflow: hidden
-
-  .navbar-collapse.collapsing
-    transition: height 0.35s ease
-
-  // Make hamburger more prominent at larger breakpoint
-  .navbar-toggle
-    display: block !important
-    float: right
-    margin-top: 8px
-    margin-right: 15px
-    margin-bottom: 8px
+  // Adjust text spacing
+  .navbar-text
+    margin-left: 5px
+    margin-right: 5px
