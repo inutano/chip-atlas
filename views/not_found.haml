@@ -1,37 +1,71 @@
-- @page_title = "ChIP-Atlas: 404"
-- @page_description = "We provide cute pics instead."
-- @active_menu = nil
+!!! 5
+%html{ :lang => "en" }
+  %head
+    %meta{ :charset => "utf-8" }
+    %meta{ "http-equiv" => "X-UA-Compatible", :content => "IE=edge" }
+    %meta{ :name => "viewport", :content => "width=device-width, initial-scale=1" }
 
-.row
-  .col-md-10
-    .header
-      %h1
-        %i.fas.fa-mountain
-        ChIP-Atlas: 404
-  .col-md-10
-    %p
-      Sorry, could not find the requested resource. Try with different data or contact us.
-    %p.gif
+    %meta{ :name => "description", :content => "We provide cute pics instead." }
+    %meta{ :name => "author", :content => "Shinya Oki, Tazro Ohta" }
 
-:javascript
-  $('button.go-experiment').on('click', function(event){
-    event.preventDefault();
-    var expid = $('input#jumpToExperiment').val();
-    window.open('/view?id='+expid);
-  });
+    %title= "ChIP-Atlas: 404"
 
-  $(function(){
-    $.ajax({
-      type: 'GET',
-      //url: 'http://api.giphy.com/v1/gifs/random?api_key=dc6zaTOxFJmzC&tag=channing%20tatum',
-      url: 'http://api.giphy.com/v1/gifs/random?api_key=dc6zaTOxFJmzC&tag=cute%20cat%20dog',
-      dataType: 'json',
-      success: function(json){
-        console.log(JSON.stringify(json['data']['image_original_url']));
-        $('<img>')
-          .attr("src", json['data']["image_original_url"])
-          .attr("width","70%")
-          .appendTo($('p.gif'));
-      }
-    });
-  })
+    // Bootstrap core and typeahead CSS
+    %link{ :href => "#{app_root}/css/bootstrap.min.css", :rel => "stylesheet" }
+
+    // Custom style for this website
+    %link{ :href => "#{app_root}/style.css", :rel => "stylesheet"}
+    %link{ :href => "#{app_root}/css/fontawesome.css", :rel => "stylesheet"}
+    %link{ :href => "#{app_root}/css/brands.css", :rel => "stylesheet"}
+    %link{ :href => "#{app_root}/css/solid.css", :rel => "stylesheet"}
+
+  %body
+    - @active_menu = nil
+    != haml :_navigation
+
+    .container
+      .row
+        .col-md-10
+          .header
+            %h1
+              %i.fas.fa-mountain
+              ChIP-Atlas: 404
+        .col-md-10
+          %p
+            Sorry, could not find the requested resource. Try with different data or contact us.
+          %p.gif
+
+
+
+    != haml :footer
+
+    /
+      Bootstrap Core Javascript
+      =========================
+    %script{ :src => "#{app_root}/js/jquery.min.js" }
+    %script{ :src => "#{app_root}/js/bootstrap.min.js" }
+
+    / 'code here'
+
+    :javascript
+      $('button.go-experiment').on('click', function(event){
+        event.preventDefault();
+        var expid = $('input#jumpToExperiment').val();
+        window.open('/view?id='+expid);
+      });
+
+      $(function(){
+        $.ajax({
+          type: 'GET',
+          //url: 'http://api.giphy.com/v1/gifs/random?api_key=dc6zaTOxFJmzC&tag=channing%20tatum',
+          url: 'http://api.giphy.com/v1/gifs/random?api_key=dc6zaTOxFJmzC&tag=cute%20cat%20dog',
+          dataType: 'json',
+          success: function(json){
+            console.log(JSON.stringify(json['data']['image_original_url']));
+            $('<img>')
+              .attr("src", json['data']["image_original_url"])
+              .attr("width","70%")
+              .appendTo($('p.gif'));
+          }
+        });
+      })

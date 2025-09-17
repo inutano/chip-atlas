@@ -1,7 +1,38 @@
-- @page_title = "ChIP-Atlas: Publication"
-- @page_description = "The list of publications that used ChIP-Atlas database."
-- @active_menu = 'publications'
+!!! 5
+%html{ :lang => "en" }
+  %head
+    %meta{ :charset => "utf-8" }
+    %meta{ "http-equiv" => "X-UA-Compatible", :content => "IE=edge" }
+    %meta{ :name => "viewport", :content => "width=device-width, initial-scale=1" }
 
-.row
-  .col-md-8.col-md-offset-2.publication_list
-    != markdown(:publications, layout: false, fenced_code_blocks: true, autolink: true)
+    %meta{ :name => "description", :content => "The list of publications that used ChIP-Atlas database." }
+    %meta{ :name => "author", :content => "Shinya Oki, Tazro Ohta" }
+
+    %title= "ChIP-Atlas: Publication"
+
+    // Bootstrap core and typeahead CSS
+    %link{ :href => "#{app_root}/css/bootstrap.min.css", :rel => "stylesheet" }
+
+    // Custom style for this website
+    %link{ :href => "#{app_root}/style.css", :rel => "stylesheet"}
+    %link{ :href => "#{app_root}/css/fontawesome.css", :rel => "stylesheet"}
+    %link{ :href => "#{app_root}/css/brands.css", :rel => "stylesheet"}
+    %link{ :href => "#{app_root}/css/solid.css", :rel => "stylesheet"}
+
+  %body
+    - @active_menu = 'publications'
+    != haml :_navigation
+
+    .container
+      .row
+        .col-md-8.col-md-offset-2.publication_list
+          != markdown(:publications, layout: false, fenced_code_blocks: true, autolink: true)
+
+    != haml :footer
+
+    /
+      Bootstrap Core Javascript
+      =========================
+    %script{ :src => "#{app_root}/js/jquery.min.js" }
+    %script{ :src => "#{app_root}/js/bootstrap.min.js" }
+    %script{ :src => "#{app_root}/js/pj/pj.js" }

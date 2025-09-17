@@ -1,220 +1,264 @@
-- @page_title = "ChIP-Atlas: Enrichment Analysis"
-- @page_description = "Perform enrichment analysis based on the public ChIP-Seq peak call results."
-- @active_menu = 'enrichment_analysis'
-- @additional_js = [
--   "#{app_root}/js/pj/enrichment_analysis.js"
-- ]
+!!! 5
+%html{ lang: "en" }
+  %head
+    %meta{ charset: "utf-8" }
+    %meta{ "http-equiv": "X-UA-Compatible", content: "IE=edge" }
+    %meta{ name: "viewport", content: "width=device-width, initial-scale=1" }
 
-.row
-  .col-md-10
-    .header
-      %h1
-        %i.fas.fa-mountain
-        ChIP-Atlas: Enrichment Analysis
-      %p
-        Calculate overlaps between a user's data and the public data (SRA + Annotations)
-  .col-md-2
-    .dropdown-help
-      .dropdown
-        .button.btn.btn-primary.dropdown-toggle{ type: "button", id: "movies-dropdown", "data-toggle": "dropdown", "aria-haspopup": true, "aria-expanded": true }
-          %i.fas.fa-question-circle
-          Tutorial
-          %span.caret
-        %ul.dropdown-menu{ "aria-labelledby": "movies-dropdown" }
-          %li
-            %a{ href: "https://chip-atlas.dbcls.jp/data/manual/Enrichment_Analysis/Enrichment_Analysis.pdf", target: "_blank" }="PDF"
-          %li
-            %a{ href: "https://youtu.be/ErJoY7pIkZk", target: "_blank" }= "Movie"
-          %li
-            %a{ href: "http://doi.org/10.7875/togotv.2018.025", target: "_blank" }= "Movie (統合TV, Japanese)"
+    %meta{ name: "description", content: "Perform enrichment analysis based on the public ChIP-Seq peak call results." }
+    %meta{ name: "author", content: "Shinya Oki, Tazro Ohta" }
 
-// Navigation Tabs, links and contents
-.genomeTab{ role: "tabpanel"}
-  // Tabs
-  %ul.nav.nav-tabs{ role: "tablist" }
-    - @list_of_genome.keys.each.with_index do |genome, i|
-      %li{ role: "presentation", class: "#{(i == 0) ? 'active' : '' }", id: "#{genome}-tab" }
-        %a{ href: "##{genome}-tab-content", "aria-controls": "#{genome}-tab-content", role: "tab", "data-toggle": "tab", source: genome }
-          = "#{@list_of_genome[genome]}"
+    %title
+      ChIP-Atlas: Enrichment Analysis
 
-  // Contents
-  .tab-content
-    - @list_of_genome.keys.each.with_index do |genome, i|
-      .tab-pane.fade{ role: "tabpanel", id: "#{genome}-tab-content", class: "#{(i == 0) ? 'in active' : ''}" }
-        .row
-          .col-md-4
-            .panel.panel-default
-              - panel = "#{genome}Panel"
-              .panel-heading{ id: panel }
-                %h4.panel-title
-                  1. Sample Classification
-              .panel-body
-                .panel-input
+    // Bootstrap core and typeahead CSS
+    %link{ href: "#{app_root}/css/bootstrap.min.css", rel: "stylesheet" }
+
+    // Custom style for this website
+    %link{ :href => "#{app_root}/style.css", :rel => "stylesheet"}
+    %link{ :href => "#{app_root}/css/fontawesome.css", :rel => "stylesheet"}
+    %link{ :href => "#{app_root}/css/brands.css", :rel => "stylesheet"}
+    %link{ :href => "#{app_root}/css/solid.css", :rel => "stylesheet"}
+
+  %body
+    - @active_menu = 'enrichment_analysis'
+    != haml :_navigation
+
+    .container
+      .row
+        .col-md-10
+          .header
+            %h1
+              %i.fas.fa-mountain
+              ChIP-Atlas: Enrichment Analysis
+            %p
+              Identify common epigenetic features of a given set of genomic loci and genes
+        .col-md-2
+          .dropdown-help
+            .dropdown
+              .button.btn.btn-primary.dropdown-toggle{ type: "button", id: "movies-dropdown", "data-toggle": "dropdown", "aria-haspopup": true, "aria-expanded": true }
+                %i.fas.fa-question-circle
+                Tutorial
+                %span.caret
+              %ul.dropdown-menu{ "aria-labelledby": "movies-dropdown" }
+                %li
+                  %a{ :href => "https://chip-atlas.dbcls.jp/data/manual/Enrichment_Analysis/Enrichment_Analysis.pdf", :target => "_blank" }="PDF"
+                %li
+                  %a{ href: "https://youtu.be/JBOB2PX5_-0", target: "_blank" }
+                    Movie
+                %li
+                  %a{ href: "http://doi.org/10.7875/togotv.2019.005", target: "_blank" }
+                    Movie (統合TV, Japanese)
+
+      // Navigation Tabs, links and contents
+      .genomeTab{ role: "tabpanel"}
+
+        // Tabs
+        %ul.nav.nav-tabs{ role: "tablist" }
+          - @list_of_genome.keys.each.with_index do |genome, i|
+            %li{ role: "presentation", class: "#{(i == 0) ? 'active' : '' }", id: "#{genome}-tab" }
+              %a{ href: "##{genome}-tab-content", "aria-controls": "#{genome}-tab-content", role: "tab", "data-toggle": "tab", "source": genome }
+                = "#{@list_of_genome[genome]}"
+
+        // Contents
+        .tab-content
+          - @list_of_genome.keys.each.with_index do |genome, i|
+            .tab-pane.fade{ role: "tabpanel", id: "#{genome}-tab-content", class: "#{(i == 0) ? 'in active' : ''}" }
+              - index = @index_all_genome[genome]
+              .row
+                .col-md-4
                   %form
-                    %label.radio
-                      %input{ type: "radio", id: "#{genome}InputTypeBed", name: "#{genome}InputType", value: "bed", checked: "checked" }
-                      Genomic regions (BED)
-                      %a.infoBtn{ value: "info", id: "#{genome}Bed" }
-                        &#x24D8;
-                    %label.radio
-                      %input{ type: "radio", id: "#{genome}InputTypeGenes", name: "#{genome}InputType", value: "genes" }
-                      Gene list (Gene symbols or IDs)
-                      %a.infoBtn{ value: "info", id: "#{genome}Genes" }
-                        &#x24D8;
+                    .panel.panel-default
+                      - class_id = "#{genome}agClass"
+                      .panel-heading{ id: "heading-#{class_id}" }
+                        %h4.panel-title
+                          1. Experiment type
+                      .panel-body
+                        %select.form-control.classSelect.agClassSelect{ id: "#{class_id}", size: 8, name: "antigen" }
 
-          .col-md-4
-            .panel.panel-default
-              - panel = "#{genome}ClassPanel"
-              .panel-heading{ id: panel }
-                %h4.panel-title
-                  2. Experiment class
-              .panel-body
-                %select.form-control.classSelect{ id: "#{genome}Class", size: 8 }
+                .col-md-4
+                  %form
+                    - class_id = "#{genome}clClass"
+                    .panel.panel-default
+                      .panel-heading{ id: "heading-#{class_id}"}
+                        %h4.panel-title
+                          2. Cell type Class
+                      .panel-body
+                        %select.form-control.classSelect.clClassSelect{ id: class_id, size: 8, name: "celltype" }
+                          %option{ value: 'All cell types', selected: true }
+                            All cell types
 
-          .col-md-4
-            .panel.panel-default
-              - panel = "#{genome}SubclassPanel"
-              .panel-heading{ id: panel }
-                %h4.panel-title
-                  3. Subclass (optional)
-              .panel-body
-                .panel-input
-                  // first search box is for bed input
-                  %input.typeahead.form-control.panel-input.bed{ type: "text", placeholder: "type to search", id: "#{genome}Subclass" }
-                  %select.form-control.flexselect.panel-input.bed{ id: "#{genome}Subclass", size: 8 }
+                .col-md-4
+                  %form
+                    .panel.panel-default
+                      .panel-heading{ id: "heading-#{genome}qval"}
+                        %h4.panel-title
+                          3. Threshold for Significance
+                          %a.infoBtn{ value: "info", id: "#{genome}Threshold" }
+                            &#x24D8;
+                      .panel-body
+                        %select.form-control{ id: "#{genome}qval", size: 5 }
 
-        .row
-          .col-md-4
-            .panel.panel-default
-              - panel = "#{genome}DataPanel"
-              .panel-heading{ id: panel }
-                %h4.panel-title
-                  4. Enter dataset A
-              .panel-body
-                .panel-input
-                  .form-group.panel-input-textarea
-                    %textarea.form-control{ name: "txtA", id: "#{genome}UserData", rows: 8, cols: 50, placeholder: "Click info buttons above to show the description format."}
-                  %row
-                    .col-md-6
-                      .form-group
-                        %input{ type: "file", id: "#{genome}UserDataFile" }
-                        %p.help-block
-                          Choose local file
-                    .col-md-5.col-md-offset-1
-                      .linkExample
-                        %a.dataExample{ href: "#", id: "#{genome}UserData" }
-                          Try with example
+              .row
+                .col-md-4
+                  .panel.panel-default
+                    - panel = "#{genome}MyDataPanel"
+                    .panel-heading{ id: panel }
+                      %h4.panel-title
+                        4. Enter dataset A
+                    .panel-body
+                      %form
+                        .checkbox.panel-input
+                          %label
+                            %input{ type: "radio", id: "#{genome}UserDataBed", name: "bedORGene", value: "bed", checked: "checked" }
+                            Genomic regions (BED)
+                            %a.infoBtn{ value: "info", id: "#{genome}UserDataBed" }
+                              &#x24D8;
+                        .checkbox.panel-input
+                          %label
+                            %input{ type: "radio", id: "#{genome}UserDataGenes", name: "bedORGene", value: "gene" }
+                            Gene list (Gene symbols or IDs)
+                            %a.infoBtn{ id: "#{genome}UserDataGenes" }
+                              &#x24D8;
+                        .checkbox.panel-input
+                          %label
+                            %input{ type: "radio", id: "#{genome}UserDataCount", name: "bedORGene", value: "count" }
+                            Gene count table (CSV or TSV)
+                            %a.infoBtn{ id: "#{genome}UserDataCount" }
+                              &#x24D8;
+                        .panel-input.bed-input.userData
+                          .form-group.panel-input-textarea
+                            %textarea.form-control{ name: "txtA", id: "#{genome}UserData", rows: 8, cols: 50, placeholder: "Click info buttons above to show the description format."}
+                          %row
+                            .col-md-6
+                              .form-group
+                                %input{ type: "file", id: "#{genome}UserDataFile" }
+                                %p.help-block
+                                  Choose local file
+                            .col-md-5.col-md-offset-1
+                              .linkExample
+                                %a.dataExample{ href: "#", id: "#{genome}UserData" }
+                                  Try with example
 
-          .col-md-4
-            .panel.panel-default
-              - panel = "#{genome}TargetDB"
-              .panel-heading{ id: panel }
-                %h4.panel-title
-                  5. Enter dataset B
-              .panel-body
-                %form
-                  .checkbox.panel-input.bed
-                    %label
-                      %input{ type: "radio", id: "#{genome}ComparedWithRandom", name: "comparedWith", value: "rnd", checked: "checked" }
-                      Random permutation of dataset A
-                      %a.infoBtn{ id: "#{genome}ComparedWithRandom" }
-                        &#x24D8;
-                    .checkbox.form-inline.panel-input.rnd
-                      %p.help-block.ptimes{ for: "permutationTimes"}
-                        Permutation times
-                        %input.form-control{ type: "radio", id: "#{genome}ComparedWithRandomx1", name: "numShuf", value: "1", checked: "checked" }
-                        x1
-                        %input.form-control{ type: "radio", id: "#{genome}ComparedWithRandomx10", name: "numShuf", value: "10"}
-                        x10
-                        %input.form-control{ type: "radio", id: "#{genome}ComparedWithRandomx100", name: "numShuf", value: "100"}
-                        x100
-                  .checkbox.panel-input.bed
-                    %label
-                      %input{ type: "radio", id: "#{genome}ComparedWithBed", name: "comparedWith", value: "bed" }
-                      Genomic regions (BED)
-                      %a.infoBtn{ id: "#{genome}ComparedWithBed" }
-                        &#x24D8;
-                %form
-                  .checkbox.panel-input.gene.default-hide
-                    %label
-                      %input{ type: "radio", id: "#{genome}ComparedWithRefseq", name: "comparedWith", value: "refseq" }
-                      Refseq coding genes (excluding dataset A)
-                      %a.infoBtn{ id: "#{genome}ComparedWithRefseq" }
-                        &#x24D8;
-                  .checkbox.panel-input.gene.default-hide
-                    %label
-                      %input{ type: "radio", id: "#{genome}ComparedWithUserlist", name: "comparedWith", value: "userlist" }
-                      Gene list (Gene symbols or IDs)
-                      %a.infoBtn{ id: "#{genome}ComparedWithUserlist" }
-                        &#x24D8;
-                .panel-input.bed-input.comparedWith.default-hide
-                  .form-group.panel-input-textarea
-                    %textarea.form-control{ name: "txtB", id: "#{genome}ComparedWith", rows: 8, cols: 50, placeholder: "Click info buttons above to show the description format.", value: nil }
-                  %row
-                    .col-md-6
-                      .form-group
-                        %input{ type: "file", id: "#{genome}ComparedWithFile", name: "fsel" }
-                        %p.help-block
-                          Choose local file
-                    .col-md-5.col-md-offset-1
-                      .linkExample
-                        %a.dataExample{ href: "#", id: "#{genome}ComparedWith" }
-                          Try with example
+                .col-md-4
+                  .panel.panel-default
+                    - panel = "#{genome}TargetDB"
+                    .panel-heading{ id: panel }
+                      %h4.panel-title
+                        5. Enter dataset B
+                    .panel-body
+                      %form
+                        .checkbox.panel-input.bed
+                          %label
+                            %input{ type: "radio", id: "#{genome}ComparedWithRandom", name: "comparedWith", value: "rnd", checked: "checked" }
+                            Random permutation of dataset A
+                            %a.infoBtn{ id: "#{genome}ComparedWithRandom" }
+                              &#x24D8;
+                          .checkbox.form-inline.panel-input.rnd
+                            %p.help-block.ptimes{ for: "permutationTimes"}
+                              Permutation times
+                              %input.form-control{ type: "radio", id: "#{genome}ComparedWithRandomx1", name: "numShuf", value: "1", checked: "checked" }
+                              x1
+                              %input.form-control{ type: "radio", id: "#{genome}ComparedWithRandomx10", name: "numShuf", value: "10"}
+                              x10
+                              %input.form-control{ type: "radio", id: "#{genome}ComparedWithRandomx100", name: "numShuf", value: "100"}
+                              x100
+                        .checkbox.panel-input.bed
+                          %label
+                            %input{ type: "radio", id: "#{genome}ComparedWithBed", name: "comparedWith", value: "bed" }
+                            Genomic regions (BED)
+                            %a.infoBtn{ id: "#{genome}ComparedWithBed" }
+                              &#x24D8;
+                      %form
+                        .checkbox.panel-input.gene.default-hide
+                          %label
+                            %input{ type: "radio", id: "#{genome}ComparedWithRefseq", name: "comparedWith", value: "refseq" }
+                            Refseq coding genes (excluding dataset A)
+                            %a.infoBtn{ id: "#{genome}ComparedWithRefseq" }
+                              &#x24D8;
+                        .checkbox.panel-input.gene.default-hide
+                          %label
+                            %input{ type: "radio", id: "#{genome}ComparedWithUserlist", name: "comparedWith", value: "userlist" }
+                            Gene list (Gene symbols or IDs)
+                            %a.infoBtn{ id: "#{genome}ComparedWithUserlist" }
+                              &#x24D8;
+                      .panel-input.bed-input.comparedWith.default-hide
+                        .form-group.panel-input-textarea
+                          %textarea.form-control{ name: "txtB", id: "#{genome}ComparedWith", rows: 8, cols: 50, placeholder: "Click info buttons above to show the description format.", value: nil }
+                        %row
+                          .col-md-6
+                            .form-group
+                              %input{ type: "file", id: "#{genome}ComparedWithFile", name: "fsel" }
+                              %p.help-block
+                                Choose local file
+                          .col-md-5.col-md-offset-1
+                            .linkExample
+                              %a.dataExample{ href: "#", id: "#{genome}ComparedWith" }
+                                Try with example
 
-          .col-md-4
-            .panel.panel-default
-              - panel = "#{genome}Desc"
-              .panel-heading{ id: panel }
-                %h4.panel-title
-                  6. Analysis description
-              .panel-body
-                .panel-input.desc.form-inline
-                  %p.form-control-static
-                    Analysis title
-                    %a.infoBtn{ value: "info", id: "#{genome}ProjectDesc" }
-                      &#x24D8;
-                  %input.form-control{ type: "text", id: "#{genome}ProjectTitle"}
-                .panel-input.desc.dataset-title-a.form-inline
-                  %p.form-control-static
-                    Dataset A title
-                    %a.infoBtn{ value: "info", id: "#{genome}UserDataDesc" }
-                      &#x24D8;
-                  %input.form-control{ type: "text", id: "#{genome}UserDataTitle"}
-                .panel-input.desc.dataset-title-b.form-inline
-                  %p.form-control-static
-                    Dataset B title
-                    %a.infoBtn{ value: "info", id: "#{genome}ComparedWithDesc" }
-                      &#x24D8;
-                  %input.form-control{ type: "text", id: "#{genome}ComparedWithTitle"}
-                .panel-input.distTSS.form-group.default-hide
-                  %p.form-control-static
-                    Distance range from TSS
-                    %a.infoBtn{ value: "info", id: "#{genome}DistTSS" }
-                      &#x24D8;
-                  .form-inline
-                    \-
-                    %input.form-control{ type: "text", id: "#{genome}DistanceUp", value: "0", size: 1 }
-                    bp &#x2266; TSS &#x2266; +
-                    %input.form-control{ type: "text", id: "#{genome}DistanceDown", value: "0", size: 1 }
-                    bp
+                .col-md-4
+                  .panel.panel-default
+                    - panel = "#{genome}Desc"
+                    .panel-heading{ id: panel }
+                      %h4.panel-title
+                        6. Analysis description
+                    .panel-body
+                      .panel-input.desc.form-inline
+                        %p.form-control-static
+                          Analysis title
+                          %a.infoBtn{ value: "info", id: "#{genome}ProjectDesc" }
+                            &#x24D8;
+                        %input.form-control{ type: "text", id: "#{genome}ProjectTitle"}
+                      .panel-input.desc.dataset-title-a.form-inline
+                        %p.form-control-static
+                          Dataset A title
+                          %a.infoBtn{ value: "info", id: "#{genome}UserDataDesc" }
+                            &#x24D8;
+                        %input.form-control{ type: "text", id: "#{genome}UserDataTitle"}
+                      .panel-input.desc.dataset-title-b.form-inline
+                        %p.form-control-static
+                          Dataset B title
+                          %a.infoBtn{ value: "info", id: "#{genome}ComparedWithDesc" }
+                            &#x24D8;
+                        %input.form-control{ type: "text", id: "#{genome}ComparedWithTitle"}
+                      .panel-input.distTSS.form-group.default-hide
+                        %p.form-control-static
+                          Distance range from TSS
+                          %a.infoBtn{ value: "info", id: "#{genome}DistTSS" }
+                            &#x24D8;
+                        .form-inline
+                          \-
+                          %input.form-control{ type: "text", id: "#{genome}DistanceUp", value: "0", size: 1 }
+                          bp ≦ TSS ≦ +
+                          %input.form-control{ type: "text", id: "#{genome}DistanceDown", value: "0", size: 1 }
+                          bp
 
-                .button-submit
-                  %button.btn.btn-primary.btn-lg.btn-block{ id: "virtual-chip-submit", type: "button" }
-                    submit
-                .estimated-run-time
-                  Estimated run time:
-                  %a{ id: "#{genome}-estimated-run-time" }
-                    \-
+                      .button-submit
+                        %button.btn.btn-primary.btn-lg.btn-block{ id: "virtual-chip-submit", type: "button" }
+                          submit
+                      .estimated-run-time
+                        Estimated run time:
+                        %a{ id: "#{genome}-estimated-run-time" }
+                          \-
 
-                %p
-                  %a{ href: "https://sc.ddbj.nig.ac.jp/en/operation/job_queue_status/", target: "_blank" }
-                    node status (short.q)
+                      %p
+                        %a{ href: "https://sc.ddbj.nig.ac.jp/en/operation/job_queue_status/", target: "_blank" }
+                          node status (short.q)
 
-%script{ type: "application/json", id: "ea_params" }
-  :plain
-    {
-      "genes": "#{@genes}",
-      "taxonomy": "#{@taxonomy}",
-      "genesetA": "#{@genesetA}",
-      "genesetB": "#{@genesetB}"
-    }
+    != haml :footer
+
+    /
+      Bootstrap Core Javascript
+      =========================
+    %script{ src: "#{app_root}/js/jquery.min.js" }
+    %script{ src: "#{app_root}/js/bootstrap.min.js" }
+    %script{ src: "#{app_root}/js/pj/pj.js" }
+    %script{ type: "application/json", id: "ea_params" }
+      :plain
+        {
+          "genes": "#{@genes}",
+          "taxonomy": "#{@taxonomy}",
+          "genesetA": "#{@genesetA}",
+          "genesetB": "#{@genesetB}"
+        }
+    %script{ src: "#{app_root}/js/pj/enrichment_analysis.js" }

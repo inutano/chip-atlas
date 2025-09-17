@@ -1,53 +1,81 @@
-- @page_title = "ChIP-Atlas: Dataset Search"
-- @page_description = "Search ChIP-Atlas dataset by keywords."
-- @active_menu = nil
-- @additional_css = [
--   { href: "https://cdn.datatables.net/1.10.16/css/jquery.dataTables.min.css", type: "text/css" },
--   { href: "https://cdn.datatables.net/buttons/1.5.1/css/buttons.dataTables.min.css", type: "text/css" }
-- ]
-- @additional_js = [
--   "https://www.datatables.net/release-datatables/media/js/jquery.js",
--   "https://cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js",
--   "https://cdn.datatables.net/buttons/1.5.1/js/dataTables.buttons.min.js",
--   "https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js",
--   "https://cdn.datatables.net/buttons/1.5.1/js/buttons.html5.min.js",
--   "#{app_root}/js/pj/search.js"
-- ]
+!!! 5
+%html{ :lang => "en" }
+  %head
+    %meta{ :charset => "utf-8" }
+    %meta{ "http-equiv" => "X-UA-Compatible", :content => "IE=edge" }
+    %meta{ :name => "viewport", :content => "width=device-width, initial-scale=1" }
 
-.row
-  .col-md-10
-    .header
-      %h1
-        %i.fas.fa-mountain
-        ChIP-Atlas: Dataset Search
-      %p
-        Find experiments by keywords
-      %p
-        Available track type classes, cell type classes, and reference genomes are the same as in the
-        %a{ :href => "/peak_browser" } Peak Browser
-        \. For bulk processing, please use the
-        %a{ :href => "https://github.com/inutano/chip-atlas/wiki#tables-summarizing-metadata-and-files" } metadata table
-  .col-md-2
-    .dropdown-help
-      .dropdown
-        .button.btn.btn-primary.dropdown-toggle{ :type => "button", :id => "movies-dropdown", "data-toggle" => "dropdown", "aria-haspopup" => true, "aria-expanded" => true }
-          %i.fas.fa-question-circle
-          Tutorial
-          %span.caret
-        %ul.dropdown-menu{ "aria-labelledby" => "movies-dropdown" }
-          %li
-            %a{ :href => "https://chip-atlas.dbcls.jp/data/manual/Dataset_Search/Dataset_Search.pdf", :target => "_blank" }="PDF"
+    %meta{ :name => "description", :content => "Search ChIP-Atlas dataset by keywords." }
+    %meta{ :name => "author", :content => "Shinya Oki, Tazro Ohta" }
 
-.searchTab{ :role => "tabpanel"}
-  %ul.nav.nav-tabs{ :role => "tablist" }
-    - ["Simple", "Detailed"].each.with_index do |stype, i|
-      %li{ :role => "presentation", :class => "#{(i == 0) ? 'active' : '' }", :id => "#{stype}-tab" }
-        %a{ :href => "##{stype}-tab-content", "aria-controls" => "#{stype}-tab-content", :role => "tab", "data-toggle" => "tab", "source" => stype }
-          = "#{stype} search"
+    %title= "ChIP-Atlas: Dataset Search"
 
-  .tab-content
-    - ["Simple", "Detailed"].each.with_index do |stype, i|
-      .tab-pane.fade{ :role => "tabpanel", :id => "#{stype}-tab-content", :class => "#{(i == 0) ? 'in active' : ''}" }
-        .row
-          .col-md-12
-            %table.table.table-striped{ id: "#{stype}SearchDataTable" }
+    // Bootstrap core and typeahead CSS
+    %link{ :href => "#{app_root}/css/bootstrap.min.css", :rel => "stylesheet" }
+    %link{:href => "https://cdn.datatables.net/1.10.16/css/jquery.dataTables.min.css", :rel => "stylesheet", :type => "text/css"}
+    %link{:href => "https://cdn.datatables.net/buttons/1.5.1/css/buttons.dataTables.min.css", :rel => "stylesheet", :type => "text/css"}
+
+    // Custom style for this website
+    %link{ :href => "#{app_root}/style.css", :rel => "stylesheet"}
+    %link{ :href => "#{app_root}/css/fontawesome.css", :rel => "stylesheet"}
+    %link{ :href => "#{app_root}/css/brands.css", :rel => "stylesheet"}
+    %link{ :href => "#{app_root}/css/solid.css", :rel => "stylesheet"}
+
+  %body
+    - @active_menu = nil
+    != haml :_navigation
+
+    .container
+      .row
+        .col-md-10
+          .header
+            %h1
+              %i.fas.fa-mountain
+              ChIP-Atlas: Dataset Search
+            %p
+              Find experiments by keywords
+            %p
+              Available track type classes, cell type classes, and reference genomes are the same as in the
+              %a{ :href => "/peak_browser" } Peak Browser
+              \. For bulk processing, please use the
+              %a{ :href => "https://github.com/inutano/chip-atlas/wiki#tables-summarizing-metadata-and-files" } metadata table
+        .col-md-2
+          .dropdown-help
+            .dropdown
+              .button.btn.btn-primary.dropdown-toggle{ :type => "button", :id => "movies-dropdown", "data-toggle" => "dropdown", "aria-haspopup" => true, "aria-expanded" => true }
+                %i.fas.fa-question-circle
+                Tutorial
+                %span.caret
+              %ul.dropdown-menu{ "aria-labelledby" => "movies-dropdown" }
+                %li
+                  %a{ :href => "https://chip-atlas.dbcls.jp/data/manual/Dataset_Search/Dataset_Search.pdf", :target => "_blank" }="PDF"
+
+      .searchTab{ :role => "tabpanel"}
+        %ul.nav.nav-tabs{ :role => "tablist" }
+          - ["Simple", "Detailed"].each.with_index do |stype, i|
+            %li{ :role => "presentation", :class => "#{(i == 0) ? 'active' : '' }", :id => "#{stype}-tab" }
+              %a{ :href => "##{stype}-tab-content", "aria-controls" => "#{stype}-tab-content", :role => "tab", "data-toggle" => "tab", "source" => stype }
+                = "#{stype} search"
+
+        .tab-content
+          - ["Simple", "Detailed"].each.with_index do |stype, i|
+            .tab-pane.fade{ :role => "tabpanel", :id => "#{stype}-tab-content", :class => "#{(i == 0) ? 'in active' : ''}" }
+              .row
+                .col-md-12
+                  %table.table.table-striped{ id: "#{stype}SearchDataTable" }
+
+    != haml :footer
+
+    /
+      Bootstrap Core Javascript
+      =========================
+    %script{ :src => "#{app_root}/js/jquery.min.js" }
+    %script{ :src => "#{app_root}/js/bootstrap.min.js" }
+    %script{ :src => "#{app_root}/js/pj/pj.js" }
+    %script{ :src => "#{app_root}/js/pj/search.js" }
+
+    %script{ :src => "https://www.datatables.net/release-datatables/media/js/jquery.js" }
+    %script{ :src => "https://cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js" }
+    %script{ :src => "https://cdn.datatables.net/buttons/1.5.1/js/dataTables.buttons.min.js" }
+    %script{ :src => "https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js" }
+    %script{ :src => "https://cdn.datatables.net/buttons/1.5.1/js/buttons.html5.min.js" }

@@ -1,13 +1,26 @@
-- @page_title = "ChIP-Atlas"
-- @page_description = "Browse and analyse the public ChIP-Seq/DNase-Seq/ATAC-Seq/Bisulfite-Seq data on your browser."
-- @active_menu = nil
-
 !!! 5
 %html{ :lang => "en" }
   %head
-    != haml :_head
+    %meta{ :charset => "utf-8" }
+    %meta{ "http-equiv" => "X-UA-Compatible", :content => "IE=edge" }
+    %meta{ :name => "viewport", :content => "width=device-width, initial-scale=1" }
+
+    %meta{ :name => "description", :content => "Browse and analyse the public ChIP-Seq/DNase-Seq/ATAC-Seq/Bisulfite-Seq data on your browser." }
+    %meta{ :name => "author", :content => "Shinya Oki, Tazro Ohta" }
+
+    %title= "ChIP-Atlas"
+
+    // Bootstrap core and typeahead CSS
+    %link{ :href => "#{app_root}/css/bootstrap.min.css", :rel => "stylesheet" }
+
+    // Custom style for this website
+    %link{ :href => "#{app_root}/style.css", :rel => "stylesheet"}
+    %link{ :href => "#{app_root}/css/fontawesome.css", :rel => "stylesheet"}
+    %link{ :href => "#{app_root}/css/brands.css", :rel => "stylesheet"}
+    %link{ :href => "#{app_root}/css/solid.css", :rel => "stylesheet"}
 
   %body
+    - @active_menu = nil
     != haml :_navigation
 
     .container
@@ -132,4 +145,9 @@
 
     != haml :footer
 
-    != haml :_javascript
+    /
+      Bootstrap Core Javascript
+      =========================
+    %script{ :src => "#{app_root}/js/jquery.min.js" }
+    %script{ :src => "#{app_root}/js/bootstrap.min.js" }
+    %script{ :src => "#{app_root}/js/pj/pj.js" }

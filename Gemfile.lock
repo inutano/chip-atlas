@@ -76,6 +76,8 @@ GEM
       rack (>= 3.0.0, < 4)
     rack-session (2.0.0)
       rack (>= 3.0.0)
+    rackup (2.2.1)
+      rack (>= 3)
     raindrops (0.20.1)
     rake (13.2.1)
     redcarpet (3.6.0)
@@ -157,6 +159,7 @@ DEPENDENCIES
   net-ping
   nokogiri
   rack-protection
+  rackup
   rake
   redcarpet
   rubyzip

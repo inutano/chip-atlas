@@ -1,83 +1,85 @@
-- @page_title = "ChIP-Atlas: Diff Analysis Result"
-- @page_description = "Display the results of performed differential analysis."
-- @active_menu = 'diff_analysis'
-- @additional_js = [
--   "#{app_root}/js/pj/diff_analysis_result.js"
-- ]
+!!! 5
+%html{ :lang => "en" }
+  %head
+    %meta{ :charset => "utf-8" }
+    %meta{ "http-equiv" => "X-UA-Compatible", :content => "IE=edge" }
+    %meta{ :name => "viewport", :content => "width=device-width, initial-scale=1" }
 
-.row
-  .col-md-12
-    .header
-      %h1
-        %i.fas.fa-mountain
-        ChIP-Atlas: Diff Analysis Result
-      %p
-        Analysis ID: #{@analysis_id}
+    %meta{ :name => "description", :content => "Display the results of diff analysis." }
+    %meta{ :name => "author", :content => "Shinya Oki, Tazro Ohta" }
 
-.row
-  .col-md-12
-    - if @result_data
-      .panel.panel-default
-        .panel-heading
-          %h3.panel-title Differential Analysis Results
-        .panel-body
-          .row
-            .col-md-4
-              .panel.panel-info
-                .panel-heading
-                  %h4.panel-title Dataset A Only
-                .panel-body
-                  %p.lead= @result_data[:dataset_a_only][:count] || 0
-                  %p Peaks unique to Dataset A
-            .col-md-4
-              .panel.panel-warning
-                .panel-heading
-                  %h4.panel-title Overlapping
-                .panel-body
-                  %p.lead= @result_data[:overlapping][:count] || 0
-                  %p Peaks found in both datasets
-            .col-md-4
-              .panel.panel-success
-                .panel-heading
-                  %h4.panel-title Dataset B Only
-                .panel-body
-                  %p.lead= @result_data[:dataset_b_only][:count] || 0
-                  %p Peaks unique to Dataset B
+    %title
+      ChIP-Atlas: Diff Analysis Result
 
-          .table-responsive
-            %table.table.table-striped.table-bordered
-              %thead
-                %tr
-                  %th Chromosome
-                  %th Start
-                  %th End
-                  %th Category
-                  %th Score
-              %tbody
-                - if @result_data[:detailed_results]
-                  - @result_data[:detailed_results].each do |result|
-                    %tr
-                      %td= result['chromosome']
-                      %td= result['start']
-                      %td= result['end']
-                      %td= result['category']
-                      %td= result['score']
-    - else
-      .alert.alert-warning
-        %p No results found for this analysis.
+    // Bootstrap core and typeahead CSS
+    %link{ :href => "#{app_root}/css/bootstrap.min.css", :rel => "stylesheet" }
 
-.row
-  .col-md-12
-    .panel.panel-default
-      .panel-heading
-        %h3.panel-title Download Results
-      .panel-body
-        %a.btn.btn-primary{ href: "/data/diff_analysis/#{@analysis_id}/result.bed" }
-          %i.fas.fa-download
-          Download BED
-        %a.btn.btn-info{ href: "/data/diff_analysis/#{@analysis_id}/result.tsv" }
-          %i.fas.fa-download
-          Download TSV
-        %a.btn.btn-secondary{ href: "/diff_analysis" }
-          %i.fas.fa-arrow-left
-          Back to Analysis
+    // Custom style for this website
+    %link{ :href => "#{app_root}/style.css", :rel => "stylesheet"}
+    %link{ :href => "#{app_root}/css/fontawesome.css", :rel => "stylesheet"}
+    %link{ :href => "#{app_root}/css/brands.css", :rel => "stylesheet"}
+    %link{ :href => "#{app_root}/css/solid.css", :rel => "stylesheet"}
+
+  %body
+    - @active_menu = 'diff_analysis'
+    != haml :_navigation
+
+    .container
+      .header
+        %h1
+          %i.fas.fa-mountain
+          ChIP-Atlas: Diff Analysis
+        %p
+          Detect differential peaks or differentially methylated regions
+      .container.job-info
+        %p
+          Result page URL will be available for a week from the time when 'status' is 'finished'.
+        %table.table
+          %tr
+            %td
+              Project title
+            %td#project-title
+          %tr
+            %td
+              Request ID
+            %td#request-id
+          %tr
+            %td
+              Submitted at:
+            %td#submitted-at
+          %tr
+            %td
+              Estimated finishing time:
+            %td#estimated-finishing-time
+          %tr
+            %td
+              Current time:
+            %td#current-time
+          %tr
+            %td
+              Status
+            %td#status
+              Requesting
+          %tr
+            %td
+              Download Result:
+            %td
+              %a#download-result
+        .container#executionLog
+        %hr
+
+        %p
+          As this function uses the NIG supercomputer system, it may take time to start your job when the nodes are busy. Please check computation node status
+          %a{ href: "https://sc.ddbj.nig.ac.jp/en/operation/job_queue_status/", target: "_blank" }
+            here
+          (epyc.q)
+
+    != haml :footer
+
+    /
+      Bootstrap Core Javascript
+      =========================
+    %script{ :src => "#{app_root}/js/jquery.min.js" }
+    %script{ :src => "#{app_root}/js/bootstrap.min.js" }
+    %script{ :src => "#{app_root}/js/pj/pj.js" }
+    %script{ :src => "#{app_root}/js/pj/diff_analysis_result.js" }
