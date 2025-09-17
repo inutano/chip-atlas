@@ -1,0 +1,122 @@
+- @page_title = "ChIP-Atlas"
+- @page_description = "Browse and analyse the public ChIP-Seq/DNase-Seq/ATAC-Seq/Bisulfite-Seq data on your browser."
+- @active_menu = nil
+
+.page-header
+  %h1
+    %i.fas.fa-mountain
+    ChIP-Atlas
+  %p
+    A data-mining suite for exploring epigenomic landscapes by fully integrating #{@number_of_experiments} ChIP-seq, ATAC-seq and Bisulfite-seq experiments.
+
+.row.align-height
+  .col-md-4
+    %a.jumbotron-link{ href: "#{app_root}/peak_browser" }
+      .jumbotron
+        .row
+          .col-xs-12.col-sm-4.col-icon
+            .icon
+              %i.fas.fa-glasses
+          .col-xs-12.col-sm-8.col-labels
+            .header-text
+              %h3
+                Peak Browser
+            .labels
+              %span.label.label-primary
+                ChIP
+              %span.label.label-primary
+                ATAC
+              %span.label.label-primary
+                Bisulfite
+
+  .col-md-4
+    %a.jumbotron-link{ href: "#{app_root}/enrichment_analysis" }
+      .jumbotron
+        .row
+          .col-xs-12.col-sm-4.col-icon
+            .icon
+              %i.fas.fa-hand-holding-heart
+          .col-xs-12.col-sm-8.col-labels
+            .header-text
+              %h3
+                Enrichment Analysis
+            .labels
+              %span.label.label-primary
+                ChIP
+              %span.label.label-primary
+                ATAC
+              %span.label.label-primary
+                Bisulfite
+
+  .col-md-4
+    %a.jumbotron-link{ href: "#{app_root}/diff_analysis" }
+      .jumbotron
+        .row
+          .col-xs-12.col-sm-4.col-icon
+            .icon
+              %i.fas.fa-balance-scale-left
+          .col-xs-12.col-sm-8.col-labels
+            .header-text
+              %h3
+                Diff Analysis
+            .labels
+              %span.label.label-primary
+                ChIP
+              %span.label.label-primary
+                ATAC
+              %span.label.label-primary
+                Bisulfite
+
+.row.align-height
+  .col-md-4
+    %a.jumbotron-link{ href: "#{app_root}/target_genes" }
+      .jumbotron
+        .row
+          .col-xs-12.col-sm-4.col-icon
+            .icon
+              %i.fas.fa-bullseye
+          .col-xs-12.col-sm-8.col-labels
+            .header-text
+              %h3
+                Target Genes
+            .labels
+              %span.label.label-primary
+                ChIP
+
+  .col-md-4
+    %a.jumbotron-link{ href: "#{app_root}/colo" }
+      .jumbotron
+        .row
+          .col-xs-12.col-sm-4.col-icon
+            .icon
+              %i.fas.fa-compress-arrows-alt
+          .col-xs-12.col-sm-8.col-labels
+            .header-text
+              %h3
+                Colocalization
+            .labels
+              %span.label.label-primary
+                ChIP
+
+  .col-md-4
+    %a.jumbotron-link{ href: "#{app_root}/search" }
+      .jumbotron
+        .row
+          .col-xs-12.col-sm-4.col-icon
+            .icon
+              %i.fas.fa-search
+          .col-xs-12.col-sm-8.col-labels
+            .header-text
+              %h3
+                Dataset Search
+            .labels
+              %span.label.label-primary
+                ChIP
+              %span.label.label-primary
+                ATAC
+              %span.label.label-primary
+                Bisulfite
+
+.row
+  .col-md-10.col-md-offset-2
+    != markdown(:updates, layout: false, fenced_code_blocks: true, autolink: true)

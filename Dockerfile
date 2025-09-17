@@ -4,4 +4,4 @@ RUN apt-get update -y && apt-get install -y libffi-dev build-essential libpq-dev
 COPY . /app
 WORKDIR /app
 RUN bundle install
-CMD ["bundle", "exe", "rackup", "--host", "0.0.0.0", "-p", "9292"]
+CMD ["bundle", "exec", "rackup", "--host", "0.0.0.0", "-p", "9292"]

@@ -23,12 +23,116 @@
     %link{ :href => "#{app_root}/css/solid.css", :rel => "stylesheet"}
 
   %body
-    != haml :_navigation
+    %nav.navbar.navbar-inverse.navbar-fixed-top
+      .container-fluid
+        .navbar-header
+          %button.navbar-toggle.collapsed{ :type => "button", "data-toggle" => "collapse", "data-target" => "#navbar", "aria-expanded" => "false", "aria-controls" => "navbar" }
+            %span.sr-only Toggle navigation
+            %span.icon-bar
+            %span.icon-bar
+            %span.icon-bar
+          %a.navbar-brand{ :href => "#{app_root}" }
+            %i.fas.fa-mountain
+        #navbar.collapse.navbar-collapse
+          %ul.nav.navbar-nav
+            %li{ :class => (@active_menu == 'peak_browser') ? 'active' : '' }
+              %a{ :href => "#{app_root}/peak_browser" }
+                %i.fas.fa-glasses
+                Peak Browser
+            %li{ :class => (@active_menu == 'enrichment_analysis') ? 'active' : '' }
+              %a{ :href => "#{app_root}/enrichment_analysis" }
+                %i.fas.fa-hand-holding-heart
+                Enrichment Analysis
+            %li{ :class => (@active_menu == 'diff_analysis') ? 'active' : '' }
+              %a{ href: "#{app_root}/diff_analysis" }
+                %i.fas.fa-balance-scale-left
+                Diff Analysis
+            %li{ :class => (@active_menu == 'target_genes') ? 'active' : '' }
+              %a{ :href => "#{app_root}/target_genes" }
+                %i.fas.fa-bullseye
+                Target Genes
+            %li{ :class => (@active_menu == 'colo') ? 'active' : '' }
+              %a{ :href => "#{app_root}/colo" }
+                %i.fas.fa-compress-arrows-alt
+                Colo
+            %li{ :class => (@active_menu == 'publications') ? 'active' : '' }
+              %a{ :href => "#{app_root}/publications" }
+                %i.fas.fa-book
+                Publications
+            %li
+              %a{ :href => "https://github.com/inutano/chip-atlas/wiki" }
+                %i.fab.fa-github
+                Docs
+          %p.navbar-text.navbar-right
+            %a{ href: "/search" }
+              %i.fas.fa-search
+              Search
+          %form.navbar-form.navbar-right{ role: "search" }
+            .form-group
+              - id_example = ["GSM469863", "SRX018625"].sample(1)[0]
+              %input.form-control#jumpToExperiment{ type: "text", value: "#{id_example}" }
+            %button.btn.btn-default.go-experiment{ type: "submit", }= "Go"
+          %p.navbar-text.navbar-right
+            ID:
 
     .container
       = yield
 
-    != haml :footer
+    %footer.footer
+      .container
+        %row
+          .col-md-12
+            %span.org-logo
+              %a{ href: "https://ewww.kumamoto-u.ac.jp/en/", target: "_blank" }
+                %img{ src: "/images/logo/kumamoto_uni_logo.jpg", width: 100 }
+
+            %span.org-logo
+              %a{ href: "https://www.ddbj.nig.ac.jp/index-e.html", target: "_blank" }
+                %img{ src: "/images/logo/ddbj_logo.png", width: 100 }
+
+            %span.org-logo
+              %a{ href: "https://biosciencedbc.jp/en/", target: "_blank" }
+                %img{ src: "/images/logo/nbdc_logo.png", width: 100 }
+
+            %span.org-logo
+              %a{ href: "https://www.jst.go.jp/EN/", target: "_blank" }
+                %img{ src: "/images/logo/jst_logo.png", width: 150 }
+
+            %span.org-logo
+              %a{ href: "https://dbcls.rois.ac.jp", target: "_blank" }
+                %img{ src: "/images/logo/dbcls_logo.png", width: 100 }
+
+            %span.org-logo
+              %a{ href: "https://www.m.chiba-u.ac.jp/dept/chiba_ai/", target: "_blank" }
+                %img{ src: "/images/logo/chiba_uni_logo.png", width: 150 }
+
+        %row
+          .col-md-12
+            %p.acknowledgement
+              This work is supported by
+              %a{ href: "https://sc.ddbj.nig.ac.jp/" }
+                NIG Supercomputer system
+              and
+              %a{ href: "https://biosciencedbc.jp" }
+                JST NBDC JPMJND2202.
+            %p
+              All data and analysis tools provided by ChIP-Atlas are licensed under
+              %a{ href: "https://creativecommons.org/licenses/by/4.0/" }
+                CC-BY 4.0
+              \. Attribution should be made to our
+              %a{ href: "https://chip-atlas.org/publications" }
+                publication
+              when using these resources.
+            %p
+              If something went wrong, check
+              %a{ href: "https://sc.ddbj.nig.ac.jp/en/blog/tags/maintenance/", target: "_blank" }
+                NIG Supercomputer system maintenance information.
+              Need help? Create an issue on
+              %a{ href: "https://github.com/inutano/chip-atlas/issues", target: "_blank" }
+                GitHub
+              or
+              %a{ href: "mailto:okishinya@kumamoto-u.ac.jp?cc=zou@kumamoto-u.ac.jp" }
+                contact us
 
     /
       Bootstrap Core Javascript
