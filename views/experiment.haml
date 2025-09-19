@@ -319,7 +319,7 @@
             .panel-heading
               %h3.panel-title
                 %i.fas.fa-chart-bar
-                Data Quality and Distribution Statistics
+                Comparative Context of This Experiment
             .panel-body.mdata
               - records.each.with_index do |record,i|
                 - genome = record[:genome]
@@ -331,16 +331,14 @@
                 - correlation_tsv_url = "#{base_url}/correlation/#{genome}__#{agSubClass}__#{clSubClass}.correlation.tsv"
 
                 .statistics-section{ 'data-genome' => genome, 'data-distribution-url' => distribution_url, 'data-correlation-url' => correlation_png_url, 'data-correlation-tsv' => correlation_tsv_url, :style => "display: none;" }
-                  %h2
-                    .small= "#{genome} Statistics"
-
+                  
                   .row
                     .col-md-6
                       %h4
                         %i.fas.fa-chart-line
                         Reads vs Peaks Distribution
                       %p.text-muted
-                        Distribution of correlation between sequence reads and called peaks across all experiments
+                        Distribution of sequence reads and called peaks across all experiments within the same antigen class. The orange horizontal line indicates the position of this experiment.
                       .text-center.distribution-container
                         %img.img-responsive.center-block.distribution-img{
                           :src => distribution_url,
@@ -354,9 +352,9 @@
                     .col-md-6
                       %h4
                         %i.fas.fa-project-diagram
-                        Experiment Clustering
+                        Experiment Correlations
                       %p.text-muted
-                        Clustering result based on peak call similarity with related experiments
+                        Correlations of experiments sharing the same genome, antigen, and cell type. Heatmap values range from 0 (blue) to 1 (red), passing through green and yellow. The arrowheads indicate this experiment, and their colors represent the median correlation of this experiment versus all other experiments.
                       .text-center.correlation-container
                         %img.img-responsive.center-block.correlation-img{
                           :src => correlation_png_url,
@@ -376,19 +374,6 @@
                         }
                           %i.fas.fa-download
                           Download Correlation Data
-
-                  .row.info-section{ :style => "display: none;" }
-                    .col-md-12
-                      %hr{ :style => "margin: 20px 0;" }
-                      %h4
-                        %i.fas.fa-info-circle
-                        About These Statistics
-                      %p.text-muted
-                        %strong Distribution Plot:
-                        Shows where this experiment falls within the overall distribution of read count vs peak count correlation across all experiments in the database.
-                      %p.text-muted
-                        %strong Clustering Analysis:
-                        Groups experiments with similar peak calling patterns. This helps identify experiments with comparable biological or technical characteristics.
 
                   %hr.genome-separator{ :style => "display: none;" }
 
