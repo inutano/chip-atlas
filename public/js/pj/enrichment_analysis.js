@@ -190,7 +190,7 @@ window.onload = async () => {
         alert(helpText["userdatagenes"] + helpText["note1"]);
         break;
       case genome + "UserDataCount":
-        alert(helpText["userdatacount"]);
+        alert(helpText["userdatacount"] + helpText["note1"]);
         break;
       case genome + "ComparedWithRandom":
         alert(helpText["comparedwithrandom"]);
@@ -1011,7 +1011,7 @@ var helpText = {
   userdatagenes:
     "Check this to search for common epigenetic features around given genes.\n\n",
   userdatacount:
-    "Check this to upload a two-group gene count table (CSV or TSV) to search for common epigenetic features around highly expressed genes in each group.\nSee the tutorial for details on the required table format.\n\n",
+    "Check this to upload a two-group gene count table (raw integer counts in CSV or TSV) with a header to search for common epigenetic features around highly expressed genes in each group.\n\nThe first column of the header is ignored. The other columns in the header specify the sample names for the corresponding columns (e.g., \"wt_1\" indicates replicate 1 of the \"wt\" group; the replicate number should be appended to the sample name, following an underscore). \n\nThe first column of the count table should contain gene names or IDs.\n\n",
   comparedwithrandom:
     "Check this to compare ‘dataset A’ with a random background. In this case, each genomic location of ‘dataset A’ is permuted on a random chromosome at a random position for the specified times. Increasing the permutation times will provide a highly randomized background, or a high quality statistical test, but the calculation time will be longer.",
   comparedwithbed:
@@ -1028,7 +1028,7 @@ var helpText = {
   projectdesc:
     "Enter a title for this submission.\nAcceptable letters are alphanumeric (a-Z, 0-9), space ( ), underscore (_), period (.) and hyphen (-).",
   disttss:
-    "To search for common epigenetic features around given genes, specify the distance range from the Transcription Start Sites (TSS).\nDefault is between -5000 and +5000 bp from the TSS.",
+    "To search for common epigenetic features around given genes, specify the distance range from the Transcription Start Sites (TSS).\n\nDefault is between -5000 and +5000 bp from the TSS. Specifying TSS ± 1000 bp, ± 5000 bp, or ± 10000 bp can accelerate the calculation by using a predefined gene-feature network.\n\n",
   threshold:
     "Set the threshold for statistical significance values calculated by peak-caller MACS2 (-10*Log10[MACS2 Q-value]). If set to 50, peaks with Q values < 1E-05 are used to evaluate overlap with data sets A and B. Ignore if experiment type is set to Bisulfite-seq.",
 };
