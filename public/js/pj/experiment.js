@@ -357,7 +357,7 @@ function setupSeparators() {
 
 function enhancePanelVisuals() {
   // Add click-to-copy functionality for experiment ID
-  $("h2")
+  $("h2.expid")
     .css("cursor", "pointer")
     .on("click", function () {
       var expid = $(this).text().trim().split("\n")[0];
