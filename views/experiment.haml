@@ -32,7 +32,7 @@
             .btn-toolbar.pull-right{ role: "toolbar" }
               // View on IGV button
               .btn-group{ role: "group" }
-                .button.btn.btn-default.dropdown-toggle{ type: "button", id: "view-igv-dropdown", "data-toggle" => "dropdown", "aria-haspopup" => true, "aria-expanded" => true, "experiment" => metadata[:agClass] }
+                .button.btn.btn-primary.dropdown-toggle{ type: "button", id: "view-igv-dropdown", "data-toggle" => "dropdown", "aria-haspopup" => true, "aria-expanded" => true, "experiment" => metadata[:agClass] }
                   %i.fas.fa-eye
                   Visualize
                   %span.caret
@@ -82,7 +82,7 @@
 
               // View Analysis button
               .btn-group{ role: "group" }
-                .button.btn.btn-default.dropdown-toggle{ type: "button", id: "analyze-dropdown", "data-toggle" => "dropdown", "aria-haspopup" => true, "aria-expanded" => true, "experiment" => metadata[:agClass] }
+                .button.btn.btn-primary.dropdown-toggle{ type: "button", id: "analyze-dropdown", "data-toggle" => "dropdown", "aria-haspopup" => true, "aria-expanded" => true, "experiment" => metadata[:agClass] }
                   %i.fas.fa-chart-line
                   Analyze
                   %span.caret
@@ -101,7 +101,7 @@
 
               // Download button
               .btn-group{ role: "group" }
-                .button.btn.btn-default.dropdown-toggle{ :type => "button", :id => "download-dropdown", "data-toggle" => "dropdown", "aria-haspopup" => true, "aria-expanded" => true }
+                .button.btn.btn-primary.dropdown-toggle{ :type => "button", :id => "download-dropdown", "data-toggle" => "dropdown", "aria-haspopup" => true, "aria-expanded" => true }
                   %i.fas.fa-download
                   Download
                   %span.caret
@@ -136,7 +136,7 @@
 
               // SRA linkout button
               .btn-group{ role: "group" }
-                .button.btn.btn-default.dropdown-toggle{ :type => "button", :id => "linkout-dropdown", "data-toggle" => "dropdown", "aria-haspopup" => true, "aria-expanded" => true }
+                .button.btn.btn-primary.dropdown-toggle{ :type => "button", :id => "linkout-dropdown", "data-toggle" => "dropdown", "aria-haspopup" => true, "aria-expanded" => true }
                   %i.fas.fa-external-link-alt
                   Link Out
                   %span.caret
@@ -175,7 +175,7 @@
                       %a{ :href => "https://togovar.biosciencedbc.jp/?term=#{URI.encode_www_form_component(metadata[:agSubClass])}", target: "_blank" }= "TogoVar"
 
 
-            %h2
+            %h2.expid
               %i.fas.fa-file-alt
               = @expid
               %br
