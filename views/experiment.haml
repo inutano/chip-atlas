@@ -325,13 +325,13 @@
                 - genome = record[:genome]
                 - agSubClass = record[:agSubClass].gsub(/[^a-zA-Z0-9_-]/, '_')
                 - clSubClass = record[:clSubClass].gsub(/[^a-zA-Z0-9_-]/, '_')
-                - base_url = "https://chip-atlas.dbcls.jp/data/#{genome}/quality"
-                - distribution_url = "#{base_url}/distribution/#{@expid}.distribution.png"
+                - base_url = "https://chip-atlas.dbcls.jp/data/#{genome}"
+                - distribution_url = "#{base_url}/distribution/png/#{@expid}.dist.png"
                 - correlation_png_url = "#{base_url}/correlation/png/#{@expid}.cor.png"
-                - correlation_tsv_url = "#{base_url}/correlation/#{genome}__#{agSubClass}__#{clSubClass}.correlation.tsv"
+                - correlation_tsv_url = "#{base_url}/correlation/tsv/#{genome}__x__#{agSubClass}__x__#{clSubClass}.correlation.tsv"
 
                 .statistics-section{ 'data-genome' => genome, 'data-distribution-url' => distribution_url, 'data-correlation-url' => correlation_png_url, 'data-correlation-tsv' => correlation_tsv_url, :style => "display: none;" }
-                  
+
                   .row
                     .col-md-6
                       %h4
