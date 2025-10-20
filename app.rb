@@ -38,12 +38,14 @@ class PeakJohn < Sinatra::Base
     end
   end
 
-  def download_json_with_fallback(remote_url, local_filename)
+  private
+
+  def self.download_json_with_fallback(remote_url, local_filename)
     local_path = File.join("public", local_filename)
 
     begin
       # Try to download from remote server
-      Timeout.timeout(10) do
+      Timeout.timeout(30) do
         content = URI.open(remote_url).read
         File.write(local_path, content)
         JSON.load(content)
