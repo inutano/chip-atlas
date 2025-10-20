@@ -38,6 +38,30 @@ class PeakJohn < Sinatra::Base
     end
   end
 
+  def download_json_with_fallback(remote_url, local_filename)
+    local_path = File.join("public", local_filename)
+
+    begin
+      # Try to download from remote server
+      Timeout.timeout(10) do
+        content = URI.open(remote_url).read
+        File.write(local_path, content)
+        JSON.load(content)
+      end
+    rescue => e
+      puts "Failed to download #{remote_url}: #{e.message}"
+
+      # Fallback to local file if it exists
+      if File.exist?(local_path)
+        puts "Using cached file: #{local_path}"
+        JSON.load(File.read(local_path))
+      else
+        puts "No cached file found: #{local_path}"
+        raise "Unable to load #{remote_url} and no cached file available"
+      end
+    end
+  end
+
   configure do
     begin
       set :number_of_experiments, ((PJ::Experiment.number_of_experiments / 1000) * 1000).to_s.reverse.gsub(/(\d{3})(?=\d)/, '\\1,').reverse
@@ -48,8 +72,8 @@ class PeakJohn < Sinatra::Base
       set :colo_analysis, PJ::Analysis.results(:colo)
       set :target_genes_analysis, PJ::Analysis.results(:target_genes)
       set :bedsizes, PJ::Bedsize.dump
-      set :experiment_list, JSON.load(URI.open("https://chip-atlas.dbcls.jp/data/metadata/ExperimentList.json"))
-      set :experiment_list_adv, JSON.load(URI.open("https://chip-atlas.dbcls.jp/data/metadata/ExperimentList_adv.json"))
+      set :experiment_list, download_json_with_fallback("https://chip-atlas.dbcls.jp/data/metadata/ExperimentList.json", "ExperimentList.json")
+      set :experiment_list_adv, download_json_with_fallback("https://chip-atlas.dbcls.jp/data/metadata/ExperimentList_adv.json", "ExperimentList_adv.json")
       set :gsm_to_srx, Hash[settings.experiment_list["data"].map{|a| [a[2], a[0]] }]
       set :wabi_endpoint, "https://dtn1.ddbj.nig.ac.jp/wabi/chipatlas/"
     rescue ActiveRecord::StatementInvalid
