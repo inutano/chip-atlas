@@ -12,16 +12,19 @@ module PJ
 
       def load(table_path)
         list = `cat #{table_path} | awk -F '\t' '$8 == "live" { print $1 "\t" $3 }'`.split("\n")
+        records = []
+        timestamp = Time.current
+
         list.each do |line|
           cols = line.split("\t")
-          run_id = cols[0]
-          exp_id = cols[1]
-
-          run = self.new
-          run.runid = run_id
-          run.expid = exp_id
-          run.save
+          records << {
+            runid: cols[0],
+            expid: cols[1],
+            timestamp: timestamp
+          }
         end
+
+        self.insert_all(records) if records.any?
       end
 
       def exp2run(exp_id)

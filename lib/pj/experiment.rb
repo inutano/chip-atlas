@@ -4,32 +4,27 @@ module PJ
   class Experiment < ActiveRecord::Base
     class << self
       def load(table_path)
-        open(table_path, "r:UTF-8").readlines.each do |line_n|
-          line = line_n.chomp.split("\t")
-          expid            = line[0]
-          genome           = line[1]
-          ag_class         = line[2]
-          ag_subclass      = line[3]
-          cl_class         = line[4]
-          cl_subclass      = line[5]
-          cl_subclass_info = line[6]
-          read_info        = line[7]
-          title            = line[8]
-          additional_attributes = line[9..line.size].join("\t")
+        records = []
+        timestamp = Time.current
 
-          exp = PJ::Experiment.new
-          exp.expid      = expid
-          exp.genome     = genome
-          exp.agClass    = ag_class
-          exp.agSubClass = ag_subclass
-          exp.clClass    = cl_class
-          exp.clSubClass = cl_subclass
-          exp.clSubClassInfo = cl_subclass_info
-          exp.readInfo   = read_info
-          exp.title      = title
-          exp.additional_attributes = additional_attributes
-          exp.save
+        File.foreach(table_path, "r:UTF-8") do |line_n|
+          line = line_n.chomp.split("\t")
+          records << {
+            expid: line[0],
+            genome: line[1],
+            agClass: line[2],
+            agSubClass: line[3],
+            clClass: line[4],
+            clSubClass: line[5],
+            clSubClassInfo: line[6],
+            readInfo: line[7],
+            title: line[8],
+            additional_attributes: line[9..line.size].join("\t"),
+            timestamp: timestamp
+          }
         end
+
+        self.insert_all(records) if records.any?
       end
 
       def id_valid?(exp_id)
