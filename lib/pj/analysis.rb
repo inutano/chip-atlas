@@ -7,7 +7,7 @@ module PJ
         records = []
         timestamp = Time.current
 
-        File.foreach(table_path, "r:UTF-8") do |line_n|
+        File.foreach(table_path, encoding: "UTF-8") do |line_n|
           line = line_n.chomp.split("\t")
           records << {
             antigen: line[0],
@@ -18,7 +18,7 @@ module PJ
           }
         end
 
-        self.insert_all(records) if records.any?
+        self.insert_all(records, returning: false) if records.any?
       end
 
       def results(type)

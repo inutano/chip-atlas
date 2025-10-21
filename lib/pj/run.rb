@@ -24,7 +24,7 @@ module PJ
           }
         end
 
-        self.insert_all(records) if records.any?
+        self.insert_all(records, returning: false) if records.any?
       end
 
       def exp2run(exp_id)
