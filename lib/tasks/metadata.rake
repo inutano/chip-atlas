@@ -98,8 +98,108 @@ namespace :metadata do
 
   task :load_run => run_members_table_fpath do |t|
     puts "[5/5] Loading runs data..."
+
+    # Verify that experiment data exists first
+    experiment_count = PJ::Experiment.count
+    if experiment_count == 0
+      puts "   ERROR: No experiments found in database!"
+      puts "   Please run 'rake metadata:load_experiment' first"
+      exit 1
+    end
+    puts "   Found #{experiment_count} experiments for filtering"
+
+    # Show file size information
+    file_size_mb = File.size(run_members_table_fpath) / (1024.0 * 1024.0)
+    puts "   Processing file: #{File.basename(run_members_table_fpath)} (#{sprintf('%.1f', file_size_mb)} MB)"
+
+    start_time = Time.now
+    initial_count = PJ::Run.count
+
+    PJ::Run.load(run_members_table_fpath)
+
+    end_time = Time.now
+    final_count = PJ::Run.count
+    new_records = final_count - initial_count
+
+    puts "   Runs loaded: #{new_records} new records added"
+    puts "   Total runs in database: #{final_count}"
+    puts "   Loading time: #{sprintf('%.2f', end_time - start_time)}s"
+  end
+
+  #
+  # Benchmark task for performance comparison
+  #
+
+  task :benchmark_run => run_members_table_fpath do |t|
+    puts "=== Run Loading Performance Benchmark ==="
+
+    # Ensure experiment data exists for filtering
+    if PJ::Experiment.count == 0
+      puts "Loading experiment data for benchmark..."
+      Rake::Task["metadata:load_experiment"].invoke
+    end
+
+    # Clear existing run data for clean comparison
+    puts "Clearing existing run data..."
+    PJ::Run.delete_all
+
+    file_size_mb = File.size(run_members_table_fpath) / (1024.0 * 1024.0)
+    puts "File to process: #{File.basename(run_members_table_fpath)} (#{sprintf('%.1f', file_size_mb)} MB)"
+
+    # Benchmark the optimized version
+    puts "\n--- Testing Optimized Version (Filtered) ---"
     start_time = Time.now
     PJ::Run.load(run_members_table_fpath)
-    puts "   Runs loaded (#{sprintf('%.2f', Time.now - start_time)}s)"
+    optimized_time = Time.now - start_time
+    optimized_count = PJ::Run.count
+
+    puts "Optimized results:"
+    puts "  - Records loaded: #{optimized_count}"
+    puts "  - Time taken: #{sprintf('%.2f', optimized_time)}s"
+    puts "  - Records/second: #{sprintf('%.0f', optimized_count / optimized_time)}" if optimized_time > 0
+
+    # Show data reduction stats
+    total_live_runs = `awk -F '\t' '$8 == "live"' #{run_members_table_fpath} | wc -l`.to_i
+    reduction_pct = (1 - optimized_count.to_f / total_live_runs) * 100
+
+    puts "\nData Reduction Summary:"
+    puts "  - Total live runs in file: #{total_live_runs}"
+    puts "  - Runs loaded (filtered): #{optimized_count}"
+    puts "  - Data reduction: #{sprintf('%.1f', reduction_pct)}%"
+    puts "  - Processing efficiency: #{sprintf('%.1f', file_size_mb / optimized_time)} MB/s" if optimized_time > 0
+
+    puts "\n=== Benchmark Complete ==="
+  end
+
+  #
+  # Validation task to check data integrity
+  #
+
+  task :validate_run_data do
+    puts "=== Run Data Validation ==="
+
+    run_count = PJ::Run.count
+    exp_count = PJ::Experiment.count
+
+    puts "Total runs: #{run_count}"
+    puts "Total experiments: #{exp_count}"
+
+    # Check for orphaned runs (runs without corresponding experiments)
+    orphaned_runs = PJ::Run.joins("LEFT JOIN experiments ON runs.expid = experiments.expid")
+                           .where("experiments.expid IS NULL").count
+
+    if orphaned_runs > 0
+      puts "WARNING: Found #{orphaned_runs} runs without corresponding experiments"
+    else
+      puts "✓ All runs have corresponding experiments"
+    end
+
+    # Check experiment coverage
+    experiments_with_runs = PJ::Run.distinct.count(:expid)
+    coverage_pct = (experiments_with_runs.to_f / exp_count) * 100
+
+    puts "Experiments with runs: #{experiments_with_runs}/#{exp_count} (#{sprintf('%.1f', coverage_pct)}%)"
+
+    puts "=== Validation Complete ==="
   end
 end
