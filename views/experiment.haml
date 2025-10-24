@@ -327,10 +327,7 @@
                 - clSubClass = record[:clSubClass].gsub(/[^a-zA-Z0-9_-]/, '_')
                 - base_url = "https://chip-atlas.dbcls.jp/data/#{genome}"
                 - distribution_url = "#{base_url}/distribution/png/#{@expid}.dist.png"
-                - if record[:agClass] == 'Bisulfite-Seq'
-                  - correlation_png_url = "#{base_url}/correlation/png/#{@expid}.methyl.cor.png"
-                - else
-                  - correlation_png_url = "#{base_url}/correlation/png/#{@expid}.cor.png"
+                - correlation_png_url = "#{base_url}/correlation/png/#{@expid}.cor.png"
                 - correlation_tsv_url = "#{base_url}/correlation/tsv/#{genome}__x__#{agSubClass}__x__#{clSubClass}.tsv"
 
                 .statistics-section{ 'data-genome' => genome, 'data-distribution-url' => distribution_url, 'data-correlation-url' => correlation_png_url, 'data-correlation-tsv' => correlation_tsv_url, :style => "display: none;" }
