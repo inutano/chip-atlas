@@ -4,21 +4,21 @@ module PJ
   class Analysis < ActiveRecord::Base
     class << self
       def load(table_path)
-        open(table_path, "r:UTF-8").readlines.each do |line_n|
+        records = []
+        timestamp = Time.current
+
+        File.foreach(table_path, encoding: "UTF-8") do |line_n|
           line = line_n.chomp.split("\t")
-
-          antigen      = line[0]
-          cell_list    = line[1]
-          target_genes = line[2] == "+"
-          genome       = line[3]
-
-          analysis = PJ::Analysis.new
-          analysis.antigen      = antigen
-          analysis.cell_list    = cell_list
-          analysis.target_genes = target_genes
-          analysis.genome       = genome
-          analysis.save
+          records << {
+            antigen: line[0],
+            cell_list: line[1],
+            target_genes: line[2] == "+",
+            genome: line[3],
+            timestamp: timestamp
+          }
         end
+
+        self.insert_all(records, returning: false) if records.any?
       end
 
       def results(type)

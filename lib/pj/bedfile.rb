@@ -4,29 +4,25 @@ module PJ
   class Bedfile < ActiveRecord::Base
     class << self
       def load(table_path)
-        open(table_path, "r:UTF-8").readlines.each do |line_n|
+        records = []
+        timestamp = Time.current
+
+        File.foreach(table_path, encoding: "UTF-8") do |line_n|
           line = line_n.chomp.split("\t")
-
-          filename    = line[0]
-          genome      = line[1]
-          ag_class    = line[2]
-          ag_subclass = line[3]
-          cl_class    = line[4]
-          cl_subclass = line[5]
-          qvalue      = line[6]
-          experiments = line[7]
-
-          bed = PJ::Bedfile.new
-          bed.filename    = filename
-          bed.genome      = genome
-          bed.agClass     = ag_class
-          bed.agSubClass  = ag_subclass
-          bed.clClass     = cl_class
-          bed.clSubClass  = cl_subclass
-          bed.qval        = qvalue
-          bed.experiments = experiments
-          bed.save
+          records << {
+            filename: line[0],
+            genome: line[1],
+            agClass: line[2],
+            agSubClass: line[3],
+            clClass: line[4],
+            clSubClass: line[5],
+            qval: line[6],
+            experiments: line[7],
+            timestamp: timestamp
+          }
         end
+
+        self.insert_all(records, returning: false) if records.any?
       end
 
       #

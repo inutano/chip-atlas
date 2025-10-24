@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2015_11_28_015049) do
+ActiveRecord::Schema[8.0].define(version: 2015_11_28_015049) do
   create_table "analyses", force: :cascade do |t|
     t.string "antigen"
     t.string "cell_list"
@@ -81,5 +81,4 @@ ActiveRecord::Schema[7.1].define(version: 2015_11_28_015049) do
     t.index ["expid"], name: "index_runs_on_expid"
     t.index ["runid"], name: "index_runs_on_runid"
   end
-
 end
