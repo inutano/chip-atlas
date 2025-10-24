@@ -337,8 +337,8 @@
                       %h4
                         %i.fas.fa-chart-line
                         Read and Peak Distribution
-                      %p.text-muted
-                        Distribution of sequence reads and called peaks across all experiments within the same experiment type (antigen class for ChIP-Seq). The orange horizontal line indicates the position of this experiment. For Bisulfite-Seq experiments, "peaks" should be interpreted as "hyper-methylated regions."
+                        %button.btn.btn-xs.btn-link.infoBtn{ :id => "distributionInfo", :style => "padding: 2px 6px; margin-left: 5px;" }
+                          %i.fas.fa-info-circle{ :style => "color: #337ab7;" }
                       .text-center.distribution-container
                         %img.img-responsive.center-block.distribution-img{
                           :src => distribution_url,
@@ -353,8 +353,8 @@
                       %h4
                         %i.fas.fa-project-diagram
                         Correlation-Based Clustering
-                      %p.text-muted
-                        Hierarchical clustering based on correlations among experiments sharing the same context (i.e., the combination of genome, antigen, and cell type). The arrowheads indicate this experiment, and their colors represent the median correlation of this experiment against all other experiments.
+                        %button.btn.btn-xs.btn-link.infoBtn{ :id => "clusteringInfo", :style => "padding: 2px 6px; margin-left: 5px;" }
+                          %i.fas.fa-info-circle{ :style => "color: #337ab7;" }
                       .text-center.correlation-container
                         %img.img-responsive.center-block.correlation-img{
                           :src => correlation_png_url,

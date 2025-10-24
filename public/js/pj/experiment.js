@@ -19,6 +19,10 @@ const HELP_TEXT = {
     "Set the threshold for statistical significance values calculated by peak-caller MACS2 (-10*Log10[MACS2 Q-value]). If 50 is set here, peaks with Q value < 1E-05 are shown on genome browser IGV.",
   viewOnIGV:
     'IGV must be running on your computer before clicking the button.\n\nIf your browser shows "cannot open the page" error, launch IGV and allow an access via port 60151 (from the menu bar of IGV, View > Preferences... > Advanced > "enable port" and set port number 60151) to browse the data. If you have not installed IGV on your computer, visit https://www.broadinstitute.org/igv/download or google "Integrative Genomics Viewer" to download the software.',
+  distributionInfo:
+    'Distribution of sequence reads and called peaks across all experiments within the same experiment type (antigen class for ChIP-Seq). The orange horizontal line indicates the position of this experiment. For Bisulfite-Seq experiments, "peaks" should be interpreted as "hyper-methylated regions."',
+  clusteringInfo:
+    "Hierarchical clustering based on correlations among experiments sharing the same context (i.e., the combination of genome, antigen, and cell type). The arrowheads indicate this experiment, and their colors represent the median correlation of this experiment against all other experiments.",
 };
 
 // Utility functions
