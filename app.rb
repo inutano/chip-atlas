@@ -43,8 +43,13 @@ class PeakJohn < Sinatra::Base
   def self.download_json_with_fallback(remote_url, local_filename)
     local_path = File.join("public", local_filename)
 
+    if File.exist?(local_path)
+      puts "Using cached file: #{local_path}"
+      return JSON.load(File.read(local_path))
+    end
+
     begin
-      # Try to download from remote server
+      puts "No cached file found, downloading from remote: #{remote_url}"
       Timeout.timeout(30) do
         content = URI.open(remote_url).read
         File.write(local_path, content)
@@ -52,15 +57,7 @@ class PeakJohn < Sinatra::Base
       end
     rescue => e
       puts "Failed to download #{remote_url}: #{e.message}"
-
-      # Fallback to local file if it exists
-      if File.exist?(local_path)
-        puts "Using cached file: #{local_path}"
-        JSON.load(File.read(local_path))
-      else
-        puts "No cached file found: #{local_path}"
-        raise "Unable to load #{remote_url} and no cached file available"
-      end
+      raise "Unable to load #{remote_url} and no cached file available"
     end
   end
 
