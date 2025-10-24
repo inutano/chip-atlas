@@ -1,16 +1,10 @@
-// onload
+// Main initialization
 $(function () {
-  dbLinkOut();
-  analysisLinkOut();
-  showHelp();
-  loadImages();
-  hideAnalysis();
-  handleStatisticsImages();
-  enhancePanelVisuals();
+  initializeExperimentPage();
 });
 
-// variables
-var dbNamespace = {
+// Configuration
+const DB_NAMESPACES = {
   wikigenes: "https://www.wikigenes.org/?search=",
   posmed:
     "http://omicspace.riken.jp/PosMed/search?actionType=searchexec&keyword=",
@@ -20,333 +14,323 @@ var dbNamespace = {
   rikenbrc: "http://www2.brc.riken.jp/lab/cell/list.cgi?skey=",
 };
 
-var getUrlParameter = function getUrlParameter(sParam) {
-  var sPageURL = decodeURIComponent(window.location.search.substring(1)),
-    sURLVariables = sPageURL.split("&"),
-    sParameterName,
-    i;
-
-  for (i = 0; i < sURLVariables.length; i++) {
-    sParameterName = sURLVariables[i].split("=");
-    if (sParameterName[0] === sParam) {
-      return sParameterName[1] === undefined ? true : sParameterName[1];
-    }
-  }
+const HELP_TEXT = {
+  threshold:
+    "Set the threshold for statistical significance values calculated by peak-caller MACS2 (-10*Log10[MACS2 Q-value]). If 50 is set here, peaks with Q value < 1E-05 are shown on genome browser IGV.",
+  viewOnIGV:
+    'IGV must be running on your computer before clicking the button.\n\nIf your browser shows "cannot open the page" error, launch IGV and allow an access via port 60151 (from the menu bar of IGV, View > Preferences... > Advanced > "enable port" and set port number 60151) to browse the data. If you have not installed IGV on your computer, visit https://www.broadinstitute.org/igv/download or google "Integrative Genomics Viewer" to download the software.',
 };
 
-// functions
-function dbLinkOut() {
+// Utility functions
+function getUrlParameter(param) {
+  const urlParams = new URLSearchParams(window.location.search);
+  return urlParams.get(param);
+}
+
+function initializeExperimentPage() {
+  setupDatabaseLinks();
+  setupAnalysisLinks();
+  setupHelpButtons();
+  hideAnalysisForBisulfiteSeq();
+  initializeStatistics();
+  setupActionButtons();
+}
+
+// Database link functionality
+function setupDatabaseLinks() {
   $("button").on("click", function (event) {
     event.preventDefault();
-    var namespace = dbNamespace[$(this).attr("id")];
-    switch (true) {
-      case $(this).hasClass("antigen"):
-        var id = $("input#queryAntigen").val().replace(/\s/, "+");
-        var uri = namespace + id;
-        break;
-      case $(this).hasClass("celltype"):
-        var id = $("input#queryCelltype").val().replace(/\s/, "+");
-        var uri = namespace + id;
-        break;
+    const namespace = DB_NAMESPACES[$(this).attr("id")];
+    if (!namespace) return;
+
+    let query;
+    if ($(this).hasClass("antigen")) {
+      query = $("input#queryAntigen").val();
+    } else if ($(this).hasClass("celltype")) {
+      query = $("input#queryCelltype").val();
     }
-    window.open(uri);
+
+    if (query) {
+      const encodedQuery = query.replace(/\s/g, "+");
+      window.open(namespace + encodedQuery);
+    }
   });
 }
 
-function analysisLinkOut() {
-  var expid = getUrlParameter("id");
+// Analysis links functionality
+function setupAnalysisLinks() {
+  const expid = getUrlParameter("id");
+  if (!expid) return;
+
   $.ajax({
     type: "GET",
     url: "/data/exp_metadata.json?expid=" + expid,
     dataType: "json",
   }).done(function (records) {
-    $.each(records, function (i, record) {
-      var genome = record["genome"];
-      var dbarc = "https://chip-atlas.dbcls.jp/data/" + genome;
-      var urlList = [
-        ["Colocalization", dbarc + "/colo/" + expid + ".html"],
-        ["Target Genes (TSS ± 1kb)", dbarc + "/target/" + expid + ".1.html"],
-        ["Target Genes (TSS ± 5kb)", dbarc + "/target/" + expid + ".5.html"],
-        ["Target Genes (TSS ± 10kb)", dbarc + "/target/" + expid + ".10.html"],
+    records.forEach((record) => {
+      const genome = record.genome;
+      const baseUrl = `https://chip-atlas.dbcls.jp/data/${genome}`;
+      const analysisLinks = [
+        ["Colocalization", `${baseUrl}/colo/${expid}.html`],
+        ["Target Genes (TSS ± 1kb)", `${baseUrl}/target/${expid}.1.html`],
+        ["Target Genes (TSS ± 5kb)", `${baseUrl}/target/${expid}.5.html`],
+        ["Target Genes (TSS ± 10kb)", `${baseUrl}/target/${expid}.10.html`],
       ];
 
-      $.each(urlList, function (i, kv) {
-        var text = kv[0];
-        var url = kv[1];
-        $.ajax({
-          type: "GET",
-          url: "/api/remoteUrlStatus?url=" + url,
-          complete: function (transport) {
-            if (transport.status == 200) {
-              $("ul#analysisLinkOut." + genome).append(
-                "<li><a href='" + url + "'>" + text + "</a></li>",
-              );
-            }
-            if (i == urlList.length - 1) {
-              if ($("ul#analysisLinkOut." + genome).children().length == 0) {
-                $("ul#analysisLinkOut." + genome).append(
-                  "<li class='dropdown-header'>No data available for this record</li>",
-                );
-              }
-            }
-          },
-        });
-      });
+      checkAndDisplayAnalysisLinks(analysisLinks, genome);
     });
   });
 }
 
-function showHelp() {
+function checkAndDisplayAnalysisLinks(links, genome) {
+  const $container = $(`ul#analysisLinkOut.${genome}`);
+  let validLinksCount = 0;
+
+  links.forEach((link, index) => {
+    const [text, url] = link;
+
+    $.ajax({
+      type: "GET",
+      url: "/api/remoteUrlStatus?url=" + url,
+      complete: function (transport) {
+        if (transport.status === 200) {
+          $container.append(`<li><a href="${url}">${text}</a></li>`);
+          validLinksCount++;
+        }
+
+        if (index === links.length - 1 && validLinksCount === 0) {
+          $container.append(
+            "<li class='dropdown-header'>No data available for this record</li>",
+          );
+        }
+      },
+    });
+  });
+}
+
+// Help functionality
+function setupHelpButtons() {
   $(".infoBtn").click(function () {
-    switch ($(this).attr("id")) {
-      case "viewOnIGV":
-        alert(helpText["viewOnIGV"]);
-        break;
+    const helpId = $(this).attr("id");
+    if (HELP_TEXT[helpId]) {
+      alert(HELP_TEXT[helpId]);
     }
   });
 }
 
-function hideAnalysis() {
-  var analysisButton = $("div#analyze-dropdown");
-  var expType = analysisButton.attr("experiment");
-  if (expType == "Bisulfite-Seq") {
-    analysisButton.hide();
+// Hide analysis for specific experiment types
+function hideAnalysisForBisulfiteSeq() {
+  const $analysisButton = $("div#analyze-dropdown");
+  if ($analysisButton.attr("experiment") === "Bisulfite-Seq") {
+    $analysisButton.hide();
   }
 }
 
-function loadImages() {
-  // Placeholder for image loading functionality
-  // This function was being called but not defined
-}
+// Statistics panel initialization
+function initializeStatistics() {
+  const $statisticsPanel = $("#statistics-panel");
+  const $sections = $(".statistics-section");
 
-function handleStatisticsImages() {
-  var $statisticsPanel = $("#statistics-panel");
-  var hasAvailableData = false;
-  var sectionsToCheck = $(".statistics-section").length;
-  var sectionsChecked = 0;
+  if ($sections.length === 0) return;
 
-  // Check each statistics section
-  $(".statistics-section").each(function () {
-    var $section = $(this);
-    var distributionUrl = $section.data("distribution-url");
-    var correlationUrl = $section.data("correlation-url");
-    var $distributionImg = $section.find(".distribution-img");
-    var $correlationImg = $section.find(".correlation-img");
-    var $distributionContainer = $section.find(".distribution-container");
-    var $correlationContainer = $section.find(".correlation-container");
-    var $downloadContainer = $section.find(".download-container");
-    var $infoSection = $section.find(".info-section");
+  let hasAvailableData = false;
+  let sectionsProcessed = 0;
 
-    var sectionHasData = false;
-
-    // Check distribution image
-    var distributionPromise = new Promise(function (resolve) {
-      var testImg = new Image();
-      testImg.onload = function () {
-        $distributionContainer.find(".loading-indicator").hide();
-        $distributionImg.show();
-        sectionHasData = true;
-        resolve(true);
-      };
-      testImg.onerror = function () {
-        $distributionContainer.find(".loading-indicator").hide();
-        resolve(false);
-      };
-      testImg.src = distributionUrl;
-    });
-
-    // Check correlation image
-    var correlationPromise = new Promise(function (resolve) {
-      var testImg = new Image();
-      testImg.onload = function () {
-        $correlationContainer.find(".loading-indicator").hide();
-        $correlationImg.show();
-        $downloadContainer.show();
-        sectionHasData = true;
-        resolve(true);
-      };
-      testImg.onerror = function () {
-        $correlationContainer.find(".loading-indicator").hide();
-        resolve(false);
-      };
-      testImg.src = correlationUrl;
-    });
-
-    // Wait for both images to be checked
-    Promise.all([distributionPromise, correlationPromise]).then(function () {
-      sectionsChecked++;
+  $sections.each(function () {
+    const $section = $(this);
+    checkStatisticsSection($section).then((sectionHasData) => {
+      sectionsProcessed++;
 
       if (sectionHasData) {
         hasAvailableData = true;
-        $infoSection.show();
-        // Show the entire section including the genome header
         $section.show();
       } else {
-        // Hide the entire section if no data is available
         $section.hide();
       }
 
-      // If all sections have been checked, show/hide panel accordingly
-      if (sectionsChecked === sectionsToCheck) {
-        if (hasAvailableData) {
-          $statisticsPanel.show();
-          setupImageInteractions();
-          setupSeparators();
-        }
-        // If no data available, panel remains hidden
+      if (sectionsProcessed === $sections.length && hasAvailableData) {
+        $statisticsPanel.show();
+        setupStatisticsInteractions();
       }
     });
   });
 }
 
-function setupImageInteractions() {
-  // Add click handlers for image zoom functionality
-  $(".distribution-img, .correlation-img").on("click", function () {
-    var $img = $(this);
-    var imgSrc = $img.attr("src");
-    var imgAlt = $img.attr("alt");
+function checkStatisticsSection($section) {
+  const distributionUrl = $section.data("distribution-url");
+  const correlationUrl = $section.data("correlation-url");
 
-    // Create modal for zoomed view
-    var modalHtml =
-      '<div class="modal fade" id="imageModal" tabindex="-1" role="dialog">' +
-      '<div class="modal-dialog modal-lg" role="document">' +
-      '<div class="modal-content">' +
-      '<div class="modal-header">' +
-      '<button type="button" class="close" data-dismiss="modal" aria-label="Close">' +
-      '<span aria-hidden="true">&times;</span>' +
-      "</button>" +
-      '<h4 class="modal-title">' +
-      imgAlt +
-      "</h4>" +
-      "</div>" +
-      '<div class="modal-body text-center">' +
-      '<img src="' +
-      imgSrc +
-      '" class="img-responsive" alt="' +
-      imgAlt +
-      '" style="max-width: 100%; height: auto;">' +
-      "</div>" +
-      '<div class="modal-footer">' +
-      '<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>' +
-      "</div>" +
-      "</div>" +
-      "</div>" +
-      "</div>";
-
-    // Remove existing modal if any
-    $("#imageModal").remove();
-
-    // Add modal to body and show
-    $("body").append(modalHtml);
-    $("#imageModal").modal("show");
-  });
-
-  // Add cursor pointer style for clickable images
-  $(".distribution-img, .correlation-img").css("cursor", "pointer");
-
-  // Add click handler for download buttons
-  $(".download-tsv").on("click", function (e) {
-    e.preventDefault();
-    var $button = $(this);
-    var url = $button.data("url");
-    var filename = $button.data("filename");
-
-    // Show loading state
-    var originalText = $button.html();
-    $button.html('<i class="fas fa-spinner fa-spin"></i> Downloading...');
-    $button.prop("disabled", true);
-
-    // Check if fetch is supported
-    if (
-      typeof fetch !== "undefined" &&
-      typeof window.URL !== "undefined" &&
-      window.URL.createObjectURL
-    ) {
-      // Use fetch to download the file as blob
-      fetch(url)
-        .then(function (response) {
-          if (!response.ok) {
-            throw new Error("Network response was not ok: " + response.status);
-          }
-          return response.blob();
-        })
-        .then(function (blob) {
-          // Create blob URL and download
-          var blobUrl = window.URL.createObjectURL(blob);
-          var link = document.createElement("a");
-          link.href = blobUrl;
-          link.download = filename;
-          link.style.display = "none";
-          document.body.appendChild(link);
-          link.click();
-          document.body.removeChild(link);
-
-          // Clean up blob URL
-          setTimeout(function () {
-            window.URL.revokeObjectURL(blobUrl);
-          }, 100);
-
-          // Restore button state
-          $button.html(originalText);
-          $button.prop("disabled", false);
-        })
-        .catch(function (error) {
-          console.error("Download failed:", error);
-
-          // Fallback to simple link approach
-          fallbackDownload(url, filename, $button, originalText);
-        });
-    } else {
-      // Fallback for older browsers
-      fallbackDownload(url, filename, $button, originalText);
-    }
-  });
-
-  // Fallback download function for older browsers
-  function fallbackDownload(url, filename, $button, originalText) {
-    try {
-      var link = document.createElement("a");
-      link.href = url;
-      link.download = filename;
-      link.target = "_blank";
-      link.rel = "noopener noreferrer";
-      link.style.display = "none";
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-
-      // Restore button state
-      $button.html(originalText);
-      $button.prop("disabled", false);
-    } catch (error) {
-      console.error("Fallback download failed:", error);
-
-      // Final fallback - open in new window
-      window.open(url, "_blank");
-
-      // Restore button state
-      $button.html(originalText);
-      $button.prop("disabled", false);
-
-      alert(
-        "File opened in new tab. Use your browser's save function to download it.",
-      );
-    }
-  }
-
-  // Add tooltip for download button
-  $(".download-tsv").attr(
-    "title",
-    "Download detailed correlation data in TSV format",
+  const distributionCheck = checkImage(
+    distributionUrl,
+    $section.find(".distribution-container"),
   );
+  const correlationCheck = checkImage(
+    correlationUrl,
+    $section.find(".correlation-container"),
+  );
+
+  return Promise.all([distributionCheck, correlationCheck]).then((results) => {
+    const hasData = results.some(Boolean);
+
+    if (hasData) {
+      $section.find(".info-section").show();
+      if (results[1]) {
+        // correlation image exists
+        $section.find(".download-container").show();
+      }
+    }
+
+    return hasData;
+  });
+}
+
+function checkImage(url, $container) {
+  return new Promise((resolve) => {
+    const img = new Image();
+    const $loadingIndicator = $container.find(".loading-indicator");
+    const $img = $container.find("img");
+
+    img.onload = () => {
+      $loadingIndicator.hide();
+      $img.show();
+      resolve(true);
+    };
+
+    img.onerror = () => {
+      $loadingIndicator.hide();
+      resolve(false);
+    };
+
+    img.src = url;
+  });
+}
+
+// Statistics interactions setup
+function setupStatisticsInteractions() {
+  setupImageClickHandlers();
+  setupDownloadHandlers();
+  setupSeparators();
+}
+
+function setupImageClickHandlers() {
+  $(".distribution-img, .correlation-img")
+    .css("cursor", "pointer")
+    .on("click", function () {
+      const $img = $(this);
+      const imgSrc = $img.attr("src");
+      const imgAlt = $img.attr("alt");
+      showImageModal(imgSrc, imgAlt);
+    });
+}
+
+function showImageModal(src, alt) {
+  const modalHtml = `
+    <div class="modal fade" id="imageModal" tabindex="-1" role="dialog">
+      <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+            <h4 class="modal-title">${alt}</h4>
+          </div>
+          <div class="modal-body text-center">
+            <img src="${src}" class="img-responsive" alt="${alt}" style="max-width: 100%; height: auto;">
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+
+  $("#imageModal").remove();
+  $("body").append(modalHtml);
+  $("#imageModal").modal("show");
+}
+
+function setupDownloadHandlers() {
+  $(".download-tsv")
+    .attr("title", "Download detailed correlation data in TSV format")
+    .on("click", function (e) {
+      e.preventDefault();
+      const $button = $(this);
+      const url = $button.data("url");
+      const filename = $button.data("filename");
+
+      downloadFile(url, filename, $button);
+    });
+}
+
+function downloadFile(url, filename, $button) {
+  const originalText = $button.html();
+  $button
+    .html('<i class="fas fa-spinner fa-spin"></i> Downloading...')
+    .prop("disabled", true);
+
+  const restoreButton = () => {
+    $button.html(originalText).prop("disabled", false);
+  };
+
+  if (
+    typeof fetch !== "undefined" &&
+    window.URL &&
+    window.URL.createObjectURL
+  ) {
+    fetch(url)
+      .then((response) => {
+        if (!response.ok)
+          throw new Error(`Network response was not ok: ${response.status}`);
+        return response.blob();
+      })
+      .then((blob) => {
+        const blobUrl = window.URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = blobUrl;
+        link.download = filename;
+        link.style.display = "none";
+
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        setTimeout(() => window.URL.revokeObjectURL(blobUrl), 100);
+        restoreButton();
+      })
+      .catch(() => fallbackDownload(url, filename, restoreButton));
+  } else {
+    fallbackDownload(url, filename, restoreButton);
+  }
+}
+
+function fallbackDownload(url, filename, callback) {
+  try {
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = filename;
+    link.target = "_blank";
+    link.rel = "noopener noreferrer";
+    link.style.display = "none";
+
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    callback();
+  } catch (error) {
+    console.error("Download failed:", error);
+    window.open(url, "_blank");
+    callback();
+    alert(
+      "File opened in new tab. Use your browser's save function to download it.",
+    );
+  }
 }
 
 function setupSeparators() {
-  // Show separators between visible genome sections
-  var $visibleSections = $(".statistics-section:visible");
-
+  const $visibleSections = $(".statistics-section:visible");
   if ($visibleSections.length > 1) {
-    // Show separators for all visible sections except the last one
     $visibleSections.each(function (index) {
       if (index < $visibleSections.length - 1) {
         $(this).find(".genome-separator").show();
@@ -355,83 +339,10 @@ function setupSeparators() {
   }
 }
 
-function enhancePanelVisuals() {
-  // Add click-to-copy functionality for experiment ID
-  // $("h2.expid")
-  //   .css("cursor", "pointer")
-  //   .on("click", function () {
-  //     var expid = $(this).text().trim().split("\n")[0];
-  //     if (navigator.clipboard && navigator.clipboard.writeText) {
-  //       navigator.clipboard
-  //         .writeText(expid)
-  //         .then(function () {
-  //           showTooltip("Experiment ID copied to clipboard!");
-  //         })
-  //         .catch(function () {
-  //           // Fallback for older browsers
-  //           fallbackCopyToClipboard(expid);
-  //         });
-  //     } else {
-  //       fallbackCopyToClipboard(expid);
-  //     }
-  //   });
-
-  // Add tooltips to action buttons
+function setupActionButtons() {
   $(".btn.dropdown-toggle").each(function () {
-    var $btn = $(this);
-    var text = $btn.text().trim();
-    $btn.attr("title", "Click to see " + text.toLowerCase() + " options");
+    const $btn = $(this);
+    const text = $btn.text().trim();
+    $btn.attr("title", `Click to see ${text.toLowerCase()} options`);
   });
 }
-
-function fallbackCopyToClipboard(text) {
-  var textArea = document.createElement("textarea");
-  textArea.value = text;
-  textArea.style.position = "fixed";
-  textArea.style.left = "-999999px";
-  textArea.style.top = "-999999px";
-  document.body.appendChild(textArea);
-  textArea.focus();
-  textArea.select();
-
-  try {
-    var successful = document.execCommand("copy");
-    if (successful) {
-      showTooltip("Experiment ID copied to clipboard!");
-    } else {
-      showTooltip("Copy failed. Please copy manually: " + text);
-    }
-  } catch (err) {
-    showTooltip("Copy not supported. ID: " + text);
-  }
-
-  document.body.removeChild(textArea);
-}
-
-function showTooltip(message) {
-  // Remove existing tooltip
-  $(".copy-tooltip").remove();
-
-  // Create and show tooltip
-  var tooltip = $(
-    '<div class="copy-tooltip" style="position: fixed; top: 20px; right: 20px; background: #666; color: white; padding: 8px 12px; border-radius: 3px; z-index: 9999; font-size: 12px; font-family: monospace;">' +
-      message +
-      "</div>",
-  );
-
-  $("body").append(tooltip);
-
-  // Remove after 2 seconds
-  setTimeout(function () {
-    tooltip.fadeOut(300, function () {
-      tooltip.remove();
-    });
-  }, 2000);
-}
-
-var helpText = {
-  threshold:
-    "Set the threshold for statistical significance values calculated by peak-caller MACS2 (-10*Log10[MACS2 Q-value]). If 50 is set here, peaks with Q value < 1E-05 are shown on genome browser IGV.",
-  viewOnIGV:
-    'IGV must be running on your computer before clicking the button.\n\nIf your browser shows "cannot open the page" error, launch IGV and allow an access via port 60151 (from the menu bar of IGV, View > Preferences... > Advanced > "enable port" and set port number 60151) to browse the data. If you have not installed IGV on your computer, visit https://www.broadinstitute.org/igv/download or google "Integrative Genomics Viewer" to download the software.',
-};
