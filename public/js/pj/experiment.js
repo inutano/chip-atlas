@@ -357,24 +357,24 @@ function setupSeparators() {
 
 function enhancePanelVisuals() {
   // Add click-to-copy functionality for experiment ID
-  $("h2.expid")
-    .css("cursor", "pointer")
-    .on("click", function () {
-      var expid = $(this).text().trim().split("\n")[0];
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard
-          .writeText(expid)
-          .then(function () {
-            showTooltip("Experiment ID copied to clipboard!");
-          })
-          .catch(function () {
-            // Fallback for older browsers
-            fallbackCopyToClipboard(expid);
-          });
-      } else {
-        fallbackCopyToClipboard(expid);
-      }
-    });
+  // $("h2.expid")
+  //   .css("cursor", "pointer")
+  //   .on("click", function () {
+  //     var expid = $(this).text().trim().split("\n")[0];
+  //     if (navigator.clipboard && navigator.clipboard.writeText) {
+  //       navigator.clipboard
+  //         .writeText(expid)
+  //         .then(function () {
+  //           showTooltip("Experiment ID copied to clipboard!");
+  //         })
+  //         .catch(function () {
+  //           // Fallback for older browsers
+  //           fallbackCopyToClipboard(expid);
+  //         });
+  //     } else {
+  //       fallbackCopyToClipboard(expid);
+  //     }
+  //   });
 
   // Add tooltips to action buttons
   $(".btn.dropdown-toggle").each(function () {
