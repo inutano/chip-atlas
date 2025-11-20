@@ -74,7 +74,7 @@ class PeakJohn < Sinatra::Base
       set :experiment_list, download_json_with_fallback("https://chip-atlas.dbcls.jp/data/metadata/ExperimentList.json", "ExperimentList.json")
       set :experiment_list_adv, download_json_with_fallback("https://chip-atlas.dbcls.jp/data/metadata/ExperimentList_adv.json", "ExperimentList_adv.json")
       set :gsm_to_srx, Hash[settings.experiment_list["data"].map{|a| [a[2], a[0]] }]
-      set :wabi_endpoint, "https://dtn1.ddbj.nig.ac.jp/wabi/chipatlas/"
+      set :wabi_endpoint, "https://dtn1.ddbj.nig.ac.jp:10443/wabi/chipatlas/"
     rescue ActiveRecord::StatementInvalid
       # Ignore Statement Invalid error when the database is not yet prepared
     end
@@ -332,7 +332,7 @@ class PeakJohn < Sinatra::Base
 
   get "/diff_analysis_log" do
     begin
-      URI.open("https://dtn1.ddbj.nig.ac.jp/wabi/chipatlas/#{params[:id]}?info=result&format=log").read
+      URI.open("https://dtn1.ddbj.nig.ac.jp:10443/wabi/chipatlas/#{params[:id]}?info=result&format=log").read
     rescue => e
       status 404
       "Log file not available yet"
@@ -341,7 +341,7 @@ class PeakJohn < Sinatra::Base
 
   get "/enrichment_analysis_log" do
     begin
-      URI.open("https://dtn1.ddbj.nig.ac.jp/wabi/chipatlas/#{params[:id]}?info=result&format=log").read
+      URI.open("https://dtn1.ddbj.nig.ac.jp:10443/wabi/chipatlas/#{params[:id]}?info=result&format=log").read
     rescue => e
       status 404
       "Log file not available yet"
@@ -409,7 +409,7 @@ class PeakJohn < Sinatra::Base
 
   # Checking the final html output rather than using Wabi API which is too slow due to its huge job history
   get "/wabi_chipatlas" do
-    server_url = "https://dtn1.ddbj.nig.ac.jp"
+    server_url = "https://dtn1.ddbj.nig.ac.jp:10443"
     endpoint = "/wabi/chipatlas/#{params[:id]}?info=result&format=html"
 
     if Net::Ping::HTTP.new(server_url).ping

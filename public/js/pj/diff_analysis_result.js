@@ -7,7 +7,7 @@ window.onload = async () => {
 };
 
 const setTableValues = (params) => {
-  // const wabiUrl = "https://dtn1.ddbj.nig.ac.jp/wabi/chipatlas/";
+  // const wabiUrl = "https://dtn1.ddbj.nig.ac.jp:10443/wabi/chipatlas/";
   // const reqUrl = wabiUrl + reqId;
   // const resultUrl = reqUrl + "?info=result";
 
@@ -32,7 +32,7 @@ const getUrlParameters = () => {
       ".igv.bed&genome=" +
       genome,
     zipUrl:
-      "https://dtn1.ddbj.nig.ac.jp/wabi/chipatlas/" +
+      "https://dtn1.ddbj.nig.ac.jp:10443/wabi/chipatlas/" +
       reqId +
       "?info=result&format=zip",
   };

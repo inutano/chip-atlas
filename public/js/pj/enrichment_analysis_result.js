@@ -28,7 +28,7 @@ const getUrlParameters = () => {
   let resultUrl, htmlUrl, tsvUrl;
 
   if (api === "wabi") {
-    const wabiUrl = "https://dtn1.ddbj.nig.ac.jp/wabi/chipatlas/";
+    const wabiUrl = "https://dtn1.ddbj.nig.ac.jp:10443/wabi/chipatlas/";
     const reqUrl = wabiUrl + reqId;
     resultUrl = reqUrl + "?info=result";
   } else {
