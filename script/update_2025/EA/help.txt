@@ -1,0 +1,74 @@
+Usage: EA -g <genome> -a <input_bed_a> -t <input_type> -o <out_prefix> [-b <input_bed_b>] \
+           [-d <dn_bp>] [-u <up_bp>] [-T <title>] [-A <desc_a>] [-B <desc_b>] \
+           [-E <exp_type>] [-C <cell_class>] [-Q <threshold>] [-p <perm_time>] \
+           [-s <seed>] [-w <wabi_id>] [-x <tmp_dir>] [-D] [-h]
+
+Required options:
+  -g <genome>        Genome assembly. One of:
+                     [hg38, hg19, mm10, mm9, rn6, dm6, dm3, ce11, ce10, sacSer3]
+  -a <input_bed_a>   Input BED file or gene list A.
+  -t <input_type>    Input type. One of: [gene, bed]
+  -o <out_prefix>    Prefix for output files.
+
+Optional options:
+  -b <input_bed_b>   Input BED file or gene list B.
+  -u <up_bp>         Distance upstream in bp (default: 5000).
+  -d <dn_bp>         Distance downstream in bp (default: 5000).
+  -T <title>         Project title (default: "My project").
+  -A <desc_a>        Description for dataset A (default: "Dataset A").
+  -B <desc_b>        Description for dataset B (default: "Dataset B").
+  -E <exp_type>      Experiment type (default: "TFs and others"). One of:
+                     [ATAC-Seq, Bisulfite-Seq, DNase-seq, Histone, Input control,
+                      RNA polymerase, TFs and others]
+  -C <cell_class>    Cell type class (default: "All cell types"). One of:
+                     [All cell types, Adult, Embryo, Larvae, Cell line, Pupae,
+                      Adipocyte, Blood, Bone, Breast, Cardiovascular, Digestive tract,
+                      Epidermis, Gonad, Kidney, Liver, Lung, Muscle, Neural, Others,
+                      Pancreas, Placenta, Pluripotent stem cell, Prostate, Uterus,
+                      Embryonic fibroblast, Spleen, Yeast strain]
+  -Q <threshold>     Threshold value (default: 100). One of: [50, 100, 200, 500]
+  -p <perm_time>     Number of permutations (default: 10).
+  -s <seed>          Seed for random permutation.
+  -w <wabi_id>       WABI ID.
+  -x <tmp_dir>       Path for tempolary directory.
+  -D                 Enable debug mode.
+  -h                 Show this help message and exit.
+
+Examples:
+  # Set EA directory and example files
+  EA_dir="/home/okishinya/chipatlas/analTools/EA"
+  example_dir="$EA_dir/examples"
+  bedA="$example_dir/dataA.bed"
+  bedB="$example_dir/dataB.bed"
+  geneA="$example_dir/dataA.txt"
+  geneB="$example_dir/dataB.txt"
+
+  # = = = Interactive mode = = = #
+  # Compare BED vs Random
+  $EA_dir/EA -g hg38 -t bed -a "$bedA" -o "bedA_vs_rnd" -C Bone -Q 50 -D
+
+  # Compare BED A vs BED B
+  $EA_dir/EA -g hg38 -t bed -a "$bedA" -b "$bedB" -o "bedA_vs_bedB" -C Bone -D
+
+  # Compare Gene list vs Others (GRN applied)
+  $EA_dir/EA -g hg38 -t gene -a "$geneA" -o "geneA_vs_refseq" -C Bone -D
+
+  # Compare Gene list A vs Gene list B (intersect with bedL needed)
+  $EA_dir/EA -g hg38 -t gene -a "$geneA" -b "$geneB" -o "geneA_vs_geneB" -C Bone -d 2500 -D
+
+  # = = = Batch mode = = = #
+  # Compare BED vs Random
+  sbatch -p short --mem=8G -J bedA_vs_rnd -o %x.sbout -e %x.sberr \
+    $EA_dir/EA -g hg38 -t bed -a "$bedA" -o "bedA_vs_rnd_sb" -C Bone -Q 50 -D
+
+  # Compare BED A vs BED B
+  sbatch -p short --mem=8G -J bedA_vs_bedB -o %x.sbout -e %x.sberr \
+    $EA_dir/EA -g hg38 -t bed -a "$bedA" -b "$bedB" -o "bedA_vs_bedB_sb" -C Bone -D
+
+  # Compare Gene list vs Others (GRN applied)
+  sbatch -p short --mem=8G -J geneA_vs_refseq -o %x.sbout -e %x.sberr \
+    $EA_dir/EA -g hg38 -t gene -a "$geneA" -o "geneA_vs_refseq_sb" -C Bone -D
+
+  # Compare Gene list A vs Gene list B (intersect with bedL needed)
+  sbatch -p short --mem=8G -J geneA_vs_geneB -o %x.sbout -e %x.sberr \
+    $EA_dir/EA -g hg38 -t gene -a "$geneA" -b "$geneB" -o "geneA_vs_geneB_sb" -C Bone -d 2500 -D

@@ -1,0 +1,647 @@
+#!/bin/bash
+
+clear_ssd() {
+  local limit_days
+  limit_days="$(
+    awk -F"\t" '$1 == "days_rm_data1_analtools"' \
+      /home/okishinya/chipatlas/sh/preferences.tsv | cut -f2
+  )"
+  find "/data1/$USER/analTools" -maxdepth 1 \
+    -mtime +"${limit_days}" \
+    -exec rm -fr {} + \
+    >/dev/null 2>&1
+}
+
+time_log() {
+  local type jst zulu seconds
+  type="${1}"
+
+  jst="$(date -Iseconds)"
+  zulu="$(date --utc '+%Y-%m-%dT%H:%M:%SZ')"
+
+  echo "[INFO] <time> $type: $jst ($zulu)" |
+    tee -a "${OUTPUTS["log"]}"
+
+  if [[ $type = "Start" ]]; then
+    seconds=0
+  elif [[ $type = "End" ]]; then
+    echo "[INFO] <time> Duration: $SECONDS seconds" |
+      tee -a "${OUTPUTS["log"]}"
+  fi
+
+  declare -g SECONDS=$seconds
+}
+
+debug_log() {
+  if [[ ${DEBUG_MODE} = 1 ]]; then
+    echo "[DEBUG] <${FUNCNAME[1]}> $1" | tee -a "${OUTPUTS["log"]}"
+  fi
+}
+
+display_help() {
+  local user_name="okishinya"
+  cat "/home/$user_name/chipatlas/analTools/EA/help.txt"
+}
+
+handle_error() {
+  local error_message="${1}"
+  if [[ -n "${OUT_PREFIX}" ]]; then
+    echo "[ERROR] ${error_message}" | tee -a "${OUT_PREFIX}.log"
+    mv "${TMPDIR}" "${OUT_PREFIX}.tmpForEA"
+    touch "${OUT_PREFIX}.html" "${OUT_PREFIX}.tsv"
+  else
+    echo "[ERROR] ${error_message}"
+  fi >&2
+
+  exit 1
+}
+
+parse_arguments() {
+  local input_a input_b genome input_type perm_time up_bp dn_bp out_prefix title desc_a desc_b exp_type cell_class threshold debug_mode wabi_id seed tmpdir
+
+  exp_type="TFs and others"
+  cell_class="All cell types"
+  threshold=100
+  title="My project"
+  desc_a="Dataset A"
+  desc_b="Dataset B"
+  up_bp=5000
+  dn_bp=5000
+  perm_time=10
+  debug_mode=0
+  seed=$(date +%s)
+  tmpdir="/data1/$USER/analTools/ea_chipatlas_$(date +%Y-%m%d-%H%M-%S-%N).tmpForEA"
+
+  while getopts a:b:p:d:g:t:u:o:s:T:A:B:E:C:Q:w:x:hD option; do
+    case "${option}" in
+    h)
+      display_help
+      exit 0
+      ;;
+    a) input_a="${OPTARG}" ;;
+    b) input_b="${OPTARG}" ;;
+    g) genome="${OPTARG}" ;;
+    t) input_type="${OPTARG}" ;;
+    p) perm_time="${OPTARG}" ;;
+    u) up_bp="${OPTARG}" ;;
+    d) dn_bp="${OPTARG}" ;;
+    o) out_prefix="${OPTARG}" ;;
+    s) seed="${OPTARG}" ;;
+    T) title="${OPTARG}" ;;
+    A) desc_a="${OPTARG}" ;;
+    B) desc_b="${OPTARG}" ;;
+    E) exp_type="${OPTARG}" ;;
+    C) cell_class="${OPTARG}" ;;
+    Q) threshold="${OPTARG}" ;;
+    D) debug_mode=1 ;;
+    w) wabi_id="${OPTARG}" ;;
+    x) tmpdir="${OPTARG}" ;;
+    *)
+      display_help
+      exit 1
+      ;;
+    esac
+  done
+
+  shift $((OPTIND - 1))
+
+  [[ $USER = "w3oki" ]] && out_prefix="wabi_result"
+  [[ -n "${wabi_id}" ]] && tmpdir="/data1/$USER/analTools/$wabi_id.tmpForEA"
+
+  if [[ -z "${genome}" || -z "${input_a}" || -z "${input_type}" || -z "${out_prefix}" ]]; then
+    handle_error "Missing required options: -g <genome> -a <input_bed_a> -t <input_type> -o <out_prefix>"
+    display_help
+    exit 1
+  fi
+
+  [[ "${exp_type}" = "Bisulfite-Seq" ]] && threshold="bs"
+
+  declare -gr INPUT_A="$input_a"
+  declare -gr INPUT_B="$input_b"
+  declare -gr GENOME="$genome"
+  declare -gr INPUT_TYPE="$input_type"
+  declare -g PERM_TIME="$perm_time"
+  declare -gr UP_BP="$up_bp"
+  declare -gr DN_BP="$dn_bp"
+  declare -gr OUT_PREFIX="$out_prefix"
+  declare -gr TMPDIR="$tmpdir"
+  declare -gr TITLE="$title"
+  declare -gr DESC_A="$desc_a"
+  declare -gr DESC_B="$desc_b"
+  declare -gr EXP_TYPE="$exp_type"
+  declare -gr CELL_CLASS="$cell_class"
+  declare -gr THRESHOLD="$threshold"
+  declare -gr DEBUG_MODE="$debug_mode"
+  declare -gr WABI_ID="$wabi_id"
+  declare -gr SEED="$seed"
+
+  declare -grA OUTPUTS=(
+    ["tmp"]="${OUT_PREFIX}.tmpForEA"
+    ["tsv"]="${OUT_PREFIX}.tsv"
+    ["html"]="${OUT_PREFIX}.html"
+    ["log"]="${OUT_PREFIX}.log"
+  )
+
+  debug_log "Arguments parsed."
+}
+
+define_constants() {
+  declare -gA CONSTANTS TOOLS LIBS TMPS OUTPUTS
+  declare -ga VALID_GENOMES VALID_EXPTYPES VALID_THRES
+
+  CONSTANTS=(
+    ["html_header"]="Search for epigenomic features significantly bound to your data."
+    ["srx_url"]="http://chip-atlas.org/view?id="
+  )
+
+  VALID_GENOMES=("hg38" "hg19" "mm10" "mm9" "rn6" "dm6" "dm3" "ce11" "ce10" "sacCer3")
+  VALID_INPUTTYPES=("gene" "bed")
+  VALID_EXPTYPES=("ATAC-Seq" "Bisulfite-Seq" "DNase-seq" "Histone" "Input control" "RNA polymerase" "TFs and others")
+  VALID_CELLCLASS=("All cell types" "Adult" "Embryo" "Larvae" "Cell line" "Pupae" "Adipocyte" "Blood" "Bone" "Breast" "Cardiovascular" "Digestive tract" "Epidermis" "Gonad" "Kidney" "Liver" "Lung" "Muscle" "Neural" "Others" "Pancreas" "Placenta" "Pluripotent stem cell" "Prostate" "Uterus" "Embryonic fibroblast" "Spleen" "Yeast strain")
+  VALID_THRES=("50" "100" "200" "500" "bs")
+
+  local user_name="okishinya"
+
+  local -A dirs=(
+    ["bin"]="/home/$user_name/bin"
+    ["chipatlas"]="/home/$user_name/chipatlas"
+    ["ca_lib"]="/home/$user_name/chipatlas/lib"
+  )
+
+  TOOLS=(
+    ["bedtools"]="${dirs["chipatlas"]}/bin/bedtools-2.17.0/bin/bedtools"
+    ["qsortBed"]="${dirs["bin"]}/qsortBed"
+    ["Rfisher"]="${dirs["bin"]}/Rfisher"
+    ["qval"]="${dirs["bin"]}/qval"
+  )
+
+  LIBS=(
+    ["file_list"]="${dirs["ca_lib"]}/assembled_list/fileList.tab"
+    ["id2symbol"]="${dirs["ca_lib"]}/id2symbol/id2symbol.${GENOME}.tsv"
+    ["tss_list"]="${dirs["ca_lib"]}/TSS/uniqueTSS.${GENOME}.bed"
+    ["chrome_size"]="${dirs["ca_lib"]}/genome_size/${GENOME}.chrom.sizes"
+    ["ref_bed_dir"]="${dirs["ca_lib"]}/inSilicoChIP/results/${GENOME}/public"
+    ["ref_grn_dir"]="${dirs["chipatlas"]}/results/${GENOME}/page/grn/$UP_BP"
+    ["hash"]="${dirs["chipatlas"]}/results/${GENOME}/page/hash.tsv"
+    ["tsv_to_html_awk"]="${dirs["chipatlas"]}/analTools/EA/tsv_to_html.awk"
+    ["html_tpl"]="${dirs["chipatlas"]}/analTools/EA/btbpToHtml.txt"
+  )
+
+  TMPS=(
+    ["bed_a"]="${TMPDIR}/bed_a"
+    ["bed_b"]="${TMPDIR}/bed_b"
+    ["qsortBed"]="${TMPDIR}/qsortBed"
+    ["sorted"]="${TMPDIR}/sorted_inBed"
+    ["count"]="${TMPDIR}/count"
+    ["qval"]="${TMPDIR}/qval"
+    ["intersect_out"]="${TMPDIR}/intersect_out"
+    ["tsv"]="${TMPDIR}/result.tsv"
+    ["html"]="${TMPDIR}/result.html"
+  )
+
+  declare -grA CONSTANTS TOOLS LIBS TMPS OUTPUTS
+  # shellcheck disable=SC2034
+  declare -gra VALID_GENOMES VALID_INPUTTYPES VALID_EXPTYPES VALID_THRES VALID_CELLCLASS
+}
+
+validate_arguments() {
+  debug_log "Validating arguments..."
+
+  local var valid_list valid_values_str
+  local -A validation_map valid_values
+  validation_map=(
+    ["GENOME"]="VALID_GENOMES"
+    ["INPUT_TYPE"]="VALID_INPUTTYPES"
+    ["CELL_CLASS"]="VALID_CELLCLASS"
+    ["EXP_TYPE"]="VALID_EXPTYPES"
+    ["THRESHOLD"]="VALID_THRES"
+  )
+
+  for var in "${!validation_map[@]}"; do
+    declare -n valid_list="${validation_map[$var]}"
+    valid_values="${valid_list[*]}"
+
+    # shellcheck disable=SC2076
+    if [[ ! " ${valid_values[*]} " =~ " ${!var} " ]]; then
+      valid_values_str="$(printf "%s, " "${valid_list[@]}" | sed 's/, $//')"
+      handle_error "Invalid ${var,,}: \"${!var}\". Must be one of: [${valid_values_str}]"
+      display_help
+      exit 1
+    fi
+  done
+
+  debug_log "Done."
+}
+
+set_input_and_ref_type() {
+  local type_a type_b ref_type perm_time
+  type_a="${INPUT_TYPE}"
+  perm_time=1
+
+  if [[ "${type_a}" = "bed" ]]; then
+
+    ref_type="bed"
+
+    if [[ -z "${INPUT_B}" || "$(cat "${INPUT_B}")" == "empty" ]]; then
+      type_b="rnd"
+      perm_time=${PERM_TIME}
+    else
+      type_b="bed"
+    fi
+
+  elif [[ "${type_a}" = "gene" ]]; then
+
+    if [[ "${UP_BP}" = "${DN_BP}" && "${UP_BP}" =~ ^(1000|5000|10000)$ ]]; then
+      ref_type="grn"
+    else
+      ref_type="bed"
+    fi
+
+    if [[ -z "${INPUT_B}" || "$(cat "${INPUT_B}")" == "empty" ]]; then
+      type_b="refseq"
+    else
+      type_b="userlist"
+    fi
+  fi
+
+  declare -gr TYPE_A="$type_a"
+  declare -gr TYPE_B="$type_b"
+  declare -gr REF_TYPE="$ref_type"
+  declare -gr PERM_TIME="$perm_time"
+}
+
+clear_output() {
+  rm -fr "${TMPDIR}" "${OUTPUTS["html"]}" "${OUTPUTS["tsv"]}" "${OUTPUTS["log"]}" "${OUTPUTS["tmp"]}"
+}
+
+generate_bed_ab() {
+  remove_illegals_from_bed() {
+    local bed="${1}"
+    awk -F '\t' -v OFS='\t' '
+    NF >= 3 {
+      if ($2 < 0) $2 = 0
+      if ($3 < 0) $3 = 1
+      if ($2 <= $3) print
+    }' "${bed}"
+  }
+
+  genelist_to_bed() {
+    local gene_list="${1}"
+    # debug_log "gene_list=\"${gene_list}\""
+    awk -F"\t" -v id2symbol="${LIBS["id2symbol"]}" '
+    BEGIN {
+      while (getline < id2symbol) {
+        gsub(/[^a-zA-Z0-9\t_\n]/, "_", $1)
+        map[tolower($1)] = $2
+      }
+    } NF {
+      gsub(/[^a-zA-Z0-9\t_\n]/, "_", $1)
+      if (tolower($1) in map) print map[tolower($1)]
+    }' "${gene_list}" >"${TMPDIR}/gene_list_tmp"
+
+    #awk -F"\t" -v id2symbol="${LIBS["id2symbol"]}" '
+    #BEGIN {
+    #  while (getline < id2symbol) map[tolower($1)] = $2
+    #} NF {
+    #  gsub(/^ +/, "", $1)
+    #  if (tolower($1) in map) print map[tolower($1)]
+    #}' "${gene_list}" >"${TMPDIR}/gene_list_tmp"
+
+    awk -v OFS="\t" -v gene_list="${TMPDIR}/gene_list_tmp" -v up="${UP_BP}" -v down="${DN_BP}" '
+    BEGIN {
+      while (getline < gene_list) {
+        gsub(/[^a-zA-Z0-9\t_\n]/, "_", $1)
+        genes[tolower($1)]++
+      }
+    } {
+      gsub(/[^a-zA-Z0-9\t_\n]/, "_", $4)
+      if (genes[tolower($4)] > 0) {
+        start = ($5 == "+") ? $2 - up : $3 - down
+        end   = ($5 == "+") ? $2 + down : $3 + up
+        print $1, start, end, $4
+      }
+    }' "${LIBS["tss_list"]}" | remove_illegals_from_bed
+
+    rm -f "${TMPDIR}/gene_list_tmp"
+  }
+
+  mkdir -p "${TMPDIR}"
+
+  debug_log "tmp_a=\"${TMPS["bed_a"]}\""
+  debug_log "tmp_b=\"${TMPS["bed_b"]}\""
+
+  if [ "${TYPE_A}" == "bed" ]; then
+    debug_log "bedtools=\"${TOOLS["bedtools"]}\""
+    debug_log "SEED=\"${SEED}\""
+    debug_log "chrome_size=\"${LIBS["chrome_size"]}\""
+
+    remove_illegals_from_bed "${INPUT_A}" >"${TMPS["bed_a"]}"
+    case "${TYPE_B}" in
+    "rnd")
+      for i in $(seq "${PERM_TIME}"); do
+        seed=$((SEED + i))
+        "${TOOLS["bedtools"]}" shuffle \
+          -seed "${seed}" \
+          -i "${TMPS["bed_a"]}" \
+          -g "${LIBS["chrome_size"]}"
+      done >"${TMPS["bed_b"]}"
+      ;;
+
+    "bed")
+      remove_illegals_from_bed "${INPUT_B}" >"${TMPS["bed_b"]}"
+      ;;
+    esac
+  elif [ "${TYPE_A}" == "gene" ]; then
+    # debug_log "gene_list=\"${gene_list}\""
+    debug_log "id2symbol=\"${LIBS["id2symbol"]}\""
+    debug_log "tss_list=\"${LIBS["tss_list"]}\""
+
+    genelist_to_bed "${INPUT_A}" >"${TMPS["bed_a"]}"
+    case "${TYPE_B}" in
+    "refseq")
+      awk -F"\t" -v OFS="\t" -v tmp_a="${TMPS["bed_a"]}" '
+      BEGIN {
+        while (getline < tmp_a) gene_a[$4]++
+      } ! ($4 in gene_a) {
+        print $4
+      }' "${LIBS["tss_list"]}" >"${TMPDIR}/tmp_b"
+      genelist_to_bed "${TMPDIR}/tmp_b" >"${TMPS["bed_b"]}"
+      rm -f "${TMPDIR}/tmp_b"
+      ;;
+    "userlist")
+      genelist_to_bed "${INPUT_B}" >"${TMPS["bed_b"]}"
+      ;;
+    esac
+  fi
+
+  local lines_a lines_b
+  lines_a="$(wc -l <"${TMPS["bed_a"]}")"
+  lines_b="$(wc -l <"${TMPS["bed_b"]}")"
+  if [ $((lines_a * lines_b)) -eq 0 ]; then
+    handle_error "Input data is empty or bad."
+  fi
+
+  declare -gr LINES_A="$lines_a"
+  declare -gr LINES_B="$lines_b"
+}
+
+define_ref_libs() {
+  local thres_str condition ref_dir ref_ext ref_file_name
+  thres_str="bs"
+  [[ $THRESHOLD != "bs" ]] && thres_str="$(printf "%02d" $((THRESHOLD / 10)))"
+
+  condition="${GENOME}${EXP_TYPE}-${CELL_CLASS}-${thres_str}"
+
+  if [ "${REF_TYPE}" = "grn" ]; then
+    ref_dir="${LIBS["ref_grn_dir"]}"
+    ref_ext=".${UP_BP}.${DN_BP}.grn"
+  elif [ "${REF_TYPE}" = "bed" ]; then
+    ref_dir="${LIBS["ref_bed_dir"]}"
+    ref_ext=".bed"
+  fi
+
+  ref_file_name=$(
+    awk -F"\t" -v condition="${condition}" -v dir="${ref_dir}" -v ext="${ref_ext}" '
+    $2$3$4$5$6$7 == condition {
+      print dir "/" $1 ext
+      exit
+    }' "${LIBS["file_list"]}"
+  )
+
+  debug_log "ref_file_name=$ref_file_name"
+
+  case "$REF_TYPE" in
+  grn)
+    if [[ -e "${ref_file_name}.0" ]]; then
+      ref_lib_prefix="${ref_file_name}."
+    else
+      error_flag=1
+    fi
+    ;;
+  bed)
+    if [[ -e "${ref_file_name}.aa" ]]; then
+      ref_lib_prefix="${ref_file_name}."
+    else
+      error_flag=1
+    fi
+    ;;
+  *)
+    error_flag=1
+    ;;
+  esac
+
+  if [[ "$error_flag" = 1 ]]; then
+    handle_error "No available experiment data that meets the specified criteria."
+    debug_log "condition=\"${condition}\""
+    debug_log "ref_dir=\"${ref_dir}\""
+    debug_log "file_list=\"${LIBS["file_list"]}\""
+    debug_log "ref_file_name=\"${ref_file_name}\""
+    display_help
+    exit 1
+  fi
+
+  declare -gr THRES_STR="$thres_str"
+  declare -gr REF_LIB_PREFIX="$ref_lib_prefix"
+}
+
+intersect_input_and_ref() {
+  debug_log "Intersecting input & refs..."
+
+  sort_input_beds() {
+    debug_log "qsortBed=\"${TOOLS["qsortBed"]}\""
+    debug_log "qsortBed_tmp=\"${TMPS["qsortBed"]}\""
+    debug_log "sorted_inBed=\"${TMPS["sorted"]}\""
+
+    awk -F"\t" -v OFS="\t" '{
+      print $1, $2, $3, NR, (ARGIND == 1) ? "A" : "B"
+    }' "${TMPS["bed_a"]}" "${TMPS["bed_b"]}" | tr -d '\015' |
+      "${TOOLS["qsortBed"]}" -t "${TMPS["qsortBed"]}" >"${TMPS["sorted"]}"
+  }
+
+  grn_vs_bed4() {
+    local grn="${1}"
+    local bed_a="${2}"
+    local bed_b="${3}"
+    grep -Fwf <(cut -f4 "${bed_a}") "${grn}" | awk -v OFS="\t" '{print $0, "A"}'
+    grep -Fwf <(cut -f4 "${bed_b}") "${grn}" | awk -v OFS="\t" '{print $0, "B"}'
+  }
+
+  local num_files idx cmd
+  num_files=$(find "${REF_LIB_PREFIX:?}"* -type f | wc -l)
+
+  [[ "${REF_TYPE}" = "bed" ]] && sort_input_beds
+
+  idx=1
+  for ref in "${REF_LIB_PREFIX:?}"*; do
+    [[ ${DEBUG_MODE} = 1 ]] && debug_log "chunk: ${idx}/${num_files}  =>  ${REF_TYPE}: ${ref}"
+
+    idx=$((idx + 1))
+    if [ "${REF_TYPE}" = "bed" ]; then
+      cmd="${TOOLS["bedtools"]} intersect -sorted -a \"${ref}\" -b \"${TMPS["sorted"]}\" -wa -wb| cut -f4,8,9"
+    elif [ "${REF_TYPE}" = "grn" ]; then
+      cmd="grn_vs_bed4 \"${ref}\" \"${TMPS["bed_a"]}\" \"${TMPS["bed_b"]}\""
+    fi
+
+    if ! eval "${cmd}" >>"${TMPS["intersect_out"]}"; then
+      handle_error "Failed for file ${ref}"
+      debug_log "cmd=\"${cmd}\""
+      exit 1
+    fi
+  done
+
+  debug_log "Done."
+}
+
+count_intersect() {
+  debug_log "Counting intersects..."
+  debug_log "lines_A=\"${LINES_A}\""
+  debug_log "lines_B=\"${LINES_B}\""
+  debug_log "intersect_out=\"${TMPS["intersect_out"]}\""
+
+  awk -F"\t" -v OFS="\t" \
+    -v lines_A="${LINES_A}" -v lines_B="${LINES_B}" '
+  !tmp[$1 $2 $3]++ {
+    count[$1 "," $3]++
+    id[$1]
+    if (NR % 1000000 == 0) delete tmp
+  } END {
+    for (srx in id) {
+      A = A*0 + count[srx "," "A"]
+      B = lines_A - A
+      C = B*0 + count[srx "," "B"]
+      D = lines_B - C
+      if (B < 0) { A += B; B = 0 }
+      if (D < 0) { C += D; D = 0 }
+      print srx, A, B, C, D
+    }
+  }' "${TMPS["intersect_out"]}" >"${TMPS["count"]}"
+
+  debug_log "Done."
+}
+
+statistical_test() {
+  debug_log "Statistical test..."
+
+  debug_log "Rfisher=\"${TOOLS["Rfisher"]}\""
+  debug_log "qval=\"${TOOLS["qval"]}\""
+
+  "${TOOLS["Rfisher"]}" -f -k2 "${TMPS["count"]}" |
+    "${TOOLS["qval"]}" -L -k6 | awk -F "\t" -v OFS="\t" '{
+      if ($(NF-1) == 0) $(NF-1) = "-324"
+      else              $(NF-1) = log($(NF-1))/log(10)
+      print
+    }' | awk -F "\t" -v OFS="\t" '{
+      if        ($2 + $4 == 0) {
+        fe = 1
+      } else if ($2 * $4 == 0) {
+        if      ($2 == 0) fe = 10^-6
+        else if ($4 == 0) fe = 10^6
+      } else {
+        fe = ($2 / ($2 + $3)) / ($4 / ($4 + $5))
+      }
+      
+      # fe = ($4 == 0) ? "99999" : ($2 / ($2 + $3)) / ($4 / ($4 + $5))
+      print $1, $2 "/" ($2 + $3), $4 "/" ($4 + $5), $6, $7, fe
+    }' >"${TMPS["qval"]}"
+
+  debug_log "Done."
+}
+
+return_results() {
+  local condition="${GENOME}${EXP_TYPE}${CELL_CLASS}${THRES_STR}"
+  [[ ${CELL_CLASS} = "All cell types" ]] && condition="${GENOME}${EXP_TYPE}${THRES_STR}"
+
+  debug_log "Converting TSV to HTML..."
+  debug_log "condition=\"${condition}\""
+  debug_log "THRES_STR=\"${THRES_STR}\""
+  debug_log "hash=\"${LIBS["hash"]}\""
+  debug_log "DESC_A=\"${DESC_A}\""
+  debug_log "DESC_B=\"${DESC_B}\""
+  debug_log "TITLE=\"${TITLE}\""
+  debug_log "WABI_ID=\"${WABI_ID}\""
+  debug_log "SRX_URL=\"${CONSTANTS["srx_url"]}\""
+  debug_log "HTML_TPL=\"${LIBS["html_tpl"]}\""
+  debug_log "HTML_HEADER=\"${CONSTANTS["html_header"]}\""
+
+  awk -F"\t" -v OFS="\t" -v condition="${condition}" -v cell="${CELL_CLASS}" \
+    -v qval="${TMPS["qval"]}" -v thres="${THRES_STR}" '
+  BEGIN {
+    methyl_name["hmr"]     = "Hypo MR"
+    methyl_name["hypermr"] = "Hyper MR"
+    methyl_name["pmd"]     = "Partial MR"
+    while (getline < qval) {
+      if (thres == "bs") {
+        split($1, arr, ".")
+        _key = arr[1] "\t" methyl_name[arr[2]]
+      } else {
+        _key = $1
+      }
+      ea_res[_key] = $2 "\t" $3 "\t" $4 "\t" $5 "\t" $6
+    }
+  } {
+    line_meta = cell == "All cell types" ? $2$3$8 : $2$3$5$8
+    if (line_meta == condition) {
+      key = (thres == "bs") ? $1 "\t" $4 : $1
+      if (key in ea_res) print $1, $3, $4, $5, $6, $7, ea_res[key]
+    }
+  }' "${LIBS["hash"]}" | sort -t$'\t' -k9g -k11gr | tee "${TMPS["tsv"]}" |
+    awk -F '\t' -v desc_a="${DESC_A}" -v desc_b="${DESC_B}" -v title="${TITLE}" \
+      -v wabi_id="${WABI_ID}" -v SRX_URL="${CONSTANTS["srx_url"]}" -v HTML_TPL="${LIBS["html_tpl"]}" \
+      -v HTML_HEADER="${CONSTANTS["html_header"]}" -f "${LIBS["tsv_to_html_awk"]}" >"${TMPS["html"]}"
+
+  debug_log "Done."
+}
+
+finalize() {
+  mv "${TMPS["tsv"]}" "${OUTPUTS["tsv"]}"
+  mv "${TMPS["html"]}" "${OUTPUTS["html"]}"
+  if [[ "${DEBUG_MODE}" = 1 ]]; then
+    mv "${TMPDIR}" "${OUTPUTS["tmp"]}"
+  else
+    rm -fr "${TMPDIR}"
+  fi
+}
+
+print_script_variables() {
+  echo "[INFO] <parameter> MODE=\"EA\""
+  echo "[INFO] <parameter> WABI_ID=\"${WABI_ID}\""
+  echo "[INFO] <parameter> GENOME=\"${GENOME}\""
+  echo "[INFO] <parameter> INPUT_TYPE=\"${INPUT_TYPE}\""
+  echo "[INFO] <parameter> PERM_TIME=\"${PERM_TIME}\""
+  echo "[INFO] <parameter> UP_BP=\"${UP_BP}\""
+  echo "[INFO] <parameter> DN_BP=\"${DN_BP}\""
+  echo "[INFO] <parameter> EXP_TYPE=\"${EXP_TYPE}\""
+  echo "[INFO] <parameter> CELL_CLASS=\"${CELL_CLASS}\""
+  echo "[INFO] <parameter> THRESHOLD=\"${THRESHOLD}\""
+  echo "[INFO] <parameter> TYPE_A=\"${TYPE_A}\""
+  echo "[INFO] <parameter> TYPE_B=\"${TYPE_B}\""
+  echo "[INFO] <parameter> LINES_A=\"${LINES_A}\""
+  echo "[INFO] <parameter> LINES_B=\"${LINES_B}\""
+  echo "[INFO] <parameter> SEED=\"${SEED}\""
+  echo "[INFO] <parameter> REF_TYPE=\"${REF_TYPE}\""
+}
+
+main() {
+  clear_ssd
+  parse_arguments "$@"
+  define_constants
+  validate_arguments
+  set_input_and_ref_type
+  clear_output
+  time_log "Start"
+  generate_bed_ab
+  if [[ $DEBUG_MODE = 1 ]]; then
+    print_script_variables | tee -a "${OUT_PREFIX}.log"
+  else
+    print_script_variables >>"${OUT_PREFIX}.log"
+  fi
+  define_ref_libs
+  intersect_input_and_ref
+  count_intersect
+  statistical_test
+  return_results
+  finalize
+  time_log "End"
+}
+
+main "$@"

@@ -1,0 +1,183 @@
+#!/bin/bash
+
+time_log() {
+  local type jst zulu seconds
+  type="${1}"
+
+  jst="$(date -Iseconds)"
+  zulu="$(date --utc '+%Y-%m-%dT%H:%M:%SZ')"
+
+  echo "[INFO] <time> $type: $jst ($zulu)" |
+    tee -a "${OUTPUT_LOG:-"./GRNcreator_result_$(date -Iseconds).log"}"
+
+  if [[ $type = "Start" ]]; then
+    seconds=0
+  elif [[ $type = "End" ]]; then
+    echo "[INFO] <time> Duration: $SECONDS seconds" |
+      tee -a "${OUTPUT_LOG:-"./GRNcreator_result_$(date -Iseconds).log"}"
+  fi
+
+  declare -g SECONDS=$seconds
+}
+
+debug_log() {
+  if [[ ${DEBUG_MODE} = 1 ]]; then
+    echo "[DEBUG] <${FUNCNAME[1]}> $1" | tee -a "${OUTPUT_LOG}"
+  fi
+}
+
+parse_arguments() {
+  local genome tss_bed file_name up_bp dn_bp output_dir log_dir split_by_cell_class debug_mode
+  while getopts g:t:f:o:l:d:u:DS option; do
+    case "${option}" in
+    g) genome="${OPTARG}" ;;
+    t) tss_bed="${OPTARG}" ;;
+    f) file_name="${OPTARG}" ;;
+    o) output_dir="${OPTARG}" ;;
+    l) log_dir="${OPTARG}" ;;
+    u) up_bp="${OPTARG}" ;;
+    d) dn_bp="${OPTARG}" ;;
+    S) split_by_cell_class=1 ;;
+    D) debug_mode=1 ;;
+    *)
+      exit 1
+      ;;
+    esac
+  done
+
+  shift $((OPTIND - 1))
+
+  declare -gr GENOME="$genome"
+  declare -gr TSS_BED="$tss_bed"
+  declare -gr FILE_NAME="$file_name"
+  declare -gr UP_BP="$up_bp"
+  declare -gr DN_BP="$dn_bp"
+  declare -gr SPLIT_BY_CELL_CLASS="$split_by_cell_class"
+  declare -gr OUTPUT_DIR="$output_dir"
+  declare -gr LOG_DIR="$log_dir"
+  if [[ $LOG_DIR = "" ]]; then
+    declare -gr OUTPUT_LOG="/dev/null"
+  else
+    declare -gr OUTPUT_LOG="$LOG_DIR/$FILE_NAME.$UP_BP.$DN_BP.log"
+  fi
+  declare -gr OUTPUT_NAME="$OUTPUT_DIR/$FILE_NAME.$UP_BP.$DN_BP.grn"
+  declare -gr DEBUG_MODE="$debug_mode"
+}
+
+define_constants() {
+  declare -gA LIBS
+
+  local user_name="okishinya"
+
+  local -A dirs=(
+    ["bin"]="/home/$user_name/bin"
+    ["chipatlas"]="/home/$user_name/chipatlas"
+    ["ca_lib"]="/home/$user_name/chipatlas/lib"
+  )
+
+  local bedtools="${dirs["chipatlas"]}/bin/bedtools-2.17.0/bin/bedtools"
+  LIBS=(
+    ["file_list"]="${dirs["ca_lib"]}/assembled_list/fileList.tab"
+    ["ref_bed_dir"]="${dirs["ca_lib"]}/inSilicoChIP/results/${GENOME}/public"
+  )
+
+  local chunk
+  chunk=$(find "${LIBS["ref_bed_dir"]}" -name "$FILE_NAME.bed.*" | wc -l)
+
+  declare -gr BEDTOOLS="$bedtools"
+  declare -gr CHUNK="$chunk"
+  declare -grA LIBS
+  rm -f "${OUTPUT_LOG}"
+  mkdir -p "${OUTPUT_DIR}" "${LOG_DIR}"
+}
+
+clear_output() {
+  rm -f "${OUTPUT_NAME:?}"*
+}
+
+intersect_tss_and_ref() {
+  debug_log "ref_bed=\"${LIBS["ref_bed_dir"]}/$FILE_NAME.bed\""
+  debug_log "tss_bed=\"${TSS_BED}\""
+
+  local num_of_bed idx
+  idx=0
+  num_of_bed="$(find "${LIBS["ref_bed_dir"]}" -name "$FILE_NAME.bed.*" | wc -l)"
+  debug_log "num_of_bed=\"$num_of_bed\""
+
+  for ref_bed in "${LIBS["ref_bed_dir"]}/$FILE_NAME.bed."*; do
+    idx=$((idx + 1))
+    debug_log "$idx / $num_of_bed: $ref_bed"
+    "$BEDTOOLS" intersect -sorted -a "$ref_bed" -b "$TSS_BED" -wa -wb | cut -f4,8 |
+      awk -F"\t" -v out_name="$OUTPUT_NAME" -v chunk="$CHUNK" '{
+      print >> out_name "." substr($1, 4) % chunk
+    }'
+  done
+}
+
+split_all_to_cell_class() {
+  local exp_type cell_class thres antigen cell all_grn idx num_of_grn
+  # shellcheck disable=SC2034
+  IFS='.' read -r exp_type cell_class thres antigen cell <<<"$FILE_NAME"
+  read_bed_dir="find \"${LIBS["ref_bed_dir"]}\" -name \"$exp_type.*.$thres.AllAg.AllCell.bed.*\" -not -name \"$FILE_NAME.bed.*\" -printf \"%f\n\""
+  debug_log "read_bed_dir=$read_bed_dir"
+  find "$OUTPUT_DIR" -name "$exp_type.*.$thres.AllAg.AllCell.*" -not -name "$FILE_NAME.*" -print0 | xargs -0 rm -f
+
+  num_of_grn="$(find "${OUTPUT_DIR}" -name "$FILE_NAME.*.grn.*" | wc -l)"
+  idx=0
+  for all_grn in "${OUTPUT_NAME}"*; do
+    idx=$((idx + 1))
+    debug_log "$idx / $num_of_grn: $all_grn"
+
+    awk -F"\t" -v OFS="\t" -v genome="$GENOME" -v outdir="$OUTPUT_DIR" -v outname="$OUTPUT_NAME" -v file_name="$FILE_NAME" -v file_list_tab="${LIBS["file_list"]}" -v read_bed_dir="$read_bed_dir" '
+    BEGIN {
+      gsub(outdir "/" file_name ".", "", outname)
+      split(file_name, fn_arr, ".")
+      regex = fn_arr[1] "\\..{3}\\." fn_arr[3] "\\." fn_arr[4] "\\." fn_arr[5]
+      while (getline < file_list_tab) {
+        if ($1 ~ regex && $1 != file_name && $2 == genome && $8) {
+          split($8, srxs, ",")
+          for (i = 1; i <= length(srxs); i++) map_to_fn[srxs[i]] = $1
+        }
+      }
+      while (read_bed_dir| getline) {
+        sub(/\.[^.]+\.[^.]+$/, "", $1)
+        chunk[$1]++
+      }
+    } {
+      split($1, x, ".")
+      output_file = outdir "/" map_to_fn[x[1]] "." outname "." substr($1, 4) % chunk[map_to_fn[x[1]]]
+      print >> output_file
+    }' "${all_grn}"
+  done
+}
+
+print_script_variables() {
+  echo "[DEBUG] <GRNcreator> GENOME=\"${GENOME}\""
+  echo "[DEBUG] <GRNcreator> TSS_BED=\"${TSS_BED}\""
+  echo "[DEBUG] <GRNcreator> FILE_NAME=\"${FILE_NAME}\""
+  echo "[DEBUG] <GRNcreator> UP_BP=\"${UP_BP}\""
+  echo "[DEBUG] <GRNcreator> DN_BP=\"${DN_BP}\""
+  echo "[DEBUG] <GRNcreator> CHUNK=\"${CHUNK}\""
+  echo "[DEBUG] <GRNcreator> OUTPUT_DIR=\"${OUTPUT_DIR}\""
+  echo "[DEBUG] <GRNcreator> OUTPUT_NAME=\"${OUTPUT_NAME}\""
+  echo "[DEBUG] <GRNcreator> BEDTOOLS=\"${BEDTOOLS}\""
+  echo "[DEBUG] <GRNcreator> LIB_filelist=\"${LIBS["file_list"]}\""
+  echo "[DEBUG] <GRNcreator> LIB_refbed=\"${LIBS["ref_bed_dir"]}\""
+}
+
+main() {
+  parse_arguments "$@"
+  define_constants
+  time_log "Start"
+  if [[ $DEBUG_MODE = 1 ]]; then
+    print_script_variables | tee -a "${OUTPUT_LOG}"
+  else
+    print_script_variables >>"${OUTPUT_LOG}"
+  fi
+  clear_output
+  intersect_tss_and_ref
+  [[ $SPLIT_BY_CELL_CLASS = 1 ]] && split_all_to_cell_class
+  time_log "End"
+}
+
+main "$@"

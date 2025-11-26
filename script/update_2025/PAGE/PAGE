@@ -1,0 +1,469 @@
+#!/bin/bash
+
+clear_ssd() {
+  local limit_days
+  limit_days="$(
+    awk -F"\t" '$1 == "days_rm_data1_analtools"' \
+      /home/okishinya/chipatlas/sh/preferences.tsv | cut -f2
+  )"
+  find "/data1/$USER/analTools" -maxdepth 1 \
+    -mtime +"${limit_days}" \
+    -exec rm -fr {} + \
+    >/dev/null 2>&1
+}
+
+time_log() {
+  local type jst zulu seconds
+  type="${1}"
+
+  jst="$(date -Iseconds)"
+  zulu="$(date --utc '+%Y-%m-%dT%H:%M:%SZ')"
+
+  echo "[INFO] <time> $type: $jst ($zulu)" |
+    tee -a "${OUTPUTS["log"]}"
+
+  if [[ $type = "Start" ]]; then
+    seconds=0
+  elif [[ $type = "End" ]]; then
+    echo "[INFO] <time> Duration: $SECONDS seconds" |
+      tee -a "${OUTPUTS["log"]}"
+  fi
+
+  declare -g SECONDS=$seconds
+}
+
+debug_log() {
+  if [[ ${DEBUG_MODE} = 1 ]]; then
+    echo "[DEBUG] <${FUNCNAME[1]}> $1" | tee -a "${OUTPUTS["log"]}"
+  fi
+}
+
+display_help() {
+  local user_name="okishinya"
+  cat "/home/$user_name/chipatlas/analTools/PAGE/help.txt"
+}
+
+handle_error() {
+  local error_message="${1}"
+  if [[ -n "${OUT_PREFIX}" ]]; then
+    echo "[ERROR] ${error_message}" | tee -a "${OUT_PREFIX}.log"
+    touch "${OUT_PREFIX}.html" "${OUT_PREFIX}.tsv"
+  else
+    echo "[ERROR] ${error_message}"
+  fi >&2
+  
+  exit 1
+}
+
+parse_arguments() {
+  local input_count_table genome up_bp dn_bp out_prefix TITLE ref_type exp_type cell_class threshold debug_mode tmpdir wabi_id
+
+  exp_type="TFs and others"
+  cell_class="All cell types"
+  threshold=100
+  title="My project"
+  up_bp=5000
+  dn_bp=5000
+  debug_mode=0
+  tmpdir="/data1/$USER/analTools/page_chipatlas_$(date +%Y-%m%d-%H%M-%S-%N).tmpForPAGE"
+
+  while getopts c:d:g:u:o:T:E:C:Q:w:x:hD option; do
+    case "${option}" in
+    h)
+      display_help
+      exit 0
+      ;;
+    c) input_count_table="${OPTARG}" ;;
+    g) genome="${OPTARG}" ;;
+    u) up_bp="${OPTARG}" ;;
+    d) dn_bp="${OPTARG}" ;;
+    o) out_prefix="${OPTARG}" ;;
+    T) title="${OPTARG}" ;;
+    E) exp_type="${OPTARG}" ;;
+    C) cell_class="${OPTARG}" ;;
+    Q) threshold="${OPTARG}" ;;
+    D) debug_mode=1 ;;
+    w) wabi_id="${OPTARG}" ;;
+    x) tmpdir="${OPTARG}" ;;
+    *)
+      display_help
+      exit 1
+      ;;
+    esac
+  done
+
+  shift $((OPTIND - 1))
+
+  [[ $USER = "w3oki" ]] && out_prefix="wabi_result"
+
+  if [[ -z "${genome}" || -z "${input_count_table}" || -z "${out_prefix}" ]]; then
+    handle_error "Missing required options: -g <genome> -c <count_table> -o <out_prefix>"
+    display_help
+    exit 1
+  fi
+
+  [[ "${exp_type}" = "Bisulfite-Seq" ]] && threshold="bs"
+  ref_type="bed"
+  [[ "${up_bp}" = "${dn_bp}" && "${up_bp}" =~ ^(1000|5000|10000)$ ]] && ref_type="grn"
+
+  declare -gr COUNT_TABLE="$input_count_table"
+  declare -gr GENOME="$genome"
+  declare -gr UP_BP="$up_bp"
+  declare -gr DN_BP="$dn_bp"
+  declare -gr OUT_PREFIX="$out_prefix"
+  declare -gr TMPDIR="$tmpdir"
+  declare -gr TITLE="$title"
+  declare -gr EXP_TYPE="$exp_type"
+  declare -gr CELL_CLASS="$cell_class"
+  declare -gr THRESHOLD="$threshold"
+  declare -gr DEBUG_MODE="$debug_mode"
+  declare -gr WABI_ID="$wabi_id"
+	declare -gr REF_TYPE="$ref_type"
+
+  declare -grA OUTPUTS=(
+    ["tmp"]="${OUT_PREFIX}.tmpForPAGE"
+    ["tsv"]="${OUT_PREFIX}.tsv"
+    ["html"]="${OUT_PREFIX}.html"
+    ["log"]="${OUT_PREFIX}.log"
+  )
+
+  debug_log "Arguments parsed."
+}
+
+define_constants() {
+  declare -gA CONSTANTS TOOLS LIBS TMPS OUTPUTS
+  declare -ga VALID_GENOMES VALID_EXPTYPES VALID_THRES
+
+  CONSTANTS=(
+    ["html_header"]="Search for epigenomic features significantly bound to your data."
+    ["srx_url"]="http://chip-atlas.org/view?id="
+  )
+
+  VALID_GENOMES=("hg38" "hg19" "mm10" "mm9" "rn6" "dm6" "dm3" "ce11" "ce10" "sacCer3")
+  VALID_EXPTYPES=("ATAC-Seq" "Bisulfite-Seq" "DNase-seq" "Histone" "Input control" "RNA polymerase" "TFs and others")
+  VALID_CELLCLASS=("All cell types" "Adult" "Embryo" "Larvae" "Cell line" "Pupae" "Adipocyte" "Blood" "Bone" "Breast" "Cardiovascular" "Digestive tract" "Epidermis" "Gonad" "Kidney" "Liver" "Lung" "Muscle" "Neural" "Others" "Pancreas" "Placenta" "Pluripotent stem cell" "Prostate" "Uterus" "Embryonic fibroblast" "Spleen" "Yeast strain")
+  VALID_THRES=("50" "100" "200" "500" "bs")
+
+  local user_name="okishinya"
+
+  local -A dirs=(
+    ["bin"]="/home/$user_name/bin"
+    ["chipatlas"]="/home/$user_name/chipatlas"
+    ["ca_lib"]="/home/$user_name/chipatlas/lib"
+    ["conda"]="/home/${user_name}/miniconda3"
+  )
+
+  TOOLS=(
+    ["qsortBed"]="${dirs["bin"]}/qsortBed"
+    ["GRNcreator"]="${dirs["chipatlas"]}/analTools/PAGE/GRNcreator"
+    ["Rscript"]="${dirs["conda"]}/envs/r420/bin/Rscript"
+  )
+
+  LIBS=(
+    ["file_list"]="${dirs["ca_lib"]}/assembled_list/fileList.tab"
+    ["id2symbol"]="${dirs["ca_lib"]}/id2symbol/id2symbol.${GENOME}.tsv"
+    ["tss_list"]="${dirs["ca_lib"]}/TSS/uniqueTSS.${GENOME}.bed"
+    ["pager"]="${dirs["chipatlas"]}/analTools/PAGE/page.r"
+    ["ref_grn_dir"]="${dirs["chipatlas"]}/results/${GENOME}/page/grn/${UP_BP}"
+    ["hash"]="${dirs["chipatlas"]}/results/${GENOME}/page/hash.tsv"
+    ["tsv_to_html_awk"]="${dirs["chipatlas"]}/analTools/PAGE/tsv_to_html.awk"
+    ["html_tpl"]="${dirs["chipatlas"]}/analTools/PAGE/btbpToHtml.txt"
+  )
+
+  TMPS=(
+    ["count_table"]="${TMPDIR}/count_table"
+    ["grn_dir"]="${TMPDIR}/grn"
+    ["tss_bed"]="${TMPDIR}/tss_bed"
+    ["qsortBed"]="${TMPDIR}/qsortBed"
+    ["page_stats"]="${TMPDIR}/page_stats"
+    ["tsv"]="${TMPDIR}/result.tsv"
+    ["html"]="${TMPDIR}/result.html"
+  )
+
+  declare -grA CONSTANTS TOOLS LIBS TMPS OUTPUTS
+  # shellcheck disable=SC2034
+  declare -gra VALID_GENOMES VALID_INPUTTYPES VALID_EXPTYPES VALID_THRES VALID_CELLCLASS
+}
+
+validate_arguments() {
+  debug_log "Validating arguments..."
+
+  local var valid_list valid_values_str
+  local -A validation_map valid_values
+  validation_map=(
+    ["GENOME"]="VALID_GENOMES"
+    ["CELL_CLASS"]="VALID_CELLCLASS"
+    ["EXP_TYPE"]="VALID_EXPTYPES"
+    ["THRESHOLD"]="VALID_THRES"
+  )
+
+  for var in "${!validation_map[@]}"; do
+    declare -n valid_list="${validation_map[$var]}"
+    valid_values="${valid_list[*]}"
+
+    # shellcheck disable=SC2076
+    if [[ ! " ${valid_values[*]} " =~ " ${!var} " ]]; then
+      valid_values_str="$(printf "%s, " "${valid_list[@]}" | sed 's/, $//')"
+      handle_error "Invalid ${var,,}: \"${!var}\". Must be one of: [${valid_values_str}]"
+      display_help
+      exit 1
+    fi
+  done
+
+  debug_log "Done."
+}
+
+clear_output() {
+  rm -fr "${TMPDIR}" "${OUTPUTS["html"]}" "${OUTPUTS["tsv"]}" "${OUTPUTS["log"]}" "${OUTPUTS["tmp"]}"
+  mkdir -p "${TMPDIR}"
+}
+
+format_count_table() {
+  debug_log "Formatting count table..."
+  debug_log "COUNT_TABLE=\"$COUNT_TABLE\""
+
+  check_delimiter() {
+    awk 'NF {print; exit}' "$COUNT_TABLE" | tr -d '\015' | awk -F"HOGEHOGE" '
+    function copy_array(src, dest) {
+      for (key in src) dest[key] = src[key]
+    } {
+      split($1, comma, ",")
+      split($1, tab, "\t")
+      if (length(comma) > length(tab)) copy_array(comma, header_arr)
+      else                             copy_array(tab, header_arr)
+      for(i=2; i<=length(header_arr); i++) {
+        sub(/_[0-9]+$/, "", header_arr[i])
+        count[header_arr[i]]++
+      }
+    } END {
+      if (length(count) != 2) exit 1
+      for (i in count) {
+        if (count[i] <= 1) exit 1
+      }
+      print (length(comma) > length(tab)) ? "csv" : "tsv"
+    }'
+  }
+
+  count_format="$(check_delimiter)"
+  debug_log "count_format=\"$count_format\""
+  local sep
+  if [[ $count_format = "csv" ]]; then
+    sep=","
+  elif [[ $count_format = "tsv" ]]; then
+    sep="\t"
+  else
+    handle_error "Invalid count table format. The table must contain raw read counts from two distinct experimental groups."
+    handle_error "Datasets without replicates are not supported."
+    display_help
+    exit 1
+  fi
+
+  debug_log "id2symbol=\"${LIBS["id2symbol"]}\""
+  tr -d '\015' <"$COUNT_TABLE" |
+    awk -F"\t" -v sep="$sep" -v OFS="\t" -v id2symbol="${LIBS["id2symbol"]}" '
+    BEGIN {
+      while (getline < id2symbol) gene_map[tolower($1)] = $2
+      FS=sep
+    } NF {
+      if (NR > 1 && tolower($1) in gene_map) $1 = gene_map[tolower($1)]
+      else                                   $1 = $1
+      print
+    }' >"${TMPS["count_table"]}"
+}
+
+prepare_grns() {
+  # shellcheck disable=SC2120
+  remove_illegals_from_bed() {
+    local bed="${1}"
+    awk -F '\t' -v OFS='\t' '
+    NF >= 3 {
+      if ($2 < 0) $2 = 0
+      if ($3 < 0) $3 = 1
+      if ($2 <= $3) print
+    }' "${bed}" | sort -k1,1 -k2,2n
+  }
+
+  genelist_to_bed() {
+    local tss="${1}" up_bp="${2}" dn_bp="${3}"
+    awk -v OFS="\t" -v up_bp="${up_bp}" -v dn_bp="${dn_bp}" '{
+      gsub(/[^a-zA-Z0-9\t_\n]/, "_", $4)
+      start = ($5 == "+") ? $2 - up_bp : $3 - dn_bp
+      end   = ($5 == "+") ? $2 + dn_bp : $3 + up_bp
+      print $1, start, end, $4
+    }' "$tss" | remove_illegals_from_bed
+  }
+
+  local thres_str file_name gene_set_dir
+  thres_str="bs"
+  [[ $THRESHOLD != "bs" ]] && thres_str="$(printf "%02d" $((THRESHOLD / 10)))"
+
+  debug_log "GENOME=\"$GENOME\""
+  debug_log "EXP_TYPE=\"$EXP_TYPE\""
+  debug_log "CELL_CLASS=\"$CELL_CLASS\""
+  debug_log "thres_str=\"$thres_str\""
+  debug_log "file_list=\"${LIBS["file_list"]}\""
+
+  file_name=$(
+    awk -F"\t" -v OFS="\t" -v genome="${GENOME}" -v exp_type="${EXP_TYPE}" \
+      -v cell_class="${CELL_CLASS}" -v threshold="${thres_str}" '
+    $2$3$4$5$6$7 == genome exp_type "-" cell_class "-" threshold && $8 {
+      print $1
+      exit
+    }' "${LIBS["file_list"]}"
+  )
+
+  debug_log "file_name=\"$file_name\""
+
+  if [[ -z "${file_name}" ]]; then
+    handle_error "No available experiment data that meets the specified criteria."
+    exit 1
+  fi
+
+  # GRN ファイルが入っている・これから入れるディレクトリを指定
+  if [[ "${REF_TYPE}" = "grn" ]]; then
+    gene_set_dir="${LIBS["ref_grn_dir"]}"
+    debug_log "gene_set_dir=\"$gene_set_dir\""
+  else
+    gene_set_dir="${TMPS["grn_dir"]}"
+    debug_log "Running GRNcreator..."
+    debug_log "gene_set_dir=\"$gene_set_dir\""
+    debug_log "tss_list=\"${LIBS["tss_list"]}\""
+    debug_log "UP_BP=\"${UP_BP}\""
+    debug_log "DN_BP=\"${DN_BP}\""
+    debug_log "tss_bed=\"${TMPS["tss_bed"]}\""
+
+    mkdir -p "${gene_set_dir}"
+    genelist_to_bed "${LIBS["tss_list"]}" "$UP_BP" "$DN_BP" >"${TMPS["tss_bed"]}"
+    debug_log "GRNcreator_cmd=${TOOLS["GRNcreator"]} -g \"$GENOME\" -t \"${TMPS["tss_bed"]}\" -u \"$UP_BP\" -d \"$DN_BP\" -f \"$file_name\" -o \"${TMPS["grn_dir"]}\""
+
+    if [ "${DEBUG_MODE}" = 1 ]; then
+      "${TOOLS["GRNcreator"]}" -g "$GENOME" -t "${TMPS["tss_bed"]}" -u "$UP_BP" -d "$DN_BP" -f "$file_name" -o "${TMPS["grn_dir"]}" -D | tee -a "${OUTPUTS["log"]}" 2>&1
+    else
+      "${TOOLS["GRNcreator"]}" -g "$GENOME" -t "${TMPS["tss_bed"]}" -u "$UP_BP" -d "$DN_BP" -f "$file_name" -o "${TMPS["grn_dir"]}" >/dev/null 2>&1
+    fi
+
+    debug_log "Done."
+  fi
+
+  grn_count=$(find "${gene_set_dir}" -maxdepth 1 -name "$file_name.$UP_BP.$DN_BP.grn.*" | wc -l)
+
+  if [[ $grn_count -lt 1 ]]; then
+    handle_error "No available experiment data that meets the specified criteria."
+    exit 1
+  fi
+
+  declare -gr THRES_STR="$thres_str"
+  declare -gr FILE_NAME="$file_name"
+  declare -gr GENE_SET_DIR="$gene_set_dir"
+}
+
+run_pageR() {
+  debug_log "Running PAGE..."
+  debug_log "PAGE_cmd=${TOOLS["Rscript"]} \"${LIBS["pager"]}\" \"${TMPS["count_table"]}\" \"${GENE_SET_DIR}\" \"$FILE_NAME.$UP_BP.$DN_BP.grn\" \"${TMPS["page_stats"]}\""
+  if [[ ${DEBUG_MODE} = 1 ]]; then
+    "${TOOLS["Rscript"]}" "${LIBS["pager"]}" "${TMPS["count_table"]}" "${GENE_SET_DIR}" "$FILE_NAME.$UP_BP.$DN_BP.grn" "${TMPS["page_stats"]}" | tee -a "${OUTPUTS["log"]}" 2>&1
+  else
+    "${TOOLS["Rscript"]}" "${LIBS["pager"]}" "${TMPS["count_table"]}" "${GENE_SET_DIR}" "$FILE_NAME.$UP_BP.$DN_BP.grn" "${TMPS["page_stats"]}" >/dev/null 2>&1
+  fi
+}
+
+return_results() {
+  local condition="${GENOME}${EXP_TYPE}${CELL_CLASS}${THRES_STR}"
+  [[ ${CELL_CLASS} = "All cell types" ]] && condition="${GENOME}${EXP_TYPE}${THRES_STR}"
+
+  local desc_a desc_b
+  read -r desc_a desc_b < <(
+    awk -F"\t" -v OFS="\t" '{
+      for (i=2; i<=NF; i++) {
+        gsub(/_[0-9]+$/, "", $i)
+        if (!seen[$i]++) desc_arr[++n] = $i
+      }
+      print desc_arr[1], desc_arr[2]
+    }' <(head -n1 "${TMPS["count_table"]}")
+  )
+
+  debug_log "Converting TSV to HTML..."
+  debug_log "condition=\"${condition}\""
+  debug_log "THRES_STR=\"${THRES_STR}\""
+  debug_log "hash=\"${LIBS["hash"]}\""
+  debug_log "desc_a=\"${desc_a}\""
+  debug_log "desc_b=\"${desc_b}\""
+  debug_log "TITLE=\"${TITLE}\""
+  debug_log "WABI_ID=\"${WABI_ID}\""
+  debug_log "SRX_URL=\"${CONSTANTS["srx_url"]}\""
+  debug_log "HTML_TPL=\"${LIBS["html_tpl"]}\""
+  debug_log "HTML_HEADER=\"${CONSTANTS["html_header"]}\""
+
+  awk -F"\t" -v OFS="\t" -v condition="${condition}" -v cell="${CELL_CLASS}" \
+    -v stats="${TMPS["page_stats"]}" -v thres="${THRES_STR}" '
+  BEGIN {
+    methyl_name["hmr"]     = "Hypo MR"
+    methyl_name["hypermr"] = "Hyper MR"
+    methyl_name["pmd"]     = "Partial MR"
+    while (getline < stats) {
+      if (thres == "bs") {
+        split($1, arr, ".")
+        _key = arr[1] "\t" methyl_name[arr[2]]
+      } else {
+        _key = $1
+      }
+      page_res[_key] = $2 "\t" $3 "\t" $4 "\t" $5 "\t" $6
+    }
+  } {
+    line_meta = cell == "All cell types" ? $2$3$8 : $2$3$5$8
+    if (line_meta == condition) {
+      key = (thres == "bs") ? $1 "\t" $4 : $1
+      if (key in page_res) print $1, $3, $4, $5, $6, $7, page_res[key]
+    }
+  }' "${LIBS["hash"]}" | sort -t$'\t' -k9g -k11gr | tee "${TMPS["tsv"]}" |
+    awk -F '\t' -v desc_a="${desc_a}" -v desc_b="${desc_b}" -v title="${TITLE}" \
+      -v wabi_id="${WABI_ID}" -v SRX_URL="${CONSTANTS["srx_url"]}" -v HTML_TPL="${LIBS["html_tpl"]}" \
+      -v HTML_HEADER="${CONSTANTS["html_header"]}" -f "${LIBS["tsv_to_html_awk"]}" >"${TMPS["html"]}"
+
+  debug_log "Done."
+}
+
+finalize() {
+  mv "${TMPS["tsv"]}" "${OUTPUTS["tsv"]}"
+  mv "${TMPS["html"]}" "${OUTPUTS["html"]}"
+  if [[ "${DEBUG_MODE}" = 1 ]]; then
+    mv "${TMPDIR}" "${OUTPUTS["tmp"]}"
+  else
+    rm -fr "${TMPDIR}"
+  fi
+}
+
+print_script_variables() {
+  echo "[INFO] <parameter> MODE=\"PAGE\""
+  echo "[INFO] <parameter> WABI_ID=\"${WABI_ID}\""
+  echo "[INFO] <parameter> GENOME=\"${GENOME}\""
+  echo "[INFO] <parameter> UP_BP=\"${UP_BP}\""
+  echo "[INFO] <parameter> DN_BP=\"${DN_BP}\""
+  echo "[INFO] <parameter> EXP_TYPE=\"${EXP_TYPE}\""
+  echo "[INFO] <parameter> CELL_CLASS=\"${CELL_CLASS}\""
+  echo "[INFO] <parameter> THRESHOLD=\"${THRESHOLD}\""
+  echo "[INFO] <parameter> REF_TYPE=\"${REF_TYPE}\""
+}
+
+main() {
+  clear_ssd
+  parse_arguments "$@"
+  define_constants
+  validate_arguments
+  clear_output
+  time_log "Start"
+  if [[ $DEBUG_MODE = 1 ]]; then
+    print_script_variables | tee -a "${OUT_PREFIX}.log"
+  else
+    print_script_variables >>"${OUT_PREFIX}.log"
+  fi
+  format_count_table
+  prepare_grns
+  run_pageR
+  return_results
+  finalize
+  time_log "End"
+}
+
+# Run the main function
+main "$@"

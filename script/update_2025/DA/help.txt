@@ -1,0 +1,66 @@
+Usage: DA -g <genome> -a <input_IDs_a> -b <input_IDs_b> -m <method> -o <out_prefix> \
+           [-T <title>] [-A <desc_a>] [-B <desc_b>] [-Q <threshold>] \
+           [-w <wabi_id>] [-x <tmp_dir>] [-D] [-h]
+
+Required options:
+  -g <genome>        Genome assembly. One of:
+                     [hg38, hg19, mm10, mm9, rn6, dm6, dm3, ce11, ce10, sacSer3]
+  -a <input_IDs_a>   Input SRX list A.
+  -b <input_IDs_b>   Input SRX list B.
+  -m <method>        Method for Diff Analysis. One of: [dmr, diffbind]
+  -o <out_prefix>    Prefix for output files.
+
+Optional options:
+
+  -T <title>         Project title (default: "My project").
+  -A <desc_a>        Description for dataset A (default: "Dataset A").
+  -B <desc_b>        Description for dataset B (default: "Dataset B").
+  -Q <threshold>     Threshold for MACS2 score (default: 50). One of: [50, 100, 200, 500]
+  -w <wabi_id>       WABI ID.
+  -x <tmp_dir>       Path for tempolary directory.
+  -D                 Enable debug mode.
+  -h                 Show this help message and exit.
+
+Examples:
+  # Set EA directory and example files
+  DA_dir="/home/okishinya/chipatlas/analTools/DA"
+  example_dir="$DA_dir/examples"
+  atacA="$example_dir/atac_dataA.txt"
+  atacB="$example_dir/atac_dataB.txt"
+  atacA_url="$example_dir/atac_dataA_url.txt"
+  atacB_url="$example_dir/atac_dataB_url.txt"
+  atacA_n1="$example_dir/atac_dataA_n1.txt"
+  atacB_n1="$example_dir/atac_dataB_n1.txt"
+  bsA="$example_dir/bs_dataA.txt"
+  bsB="$example_dir/bs_dataB.txt"
+  bsA_url="$example_dir/bs_dataA_url.txt"
+  bsB_url="$example_dir/bs_dataB_url.txt"
+
+  # = = = Interactive mode = = = #
+  # Diff Analysis on ATAC-seq
+  $DA_dir/DA -g mm10 -m diffbind -a "$atacA" -b "$atacB" -o "atac" -D
+
+  # Diff Analysis on ATAC-seq (without replicate)
+  $DA_dir/DA -g mm10 -m diffbind -a "$atacA_n1" -b "$atacB_n1" -o "atac_n1" -D
+
+  # Diff Analysis on Bisulfite-seq
+  $DA_dir/DA -g mm10 -m dmr -a "$bsA" -b "$bsB" -o "bs" -D
+
+  # = = = Batch mode = = = #
+  # Diff Analysis on ATAC-seq
+  sbatch -p short --mem=8G -J atac -o %x.sbout -e %x.sberr \
+    $DA_dir/DA -g mm10 -m diffbind -a "$atacA" -b "$atacB" -o "atac_sb" -D
+
+  # Diff Analysis on ATAC-seq (without replicate)
+  sbatch -p short --mem=8G -J atac_n1 -o %x.sbout -e %x.sberr \
+    $DA_dir/DA -g mm10 -m diffbind -a "$atacA_n1" -b "$atacB_n1" -o "atac_n1_sb" -D
+
+  # Diff Analysis on Bisulfite-seq
+  sbatch -p short --mem=8G -J bs -o %x.sbout -e %x.sberr \
+    $DA_dir/DA -g mm10 -m dmr -a "$bsA" -b "$bsB" -o "bs_sb" -D
+
+  # = = = Process of user original data = = = #
+  $DA_dir/DA -g mm10 -m diffbind -a "$atacA_url" -b "$atacB_url" -o "atac_url" -D
+
+  # = = = Process of user original data = = = #
+  $DA_dir/DA -g mm10 -m dmr -a "$bsA_url" -b "$bsB_url" -o "bs_url" -D
