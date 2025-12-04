@@ -1,0 +1,780 @@
+#!/bin/bash
+
+clear_ssd() {
+  local limit_days
+  limit_days="$(
+    awk -F"\t" '$1 == "days_rm_data1_analtools"' \
+      /home/okishinya/chipatlas/sh/preferences.tsv | cut -f2
+  )"
+  find "/data1/$USER/analTools" -maxdepth 1 \
+    -mtime +"${limit_days}" \
+    -exec rm -fr {} + \
+    >/dev/null 2>&1
+}
+
+time_log() {
+  local type jst zulu seconds
+  type="${1}"
+
+  jst="$(date -Iseconds)"
+  zulu="$(date --utc '+%Y-%m-%dT%H:%M:%SZ')"
+
+  echo "[INFO] <time> $type: $jst ($zulu)" |
+    tee -a "${OUTPUTS["log"]}"
+
+  if [[ $type = "Start" ]]; then
+    seconds=0
+  elif [[ $type = "End" ]]; then
+    echo "[INFO] <time> Duration: $SECONDS seconds" |
+      tee -a "${OUTPUTS["log"]}"
+  fi
+
+  declare -g SECONDS=$seconds
+}
+
+debug_log() {
+  if [[ ${DEBUG_MODE} = 1 ]]; then
+    echo "[DEBUG] <${FUNCNAME[1]}> $1" | tee -a "${OUTPUTS["log"]}"
+  fi
+}
+
+display_help() {
+  local user_name="okishinya"
+  cat "/home/$user_name/chipatlas/analTools/DA/help.txt"
+}
+
+handle_error() {
+  local error_message="${1}"
+  if [[ -n "${OUT_PREFIX}" ]]; then
+    echo "[ERROR] ${error_message}" | tee -a "${OUT_PREFIX}.log"
+    touch "${OUT_PREFIX}.html" "${OUT_PREFIX}.tsv"
+  else
+    echo "[ERROR] ${error_message}"
+  fi >&2
+  
+  exit 1
+}
+
+parse_arguments() {
+  validate_arguments() {
+    debug_log "Validating arguments..."
+    local var valid_list valid_values_str
+    local -A validation_map valid_values
+
+    validation_map=(
+      ["GENOME"]="valid_genomes"
+      ["METHOD"]="valid_methods"
+      ["THRESHOLD"]="valid_thres"
+    )
+
+    for var in "${!validation_map[@]}"; do
+      declare -n valid_list="${validation_map[$var]}"
+      valid_values="${valid_list[*]}"
+
+      # shellcheck disable=SC2076
+      if [[ ! " ${valid_values[*]} " =~ " ${!var} " ]]; then
+        valid_values_str="$(printf "%s, " "${valid_list[@]}" | sed 's/, $//')"
+        handle_error "Invalid ${var,,}: \"${!var}\". Must be one of: [${valid_values_str}]"
+        display_help
+        exit 1
+      fi
+    done
+
+    debug_log "Done."
+  }
+
+  local input_a input_b genome out_prefix method threshold title desc_a desc_b debug_mode wabi_id valid_values_str
+  local -a valid_genomes valid_methods valid_thres
+
+  # shellcheck disable=SC2034
+  valid_genomes=("hg38" "hg19" "mm10" "mm9" "rn6" "dm6" "dm3" "ce11" "ce10" "sacCer3")
+  # shellcheck disable=SC2034
+  valid_methods=("dmr" "diffbind")
+  # shellcheck disable=SC2034
+  valid_thres=("50" "100" "200" "500" "bs" "999")
+
+  title="Diff Analysis"
+  desc_a="Dataset A"
+  desc_b="Dataset B"
+  threshold="50"
+  debug_mode=0
+  tmpdir="/data1/$USER/analTools/da_chipatlas_$(date +%Y-%m%d-%H%M-%S-%N).tmpForDA"
+
+  while getopts a:b:g:o:m:Q:T:A:B:w:x:hD option; do
+    case "${option}" in
+    h)
+      display_help
+      exit 0
+      ;;
+    a) input_a="${OPTARG}" ;;
+    b) input_b="${OPTARG}" ;;
+    g) genome="${OPTARG}" ;;
+    o) out_prefix="${OPTARG}" ;;
+    m) method="${OPTARG}" ;;
+    Q) threshold="${OPTARG}" ;;
+    T) title="${OPTARG}" ;;
+    A) desc_a="${OPTARG}" ;;
+    B) desc_b="${OPTARG}" ;;
+    D) debug_mode=1 ;;
+    w) wabi_id="${OPTARG}" ;;
+    x) tmpdir="${OPTARG}" ;;
+    *)
+      display_help
+      exit 1
+      ;;
+    esac
+  done
+
+  shift $((OPTIND - 1))
+
+  [[ $USER = "w3oki" ]] && out_prefix="wabi_result"
+
+  if [[ -z "${genome}" || -z "${input_a}" || -z "${input_b}" || -z "${method}" || -z "${out_prefix}" ]]; then
+    handle_error "Missing required options: -g <genome> -a <input_IDs_a> -b <input_IDs_b> -o <out_prefix> -m <method>"
+    display_help
+    exit 1
+  fi
+
+  declare -gr INPUT_A="$input_a"
+  declare -gr INPUT_B="$input_b"
+  declare -gr GENOME="$genome"
+  declare -gr OUT_PREFIX="$out_prefix"
+  declare -gr METHOD="$method"
+  declare -gr THRESHOLD="$threshold"
+  declare -gr TMPDIR="$tmpdir"
+  declare -gr TITLE="$title"
+  declare -gr DESC_A="$desc_a"
+  declare -gr DESC_B="$desc_b"
+  declare -gr DEBUG_MODE="$debug_mode"
+  declare -gr WABI_ID="$wabi_id"
+
+  declare -grA OUTPUTS=(
+    ["tmp"]="${OUT_PREFIX}.tmpForDA"
+    ["log"]="${OUT_PREFIX}.log"
+    ["zip"]="${OUT_PREFIX}.zip"
+    ["igv"]="${OUT_PREFIX}.igv.bed"
+    ["html"]="${OUT_PREFIX}.html"
+    ["tsv"]="${OUT_PREFIX}.tsv"
+  )
+
+  debug_log "Arguments parsed."
+  validate_arguments
+}
+
+define_constants() {
+  declare -gA TOOLS LIBS TMPS OUTPUTS
+  local thres_str out_base
+  thres_str="$(printf "%02d" $((THRESHOLD / 10)))"
+  out_base=$(basename "${OUT_PREFIX}")
+
+  local user_name="okishinya"
+
+  local -A dirs=(
+    ["bin"]="/home/$user_name/bin"
+    ["chipatlas"]="/home/$user_name/chipatlas"
+    ["ca_lib"]="/home/$user_name/chipatlas/lib"
+    ["DA"]="/home/$user_name/chipatlas/analTools/DA"
+    ["conda"]="/home/${user_name}/miniconda3"
+  )
+
+  TOOLS=(
+    ["metilene"]="${dirs["chipatlas"]}/analTools/DA/metilene_v0.2-8/metilene"
+    ["bedtools"]="${dirs["chipatlas"]}/bin/bedtools-2.17.0/bin/bedtools"
+    ["bigWigToBedGraph"]="${dirs["bin"]}/bigWigToBedGraph"
+    ["Rscript"]="${dirs["conda"]}/envs/r420/bin/Rscript"
+  )
+
+  LIBS=(
+    ["exp_tab"]="${dirs["ca_lib"]}/assembled_list/experimentList.tab"
+    ["run_info"]="${dirs["ca_lib"]}/metadata/SRA_Metadata_RunInfo.tab"
+    ["reads_bases"]="${dirs["ca_lib"]}/metadata/SRX_reads_bases.tab"
+    ["bw_methyl"]="${dirs["chipatlas"]}/results/${GENOME}/bmap/methyl"
+    ["bw_chip"]="${dirs["chipatlas"]}/results/${GENOME}/BigWig"
+    ["peak_chip"]="${dirs["chipatlas"]}/results/${GENOME}/Bed${thres_str}/Bed"
+    ["metilene_input"]="${dirs["DA"]}/metilene_v0.2-8/metilene_input.pl"
+    ["edgeR"]="${dirs["DA"]}/edgeR.r"
+    ["make_igv_session_awk"]="${dirs["DA"]}/make_igv_session.awk"
+    ["readme"]="${dirs["DA"]}/README.md"
+  )
+
+  TMPS=(
+    ["srx_a"]="${TMPDIR}/srx_a"
+    ["srx_b"]="${TMPDIR}/srx_b"
+    ["url_input"]="${TMPDIR}/url_input"
+    ["metilene_input"]="${TMPDIR}/metilene_input"
+    ["srx_to_track"]="${TMPDIR}/srx_to_track"
+    ["peak_list"]="${TMPDIR}/peak_list"
+    ["meta"]="${TMPDIR}/meta"
+    ["scale_length"]="${TMPDIR}/scale_length"
+    ["count_table"]="${TMPDIR}/count_table"
+    ["results"]="${TMPDIR}/$out_base"
+    ["bed"]="${TMPDIR}/$out_base.bed"
+    ["igv"]="${TMPDIR}/$out_base.igv.bed"
+    ["xml"]="${TMPDIR}/$out_base.xml"
+  )
+
+  declare -grA TOOLS LIBS TMPS OUTPUTS
+  declare -gr THRES_STR="$thres_str"
+}
+
+clear_output() {
+  rm -fr "${TMPDIR}" "${OUTPUTS["log"]}" "${OUTPUTS["zip"]}" "${OUTPUTS["tmp"]}"
+  mkdir -p "${TMPDIR}"
+}
+
+download_url_data() {
+  prepare_url_list() {
+    local input_file=$1 group=$2 tmp_srx=$3
+    awk -v OFS="\t" -v group="$group" -v tmp_srx="$tmp_srx" '
+    NF && $1 ~ /^http/ {
+      id = "URL_" group (++count[group])
+      print id, $0
+      print id > tmp_srx
+    }' "$input_file" >>"${TMPS["url_input"]}"
+  }
+
+  download_file() {
+    local tmpdir method id bw_url peak_url read_length bw_path peak_path
+    # shellcheck disable=SC2034
+    read -r tmpdir method id bw_url peak_url read_length <<<"$1"
+    bw_path="${tmpdir}/${id}.$([[ $method == "dmr" ]] && echo "methyl.")bw"
+    wget -O "$bw_path" "$bw_url" >/dev/null 2>&1
+
+    if [[ $method == "diffbind" ]]; then
+      peak_path="${tmpdir}/${id}.bed"
+      [[ -n $peak_url ]] && wget -O "$peak_path" "$peak_url" >/dev/null 2>&1
+    fi
+  }
+  export -f download_file
+
+  prepare_url_list "${INPUT_A}" "A" "${TMPS["srx_a"]}"
+  prepare_url_list "${INPUT_B}" "B" "${TMPS["srx_b"]}"
+
+  [[ $DEBUG_MODE = 1 ]] && local parallel_option="-v"
+  awk -v OFS="\t" -v tmpdir="$TMPDIR" -v method="$METHOD" '{
+    print tmpdir, method, $0
+  }' "${TMPS["url_input"]}" | parallel "$parallel_option" -j2 download_file {}
+}
+
+map_gsm_to_srx() {
+  debug_log "Mapping GSM IDs to SRX IDs..."
+
+  debug_log "log=\"${OUTPUTS["log"]}\""
+  debug_log "tmp_a=\"${TMPS["srx_a"]}\""
+  debug_log "tmp_b=\"${TMPS["srx_b"]}\""
+  debug_log "exp_tab=\"${LIBS["exp_tab"]}\""
+  debug_log "genome=\"${GENOME}\""
+
+  awk -v OFS="\t" -v method="$METHOD" '
+  NF && $1 !~ /^(http|GSM|[EDS]RX[0-9]+$)/ {
+    print "[WARNING] \"" $1 "\" is not a valid SRX or GSM ID and has been ignored."
+  }' "${INPUT_A}" "${INPUT_B}" | tee -a "${OUTPUTS["log"]}"
+
+  local num_of_urls
+  eval "$(
+    awk 'BEGIN {url = 0}
+    NF && $1 ~ /^(http)/ {url++}
+    END {print "num_of_urls="url}' \
+      "${INPUT_A}" "${INPUT_B}"
+  )"
+
+  [[ $num_of_urls -gt 0 ]] && download_url_data
+
+  read_exp_tab="bash -c \"grep -F -f <(sed '/^$/d; s/^[ \t]*//' ${INPUT_A}) -f <(sed '/^$/d; s/^[ \t]*//' ${INPUT_B}) ${LIBS["exp_tab"]}\""
+  debug_log "read_exp_tab=\"${read_exp_tab}\""
+
+  awk -v OFS="\t" -v tmp_a="${TMPS["srx_a"]}" -v tmp_b="${TMPS["srx_b"]}" \
+    -v logfile="${OUTPUTS["log"]}" -v genome="$GENOME" \
+    -v read_exp_tab="$read_exp_tab" '
+  function output(id, label) { print id >> (label == "A" ? tmp_a : tmp_b) }
+  BEGIN {
+    ori_fs = FS
+    FS = "\t"
+    warning_fmt = "[WARNING] \"%s\" unmapped for %s and has been ignored."
+    while (read_exp_tab | getline) {
+      if ($9 ~ /^GSM[0-9]+:/ && $2 == genome) {
+        split($9, log_arr, ":")
+        exp_map[log_arr[1]] = $1
+      }
+    }
+    FS = ori_fs
+  } $1 ~ /^(GSM|[EDS]RX)[0-9]+$/ {
+    label = (ARGIND == 1) ? "A" : "B"
+    if ($1 ~ /^GSM/) {
+      if ($1 in exp_map) {
+        output(exp_map[$1], label)
+      } else {
+        message = sprintf(warning_fmt, $1, genome)
+        print message
+        print message >> logfile
+      }
+    } else {
+      output($1, label)
+    }
+  }' "${INPUT_A}" "${INPUT_B}"
+
+  declare -gr NUM_OF_URLS="$num_of_urls"
+  debug_log "Done."
+}
+
+validate_input_srx_list() {
+  debug_log "Validating input datasets..."
+
+  local lines_a lines_b
+  lines_a="$(wc -l <"${TMPS["srx_a"]}")"
+  lines_b="$(wc -l <"${TMPS["srx_b"]}")"
+  if [[ $((lines_a * lines_b)) -eq 0 ]]; then
+    debug_log "lines_a=\"${lines_a}\""
+    debug_log "lines_b=\"${lines_b}\""
+    handle_error "At least one ID should be assigned for each group."
+    exit 1
+  elif [[ $lines_a = 1 || $lines_b = 1 ]]; then
+    echo "[WARNING] Performing Diff Analysis without replicate is not recommended (Num of IDs: \"$DESC_A\", $lines_a; \"$DESC_B\", $lines_b)." | tee -a "${OUTPUTS["log"]}"
+  fi
+
+  if [[ $((lines_a + lines_b)) -gt "$NUM_OF_URLS" ]]; then
+    debug_log "# Not URLs: \"$((lines_a + lines_b - NUM_OF_URLS))\""
+
+    grep -Fw -f "${TMPS["srx_a"]}" -f "${TMPS["srx_b"]}" "${LIBS["exp_tab"]}" |
+      awk -F"\t" -v OFS="\t" -v genome="$GENOME" -v method="$METHOD" -v logfile="${OUTPUTS["log"]}" \
+        -v srx_to_track="${TMPS["srx_to_track"]}" '
+    BEGIN {
+      organism = substr(genome, 1, 2)
+      exp_type["dmr"]      = "Bisulfite-seq"
+      exp_type["diffbind"] = "ChIP-seq/ATAC-seq/DNase-seq"
+      err_format = "[ERROR] \"%s\" does not correspond to an experiment for %s.\n"
+    } {
+      if (substr($2, 1, 2) != organism) {
+        printf err_format, $1, genome >> logfile
+        exit 1
+      }
+      if (($3 == "Bisulfite-Seq" ? "dmr" : "diffbind") != method) {
+        printf err_format, $1, exp_type[method] >> logfile
+        exit 1
+      }
+      if (!a[$1]++) {
+        track_info = (method == "dmr") ? "Methylation rate" : $3
+        printf "%s\t%s (@ %s) %s\n", $1, track_info, $6, $1 > srx_to_track
+      }
+    }' || exit 1
+  fi
+
+  [[ "$NUM_OF_URLS" -gt 0 ]] && awk -F"\t" -v OFS="\t" '{
+    print $1, "BigWig from user" " " $1
+  }' "${TMPS["url_input"]}" >>"${TMPS["srx_to_track"]}"
+
+  debug_log "Done."
+}
+
+check_file_exist() {
+  check_file() {
+    local file=$1 link=$2
+    debug_log "checking $file"
+    if [[ ! -e $file ]]; then
+      debug_log "$file => \"$link\""
+      handle_error "The following file was not correctly downloaded or identified."
+      handle_error " ==> $file"
+      [[ -n $link ]] && handle_error "==> $link"
+      exit 1
+    fi
+  }
+
+  local srx suffix bw_path bed_path
+
+  # shellcheck disable=SC2013,SC2086
+  for srx in $(cat ${TMPS["srx_a"]} ${TMPS["srx_b"]}); do
+    if [[ $METHOD == "dmr" ]]; then
+      suffix="methyl.bw"
+      bw_path="${LIBS["bw_methyl"]}/${srx}.${suffix}"
+    elif [[ $METHOD == "diffbind" ]]; then
+      suffix="bw"
+      bw_path="${LIBS["bw_chip"]}/${srx}.${suffix}"
+      bed_path="${LIBS["peak_chip"]}/${srx}.${THRES_STR}.bed"
+    fi
+
+    if [[ $srx =~ "URL" ]]; then
+      check_file "${TMPDIR}/${srx}.${suffix}" "$(awk -F"\t" -v srx="$srx" '$1 == srx {print $2}' "${TMPS["url_input"]}")"
+      [[ $METHOD == "diffbind" ]] && check_file "${TMPDIR}/${srx}.bed" "$(awk -F"\t" -v srx="$srx" '$1 == srx {print $3}' "${TMPS["url_input"]}")"
+    else
+      check_file "$bw_path"
+      [[ $METHOD == "diffbind" ]] && check_file "$bed_path"
+    fi
+  done
+}
+
+bw_to_bg() {
+  debug_log "Converting bigWig to bedGraph..."
+  debug_log "lib_bw_methyl=\"${LIBS["bw_methyl"]}\""
+  debug_log "lib_bw_chip=\"${LIBS["bw_chip"]}\""
+  debug_log "lib_peak_chip=\"${LIBS["peak_chip"]}\""
+
+  calc_scalefactor_and_readlength() {
+    extract_meta() {
+      grep -F -w -f "${TMPS["srx_a"]}" -f "${TMPS["srx_b"]}" \
+        "${LIBS["exp_tab"]}" "${LIBS["run_info"]}" "${LIBS["reads_bases"]}" |
+        awk -F"\t" -v OFS="\t" '
+        NF {
+          split($1, x, ":")
+          $1 = x[2]
+          print $0, x[1]
+        }' >"${TMPS["meta"]}"
+    }
+
+    calc_from_meta() {
+      awk -F"\t" -v OFS="\t" -v genome="$GENOME" '
+      NF {
+        if ($NF ~ /experimentList\.tab$/ && $2 == genome) {
+          split ($8, log_arr, ",")
+          num_of_reads[$1] = log_arr[1]
+          mapping_rate[$1] = log_arr[2] / 100
+          non_dup_rate[$1] = 1 - log_arr[3] / 100
+        } else if ($NF ~ /RunInfo\.tab$/) {
+          layout[$1] = $2 + 1
+        } else if ($NF ~ /reads_bases\.tab$/ && layout[$1] > 0) {
+          read_length[$1] = $3 / $2 / layout[$1]
+        }
+      } END {
+        for (srx in num_of_reads) {
+          scale_factor[srx] = 1000000 / (num_of_reads[srx] * mapping_rate[srx] * non_dup_rate[srx] * layout[srx])
+          print srx, scale_factor[srx], read_length[srx]
+        }
+      }' "${TMPS["meta"]}" >"${TMPS["scale_length"]}"
+
+      if [[ $NUM_OF_URLS -gt 0 ]]; then
+        awk -F"\t" -v OFS="\t" '{
+          print $1, "1", $4
+        }' "${TMPS["url_input"]}" >>"${TMPS["scale_length"]}"
+      fi
+    }
+
+    debug_log "Calcutating scale factor and read length..."
+    debug_log "exp_tab=\"${LIBS["exp_tab"]}\""
+    debug_log "run_info=\"${LIBS["run_info"]}\""
+    debug_log "reads_bases=\"${LIBS["reads_bases"]}\""
+    debug_log "scale_length=\"${TMPS["scale_length"]}\""
+    debug_log "srx_a=\"${TMPS["srx_a"]}\""
+    debug_log "srx_b=\"${TMPS["srx_b"]}\""
+
+    debug_log "read_srx_list=\"cat ${TMPS["srx_a"]} ${TMPS["srx_b"]}\""
+    debug_log "meta=\"${TMPS["meta"]}\""
+
+    extract_meta
+    calc_from_meta
+
+    debug_log "Done."
+  }
+
+  prepare_peak_list() {
+    debug_log "Preparing peak list..."
+    debug_log "thres=\"${THRES_STR}\""
+    debug_log "peakdir=\"${LIBS["peak_chip"]}\""
+    local srx_list srx_peaks
+
+    eval "$(
+      awk -v tmpdir="${TMPDIR}" -v peakdir="${LIBS["peak_chip"]}" -v thres="${THRES_STR}" '{
+        srx_list  = srx_list  (NR == 1 ? "" : " ") $1
+        prefix = ($1 ~ /^URL/) ? tmpdir : peakdir
+        suffix = ($1 ~ /^URL/) ? ".bed" : "." thres ".bed"
+        srx_peaks = srx_peaks (NR == 1 ? "" : " ") prefix "/" $1 suffix
+      } END {
+        print "srx_list=\"" srx_list "\""
+        print "srx_peaks=\"" srx_peaks "\""
+      }' "${TMPS["srx_a"]}" "${TMPS["srx_b"]}"
+    )"
+
+    debug_log "names=${srx_list}"
+    debug_log "srx_files=${srx_peaks}"
+    debug_log "peak_list=\"${TMPS["peak_list"]}\""
+    debug_log "bedtools=\"${TOOLS["bedtools"]}\""
+
+    # shellcheck disable=SC2086
+    "${TOOLS["bedtools"]}" multiinter -names ${srx_list} -i ${srx_peaks} |
+      awk -F"\t" -v OFS="\t" '{
+      $4 = "peak_"NR
+      print $1, $2, $3, $4
+    }' >"${TMPS["peak_list"]}"
+    debug_log "Done."
+  }
+
+  scaling_bg_and_convert_to_count() {
+    debug_log "srx=\"$srx\""
+
+    "${TOOLS["bedtools"]}" intersect -a "${bg}" -b "${TMPS["peak_list"]}" -sorted -wa -wb |
+      cut -f2-4,8 | awk -F"\t" -v OFS="\t" -v srx="$srx" -v scale_length="${TMPS["scale_length"]}" '
+    BEGIN {
+      while (getline < scale_length) {
+        scale_factor[$1] = $2
+        read_length[$1] = $3
+      }
+    } {
+      sum[$4] += ($2 - $1) * $3
+    } END {
+      for (i in sum) print i, srx, int((sum[i] / scale_factor[srx] + 0.5) / read_length[srx]) + 1
+    }' >"${TMPDIR}/${srx}.count"
+  }
+
+  combine_counts() {
+    awk -F"\t" -v OFS="," '
+    function join(sep, arr, n, s, i) {
+      for (i=1; i<=n; i++) s = s sep arr[i]
+      return substr(s, 2)
+    } {
+      row[$1]++
+      line[$1] = $1
+      if (!($2 in column)) {
+        column[$2] = ++col_idx
+        col_order[col_idx] = $2
+      }
+      count[$1, $2] = $3
+    } END {
+      print "Peak" (col_idx ? "," : "") join(",", col_order, col_idx)
+      for (r in row) {
+        printf "%s", r
+        for (c=1; c<=col_idx; c++)
+          printf ",%s", (count[r, col_order[c]] ? count[r, col_order[c]] : 0)
+        print ""
+      }
+    }' "${TMPDIR}"/*.count >"${TMPS["count_table"]}"
+  }
+
+  check_url_bg_integer() {
+    local bg="$1" link=$2
+    debug_log "bg=\"$bg\""
+    debug_log "link=\"$link\""
+    awk -F"\t" '{
+      if (int($4) != $4) exit 1
+    }' <(head -n 10000 "$bg") || {
+      handle_error "The following BigWig file contains non-integer values, which are not allowed."
+      handle_error "==> $link"
+      exit 1
+    }
+  }
+
+  single_list_bw_to_bg() {
+    local srx_list bw bg srx
+    srx_list="$1"
+
+    # shellcheck disable=SC2013
+    for srx in $(cat "${srx_list}"); do
+      bg="${TMPDIR}/$srx.bg"
+
+      if [[ $METHOD = "dmr" ]]; then
+        bw="${LIBS["bw_methyl"]}/${srx}.methyl.bw"
+        [[ $srx =~ "URL" ]] && bw="${TMPDIR}/${srx}.methyl.bw"
+
+        debug_log "${TOOLS["bigWigToBedGraph"]} \"$bw\" \"$bg\""
+        "${TOOLS["bigWigToBedGraph"]}" "$bw" "$bg"
+
+      elif [[ $METHOD = "diffbind" ]]; then
+        bw="${LIBS["bw_chip"]}/${srx}.bw"
+        [[ $srx =~ "URL" ]] && bw="${TMPDIR}/${srx}.bw"
+
+        debug_log "${TOOLS["bigWigToBedGraph"]} \"$bw\" \"$bg\""
+        "${TOOLS["bigWigToBedGraph"]}" "$bw" "$bg"
+        if [[ $srx =~ "URL" ]]; then
+          check_url_bg_integer "$bg" "$(awk -F"\t" -v srx="$srx" '$1 == srx {print $2}' "${TMPS["url_input"]}")"
+        fi
+        scaling_bg_and_convert_to_count
+
+      fi
+    done
+  }
+
+  if [[ $METHOD = "diffbind" ]]; then
+    calc_scalefactor_and_readlength
+    prepare_peak_list
+  fi
+
+  single_list_bw_to_bg "${TMPS["srx_a"]}" &
+  single_list_bw_to_bg "${TMPS["srx_b"]}" &
+
+  wait || {
+    handle_error "bigWigToBedGraph failed."
+    exit 1
+  }
+
+  if [[ $METHOD = "diffbind" ]]; then
+    combine_counts
+  fi
+
+  debug_log "Done."
+}
+
+# detect_dmr_with_metilene
+perform_diff_analysis() {
+  detect_dmr_with_metilene() {
+    debug_log "Detecting DMRs..."
+    local bg_list_a bg_list_b
+    make_bg_list() {
+      awk -v tmpdir="${TMPDIR}" '{
+        printf (NR == 1 ? "" : ",") tmpdir "/" $1 ".bg"
+      } END {
+        print ""
+      }' "${1}"
+    }
+
+    bg_list_a="$(make_bg_list "${TMPS["srx_a"]}")"
+    bg_list_b="$(make_bg_list "${TMPS["srx_b"]}")"
+
+    debug_log "bg_list_a=\"${bg_list_a}\""
+    debug_log "bg_list_b=\"${bg_list_b}\""
+    debug_log "lib_pl=\"${LIBS["metilene_input"]}\""
+    debug_log "out_pl=\"${TMPS["metilene_input"]}\""
+    debug_log "metilene=\"${TOOLS["metilene"]}\""
+
+    debug_log "Genarating input for metilene..."
+    perl "${LIBS["metilene_input"]}" -b "${TOOLS["bedtools"]}" \
+      --in1 "${bg_list_a}" --in2 "${bg_list_b}" \
+      --out "${TMPS["metilene_input"]}" >/dev/null 2>&1
+
+    debug_log "Running metilene..."
+    "${TOOLS["metilene"]}" -a g1 -b g2 \
+      "${TMPS["metilene_input"]}" >"${TMPS["bed"]}" 2>/dev/null
+
+  }
+
+  detect_diffbind_with_edgeR() {
+    "${TOOLS["Rscript"]}" "${LIBS["edgeR"]}" \
+      "${TMPS["count_table"]}" \
+      "${TMPS["srx_a"]}" "${TMPS["srx_b"]}" \
+      "${TMPS["peak_list"]}" \
+      "${TMPS["bed"]}"
+  }
+
+  if [[ $METHOD = "dmr" ]]; then
+    detect_dmr_with_metilene
+  elif [[ $METHOD = "diffbind" ]]; then
+    if [[ $DEBUG_MODE = 1 ]]; then
+      debug_log "Detecting diffbinds..."
+      debug_log "Rscript=\"${TOOLS["Rscript"]}\""
+      debug_log "edgeR=\"${LIBS["edgeR"]}\""
+      debug_log "count_table=\"${TMPS["count_table"]}\""
+
+      detect_diffbind_with_edgeR | tee -a "${OUTPUTS["log"]}"
+    else
+      detect_diffbind_with_edgeR >>"${OUTPUTS["log"]}"
+    fi
+  fi
+
+  debug_log "Done."
+}
+
+format_bed_for_igv() {
+  debug_log "Formatting BED for IGV..."
+
+  local srx_list_a srx_list_b make_igv_session_awk wd
+  make_srx_list() {
+    awk '{
+      printf (NR == 1 ? "" : ",") $1
+    } END {
+      print ""
+    }'
+  }
+
+  srx_list_a="$(make_srx_list < <(sort "${TMPS["srx_a"]}"))"
+  srx_list_b="$(make_srx_list < <(sort "${TMPS["srx_b"]}"))"
+
+  debug_log "srx_list_a=\"${srx_list_a}\""
+  debug_log "srx_list_b=\"${srx_list_b}\""
+  debug_log "out_igv=\"${TMPS["igv"]}\""
+
+  awk -F"\t" -v OFS="\t" -v desc_a="${DESC_A}" -v desc_b="${DESC_B}" \
+    -v srx_list_a="${srx_list_a}" -v srx_list_b="${srx_list_b}" \
+    -v genome="$GENOME" -v title="$TITLE" -v method="$METHOD" '
+    BEGIN {
+      print "track name=\"" title "\" gffTags=\"on\""
+      score     = method == "dmr" ? 4 : 8
+      posi_nega = method == "dmr" ? 5 : 6
+    } $score < 0.1 {
+      metadata = "Analysis%20title=" title \
+                ";Genome=" genome \
+                ";SRXs%20(\"" desc_a "\")=" srx_list_a \
+                ";SRXs%20(\"" desc_b "\")=" srx_list_b
+
+      if (method == "dmr") {
+          metadata = metadata \
+                ";Q-value=" $4 \
+                ";Mean%20methylation%20difference=" $5 \
+                ";Length=" ($3 - $2 + 1) \
+                ";#CpGs=" $6 \
+                ";P-value%20(MWU)=" $7 \
+                ";P-value%20(2D%20KS)=" $8 \
+                ";Mean%20methylation%20level%20(\"" desc_a "\")=" $9 \
+                ";Mean%20methylation%20level%20(\"" desc_b "\")=" $10 ";"
+      } else {
+          metadata = metadata \
+                ";Normalized%20count%20(\"" desc_a "\")=" $4 \
+                ";Normalized%20count%20(\"" desc_b "\")=" $5 \
+                ";LogFC=" $6 \
+                ";P-value=" $7 \
+                ";Q-value=" $8 ";"
+      }
+
+      RGB = $posi_nega > 0 ? "222,131,68" : "106,153,208"
+      print $1, $2, $3, metadata, $score, ".", $2, $3, RGB
+    }' "${TMPS["bed"]}" >"${TMPS["igv"]}"
+
+  debug_log "Making IGV session file..."
+  debug_log "make_igv_session_awk=\"${LIBS["make_igv_session_awk"]}\""
+
+  awk -F"\t" -v genome="$GENOME" -v method="$METHOD" -v bed_igv="${OUTPUTS["igv"]}" -v title="$TITLE" \
+    -v track_name="${TMPDIR}/srx_to_track" -v url_input="${TMPS["url_input"]}" \
+    -f "${LIBS["make_igv_session_awk"]}" <(sort "${TMPS["srx_a"]}") <(sort "${TMPS["srx_b"]}") \
+    >"${TMPS["xml"]}"
+
+  mkdir -p "${TMPS["results"]}"
+  cp "${TMPS["igv"]}" "${TMPS["bed"]}" "${TMPS["xml"]}" "${OUTPUTS["log"]}" "${LIBS["readme"]}" "${TMPS["results"]}"/
+
+  wd="$(pwd)"
+  cd "$TMPDIR" || exit
+  zip -r "${TMPS["results"]}.zip" "$(basename "${TMPS["results"]}")"
+  cd "$wd" || exit
+
+  debug_log "Done."
+}
+
+print_script_variables() {
+  echo "[INFO] <parameter> MODE=\"DA\""
+  echo "[INFO] <parameter> WABI_ID=\"${WABI_ID}\""
+  echo "[INFO] <parameter> INPUT_A=\"${INPUT_A}\""
+  echo "[INFO] <parameter> INPUT_B=\"${INPUT_B}\""
+  echo "[INFO] <parameter> DESC_A=\"${DESC_A}\""
+  echo "[INFO] <parameter> DESC_B=\"${DESC_B}\""
+  echo "[INFO] <parameter> TITLE=\"${TITLE}\""
+  echo "[INFO] <parameter> GENOME=\"${GENOME}\""
+  echo "[INFO] <parameter> METHOD=\"${METHOD}\""
+  echo "[INFO] <parameter> THRESHOLD=\"${THRESHOLD}\""
+}
+
+finalize() {
+  mv "${TMPS["results"]}.zip" "${OUTPUTS["zip"]}"
+  if [[ "${DEBUG_MODE}" = 1 ]]; then
+    mv "${TMPDIR}" "${OUTPUTS["tmp"]}"
+  else
+    rm -fr "${TMPDIR}"
+  fi
+  touch "${OUTPUTS["html"]}" "${OUTPUTS["tsv"]}"
+}
+
+main() {
+  clear_ssd
+  parse_arguments "$@"
+  define_constants
+  clear_output
+  time_log "Start"
+  if [[ $DEBUG_MODE = 1 ]]; then
+    print_script_variables | tee -a "${OUTPUTS["log"]}"
+  else
+    print_script_variables >>"${OUTPUTS["log"]}"
+  fi
+  map_gsm_to_srx
+  validate_input_srx_list
+  check_file_exist
+  bw_to_bg
+  perform_diff_analysis
+  format_bed_for_igv
+  finalize
+  time_log "End"
+}
+
+main "$@"

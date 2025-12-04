@@ -1,0 +1,113 @@
+<!DOCTYPE HTML>
+<html lang='en'>
+<head>
+<meta charset='utf-8'>
+<FONT face="Helvetica Neue" color="333333">
+<title>___Title___</title>
+
+<script type="text/javascript" language="javascript" src="https://www.datatables.net/release-datatables/media/js/jquery.js"></script>
+<script type="text/javascript" language="javascript" src="https://www.datatables.net/release-datatables/media/js/jquery.dataTables.js"></script>
+<link rel="stylesheet" type="text/css" href="https://www.datatables.net/release-datatables/media/css/jquery.dataTables.css" />
+
+
+<style type="text/css">
+<!--
+.bodyMargin {margin: 30px 30px 30px 30px ;}
+
+.table1 {
+	margin: 10px auto;
+}
+@media (max-width:767px) { .table1 {
+    width: auto;
+	margin: 0;
+} }
+-->
+</style>
+</head>
+<body class="bodyMargin" onresize="location.reload()">
+<h1>ChIP-Atlas / Enrichment Analysis</h1>
+<p>___Header___</p>
+
+<script>
+jQuery.fn.dataTableExt.aTypes.unshift(
+	function ( sData )
+	{
+		var sValidChars = "0123456789-,./";
+		var Char;
+		var bDecimal = false;
+		for ( i=0 ; i<sData.length ; i++ )
+		{
+			Char = sData.charAt(i);
+			if (sValidChars.indexOf(Char) == -1)
+			{
+				return null;
+			}
+			if ( Char == "," )
+			{
+				if ( bDecimal )
+				{
+					return null;
+				}
+				bDecimal = true;
+			}
+		}
+
+		return 'numeric-comma';
+	}
+);
+
+jQuery.fn.dataTableExt.oSort['numeric-comma-asc']  = function(a,b) {
+	var x = (a == "-") ? 0 : a.replace( /,/, "" );
+	var y = (b == "-") ? 0 : b.replace( /,/, "" );
+	x = parseFloat( x );
+	y = parseFloat( y );
+    return ((x < y) ? -1 : ((x > y) ?  1 : 0));
+};
+
+jQuery.fn.dataTableExt.oSort['numeric-comma-desc'] = function(a,b) {
+	var x = (a == "-") ? 0 : a.replace( /,/, "" );
+	var y = (b == "-") ? 0 : b.replace( /,/, "" );
+	x = parseFloat( x );
+	y = parseFloat( y );
+	return ((x < y) ?  1 : ((x > y) ? -1 : 0));
+};
+
+$(document).ready(function() {
+    $('#example').dataTable( {
+        "aaSorting": [[8, 'asc']],
+        "sScrollY": $(window).height() / 1.5,
+        "bPaginate": true,
+        "bFilter": true,
+        "bSort": true,
+        "bInfo": true,
+        "bProcessing": true,
+        "bAutoWidth": true,
+        "iDisplayLength": 100,
+        "aLengthMenu": [[100, 200, 500, -1], [100, 200, 500, "All"]]
+    } );
+} );
+</script>
+
+
+
+
+<div class="table1">
+<table cellpadding="0" cellspacing="0" border="0" class="display" id="example">
+<caption><h2>___Caption___</h2></caption>
+<thead>
+<tr style="text-decoration: none;">
+<th title="Links to experimental accessions.">ID</th>
+<th title="Experiment type.">Experiment type</th>
+<th title="Feature.">Feature</th>
+<th title="Cell type class.">Cell class</th>
+<th title="Cell type.">Cell</th>
+<th title="Number of peaks called for the accession ID at column 1.">Num of peaks</th>
+<th title="Number of target genes for the accession ID at column 1 / Number of all non-zero expression genes in the count table.">Num of Targets / All</th>
+<th title="Mean LogFC of the target genes / Mean LogFC of all non-zero expression genes. FCs were calculated by ___Targets___ / ___References___.">Mean LogFC (Targets / All)</th>
+<th title="Log10(P-value) calculated from Z-scores in column 11.">Log P-val </th>
+<th title="Log10(Q-value) calculated by Benjamini and Hochberg method.">Log Q-val </th>
+<th title="The Z-score calculated from column 8, quantifing the distance between the mean logFC of the target genes and that of all non-zero genes.">Z-score</th>
+<th title="If the Z-score > 0, the features are enriched more to ‘___Targets___’, otherwise more to ‘___References___’.">Z > 0?</th>
+</tr>
+</thead>
+<tbody>

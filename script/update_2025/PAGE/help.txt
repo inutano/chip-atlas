@@ -1,0 +1,38 @@
+Usage: PAGE -g <genome> -c <count_table> -o <out_prefix> \
+           [-d <dn_bp>] [-u <up_bp>] [-T <title>] [-E <exp_type>] [-C <cell_class>] \
+           [-Q <threshold>] [-w <wabi_id>] [-x <tmp_dir>] [-D] [-h]
+
+Required options:
+  -g <genome>        Genome assembly. One of:
+                     [hg38, hg19, mm10, mm9, rn6, dm6, dm3, ce11, ce10, sacSer3]
+  -c <count_table>   Input RAW count table in either CSV or TSV format.
+  -o <out_prefix>    Prefix for output files.
+
+Optional options:
+  -u <up_bp>         Distance upstream in bp (default: 5000).
+  -d <dn_bp>         Distance downstream in bp (default: 5000).
+  -T <title>         Project title (default: "My project").
+  -E <exp_type>      Experiment type (default: "TFs and others"). One of:
+                     [ATAC-Seq, Bisulfite-Seq, DNase-seq, Histone, Input control,
+                      RNA polymerase, TFs and others]
+  -C <cell_class>    Cell type class (default: "All cell types"). One of:
+                     [All cell types, Adult, Embryo, Larvae, Cell line, Pupae,
+                      Adipocyte, Blood, Bone, Breast, Cardiovascular, Digestive tract,
+                      Epidermis, Gonad, Kidney, Liver, Lung, Muscle, Neural, Others,
+                      Pancreas, Placenta, Pluripotent stem cell, Prostate, Uterus,
+                      Embryonic fibroblast, Spleen, Yeast strain]
+  -Q <threshold>     Threshold value (default: 100). One of: [50, 100, 200, 500, bs]
+  -w <wabi_id>       WABI ID.
+  -x <tmp_dir>       Path for tempolary directory.
+  -D                 Enable debug mode.
+  -h                 Show this help message and exit.
+
+Examples:
+  # Set EA directory and example files
+  PAGE_dir="/home/okishinya/chipatlas/analTools/PAGE"
+  example_dir="$PAGE_dir/examples"
+  human_count="$example_dir/human.tsv"
+  mouse_count="$example_dir/mouse.tsv"
+
+  # = = = Interactive mode = = = #
+  $PAGE_dir/PAGE -g hg38 -c "$human_count" -o "human_hg38" -C Bone -Q 50 -D

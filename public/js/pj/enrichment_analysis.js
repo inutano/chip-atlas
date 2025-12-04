@@ -1030,5 +1030,5 @@ var helpText = {
   disttss:
     "To search for common epigenetic features around given genes, specify the distance range from the Transcription Start Sites (TSS).\n\nDefault is between -5000 and +5000 bp from the TSS. Specifying TSS ± 1000 bp, ± 5000 bp, or ± 10000 bp can accelerate the calculation by using a predefined gene-feature network.\n\n",
   threshold:
-    "Set the threshold for statistical significance values calculated by peak-caller MACS2 (-10*Log10[MACS2 Q-value]). If set to 50, peaks with Q values < 1E-05 are used to evaluate overlap with data sets A and B. Ignore if experiment type is set to Bisulfite-seq.",
+    "Set the threshold for statistical significance values calculated by peak-caller MACS2 (-10*Log10[MACS2 Q-value]). If set to 50, peaks with Q values < 1E-05 are used to evaluate overlap with data sets A and, when available, B. Ignore if experiment type is set to Bisulfite-seq.",
 };
