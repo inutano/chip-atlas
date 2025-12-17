@@ -1,6 +1,6 @@
 # ChIP-Atlas
 
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.11044059.svg)](https://doi.org/10.5281/zenodo.11044059)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.17959610.svg)](https://doi.org/10.5281/zenodo.17959610)
 
 [ChIP-Atlas](https://chip-atlas.org) is a database collecting the bed files calculated from the ChIP-Seq, DNase-Seq, ATAC-Seq, and Bisulfite-seq data archived in Sequence Read Archive (SRA). The database has a web interface to explore the analysis results from the calculated peak call data. This repository contains the webapp code and the documentation of the database.
 
