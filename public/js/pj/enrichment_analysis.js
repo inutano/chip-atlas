@@ -406,6 +406,7 @@ function positionBed() {
     ".panel-input.bed-input.comparedWith": "hide",
     ".panel-input.dataset-title-a": "show",
     ".panel-input.dataset-title-b": "show",
+    ".panel-input.not-required-message": "hide",
   };
   var inputs = {
     ComparedWithRandom: "checked",
@@ -434,6 +435,7 @@ function positionGene() {
     ".panel-input.bed-input.comparedWith": "hide",
     ".panel-input.dataset-title-a": "show",
     ".panel-input.dataset-title-b": "show",
+    ".panel-input.not-required-message": "hide",
   };
   var inputs = {
     ComparedWithRefseq: "checked",
@@ -449,10 +451,10 @@ function positionGene() {
 
 function positionCount() {
   var genome = genomeSelected();
-  // Hide panel 5 (dataset B) completely when count is selected
+  // Show panel 5 but display "not required" message when count is selected
   $("#" + genome + "TargetDB")
     .parent()
-    .hide();
+    .show();
 
   var panels = {
     ".panel-input.rnd": "hide",
@@ -462,6 +464,7 @@ function positionCount() {
     ".panel-input.bed-input.comparedWith": "hide",
     ".panel-input.dataset-title-a": "hide",
     ".panel-input.dataset-title-b": "hide",
+    ".panel-input.not-required-message": "show",
   };
   var inputs = {
     ComparedWithRefseq: "unchecked",
@@ -1011,7 +1014,7 @@ var helpText = {
   userdatagenes:
     "Check this to search for common epigenetic features around given genes.\n\n",
   userdatacount:
-    "Check this to upload a two-group gene count table (raw integer counts in CSV or TSV) with a header to search for common epigenetic features around highly expressed genes in each group.\n\nThe first column of the header is ignored. The other columns in the header specify the sample names for the corresponding columns (e.g., \"wt_1\" indicates replicate 1 of the \"wt\" group; the replicate number should be appended to the sample name, following an underscore). \n\nThe first column of the count table should contain gene names or IDs.\n\n",
+    'Check this to upload a two-group gene count table (raw integer counts in CSV or TSV) with a header to search for common epigenetic features around highly expressed genes in each group.\n\nThe first column of the header is ignored. The other columns in the header specify the sample names for the corresponding columns (e.g., "wt_1" indicates replicate 1 of the "wt" group; the replicate number should be appended to the sample name, following an underscore). \n\nThe first column of the count table should contain gene names or IDs.\n\n',
   comparedwithrandom:
     "Check this to compare ‘dataset A’ with a random background. In this case, each genomic location of ‘dataset A’ is permuted on a random chromosome at a random position for the specified times. Increasing the permutation times will provide a highly randomized background, or a high quality statistical test, but the calculation time will be longer.",
   comparedwithbed:

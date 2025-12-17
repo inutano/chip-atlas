@@ -344,8 +344,8 @@
                       %h4
                         %i.fas.fa-chart-line
                         Read and Peak Distribution
-                        %button.btn.btn-xs.btn-link.infoBtn{ :id => "distributionInfo", :style => "padding: 2px 6px; margin-left: 5px;" }
-                          %i.fas.fa-info-circle{ :style => "color: #337ab7;" }
+                        %a.infoBtn{ :id => "distributionInfo" }
+                          &#x24D8;
                       .text-center.distribution-container
                         %img.img-responsive.center-block.distribution-img{
                           :src => distribution_url,
@@ -360,8 +360,8 @@
                       %h4
                         %i.fas.fa-project-diagram
                         Correlation-Based Clustering
-                        %button.btn.btn-xs.btn-link.infoBtn{ :id => "clusteringInfo", :style => "padding: 2px 6px; margin-left: 5px;" }
-                          %i.fas.fa-info-circle{ :style => "color: #337ab7;" }
+                        %a.infoBtn{ :id => "clusteringInfo" }
+                          &#x24D8;
                       .text-center.correlation-container
                         %img.img-responsive.center-block.correlation-img{
                           :src => correlation_png_url,
