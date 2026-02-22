@@ -200,6 +200,23 @@ footer
 
 .org-logo
   margin-left: 30px
+  img
+    width: 100px
+    height: auto
+  &:nth-child(4), &:nth-child(6)
+    img
+      width: 150px
+
+@media (max-width: 767px)
+  .org-logo
+    margin-left: 10px
+    img
+      width: 20vw
+      max-width: 100px
+    &:nth-child(4), &:nth-child(6)
+      img
+        width: 28vw
+        max-width: 150px
 
 // publication
 .publication_list
