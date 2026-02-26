@@ -391,6 +391,10 @@ class PeakJohn < Sinatra::Base
     haml :publications
   end
 
+  get "/agents" do
+    haml :agents
+  end
+
   #
   # 404 Not Found
   #
