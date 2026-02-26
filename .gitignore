@@ -15,3 +15,5 @@ script/launch-instance/temporalInstance*
 data
 .env
 sapporo_run
+mcp/dist
+mcp/node_modules
