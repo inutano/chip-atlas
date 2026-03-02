@@ -1,0 +1,496 @@
+openapi: 3.1.0
+
+info:
+  title: ChIP-Atlas API
+  version: "1.0.0"
+  description: >-
+    REST API for ChIP-Atlas, a comprehensive database of public ChIP-seq,
+    ATAC-seq, DNase-seq, and Bisulfite-seq experiments. Provides programmatic
+    access to experiment metadata, peak-call data, colocalization analysis,
+    and target gene predictions across 10+ genome assemblies.
+  contact:
+    name: ChIP-Atlas
+    url: https://chip-atlas.org
+  license:
+    name: CC BY 4.0
+    url: https://creativecommons.org/licenses/by/4.0/
+
+externalDocs:
+  description: Agent integration guide
+  url: https://chip-atlas.org/agents
+
+servers:
+  - url: https://chip-atlas.org
+    description: Production
+
+tags:
+  - name: Classification
+    description: Browse the genome / experiment type / antigen / cell type hierarchy
+  - name: Experiments
+    description: Search and retrieve experiment metadata
+  - name: Analysis
+    description: Colocalization and target gene analysis data
+  - name: Download
+    description: Generate download URLs for peak-call BED files
+
+components:
+  parameters:
+    Genome:
+      name: genome
+      in: query
+      required: true
+      description: Genome assembly identifier
+      schema:
+        $ref: "#/components/schemas/GenomeAssembly"
+    AgClass:
+      name: agClass
+      in: query
+      required: true
+      description: >-
+        Experiment / antigen class. Use chipatlas_list_experiment_types
+        to discover valid values.
+      schema:
+        type: string
+        enum:
+          - Histone
+          - TFs and others
+          - RNA polymerase
+          - Input control
+          - ATAC-Seq
+          - DNase-seq
+          - Bisulfite-Seq
+      example: Histone
+    ClClass:
+      name: clClass
+      in: query
+      required: false
+      description: >-
+        Cell type class (e.g. "Blood", "Brain"). Use "All cell types" for
+        unfiltered results. Use /data/sample_types to discover valid values.
+      schema:
+        type: string
+      example: Blood
+
+  schemas:
+    GenomeAssembly:
+      type: string
+      description: UCSC-style genome assembly identifier
+      enum:
+        - hg38
+        - hg19
+        - mm39
+        - mm10
+        - mm9
+        - rn6
+        - dm6
+        - dm3
+        - ce11
+        - ce10
+        - sacCer3
+      example: hg38
+
+    ClassificationItem:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Machine-readable identifier
+        label:
+          type: string
+          description: Human-readable label
+        count:
+          type:
+            - integer
+            - "null"
+          description: Number of experiments (null when not applicable)
+      required:
+        - id
+        - label
+
+    ExperimentMetadata:
+      type: object
+      properties:
+        expid:
+          type: string
+          description: Experiment accession (SRX or ERX)
+          example: SRX018625
+        genome:
+          type: string
+          description: Genome assembly this record refers to
+        agClass:
+          type: string
+          description: Experiment / antigen class
+        agSubClass:
+          type: string
+          description: Antigen subclass (e.g. H3K4me3)
+        clClass:
+          type: string
+          description: Cell type class
+        clSubClass:
+          type: string
+          description: Cell type subclass
+        title:
+          type: string
+          description: Experiment title
+        attributes:
+          type: string
+          description: Additional sample attributes
+        readInfo:
+          type: string
+          description: Read count and length info
+
+    DownloadCondition:
+      type: object
+      required:
+        - genome
+        - agClass
+      properties:
+        genome:
+          $ref: "#/components/schemas/GenomeAssembly"
+        agClass:
+          type: string
+          description: Experiment / antigen class
+          example: Histone
+        agSubClass:
+          type: string
+          description: Antigen subclass filter
+          example: H3K4me3
+        clClass:
+          type: string
+          description: Cell type class filter
+          example: Blood
+        clSubClass:
+          type: string
+          description: Cell type subclass filter
+        qval:
+          type: string
+          description: >-
+            Q-value significance threshold. Lower values are stricter.
+          enum:
+            - "1"
+            - "5"
+            - "10"
+            - "50"
+            - "100"
+          example: "5"
+
+paths:
+  /data/list_of_genome.json:
+    get:
+      operationId: listGenomes
+      tags: [Classification]
+      summary: List available genome assemblies
+      description: Returns all genome assembly identifiers available in ChIP-Atlas.
+      responses:
+        "200":
+          description: Array of genome assembly identifiers
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+              example:
+                - hg38
+                - hg19
+                - mm10
+                - mm9
+                - rn6
+                - dm6
+                - dm3
+                - ce11
+                - ce10
+                - sacCer3
+
+  /data/list_of_experiment_types.json:
+    get:
+      operationId: listExperimentTypesStatic
+      tags: [Classification]
+      summary: List experiment type categories (static)
+      description: >-
+        Returns the fixed list of experiment type categories without counts.
+        Use /data/experiment_types for counts by genome and cell type.
+      responses:
+        "200":
+          description: Array of experiment type objects
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                    label:
+                      type: string
+                  required: [id, label]
+              example:
+                - id: Histone
+                  label: "ChIP: Histone"
+                - id: TFs and others
+                  label: "ChIP: TFs and others"
+                - id: ATAC-Seq
+                  label: ATAC-Seq
+
+  /data/experiment_types:
+    get:
+      operationId: listExperimentTypesWithCounts
+      tags: [Classification]
+      summary: List experiment types with counts
+      description: >-
+        Returns experiment type categories with the number of experiments
+        for a given genome and cell type class.
+      parameters:
+        - $ref: "#/components/parameters/Genome"
+        - name: clClass
+          in: query
+          required: true
+          description: Cell type class. Use "All cell types" for unfiltered counts.
+          schema:
+            type: string
+          example: All cell types
+      responses:
+        "200":
+          description: Array of experiment types with counts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ClassificationItem"
+
+  /data/sample_types:
+    get:
+      operationId: listSampleTypes
+      tags: [Classification]
+      summary: List cell type classes with counts
+      description: >-
+        Returns cell type classes and their experiment counts for a given
+        genome and experiment class.
+      parameters:
+        - $ref: "#/components/parameters/Genome"
+        - $ref: "#/components/parameters/AgClass"
+      responses:
+        "200":
+          description: Array of cell type classes with counts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ClassificationItem"
+              example:
+                - id: All cell types
+                  label: All cell types
+                  count: 500
+                - id: Blood
+                  label: Blood
+                  count: 120
+
+  /data/chip_antigen:
+    get:
+      operationId: listAntigens
+      tags: [Classification]
+      summary: List antigen subclasses with counts
+      description: >-
+        Returns antigen subclasses (e.g. H3K4me3, CTCF) with experiment
+        counts for a given genome, experiment class, and optional cell type.
+      parameters:
+        - $ref: "#/components/parameters/Genome"
+        - $ref: "#/components/parameters/AgClass"
+        - $ref: "#/components/parameters/ClClass"
+      responses:
+        "200":
+          description: Array of antigen subclasses with counts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ClassificationItem"
+              example:
+                - id: "-"
+                  label: All
+                  count: null
+                - id: H3K4me3
+                  label: H3K4me3
+                  count: 45
+
+  /data/cell_type:
+    get:
+      operationId: listCellTypes
+      tags: [Classification]
+      summary: List cell type subclasses with counts
+      description: >-
+        Returns cell type subclasses with experiment counts for a given
+        genome, experiment class, and optional cell type class.
+      parameters:
+        - $ref: "#/components/parameters/Genome"
+        - $ref: "#/components/parameters/AgClass"
+        - $ref: "#/components/parameters/ClClass"
+      responses:
+        "200":
+          description: Array of cell type subclasses with counts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ClassificationItem"
+
+  /data/ExperimentList.json:
+    get:
+      operationId: listAllExperiments
+      tags: [Experiments]
+      summary: Get full experiment list
+      description: >-
+        Returns the complete list of experiments as a 2D array. This is a
+        large response; prefer /data/exp_metadata.json for individual lookups.
+        Each row contains: SRX ID, SRA ID, GEO ID, genome, antigen class,
+        antigen subclass, cell type class, cell type subclass.
+      responses:
+        "200":
+          description: Object with a `data` array of experiment rows
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: array
+                      items:
+                        type: string
+
+  /data/exp_metadata.json:
+    get:
+      operationId: getExperimentMetadata
+      tags: [Experiments]
+      summary: Get metadata for a single experiment
+      description: >-
+        Returns detailed metadata for an experiment by its SRX or GSM
+        accession ID. May return multiple records if the experiment is
+        mapped to multiple genome assemblies.
+      parameters:
+        - name: expid
+          in: query
+          required: true
+          description: Experiment accession ID
+          schema:
+            type: string
+          example: SRX018625
+      responses:
+        "200":
+          description: Array of experiment metadata records
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ExperimentMetadata"
+
+  /data/colo_analysis.json:
+    get:
+      operationId: getColocalizationIndex
+      tags: [Analysis]
+      summary: Get colocalization analysis index
+      description: >-
+        Returns the index of available colocalization analyses for a genome.
+        The response maps antigens to their available cell types and vice versa.
+      parameters:
+        - $ref: "#/components/parameters/Genome"
+      responses:
+        "200":
+          description: >-
+            Object with `antigen` and `cellline` keys, each mapping names
+            to arrays of available partners.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties:
+                  type: object
+                  properties:
+                    antigen:
+                      type: object
+                      additionalProperties:
+                        type: array
+                        items:
+                          type: string
+                    cellline:
+                      type: object
+                      additionalProperties:
+                        type: array
+                        items:
+                          type: string
+
+  /data/target_genes_analysis.json:
+    get:
+      operationId: getTargetGenesIndex
+      tags: [Analysis]
+      summary: Get target genes analysis index
+      description: >-
+        Returns a mapping of genome assemblies to lists of antigens that
+        have precomputed target gene analysis data.
+      responses:
+        "200":
+          description: Object mapping genome assemblies to antigen arrays
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties:
+                  type: array
+                  items:
+                    type: string
+              example:
+                hg38:
+                  - H3K4me3
+                  - H3K27ac
+                  - CTCF
+                mm10:
+                  - H3K4me3
+                  - H3K27ac
+
+  /download:
+    post:
+      operationId: getBedDownloadUrl
+      tags: [Download]
+      summary: Get download URL for peak-call BED data
+      description: >-
+        Generates a download URL for assembled peak-call BED files
+        matching the given filtering conditions.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - condition
+              properties:
+                condition:
+                  $ref: "#/components/schemas/DownloadCondition"
+            example:
+              condition:
+                genome: hg38
+                agClass: Histone
+                agSubClass: H3K4me3
+                clClass: Blood
+                qval: "5"
+      responses:
+        "200":
+          description: Object containing the download URL
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  url:
+                    type: string
+                    format: uri
+                    description: Direct download URL for the BED file
+              example:
+                url: "https://chip-atlas.dbcls.jp/data/hg38/assembled/H3K4me3.Blood.5.bed"
