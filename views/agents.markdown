@@ -31,6 +31,8 @@ Set `CHIP_ATLAS_BASE_URL` to override the default base URL (`https://chip-atlas.
 
 Source code: [github.com/inutano/chip-atlas/tree/master/mcp](https://github.com/inutano/chip-atlas/tree/master/mcp)
 
+**Machine-readable API spec:** [OpenAPI 3.1 (openapi.yaml)](/openapi.yaml)
+
 ---
 
 ## Data Model
