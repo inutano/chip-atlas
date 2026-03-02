@@ -16,6 +16,7 @@ ChIP-Atlas integrates data from NCBI SRA, GEO, and other public repositories. Al
 ## API for Agents
 
 - [Agent Guide](https://chip-atlas.org/agents): Full documentation of MCP tools, HTTP API endpoints, data model, and usage workflows for AI agents
+- [OpenAPI 3.1 Spec](https://chip-atlas.org/openapi.yaml): Machine-readable API specification for all JSON endpoints
 - [MCP Server Source](https://github.com/inutano/chip-atlas/tree/master/mcp): TypeScript MCP server providing 10 read-only tools for querying ChIP-Atlas programmatically
 
 ## API Endpoints
