@@ -73,6 +73,7 @@ class PeakJohn < Sinatra::Base
       set :bedsizes, PJ::Bedsize.dump
       set :experiment_list, download_json_with_fallback("https://chip-atlas.dbcls.jp/data/metadata/ExperimentList.json", "ExperimentList.json")
       set :experiment_list_adv, download_json_with_fallback("https://chip-atlas.dbcls.jp/data/metadata/ExperimentList_adv.json", "ExperimentList_adv.json")
+      PJ::ExperimentSearch.load_from_json(settings.experiment_list_adv)
       set :gsm_to_srx, Hash[settings.experiment_list["data"].map{|a| [a[2], a[0]] }]
       set :wabi_endpoint, "https://dtn1.ddbj.nig.ac.jp/wabi/chipatlas/"
     rescue ActiveRecord::StatementInvalid
@@ -174,6 +175,15 @@ class PeakJohn < Sinatra::Base
     cl_class = params[:clClass]
     data = PJ::Experiment.cell_type(genome, ag_class, cl_class)
 
+    content_type "application/json"
+    JSON(data)
+  end
+
+  get '/data/search' do
+    query  = params[:q]
+    genome = params[:genome]
+    limit  = (params[:limit] || 20).to_i.clamp(1, 100)
+    data = PJ::ExperimentSearch.search(query, genome: genome, limit: limit)
     content_type "application/json"
     JSON(data)
   end
