@@ -178,6 +178,34 @@ class PeakJohn < Sinatra::Base
     JSON(data)
   end
 
+  get "/health" do
+    checks = {}
+
+    # DB connectivity
+    begin
+      ActiveRecord::Base.connection.execute("SELECT 1")
+      checks[:database] = "ok"
+    rescue => e
+      checks[:database] = "error"
+      checks[:database_error] = e.message
+    end
+
+    # Config loaded (settings populated during configure block)
+    config_loaded = begin
+      settings.respond_to?(:list_of_genome) && settings.list_of_genome
+    rescue
+      false
+    end
+    checks[:config] = config_loaded ? "ok" : "not_loaded"
+
+    healthy = checks[:database] == "ok" &&
+              (ENV["RACK_ENV"] == "production" ? checks[:config] == "ok" : true)
+
+    status healthy ? 200 : 503
+    content_type "application/json"
+    JSON.dump({ status: healthy ? "ok" : "error", checks: checks })
+  end
+
   get "/" do
     @number_of_experiments = settings.number_of_experiments
     haml :about
