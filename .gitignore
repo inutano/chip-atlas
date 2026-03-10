@@ -18,3 +18,5 @@ script/deploy/deploy-*-instance.json
 data
 .env
 sapporo_run
+mcp/dist
+mcp/node_modules
