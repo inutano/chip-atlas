@@ -1,0 +1,62 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.2.2"
+          bundler-cache: true
+
+      - name: Ruby syntax check
+        run: |
+          find . -name '*.rb' -not -path './vendor/*' | xargs -n1 ruby -c
+
+      - name: Set up database
+        run: bundle exec rake db:migrate
+
+      - name: Boot app and verify endpoints
+        run: |
+          bundle exec rackup -p 9292 -D -P tmp/rackup.pid
+          sleep 3
+
+          # Verify /health returns 200
+          health_status=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:9292/health)
+          if [ "$health_status" != "200" ]; then
+            echo "FAIL: /health returned $health_status"
+            curl -s http://localhost:9292/health
+            kill $(cat tmp/rackup.pid) 2>/dev/null || true
+            exit 1
+          fi
+          echo "OK: /health returned 200"
+          curl -s http://localhost:9292/health | python3 -m json.tool
+
+          # Verify / returns 200
+          root_status=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:9292/)
+          if [ "$root_status" != "200" ]; then
+            echo "FAIL: / returned $root_status"
+            kill $(cat tmp/rackup.pid) 2>/dev/null || true
+            exit 1
+          fi
+          echo "OK: / returned 200"
+
+          kill $(cat tmp/rackup.pid) 2>/dev/null || true
+
+      - name: Validate nginx config syntax
+        continue-on-error: true
+        run: |
+          sudo apt-get install -y nginx-core
+          sudo cp config/nginx/chip-atlas.conf /etc/nginx/sites-available/chip-atlas
+          sudo ln -sf /etc/nginx/sites-available/chip-atlas /etc/nginx/sites-enabled/chip-atlas
+          sudo rm -f /etc/nginx/sites-enabled/default
+          sudo nginx -t

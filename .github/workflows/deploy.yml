@@ -1,0 +1,68 @@
+name: Deploy
+
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Dry run (read-only, no mutations)"
+        required: false
+        type: boolean
+        default: false
+      skip_launch:
+        description: "Skip instance launch and re-provision existing instance"
+        required: false
+        type: boolean
+        default: false
+      instance_id:
+        description: "Instance ID (required when skip_launch is true)"
+        required: false
+        type: string
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Set up SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/chip-atlas.pem
+          chmod 600 ~/.ssh/chip-atlas.pem
+
+      - name: Create deploy config
+        run: |
+          {
+            echo "AWS_EC2_LAUNCH_TEMPLATE_ID=${{ secrets.AWS_EC2_LAUNCH_TEMPLATE_ID }}"
+            echo "CHIP_ATLAS_AWS_ACCOUNT_ID=${{ secrets.CHIP_ATLAS_AWS_ACCOUNT_ID }}"
+            echo "ALB_TARGET_GROUP_ARN=${{ secrets.ALB_TARGET_GROUP_ARN }}"
+            echo "SSH_KEY_FILE=$HOME/.ssh/chip-atlas.pem"
+          } > script/deploy/deploy.conf
+
+      - name: Run deployment
+        run: |
+          args=""
+          if [[ "${{ inputs.dry_run }}" == "true" ]]; then
+            args="$args --dry-run"
+          fi
+          if [[ "${{ inputs.skip_launch }}" == "true" ]]; then
+            args="$args --skip-launch --instance-id ${{ inputs.instance_id }}"
+          fi
+          bash script/deploy/deploy.sh $args
+
+      - name: Upload deploy log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: deploy-log
+          path: script/deploy/deploy-*.log
+          retention-days: 30

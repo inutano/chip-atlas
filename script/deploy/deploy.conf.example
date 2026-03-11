@@ -1,0 +1,14 @@
+# ChIP-Atlas deployment configuration
+# Copy this file to deploy.conf and fill in the values.
+
+# AWS EC2 Launch Template ID
+AWS_EC2_LAUNCH_TEMPLATE_ID=""
+
+# ChIP-Atlas AWS account ID (used to verify credentials)
+CHIP_ATLAS_AWS_ACCOUNT_ID=""
+
+# ALB target group ARN for blue-green switching
+ALB_TARGET_GROUP_ARN=""
+
+# Path to SSH private key for EC2 instances (optional, uses default SSH key if not set)
+# SSH_KEY_FILE="~/.ssh/chip-atlas.pem"

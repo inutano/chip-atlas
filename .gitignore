@@ -12,6 +12,11 @@ rdf/data
 experimentList*json
 script/launch-instance/launch-chip-atlas.conf
 script/launch-instance/temporalInstance*
+script/deploy/deploy.conf
+script/deploy/deploy-*.log
+script/deploy/deploy-*-instance.json
 data
 .env
 sapporo_run
+mcp/dist
+mcp/node_modules
