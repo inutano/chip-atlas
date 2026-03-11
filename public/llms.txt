@@ -1,0 +1,42 @@
+# ChIP-Atlas
+
+> ChIP-Atlas is a comprehensive database of public epigenomic data (ChIP-seq, ATAC-seq, DNase-seq, Bisulfite-seq) covering over 1M experiments across 10+ genome assemblies. It provides peak browsing, colocalization analysis, target gene prediction, enrichment analysis, and differential analysis.
+
+ChIP-Atlas integrates data from NCBI SRA, GEO, and other public repositories. All experiments are uniformly processed and classified by genome, experiment type, antigen, and cell type.
+
+## Main Features
+
+- [Peak Browser](https://chip-atlas.org/peak_browser): Browse and download assembled peak-call data filtered by genome, experiment type, antigen, cell type, and significance threshold
+- [Enrichment Analysis](https://chip-atlas.org/enrichment_analysis): Test whether your genomic regions are enriched for specific ChIP-seq/ATAC-seq signals
+- [Differential Analysis](https://chip-atlas.org/diff_analysis): Compare epigenomic profiles between sample groups (DiffBind / DMR)
+- [Target Genes](https://chip-atlas.org/target_genes): Predict target genes regulated by specific transcription factors or histone marks
+- [Colocalization](https://chip-atlas.org/colo): Analyze genome-wide colocalization between epigenomic factors
+- [Experiment Search](https://chip-atlas.org/search): Search all experiments by keyword, accession ID, or classification
+
+## API for Agents
+
+- [Agent Guide](https://chip-atlas.org/agents): Full documentation of MCP tools, HTTP API endpoints, data model, and usage workflows for AI agents
+- [OpenAPI 3.1 Spec](https://chip-atlas.org/openapi.yaml): Machine-readable API specification for all JSON endpoints
+- [MCP Server Source](https://github.com/inutano/chip-atlas/tree/master/mcp): TypeScript MCP server providing 10 read-only tools for querying ChIP-Atlas programmatically
+
+## API Endpoints
+
+- [List Genomes](https://chip-atlas.org/data/list_of_genome.json): GET — available genome assemblies
+- [List Experiment Types](https://chip-atlas.org/data/list_of_experiment_types.json): GET — experiment type categories
+- [Experiment Types with Counts](https://chip-atlas.org/data/experiment_types?genome=hg38&clClass=All%20cell%20types): GET — experiment types with counts for a genome and cell type class
+- [Sample Types](https://chip-atlas.org/data/sample_types?genome=hg38&agClass=Histone): GET — cell type classes with counts for a genome and experiment type
+- [Antigens](https://chip-atlas.org/data/chip_antigen?genome=hg38&agClass=Histone&clClass=undefined): GET — antigen subclasses with counts
+- [Cell Types](https://chip-atlas.org/data/cell_type?genome=hg38&agClass=Histone&clClass=undefined): GET — cell type subclasses with counts
+- [Experiment Metadata](https://chip-atlas.org/data/exp_metadata.json?expid=SRX018625): GET — detailed metadata for a single experiment by ID
+- [Colocalization Index](https://chip-atlas.org/data/colo_analysis.json?genome=hg38): GET — available colocalization analyses for a genome
+- [Target Genes Index](https://chip-atlas.org/data/target_genes_analysis.json): GET — genomes and antigens with target gene data
+
+## Data Model
+
+Experiments are classified along these dimensions: genome assembly (hg38, mm10, dm6, etc.), experiment class (Histone, TFs and others, ATAC-Seq, DNase-seq, Bisulfite-Seq), antigen subclass (H3K4me3, CTCF, etc.), cell type class (Blood, Brain, Liver, etc.), and cell type subclass (K-562, HeLa, etc.). Each experiment has an SRX (SRA) or GSM (GEO) accession ID.
+
+## Optional
+
+- [Publications](https://chip-atlas.org/publications): Papers citing ChIP-Atlas
+- [Documentation Wiki](https://github.com/inutano/chip-atlas/wiki): Detailed usage guide
+- [GitHub Repository](https://github.com/inutano/chip-atlas): Source code
