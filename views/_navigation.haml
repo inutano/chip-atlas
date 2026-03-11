@@ -40,6 +40,11 @@
             %i.fas.fa-book
             %span.full-text Publications
             %span.abbrev-text Pub
+        %li{ :class => (@active_menu == 'agents') ? 'active' : '' }
+          %a{ :href => "#{app_root}/agents" }
+            %i.fas.fa-robot
+            %span.full-text Agents
+            %span.abbrev-text API
         %li
           %a{ :href => "https://github.com/inutano/chip-atlas/wiki" }
             %i.fab.fa-github
