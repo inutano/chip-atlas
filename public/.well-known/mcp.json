@@ -1,0 +1,26 @@
+{
+  "name": "ChIP-Atlas",
+  "description": "Query public ChIP-seq, ATAC-seq, DNase-seq, and Bisulfite-seq data from ChIP-Atlas. Browse genomes, experiments, antigens, cell types, colocalization, and target gene analyses.",
+  "url": "https://chip-atlas.org",
+  "documentation": "https://chip-atlas.org/agents",
+  "source": "https://github.com/inutano/chip-atlas/tree/master/mcp",
+  "install": {
+    "command": "node",
+    "args": ["mcp/dist/index.js"],
+    "env": {
+      "CHIP_ATLAS_BASE_URL": "https://chip-atlas.org"
+    }
+  },
+  "tools": [
+    "chipatlas_list_genomes",
+    "chipatlas_list_experiment_types",
+    "chipatlas_list_sample_types",
+    "chipatlas_list_antigens",
+    "chipatlas_list_cell_types",
+    "chipatlas_search_experiments",
+    "chipatlas_get_experiment",
+    "chipatlas_get_colocalization",
+    "chipatlas_get_target_genes",
+    "chipatlas_get_bed_url"
+  ]
+}
