@@ -63,9 +63,23 @@ namespace :metadata do
     :load_bedfile,
     :load_analysis,
     :load_bedsize,
-    :load_run
+    :load_run,
+    :load_fts
   ] do
     puts "All metadata loading completed successfully!"
+  end
+
+  task :load_fts do
+    puts "[6/6] Loading FTS5 search index..."
+    start_time = Time.now
+    json_path = File.join(PROJ_ROOT, "public", "ExperimentList_adv.json")
+    if File.exist?(json_path)
+      json_data = JSON.parse(File.read(json_path))
+      PJ::ExperimentSearch.load_from_json(json_data)
+      puts "   FTS5 index loaded (#{sprintf('%.2f', Time.now - start_time)}s)"
+    else
+      puts "   Skipping FTS5: ExperimentList_adv.json not found (will be populated at app startup)"
+    end
   end
 
   task :load_experiment => experiment_table_fpath do |t|
