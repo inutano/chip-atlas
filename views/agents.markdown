@@ -2,6 +2,8 @@
 
 ChIP-Atlas is a comprehensive database of public ChIP-seq, ATAC-seq, DNase-seq, and Bisulfite-seq experiments. This page describes how AI agents can query ChIP-Atlas programmatically via the MCP (Model Context Protocol) server or the HTTP API directly.
 
+**New here?** Check out the [hands-on demo tutorial](/demo) for step-by-step scenarios you can try with your preferred LLM.
+
 ---
 
 ## MCP Server

@@ -433,6 +433,10 @@ class PeakJohn < Sinatra::Base
     haml :agents
   end
 
+  get "/demo" do
+    haml :demo
+  end
+
   #
   # 404 Not Found
   #

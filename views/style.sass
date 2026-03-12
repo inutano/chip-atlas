@@ -218,11 +218,43 @@ footer
         width: 28vw
         max-width: 150px
 
+// copy button on code blocks
+.copy-btn
+  position: absolute
+  top: 6px
+  right: 6px
+  background: #e8e8e8
+  border: none
+  border-radius: 3px
+  padding: 4px 7px
+  cursor: pointer
+  font-size: 13px
+  color: #555
+  opacity: 0.6
+  transition: opacity 0.15s
+  &:hover
+    background: #d0d0d0
+    color: #333
+    opacity: 1
+
 // publication
 .publication_list
   margin:
     top: .5em
   line-height: 1.5
+  table
+    width: 100%
+    margin-bottom: 1em
+    border-collapse: collapse
+    th, td
+      padding: 8px 12px
+      border: 1px solid #ddd
+      text-align: left
+    th
+      background-color: #f5f5f5
+      font-weight: bold
+    tbody tr:hover
+      background-color: #f9f9f9
 
 // navbar height fix
 .navbar-fixed-top

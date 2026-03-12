@@ -5,10 +5,10 @@
     %meta{ "http-equiv" => "X-UA-Compatible", :content => "IE=edge" }
     %meta{ :name => "viewport", :content => "width=device-width, initial-scale=1" }
 
-    %meta{ :name => "description", :content => "Guide for AI agents to use ChIP-Atlas MCP tools and API endpoints." }
+    %meta{ :name => "description", :content => "Step-by-step tutorial for using ChIP-Atlas with AI agents via llms.txt, MCP server, and HTTP API." }
     %meta{ :name => "author", :content => "Shinya Oki, Tazro Ohta" }
 
-    %title= "ChIP-Atlas: Agent Guide"
+    %title= "ChIP-Atlas: Demo Tutorial"
 
     // Bootstrap core and typeahead CSS
     %link{ :href => "#{app_root}/css/bootstrap.min.css", :rel => "stylesheet" }
@@ -21,13 +21,13 @@
     %link{ :href => "#{app_root}/css/regular.css", :rel => "stylesheet"}
 
   %body
-    - @active_menu = 'agents'
+    - @active_menu = 'demo'
     != haml :_navigation
 
     .container
       .row
         .col-md-8.col-md-offset-2.publication_list
-          != markdown(:agents, layout: false, fenced_code_blocks: true, autolink: true, tables: true)
+          != markdown(:demo, layout: false, fenced_code_blocks: true, autolink: true, tables: true)
 
     != haml :footer
 

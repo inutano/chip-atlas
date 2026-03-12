@@ -1,0 +1,37 @@
+:javascript
+  document.addEventListener('DOMContentLoaded', function() {
+    function copyText(text) {
+      if (navigator.clipboard && window.isSecureContext) {
+        return navigator.clipboard.writeText(text);
+      }
+      var ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.left = '-9999px';
+      document.body.appendChild(ta);
+      ta.focus();
+      ta.select();
+      try { document.execCommand('copy'); } catch(e) {}
+      document.body.removeChild(ta);
+      return Promise.resolve();
+    }
+
+    document.querySelectorAll('.publication_list pre').forEach(function(pre) {
+      pre.style.position = 'relative';
+      var btn = document.createElement('button');
+      btn.className = 'copy-btn';
+      btn.title = 'Copy to clipboard';
+      btn.innerHTML = '<i class="far fa-copy"></i>';
+      btn.addEventListener('click', function() {
+        var code = pre.querySelector('code');
+        var text = (code || pre).textContent.replace(/\n$/, '');
+        copyText(text).then(function() {
+          btn.innerHTML = '<i class="fas fa-check"></i>';
+          setTimeout(function() {
+            btn.innerHTML = '<i class="far fa-copy"></i>';
+          }, 1500);
+        });
+      });
+      pre.appendChild(btn);
+    });
+  });
