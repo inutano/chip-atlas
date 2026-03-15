@@ -7,6 +7,7 @@ require 'pj/fastqc'
 require 'pj/location'
 require 'pj/metadata'
 require 'pj/run'
+require 'pj/maintenance'
 require 'pj/sra'
 
 module PJ

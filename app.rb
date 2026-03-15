@@ -216,6 +216,11 @@ class PeakJohn < Sinatra::Base
     JSON.dump({ status: healthy ? "ok" : "error", checks: checks })
   end
 
+  get "/maintenance_status" do
+    content_type "application/json"
+    JSON.dump(PJ::Maintenance.current_status)
+  end
+
   get "/" do
     @number_of_experiments = settings.number_of_experiments
     haml :about
