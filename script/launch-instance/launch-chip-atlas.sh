@@ -41,10 +41,14 @@ if [ "$1" == "--launch" ]; then
   # Get the latest app server AMI (name starts with "app-")
   LATEST_AMI_INFO=$(aws ec2 describe-images \
     --owners $CHIP_ATLAS_AWS_ACCOUNT_ID \
-    --filters "Name=name,Values=app-*" \
+    --filters "Name=tag:Name,Values=app-*" \
     --query 'Images[*].[ImageId,CreationDate,Name]' \
     --output text | sort -k2 -r | head -1
   )
+  if [ -z "$LATEST_AMI_INFO" ]; then
+    echo "No AMI found with name starting with 'app-'. Please ensure your app server AMIs are named with the 'app-' prefix."
+    exit 1
+  fi
   LATEST_AMI_ID=$(echo $LATEST_AMI_INFO | cut -d' ' -f1)
   INSTANCE_CREATION_DATE=$(echo $LATEST_AMI_INFO | cut -d' ' -f3 | cut -d'-' -f1)
   echo "The latest AMI ID is $LATEST_AMI_ID created at $(echo $LATEST_AMI_INFO | cut -d' ' -f2) originally created from $INSTANCE_CREATION_DATE)"
@@ -61,18 +65,18 @@ if [ "$1" == "--launch" ]; then
   > $TEMPORAL_INSTANCE_INFO_FILE \
   && echo "The instance is launched successfully."
 
-  # Wait until the http status code of the webapp turns to 200
+  # Wait until the webapp responds (200 or 403 "Host not permitted" from Sinatra)
   echo "Waiting for the webapp to be up. This may take several minutes..."
   for i in {1..10}; do
     INSTANCE_ID=$(jq -r '.Instances[0].InstanceId' $TEMPORAL_INSTANCE_INFO_FILE)
     PUBLIC_IP=$(aws ec2 describe-instances --instance-ids $INSTANCE_ID --query 'Reservations[0].Instances[0].PublicIpAddress' --output text)
     echo "Public IP: $PUBLIC_IP"
     HTTP_STATUS_CODE=$(curl -s -o /dev/null -w "%{http_code}" http://$PUBLIC_IP)
-    if [ $HTTP_STATUS_CODE -eq 200 ]; then
-      echo "ChIP-Atlas is up and running at http://$PUBLIC_IP"
+    if [ $HTTP_STATUS_CODE -eq 200 ] || [ $HTTP_STATUS_CODE -eq 403 ]; then
+      echo "ChIP-Atlas is up and running at http://$PUBLIC_IP (HTTP $HTTP_STATUS_CODE)"
       break
     else
-      echo "Webapp is not up yet. Waiting for 90 seconds..."
+      echo "Webapp is not up yet (HTTP $HTTP_STATUS_CODE). Waiting for 90 seconds..."
       sleep 90
     fi
   done
@@ -114,17 +118,17 @@ if [ "$1" == "--start" ]; then
   echo "Starting the instance $INSTANCE_ID"
   aws ec2 start-instances --instance-ids $INSTANCE_ID > /dev/null
 
-  # Wait until the http status code of the webapp turns to 200
-    echo "Waiting for the webapp to be up. This may take several minutes..."
-    for i in {1..10}; do
+  # Wait until the webapp responds (200 or 403 "Host not permitted" from Sinatra)
+  echo "Waiting for the webapp to be up. This may take several minutes..."
+  for i in {1..10}; do
     PUBLIC_IP=$(aws ec2 describe-instances --instance-ids $INSTANCE_ID --query 'Reservations[0].Instances[0].PublicIpAddress' --output text)
     echo "Public IP: $PUBLIC_IP"
     HTTP_STATUS_CODE=$(curl -s -o /dev/null -w "%{http_code}" http://$PUBLIC_IP)
-    if [ $HTTP_STATUS_CODE -eq 200 ]; then
-      echo "ChIP-Atlas is up and running at http://$PUBLIC_IP"
+    if [ $HTTP_STATUS_CODE -eq 200 ] || [ $HTTP_STATUS_CODE -eq 403 ]; then
+      echo "ChIP-Atlas is up and running at http://$PUBLIC_IP (HTTP $HTTP_STATUS_CODE)"
       break
     else
-      echo "Webapp is not up yet. Waiting for 90 seconds..."
+      echo "Webapp is not up yet (HTTP $HTTP_STATUS_CODE). Waiting for 90 seconds..."
       sleep 90
     fi
   done
