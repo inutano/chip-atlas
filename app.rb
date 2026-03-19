@@ -62,7 +62,11 @@ class PeakJohn < Sinatra::Base
   end
 
   configure do
-    begin
+    # Static config (no external dependencies)
+    set :wabi_endpoint, "https://dtn1.ddbj.nig.ac.jp/wabi/chipatlas/"
+
+    unless ENV["SKIP_APP_CONFIGURE"]
+      # Database-dependent settings (app cannot function without these)
       set :number_of_experiments, ((PJ::Experiment.number_of_experiments / 1000) * 1000).to_s.reverse.gsub(/(\d{3})(?=\d)/, '\\1,').reverse
       set :index_all_genome, PJ::Experiment.index_all_genome
       set :list_of_genome, PJ::Experiment.list_of_genome
@@ -71,13 +75,12 @@ class PeakJohn < Sinatra::Base
       set :colo_analysis, PJ::Analysis.results(:colo)
       set :target_genes_analysis, PJ::Analysis.results(:target_genes)
       set :bedsizes, PJ::Bedsize.dump
+
+      # Remote JSON data and derived settings (app cannot function without these)
       set :experiment_list, download_json_with_fallback("https://chip-atlas.dbcls.jp/data/metadata/ExperimentList.json", "ExperimentList.json")
       set :experiment_list_adv, download_json_with_fallback("https://chip-atlas.dbcls.jp/data/metadata/ExperimentList_adv.json", "ExperimentList_adv.json")
       PJ::ExperimentSearch.load_from_json(settings.experiment_list_adv)
       set :gsm_to_srx, Hash[settings.experiment_list["data"].map{|a| [a[2], a[0]] }]
-      set :wabi_endpoint, "https://dtn1.ddbj.nig.ac.jp/wabi/chipatlas/"
-    rescue ActiveRecord::StatementInvalid
-      # Ignore Statement Invalid error when the database is not yet prepared
     end
   end
 
@@ -450,7 +453,7 @@ class PeakJohn < Sinatra::Base
   #
 
   get "/wabi_endpoint_status" do
-    wabi_endpoint_status
+    wabi_endpoint_status || ""
   end
 
   # Checking the final html output rather than using Wabi API which is too slow due to its huge job history

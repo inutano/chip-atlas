@@ -1,3 +1,4 @@
+ENV["SKIP_APP_CONFIGURE"] = "1"
 require 'sinatra/activerecord/rake'
 require './app'
 
