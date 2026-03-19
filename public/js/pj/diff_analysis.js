@@ -114,17 +114,7 @@ const putExampleData = (examples) => {
 
 // Diff Analysis post functions
 const submitDMR = async () => {
-  // Check maintenance status first
-  let maintenanceResponse = await fetch("/maintenance_status");
-  let maintenanceStatus = await maintenanceResponse.json();
-
-  if (maintenanceStatus.phase >= 1 && maintenanceStatus.phase <= 2) {
-    $("button#dmr-submit").prop("disabled", true);
-    alert(maintenanceStatus.message);
-    return;
-  }
-
-  // Normal operation: check WABI endpoint
+  // diable when blackout
   const endpointStatusUrl = "/wabi_endpoint_status";
   let endpointStatusResponse = await fetch(endpointStatusUrl);
   let endpointStatus = await endpointStatusResponse.text();

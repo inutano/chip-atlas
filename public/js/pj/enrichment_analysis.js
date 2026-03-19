@@ -1,4 +1,6 @@
 // variables
+// switch enrichment analysis API endpoint if this constant is set to the IP address of the server
+// const sapporoService = "ea.chip-atlas.org";
 
 const genomesize = {
   ce10: 100286070,
@@ -107,23 +109,8 @@ window.onload = async () => {
     eraseTextarea(genome + "ComparedWith");
   });
 
-  // check maintenance status and endpoint availability
-  let maintenanceResponse = await fetch("/maintenance_status");
-  let maintenanceStatus = await maintenanceResponse.json();
-
-  if (maintenanceStatus.ea_endpoint) {
-    // Maintenance mode with temporary EA endpoint
-    $("button#virtual-chip-submit").click(function () {
-      var button = $(this);
-      var data = retrievePostData();
-      post2sapporo(button, data, maintenanceStatus.ea_endpoint);
-    });
-  } else if (maintenanceStatus.phase >= 1 && maintenanceStatus.phase <= 2) {
-    // Maintenance mode, no EA available
-    $("button#virtual-chip-submit").prop("disabled", true);
-    alert(maintenanceStatus.message);
-  } else {
-    // Normal operation: check WABI endpoint
+  // check the endpoint status if the constant sapporoService is not set
+  if (typeof sapporoService === "undefined") {
     let endpointStatusResponse = await fetch("/wabi_endpoint_status");
     let endpointStatus = await endpointStatusResponse.text();
     if (endpointStatus == "chipatlas") {
@@ -138,6 +125,12 @@ window.onload = async () => {
         "Enrichment analysis is currently unavailable due to the background server issue. See maintainance schedule on top page.",
       );
     }
+  } else {
+    $("button#virtual-chip-submit").click(function () {
+      var button = $(this);
+      var data = retrievePostData();
+      post2sapporo(button, data);
+    });
   }
 
   // calculate estimated running time
@@ -709,7 +702,7 @@ function convertJsonStringsToIntegers(data) {
   return data;
 }
 
-function post2sapporo(button, data, endpoint) {
+function post2sapporo(button, data) {
   var genome = genomeSelected();
   button.attr("disabled", true);
   // evaluate text input and reject if invalid characters are found
@@ -724,7 +717,7 @@ function post2sapporo(button, data, endpoint) {
     formData.append("workflow_params", JSON.stringify(data));
     $.ajax({
       type: "post",
-      url: "https://" + endpoint + "/runs",
+      url: "https://" + sapporoService + "/runs",
       data: formData,
       contentType: false,
       processData: false,
@@ -737,7 +730,7 @@ function post2sapporo(button, data, endpoint) {
           "/enrichment_analysis_result?id=" +
           requestId +
           "&api=" +
-          endpoint +
+          sapporoService +
           "&title=" +
           data["title"] +
           "&calcm=" +
