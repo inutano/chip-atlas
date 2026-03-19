@@ -40,17 +40,15 @@ module PJ
         # Escape special FTS5 characters and build match expression
         sanitized = fts5_sanitize(query)
 
-        where_clause = "experiments_fts MATCH ?"
-        bind_values = [sanitized]
+        where_clause = "experiments_fts MATCH '#{sanitized.gsub("'", "''")}'"
 
         if genome && !genome.empty?
-          where_clause += " AND genome = ?"
-          bind_values << genome
+          where_clause += " AND genome = '#{genome.gsub("'", "''")}'"
         end
 
         # Count total matches
         count_sql = "SELECT COUNT(*) FROM experiments_fts WHERE #{where_clause}"
-        total = db.select_value(count_sql, "FTS Count", bind_values.map { |v| [nil, v] }).to_i
+        total = db.execute(count_sql).first["COUNT(*)"].to_i
 
         # Fetch ranked results
         select_sql = <<-SQL
@@ -60,14 +58,10 @@ module PJ
           FROM experiments_fts
           WHERE #{where_clause}
           ORDER BY rank
-          LIMIT ?
+          LIMIT #{limit.to_i}
         SQL
 
-        rows = db.select_all(
-          select_sql,
-          "FTS Search",
-          (bind_values + [limit]).map { |v| [nil, v] }
-        )
+        rows = db.execute(select_sql)
 
         experiments = rows.map do |row|
           {
@@ -93,7 +87,7 @@ module PJ
         # Remove FTS5 special characters, then wrap each token in quotes for safety
         tokens = query.strip.split(/\s+/).map do |token|
           # Strip special FTS5 operators
-          cleaned = token.gsub(/["()*^{}:]/, "")
+          cleaned = token.gsub(/["'()*^{}:]/, "")
           next nil if cleaned.empty?
           %("#{cleaned}")
         end.compact
