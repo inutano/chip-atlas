@@ -35,6 +35,26 @@ ChIP-Atlas integrates data from NCBI SRA, GEO, and other public repositories. Al
 
 Experiments are classified along these dimensions: genome assembly (hg38, mm10, dm6, etc.), experiment class (Histone, TFs and others, ATAC-Seq, DNase-seq, Bisulfite-Seq), antigen subclass (H3K4me3, CTCF, etc.), cell type class (Blood, Brain, Liver, etc.), and cell type subclass (K-562, HeLa, etc.). Each experiment has an SRX (SRA) or GSM (GEO) accession ID.
 
+## Important Notes for Agents
+
+### Data architecture
+
+ChIP-Atlas consists of two components: the **app server** (chip-atlas.org) serving the web UI and APIs, and the **data backend** (chip-atlas.dbcls.jp) hosting pre-computed result files. The app server generates URLs pointing to the data backend. Download URLs, colocalization results, and target gene results are all served from chip-atlas.dbcls.jp, not the app server itself.
+
+### Peak Browser download
+
+POST /download returns a URL to a pre-computed BED file on the data backend. The `qval` parameter in the condition must match a pre-computed threshold. Use GET /qvalue_range to retrieve valid values (typically "05", "10", "20", "50"). Other qval values will return `{"url": null}`.
+
+The download condition requires all of: `genome`, `agClass`, `agSubClass`, `clClass`, `clSubClass` (use "-" for unspecified), and `qval`.
+
+### Colocalization and Target Genes results
+
+POST /colo and POST /target_genes return URLs to pre-computed result files on the data backend. Not all antigen/cell type combinations have pre-computed results. A 404 from the result URL means that combination has no data available, not that the API is broken. Use the colocalization and target genes index endpoints to check which combinations have data before requesting results.
+
+### Experiment Search
+
+GET /search performs full-text search across the experiment database. The search index is populated at app startup from the experiment metadata JSON. If the index is empty, the endpoint returns `{"total": 0, "returned": 0, "experiments": []}`. This does not indicate an error.
+
 ## Optional
 
 - [Publications](https://chip-atlas.org/publications): Papers citing ChIP-Atlas
