@@ -103,7 +103,7 @@ echo ""
 
 # 4. FTS Search
 echo "Step 4: Full-text search"
-test_get_body "Search H3K4me3" "/search?q=H3K4me3" "experiments"
+test_get_body "Search H3K4me3" "/data/search?q=H3K4me3" "experiments"
 echo ""
 
 # 5. Peak browser form
