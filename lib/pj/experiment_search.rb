@@ -13,17 +13,19 @@ module PJ
 
         db.execute("DELETE FROM experiments_fts")
 
-        # Bulk insert in batches
+        # Bulk insert in batches using raw SQL to avoid AR type casting issues
         rows.each_slice(500) do |batch|
-          placeholders = batch.map { "(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)" }.join(", ")
-          values = batch.flat_map do |row|
-            COLUMNS.each_with_index.map { |_, i| row[i] || "" }
-          end
+          values_sql = batch.map do |row|
+            vals = COLUMNS.each_with_index.map do |_, i|
+              v = row[i]
+              v = v.join(", ") if v.is_a?(Array)
+              "'" + (v || "").to_s.gsub("'", "''") + "'"
+            end
+            "(#{vals.join(', ')})"
+          end.join(", ")
 
-          db.exec_insert(
-            "INSERT INTO experiments_fts (#{COLUMNS.join(', ')}) VALUES #{placeholders}",
-            "FTS Insert",
-            values.each_with_index.map { |v, i| [nil, v] }
+          db.execute(
+            "INSERT INTO experiments_fts (#{COLUMNS.join(', ')}) VALUES #{values_sql}"
           )
         end
 
