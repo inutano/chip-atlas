@@ -38,18 +38,19 @@ fi
 # Launch the instance if the command line option is --launch
 # Return the instance ID and the assigned ip if the instance is launched successfully
 if [ "$1" == "--launch" ]; then
-  # Get the latest AMI
+  # Get the latest app server AMI (name starts with "app-")
   LATEST_AMI_INFO=$(aws ec2 describe-images \
     --owners $CHIP_ATLAS_AWS_ACCOUNT_ID \
+    --filters "Name=name,Values=app-*" \
     --query 'Images[*].[ImageId,CreationDate,Name]' \
-    --output text | grep -v 'sapporo' | sort -k2 -r | head -1
+    --output text | sort -k2 -r | head -1
   )
   LATEST_AMI_ID=$(echo $LATEST_AMI_INFO | cut -d' ' -f1)
   INSTANCE_CREATION_DATE=$(echo $LATEST_AMI_INFO | cut -d' ' -f3 | cut -d'-' -f1)
   echo "The latest AMI ID is $LATEST_AMI_ID created at $(echo $LATEST_AMI_INFO | cut -d' ' -f2) originally created from $INSTANCE_CREATION_DATE)"
 
   # Script to launch an EC2 instance using the latest AMI
-  TEMPORAL_INSTANCE_NAME="temporalInstance-$(date +'%Y%m%d-%H%M%S')"
+  TEMPORAL_INSTANCE_NAME="app-$(date +'%Y%m%d-%H%M%S')"
   TEMPORAL_INSTANCE_INFO_FILE="${TEMPORAL_INSTANCE_NAME}_info.json"
 
   echo "Launching the instance with the latest AMI using the launch template $AWS_EC2_LAUNCH_TEMPLATE_ID"
