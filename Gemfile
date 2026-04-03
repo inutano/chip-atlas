@@ -16,7 +16,7 @@ gem 'tilt'
 gem 'redcarpet'
 
 # Utilities
-gem 'nokogiri'
+gem 'rexml'
 gem 'rake'
 
 group :test do

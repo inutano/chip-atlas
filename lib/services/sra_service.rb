@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 require 'open-uri'
-require 'nokogiri'
+require 'rexml/document'
 require 'json'
 
 module ChipAtlas
@@ -27,9 +27,10 @@ module ChipAtlas
       uid = get_uid
       return error_metadata unless uid
 
-      xml = Nokogiri::XML(URI.open("#{EUTILS_BASE}/efetch.fcgi?db=sra&id=#{uid}"))
-      parse_experiment(xml)
-    rescue OpenURI::HTTPError, Timeout::Error, SocketError, Errno::ECONNREFUSED
+      xml_str = URI.open("#{EUTILS_BASE}/efetch.fcgi?db=sra&id=#{uid}").read
+      doc = REXML::Document.new(xml_str)
+      parse_experiment(doc)
+    rescue OpenURI::HTTPError, Timeout::Error, SocketError, Errno::ECONNREFUSED, REXML::ParseException
       error_metadata
     end
 
@@ -42,32 +43,36 @@ module ChipAtlas
       nil
     end
 
-    def parse_experiment(xml)
-      lib_layout_node = xml.at_css('LIBRARY_LAYOUT')&.children&.first
+    def parse_experiment(doc)
+      lib_layout_el = doc.elements['.//LIBRARY_LAYOUT']&.elements&.first
 
       {
         exp_id: @exp_id,
         library_description: {
-          library_name:                  xml.at_css('LIBRARY_NAME')&.text.to_s,
-          library_strategy:              xml.at_css('LIBRARY_STRATEGY')&.text.to_s,
-          library_source:                xml.at_css('LIBRARY_SOURCE')&.text.to_s,
-          library_selection:             xml.at_css('LIBRARY_SELECTION')&.text.to_s,
-          library_construction_protocol: xml.at_css('LIBRARY_CONSTRUCTION_PROTOCOL')&.text.to_s,
+          library_name:                  xml_text(doc, 'LIBRARY_NAME'),
+          library_strategy:              xml_text(doc, 'LIBRARY_STRATEGY'),
+          library_source:                xml_text(doc, 'LIBRARY_SOURCE'),
+          library_selection:             xml_text(doc, 'LIBRARY_SELECTION'),
+          library_construction_protocol: xml_text(doc, 'LIBRARY_CONSTRUCTION_PROTOCOL'),
         },
         platform_information: {
-          instrument_model: xml.at_css('INSTRUMENT_MODEL')&.text.to_s,
-          cycle_sequence:   xml.at_css('CYCLE_SEQUENCE')&.text.to_s,
-          cycle_count:      xml.at_css('CYCLE_COUNT')&.text.to_s,
-          flow_sequence:    xml.at_css('FLOW_SEQUENCE')&.text.to_s,
-          flow_count:       xml.at_css('FLOW_COUNT')&.text.to_s,
-          key_sequence:     xml.at_css('KEY_SEQUENCE')&.text.to_s,
+          instrument_model: xml_text(doc, 'INSTRUMENT_MODEL'),
+          cycle_sequence:   xml_text(doc, 'CYCLE_SEQUENCE'),
+          cycle_count:      xml_text(doc, 'CYCLE_COUNT'),
+          flow_sequence:    xml_text(doc, 'FLOW_SEQUENCE'),
+          flow_count:       xml_text(doc, 'FLOW_COUNT'),
+          key_sequence:     xml_text(doc, 'KEY_SEQUENCE'),
         },
-        platform:               xml.at_css('PLATFORM')&.children&.first&.name,
-        library_layout:         lib_layout_node&.name,
-        library_orientation:    lib_layout_node&.attr('ORIENTATION').to_s,
-        library_nominal_length: lib_layout_node&.attr('NOMINAL_LENGTH').to_s,
-        library_nominal_sdev:   lib_layout_node&.attr('NOMINAL_SDEV').to_s,
+        platform:               doc.elements['.//PLATFORM']&.elements&.first&.name,
+        library_layout:         lib_layout_el&.name,
+        library_orientation:    lib_layout_el&.attributes&.[]('ORIENTATION').to_s,
+        library_nominal_length: lib_layout_el&.attributes&.[]('NOMINAL_LENGTH').to_s,
+        library_nominal_sdev:   lib_layout_el&.attributes&.[]('NOMINAL_SDEV').to_s,
       }
+    end
+
+    def xml_text(doc, tag)
+      doc.elements[".//#{tag}"]&.text.to_s
     end
 
     def error_metadata
