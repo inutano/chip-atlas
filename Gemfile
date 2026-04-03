@@ -8,9 +8,8 @@ gem 'puma'
 gem 'sequel'
 gem 'sqlite3'
 
-# Templates & rendering
-gem 'erubi'
-gem 'redcarpet'
+# Templates & rendering (ERB is stdlib, no gem needed)
+gem 'kramdown'
 
 # Utilities
 gem 'rexml'
