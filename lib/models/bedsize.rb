@@ -18,6 +18,8 @@ module ChipAtlas
     def load_from_file(table_path)
       records = []
       timestamp = Time.now
+      total = 0
+      batch_size = 5_000
 
       File.foreach(table_path, encoding: 'UTF-8') do |line_n|
         cols = line_n.chomp.split("\t")
@@ -29,10 +31,19 @@ module ChipAtlas
           number_of_lines: cols[4].to_i,
           created_at:      timestamp,
         }
+
+        if records.size >= batch_size
+          dataset.multi_insert(records)
+          total += records.size
+          records.clear
+        end
       end
 
-      dataset.multi_insert(records) if records.any?
-      records.size
+      if records.any?
+        dataset.multi_insert(records)
+        total += records.size
+      end
+      total
     end
   end
 end

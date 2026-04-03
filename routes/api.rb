@@ -3,6 +3,19 @@ require 'net/http'
 module ChipAtlas
   module Routes
     module Api
+      ALLOWED_HOSTS = %w[
+        chip-atlas.dbcls.jp
+        dtn1.ddbj.nig.ac.jp
+      ].freeze
+
+      def self.allowed_remote_url?(url)
+        uri = URI.parse(url)
+        return false unless uri.is_a?(URI::HTTP) || uri.is_a?(URI::HTTPS)
+        ALLOWED_HOSTS.any? { |host| uri.host&.end_with?(host) }
+      rescue URI::InvalidURIError
+        false
+      end
+
       def self.registered(app)
         app.get '/data/:data.json' do
           data = case params[:data]
@@ -110,8 +123,12 @@ module ChipAtlas
         end
 
         app.get '/api/remoteUrlStatus' do
+          url = params[:url]
+          unless url && ChipAtlas::Routes::Api.allowed_remote_url?(url)
+            halt 400, 'Invalid or disallowed URL'
+          end
           begin
-            Net::HTTP.get_response(URI.parse(params[:url])).code.to_i.to_s
+            Net::HTTP.get_response(URI.parse(url)).code.to_i.to_s
           rescue => e
             '500'
           end

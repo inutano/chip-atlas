@@ -33,10 +33,11 @@ module ChipAtlas
 
         app.get '/colo_result' do
           url = params[:base]
+          halt 404 unless url && url.start_with?('https://chip-atlas.dbcls.jp/')
           begin
             response = Net::HTTP.get_response(URI.parse(url))
             response.code == '200' ? redirect(url) : (halt 404)
-          rescue
+          rescue StandardError
             halt 404
           end
         end
@@ -49,10 +50,11 @@ module ChipAtlas
 
         app.get '/target_genes_result' do
           url = params[:base]
+          halt 404 unless url && url.start_with?('https://chip-atlas.dbcls.jp/')
           begin
             response = Net::HTTP.get_response(URI.parse(url))
             response.code == '200' ? redirect(url) : (halt 404)
-          rescue
+          rescue StandardError
             halt 404
           end
         end

@@ -11,27 +11,35 @@ module ChipAtlas
       sanitized = fts5_sanitize(query)
       return { total: 0, returned: 0, experiments: [] } if sanitized.empty?
 
-      where_clause = "experiments_fts MATCH '#{sanitized.gsub("'", "''")}'"
       if genome && !genome.empty?
-        where_clause += " AND genome = '#{genome.gsub("'", "''")}'"
+        count_sql = "SELECT COUNT(*) AS c FROM experiments_fts WHERE experiments_fts MATCH ? AND genome = ?"
+        total = DB[count_sql, sanitized, genome].first[:c]
+
+        select_sql = <<-SQL
+          SELECT #{COLUMNS.join(', ')}, rank
+          FROM experiments_fts
+          WHERE experiments_fts MATCH ? AND genome = ?
+          ORDER BY rank
+          LIMIT ? OFFSET ?
+        SQL
+        rows = DB[select_sql, sanitized, genome, limit.to_i, offset.to_i].all
+      else
+        count_sql = "SELECT COUNT(*) AS c FROM experiments_fts WHERE experiments_fts MATCH ?"
+        total = DB[count_sql, sanitized].first[:c]
+
+        select_sql = <<-SQL
+          SELECT #{COLUMNS.join(', ')}, rank
+          FROM experiments_fts
+          WHERE experiments_fts MATCH ?
+          ORDER BY rank
+          LIMIT ? OFFSET ?
+        SQL
+        rows = DB[select_sql, sanitized, limit.to_i, offset.to_i].all
       end
 
-      total = DB["SELECT COUNT(*) AS c FROM experiments_fts WHERE #{where_clause}"]
-                .first[:c]
-
-      rows = DB[<<-SQL].all
-        SELECT #{COLUMNS.join(', ')}, rank
-        FROM experiments_fts
-        WHERE #{where_clause}
-        ORDER BY rank
-        LIMIT #{limit.to_i}
-        OFFSET #{offset.to_i}
-      SQL
-
-      # Sequel returns symbol keys; Serializers.search_result expects string keys
       experiments = rows.map do |row|
-        string_row = row.each_with_object({}) { |(k, v), h| h[k.to_s] = v }
-        ChipAtlas::Serializers.search_result(string_row)
+        str_row = row.each_with_object({}) { |(k, v), h| h[k.to_s] = v }
+        ChipAtlas::Serializers.search_result(str_row)
       end
 
       { total: total, returned: experiments.size, experiments: experiments }
