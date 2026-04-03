@@ -14,34 +14,27 @@ module ChipAtlas
       return { total: 0, returned: 0, experiments: [] } if sanitized.empty?
 
       if genome && !genome.empty?
-        count_sql = "SELECT COUNT(*) AS c FROM experiments_fts WHERE experiments_fts MATCH ? AND genome = ?"
-        total = DB[count_sql, sanitized, genome].first[:c]
-
-        select_sql = <<-SQL
-          SELECT #{COLUMNS.join(', ')}, rank
+        sql = <<~SQL
+          SELECT #{COLUMNS.join(', ')}, rank, COUNT(*) OVER() AS total_count
           FROM experiments_fts
           WHERE experiments_fts MATCH ? AND genome = ?
           ORDER BY rank
           LIMIT ? OFFSET ?
         SQL
-        rows = DB[select_sql, sanitized, genome, limit.to_i, offset.to_i].all
+        rows = DB[sql, sanitized, genome, limit.to_i, offset.to_i].all
       else
-        count_sql = "SELECT COUNT(*) AS c FROM experiments_fts WHERE experiments_fts MATCH ?"
-        total = DB[count_sql, sanitized].first[:c]
-
-        select_sql = <<-SQL
-          SELECT #{COLUMNS.join(', ')}, rank
+        sql = <<~SQL
+          SELECT #{COLUMNS.join(', ')}, rank, COUNT(*) OVER() AS total_count
           FROM experiments_fts
           WHERE experiments_fts MATCH ?
           ORDER BY rank
           LIMIT ? OFFSET ?
         SQL
-        rows = DB[select_sql, sanitized, limit.to_i, offset.to_i].all
+        rows = DB[sql, sanitized, limit.to_i, offset.to_i].all
       end
 
-      experiments = rows.map do |row|
-        ChipAtlas::Serializers.search_result(row)
-      end
+      total = rows.first&.[](:total_count) || 0
+      experiments = rows.map { |row| ChipAtlas::Serializers.search_result(row) }
 
       { total: total, returned: experiments.size, experiments: experiments }
     end
@@ -50,19 +43,21 @@ module ChipAtlas
       rows = json_data['data']
       return if rows.nil? || rows.empty?
 
-      DB.run("DELETE FROM experiments_fts")
+      DB.transaction do
+        DB.run("DELETE FROM experiments_fts")
 
-      rows.each_slice(500) do |batch|
-        values_sql = batch.map do |row|
-          vals = COLUMNS.each_with_index.map do |_, i|
-            v = row[i]
-            v = v.join(', ') if v.is_a?(Array)
-            DB.literal((v || '').to_s)
-          end
-          "(#{vals.join(', ')})"
-        end.join(', ')
+        rows.each_slice(500) do |batch|
+          values_sql = batch.map do |row|
+            vals = COLUMNS.each_with_index.map do |_, i|
+              v = row[i]
+              v = v.join(', ') if v.is_a?(Array)
+              DB.literal((v || '').to_s)
+            end
+            "(#{vals.join(', ')})"
+          end.join(', ')
 
-        DB.run("INSERT INTO experiments_fts (#{COLUMNS.join(', ')}) VALUES #{values_sql}")
+          DB.run("INSERT INTO experiments_fts (#{COLUMNS.join(', ')}) VALUES #{values_sql}")
+        end
       end
 
       warn "ExperimentSearch: loaded #{rows.size} rows into FTS5 table"

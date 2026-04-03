@@ -37,31 +37,34 @@ module ChipAtlas
     end
 
     def load_from_file(table_path)
-      records = []
       timestamp = Time.now
       total = 0
       batch_size = 5_000
 
-      File.foreach(table_path, encoding: 'UTF-8') do |line_n|
-        cols = line_n.chomp.split("\t")
-        records << {
-          antigen:      cols[0],
-          cell_list:    cols[1],
-          target_genes: cols[2] == '+',
-          genome:       cols[3],
-          created_at:   timestamp,
-        }
+      DB.transaction do
+        records = []
 
-        if records.size >= batch_size
+        File.foreach(table_path, encoding: 'UTF-8') do |line_n|
+          cols = line_n.chomp.split("\t")
+          records << {
+            antigen:      cols[0],
+            cell_list:    cols[1],
+            target_genes: cols[2] == '+',
+            genome:       cols[3],
+            created_at:   timestamp,
+          }
+
+          if records.size >= batch_size
+            dataset.multi_insert(records)
+            total += records.size
+            records.clear
+          end
+        end
+
+        if records.any?
           dataset.multi_insert(records)
           total += records.size
-          records.clear
         end
-      end
-
-      if records.any?
-        dataset.multi_insert(records)
-        total += records.size
       end
       total
     end

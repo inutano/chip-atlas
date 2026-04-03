@@ -53,12 +53,18 @@ module ChipAtlas
 
     def sample_types(genome, ag_class)
       ag_class = EXPERIMENT_TYPES.first[:id] if ag_class == 'undefined'
-      subset = dataset.where(genome: genome, ag_class: ag_class)
 
-      result = [{ id: 'All cell types', label: 'All cell types', count: subset.count }]
-      subset.group_and_count(:cl_class).each do |row|
+      groups = dataset.where(genome: genome, ag_class: ag_class)
+                      .group_and_count(:cl_class)
+
+      total = 0
+      result = []
+      groups.each do |row|
         result << { id: row[:cl_class], label: row[:cl_class], count: row[:count] }
+        total += row[:count]
       end
+
+      result.unshift({ id: 'All cell types', label: 'All cell types', count: total })
       result
     end
 
@@ -106,43 +112,34 @@ module ChipAtlas
     end
 
     def total_number_of_reads(ids)
-      dataset.where(exp_id: ids).select_map(:read_info).sum do |info|
-        info.to_s.split(',')[0].to_i
-      end
+      return 0 if ids.nil? || ids.empty?
+
+      placeholders = ids.map { '?' }.join(', ')
+      sql = "SELECT COALESCE(SUM(CAST(SUBSTR(read_info, 1, INSTR(read_info, ',') - 1) AS INTEGER)), 0) AS total FROM experiments WHERE exp_id IN (#{placeholders})"
+      DB[sql, *ids].first[:total]
     end
 
     def index_all_genome
       result = {}
-      GENOMES.each_key do |genome|
-        result[genome] = index_by_genome(genome)
+      GENOMES.each_key { |g| result[g] = { antigen: {}, celltype: {} } }
+
+      # One query for all antigen counts across all genomes
+      dataset.group_and_count(:genome, :ag_class, :ag_sub_class).each do |row|
+        g = row[:genome]
+        next unless result.key?(g)
+        result[g][:antigen][row[:ag_class]] ||= Hash.new(0)
+        result[g][:antigen][row[:ag_class]][row[:ag_sub_class]] = row[:count]
       end
+
+      # One query for all celltype counts across all genomes
+      dataset.group_and_count(:genome, :cl_class, :cl_sub_class).each do |row|
+        g = row[:genome]
+        next unless result.key?(g)
+        result[g][:celltype][row[:cl_class]] ||= Hash.new(0)
+        result[g][:celltype][row[:cl_class]][row[:cl_sub_class]] = row[:count]
+      end
+
       result
-    end
-
-    def index_by_genome(genome)
-      index = { antigen: {}, celltype: {} }
-
-      # Antigen index via SQL GROUP BY
-      dataset.where(genome: genome)
-        .group_and_count(:ag_class, :ag_sub_class)
-        .each do |row|
-          ag_cls = row[:ag_class]
-          ag_sub = row[:ag_sub_class]
-          index[:antigen][ag_cls] ||= Hash.new(0)
-          index[:antigen][ag_cls][ag_sub] = row[:count]
-        end
-
-      # Cell type index via SQL GROUP BY
-      dataset.where(genome: genome)
-        .group_and_count(:cl_class, :cl_sub_class)
-        .each do |row|
-          cl_cls = row[:cl_class]
-          cl_sub = row[:cl_sub_class]
-          index[:celltype][cl_cls] ||= Hash.new(0)
-          index[:celltype][cl_cls][cl_sub] = row[:count]
-        end
-
-      index
     end
 
     def get_subclass(genome, ag_class, cl_class, subclass_type)
@@ -159,37 +156,40 @@ module ChipAtlas
     end
 
     def load_from_file(table_path)
-      records = []
       timestamp = Time.now
       total = 0
       batch_size = 5_000
 
-      File.foreach(table_path, encoding: 'UTF-8') do |line_n|
-        cols = line_n.chomp.split("\t")
-        records << {
-          exp_id:            cols[0],
-          genome:            cols[1],
-          ag_class:          cols[2],
-          ag_sub_class:      cols[3],
-          cl_class:          cols[4],
-          cl_sub_class:      cols[5],
-          cl_sub_class_info: cols[6],
-          read_info:         cols[7],
-          title:             cols[8],
-          attributes:        cols[9..].to_a.join("\t"),
-          created_at:        timestamp,
-        }
+      DB.transaction do
+        records = []
 
-        if records.size >= batch_size
+        File.foreach(table_path, encoding: 'UTF-8') do |line_n|
+          cols = line_n.chomp.split("\t")
+          records << {
+            exp_id:            cols[0],
+            genome:            cols[1],
+            ag_class:          cols[2],
+            ag_sub_class:      cols[3],
+            cl_class:          cols[4],
+            cl_sub_class:      cols[5],
+            cl_sub_class_info: cols[6],
+            read_info:         cols[7],
+            title:             cols[8],
+            attributes:        cols[9..].to_a.join("\t"),
+            created_at:        timestamp,
+          }
+
+          if records.size >= batch_size
+            dataset.multi_insert(records)
+            total += records.size
+            records.clear
+          end
+        end
+
+        if records.any?
           dataset.multi_insert(records)
           total += records.size
-          records.clear
         end
-      end
-
-      if records.any?
-        dataset.multi_insert(records)
-        total += records.size
       end
       total
     end
