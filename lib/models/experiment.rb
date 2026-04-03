@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module ChipAtlas
   module Experiment
     GENOMES = {
@@ -9,6 +11,8 @@ module ChipAtlas
       'sacCer3' => 'S. cerevisiae (sacCer3)',
       'TAIR10'  => 'A. thaliana (TAIR10)',
     }.freeze
+
+    GENOME_ORDER = GENOMES.keys.each_with_index.to_h.freeze
 
     EXPERIMENT_TYPES = [
       { id: 'Histone',          label: 'ChIP: Histone' },
@@ -90,7 +94,7 @@ module ChipAtlas
       records = dataset.where(exp_id: exp_id).map do |row|
         ChipAtlas::Serializers.experiment(row)
       end
-      records.sort_by { |r| -(r[:genome].match(/\d+/)[0].to_i rescue 0) }
+      records.sort_by { |r| GENOME_ORDER.fetch(r[:genome], 999) }
     end
 
     def id_valid?(exp_id)

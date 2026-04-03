@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module ChipAtlas
   module Bedfile
     NotFound = Class.new(StandardError)
@@ -24,11 +26,12 @@ module ChipAtlas
     def filesearch(condition)
       dataset
         .where(genome: condition['genome'])
-        .where(ag_class: condition['agClass'])
-        .where(ag_sub_class: condition['agSubClass'] || '-')
-        .where(cl_class: condition['clClass'])
-        .where(cl_sub_class: condition['clSubClass'] || '-')
+        .where(ag_class: condition['ag_class'])
+        .where(ag_sub_class: condition['ag_sub_class'] || '-')
+        .where(cl_class: condition['cl_class'])
+        .where(cl_sub_class: condition['cl_sub_class'] || '-')
         .where(qval: condition['qval'])
+        .limit(2)
         .all
     end
 
@@ -75,5 +78,7 @@ module ChipAtlas
       end
       total
     end
+
+    private_class_method :filesearch
   end
 end

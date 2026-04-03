@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module ChipAtlas
   module Routes
     module Pages
@@ -35,7 +37,12 @@ module ChipAtlas
           url = params[:base]
           halt 404 unless url && url.start_with?('https://chip-atlas.dbcls.jp/')
           begin
-            response = Net::HTTP.get_response(URI.parse(url))
+            uri = URI.parse(url)
+            http = Net::HTTP.new(uri.host, uri.port)
+            http.use_ssl = uri.scheme == 'https'
+            http.open_timeout = 5
+            http.read_timeout = 10
+            response = http.request_head(uri.path)
             response.code == '200' ? redirect(url) : (halt 404)
           rescue StandardError
             halt 404
@@ -52,7 +59,12 @@ module ChipAtlas
           url = params[:base]
           halt 404 unless url && url.start_with?('https://chip-atlas.dbcls.jp/')
           begin
-            response = Net::HTTP.get_response(URI.parse(url))
+            uri = URI.parse(url)
+            http = Net::HTTP.new(uri.host, uri.port)
+            http.use_ssl = uri.scheme == 'https'
+            http.open_timeout = 5
+            http.read_timeout = 10
+            response = http.request_head(uri.path)
             response.code == '200' ? redirect(url) : (halt 404)
           rescue StandardError
             halt 404

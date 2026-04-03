@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 ENV['RACK_ENV'] = 'test'
 ENV['DATABASE_URL'] = 'sqlite:/'
 ENV['SKIP_APP_CONFIGURE'] = '1'
@@ -11,9 +13,7 @@ DB = Sequel.connect(ENV['DATABASE_URL'])
 Sequel.extension :migration
 Sequel::Migrator.run(DB, File.join(__dir__, '..', 'db', 'migrations'))
 
-$LOAD_PATH << File.join(__dir__, '..', 'lib')
-$LOAD_PATH << File.join(__dir__, '..')
-require 'lib/chip_atlas'
+require_relative '../lib/chip_atlas'
 
 module TestHelper
   def seed_experiments

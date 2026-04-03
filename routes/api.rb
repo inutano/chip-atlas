@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'net/http'
 
 module ChipAtlas
@@ -34,32 +36,27 @@ module ChipAtlas
                  when 'ExperimentList'            then settings.experiment_list
                  when 'ExperimentList_adv'        then settings.experiment_list_adv
                  end
-          content_type 'application/json'
-          JSON.generate(data)
+          json_response(data)
         end
 
         app.get '/data/experiment_types' do
           data = ChipAtlas::Experiment.experiment_types(params[:genome], params[:clClass])
-          content_type 'application/json'
-          JSON.generate(data)
+          json_response(data)
         end
 
         app.get '/data/sample_types' do
           data = ChipAtlas::Experiment.sample_types(params[:genome], params[:agClass])
-          content_type 'application/json'
-          JSON.generate(data)
+          json_response(data)
         end
 
         app.get '/data/chip_antigen' do
           data = ChipAtlas::Experiment.chip_antigen(params[:genome], params[:agClass], params[:clClass])
-          content_type 'application/json'
-          JSON.generate(data)
+          json_response(data)
         end
 
         app.get '/data/cell_type' do
           data = ChipAtlas::Experiment.cell_type(params[:genome], params[:agClass], params[:clClass])
-          content_type 'application/json'
-          JSON.generate(data)
+          json_response(data)
         end
 
         app.get '/data/search' do
@@ -68,45 +65,39 @@ module ChipAtlas
           limit  = (params[:limit] || 20).to_i.clamp(1, 100)
           offset = (params[:offset] || 0).to_i
           data = ChipAtlas::ExperimentSearch.search(query, genome: genome, limit: limit, offset: offset)
-          content_type 'application/json'
-          JSON.generate(data)
+          json_response(data)
         end
 
         app.get '/qvalue_range' do
-          content_type 'application/json'
-          JSON.generate(settings.qval_range)
+          json_response(settings.qval_range)
         end
 
         app.post '/browse' do
           request.body.rewind
           json = JSON.parse(request.body.read)
           url = ChipAtlas::LocationService.new(json).igv_browsing_url
-          content_type 'application/json'
-          JSON.generate({ 'url' => url })
+          json_response({ 'url' => url })
         end
 
         app.post '/download' do
           request.body.rewind
           json = JSON.parse(request.body.read)
           url = ChipAtlas::LocationService.new(json).archive_url
-          content_type 'application/json'
-          JSON.generate({ 'url' => url })
+          json_response({ 'url' => url })
         end
 
         app.post '/colo' do
           request.body.rewind
           json = JSON.parse(request.body.read)
           url = ChipAtlas::LocationService.new(json).colo_url(params[:type])
-          content_type 'application/json'
-          JSON.generate({ 'url' => url })
+          json_response({ 'url' => url })
         end
 
         app.post '/target_genes' do
           request.body.rewind
           json = JSON.parse(request.body.read)
           url = ChipAtlas::LocationService.new(json).target_genes_url(params[:type])
-          content_type 'application/json'
-          JSON.generate({ 'url' => url })
+          json_response({ 'url' => url })
         end
 
         app.post '/diff_analysis_estimated_time' do
@@ -118,8 +109,7 @@ module ChipAtlas
                     when 'diffbind' then 1.80e-6 * total_reads + 119.38 + 600
                     end
           minutes = (seconds && !seconds.infinite?) ? Rational(seconds, 60).to_f.round : nil
-          content_type 'application/json'
-          JSON.generate({ minutes: minutes })
+          json_response({ minutes: minutes })
         end
 
         app.get '/api/remoteUrlStatus' do
@@ -128,7 +118,13 @@ module ChipAtlas
             halt 400, 'Invalid or disallowed URL'
           end
           begin
-            Net::HTTP.get_response(URI.parse(url)).code.to_i.to_s
+            uri = URI.parse(url)
+            http = Net::HTTP.new(uri.host, uri.port)
+            http.use_ssl = uri.scheme == 'https'
+            http.open_timeout = 5
+            http.read_timeout = 10
+            response = http.request_head(uri.path)
+            response.code
           rescue => e
             '500'
           end

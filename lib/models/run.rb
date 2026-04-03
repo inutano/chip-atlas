@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'shellwords'
 
 module ChipAtlas
@@ -14,7 +16,7 @@ module ChipAtlas
 
     def load_from_file(table_path)
       existing_exp_ids = DB[:experiments].distinct.select_map(:exp_id).to_set
-      puts "   Found #{existing_exp_ids.size} experiment IDs for filtering"
+      warn "   Found #{existing_exp_ids.size} experiment IDs for filtering"
 
       records = []
       timestamp = Time.now
@@ -27,7 +29,7 @@ module ChipAtlas
           total_processed += 1
 
           if total_processed % 100_000 == 0
-            puts "   Processed #{total_processed} lines (#{filtered_count} matched)"
+            warn "   Processed #{total_processed} lines (#{filtered_count} matched)"
           end
 
           cols = line.chomp.split("\t")
@@ -40,7 +42,7 @@ module ChipAtlas
             filtered_count += 1
 
             if records.size >= batch_size
-              puts "   Inserting batch of #{records.size} records..."
+              warn "   Inserting batch of #{records.size} records..."
               dataset.multi_insert(records)
               records.clear
             end
@@ -49,7 +51,7 @@ module ChipAtlas
       end
 
       dataset.multi_insert(records) if records.any?
-      puts "   Summary: #{filtered_count} runs from #{total_processed} total"
+      warn "   Summary: #{filtered_count} runs from #{total_processed} total"
       filtered_count
     end
   end

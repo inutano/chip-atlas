@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module ChipAtlas
   module ExperimentSearch
     COLUMNS = %w[exp_id sra_id geo_id genome ag_class ag_sub_class
@@ -63,7 +65,7 @@ module ChipAtlas
         DB.run("INSERT INTO experiments_fts (#{COLUMNS.join(', ')}) VALUES #{values_sql}")
       end
 
-      puts "ExperimentSearch: loaded #{rows.size} rows into FTS5 table"
+      warn "ExperimentSearch: loaded #{rows.size} rows into FTS5 table"
     end
 
     def fts5_sanitize(query)

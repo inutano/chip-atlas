@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module ChipAtlas
   module Routes
     module Health
@@ -6,7 +8,7 @@ module ChipAtlas
           checks = {}
 
           begin
-            DB.execute("SELECT 1")
+            DB.test_connection
             checks[:database] = 'ok'
           rescue => e
             checks[:database] = 'error'
@@ -22,8 +24,7 @@ module ChipAtlas
 
           healthy = checks[:database] == 'ok'
           status healthy ? 200 : 503
-          content_type 'application/json'
-          JSON.generate({ status: healthy ? 'ok' : 'error', checks: checks })
+          json_response({ status: healthy ? 'ok' : 'error', checks: checks })
         end
       end
     end

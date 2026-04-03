@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module ChipAtlas
   module Bedsize
     module_function

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'json'
 
 module ChipAtlas
@@ -31,11 +33,9 @@ module ChipAtlas
 
           request_id = ChipAtlas::WabiService.submit_job(post_data)
           if request_id
-            content_type 'application/json'
-            JSON.generate({ 'requestId' => request_id })
+            json_response({ 'requestId' => request_id })
           else
-            content_type 'application/json'
-            JSON.generate({ 'request_body' => post_data.to_s })
+            json_response({ 'request_body' => post_data.to_s })
           end
         end
 

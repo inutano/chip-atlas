@@ -1,10 +1,9 @@
+# frozen_string_literal: true
+
 ENV['SKIP_APP_CONFIGURE'] = '1'
 
-$LOAD_PATH << __dir__
-$LOAD_PATH << File.join(__dir__, 'lib')
-
 require_relative 'lib/db'
-require 'lib/chip_atlas'
+require_relative 'lib/chip_atlas'
 require 'rake'
 require 'json'
 

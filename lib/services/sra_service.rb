@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'open-uri'
 require 'nokogiri'
 require 'json'
@@ -27,7 +29,7 @@ module ChipAtlas
 
       xml = Nokogiri::XML(URI.open("#{EUTILS_BASE}/efetch.fcgi?db=sra&id=#{uid}"))
       parse_experiment(xml)
-    rescue OpenURI::HTTPError, Timeout::Error, StandardError
+    rescue OpenURI::HTTPError, Timeout::Error, SocketError, Errno::ECONNREFUSED
       error_metadata
     end
 

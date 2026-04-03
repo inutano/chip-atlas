@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require_relative 'serializers'
 require_relative 'models/experiment'
 require_relative 'models/bedfile'

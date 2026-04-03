@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module ChipAtlas
   module Serializers
     module_function
@@ -33,6 +35,20 @@ module ChipAtlas
         clSubClass: row[:cl_sub_class],
         title:      row[:title],
         attributes: row[:attributes],
+      }
+    end
+
+    def normalize_condition(condition)
+      {
+        'genome'       => condition['genome'],
+        'ag_class'     => condition['agClass'],
+        'ag_sub_class' => condition['agSubClass'],
+        'cl_class'     => condition['clClass'],
+        'cl_sub_class' => condition['clSubClass'],
+        'qval'         => condition['qval'],
+        'antigen'      => condition['antigen'],
+        'cellline'     => condition['cellline'],
+        'distance'     => condition['distance'],
       }
     end
   end

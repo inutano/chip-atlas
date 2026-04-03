@@ -1,10 +1,7 @@
+# frozen_string_literal: true
 # :)
 
-$LOAD_PATH << __dir__
-$LOAD_PATH << File.join(__dir__, 'lib')
-
-require 'bundler'
-Bundler.require
+require 'bundler/setup'
 require 'json'
 require 'net/http'
 require 'uri'
@@ -13,13 +10,13 @@ require 'timeout'
 require 'fileutils'
 require 'sinatra/base'
 
-require 'lib/db'
+require_relative 'lib/db'
 
-require 'lib/chip_atlas'
-require 'routes/health'
-require 'routes/api'
-require 'routes/pages'
-require 'routes/wabi'
+require_relative 'lib/chip_atlas'
+require_relative 'routes/health'
+require_relative 'routes/api'
+require_relative 'routes/pages'
+require_relative 'routes/wabi'
 
 class ChipAtlasApp < Sinatra::Base
   set :erb, escape_html: true
@@ -34,30 +31,34 @@ class ChipAtlasApp < Sinatra::Base
     def app_root
       "#{env['rack.url_scheme']}://#{env['HTTP_HOST']}#{env['SCRIPT_NAME']}"
     end
-  end
 
-  private
+    def json_response(data)
+      content_type 'application/json'
+      JSON.generate(data)
+    end
+  end
 
   def self.download_json_with_fallback(remote_url, local_filename)
     local_path = File.join('public', local_filename)
 
     if File.exist?(local_path)
-      puts "Using cached file: #{local_path}"
+      warn "Using cached file: #{local_path}"
       return JSON.parse(File.read(local_path))
     end
 
     begin
-      puts "No cached file found, downloading from remote: #{remote_url}"
+      warn "No cached file found, downloading from remote: #{remote_url}"
       Timeout.timeout(30) do
         content = URI.open(remote_url).read
         File.write(local_path, content)
         JSON.parse(content)
       end
     rescue => e
-      puts "Failed to download #{remote_url}: #{e.message}"
+      warn "Failed to download #{remote_url}: #{e.message}"
       raise "Unable to load #{remote_url} and no cached file available"
     end
   end
+  private_class_method :download_json_with_fallback
 
   configure do
     set :wabi_endpoint, 'https://dtn1.ddbj.nig.ac.jp/wabi/chipatlas/'
@@ -79,7 +80,7 @@ class ChipAtlasApp < Sinatra::Base
         'https://chip-atlas.dbcls.jp/data/metadata/ExperimentList_adv.json', 'ExperimentList_adv.json'
       )
       ChipAtlas::ExperimentSearch.load_from_json(settings.experiment_list_adv)
-      set :gsm_to_srx, Hash[settings.experiment_list['data'].map { |a| [a[2], a[0]] }]
+      set :gsm_to_srx, settings.experiment_list['data'].to_h { |a| [a[2], a[0]] }
     end
   end
 
@@ -91,7 +92,11 @@ class ChipAtlasApp < Sinatra::Base
     if request.post?
       rack_input = request.env['rack.input']&.read.to_s
       unless rack_input.empty?
-        posted_data = JSON.parse(rack_input) rescue nil
+        begin
+          posted_data = JSON.parse(rack_input)
+        rescue JSON::ParserError
+          posted_data = nil
+        end
         if posted_data
           log = [Time.now, request.ip, request.path_info, posted_data].join("\t")
           logfile = './log/access_log'
