@@ -1,9 +1,7 @@
 source 'https://rubygems.org'
 
 # Web framework
-gem 'sinatra'
-gem 'rackup'
-gem 'rack-protection'
+gem 'sinatra'      # includes rack, rack-protection, tilt
 gem 'puma'
 
 # Database
@@ -12,7 +10,6 @@ gem 'sqlite3'
 
 # Templates & rendering
 gem 'erubi'
-gem 'tilt'
 gem 'redcarpet'
 
 # Utilities
