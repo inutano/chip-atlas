@@ -8,6 +8,7 @@ require 'sequel'
 require 'json'
 
 DB = Sequel.connect(ENV['DATABASE_URL'])
+Sequel.extension :migration
 Sequel::Migrator.run(DB, File.join(__dir__, '..', 'db', 'migrations'))
 
 $LOAD_PATH << File.join(__dir__, '..', 'lib')
