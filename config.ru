@@ -1,5 +1,5 @@
 # frozen_string_literal: true
 
-require File.dirname(__FILE__) + '/app'
+require_relative 'app'
 use Rack::RewindableInput::Middleware
 run ChipAtlasApp

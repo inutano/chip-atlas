@@ -1,4 +1,19 @@
-require 'open-uri'
+# frozen_string_literal: true
+
+require 'net/http'
+require 'uri'
+
+def download_file(url, dest)
+  uri = URI.parse(url)
+  http = Net::HTTP.new(uri.host, uri.port)
+  http.use_ssl = uri.scheme == 'https'
+  http.open_timeout = 30
+  http.read_timeout = 120
+  response = http.get(uri.request_uri)
+  raise "Download failed: #{response.code} for #{url}" unless response.code == '200'
+
+  File.write(dest, response.body)
+end
 
 namespace :metadata do
   datetime = Time.now.strftime('%Y%m%d-%H%M')
@@ -17,28 +32,28 @@ namespace :metadata do
   file experiment_table_fpath => metadata_dir do |t|
     puts 'Downloading experiments metadata...'
     start = Time.now
-    File.write(t.name, URI.open("#{metadata_base}/experimentList.tab").read)
+    download_file("#{metadata_base}/experimentList.tab", t.name)
     puts "   Downloaded experimentList.tab (#{sprintf('%.2f', Time.now - start)}s)"
   end
 
   file bedfile_table_fpath => metadata_dir do |t|
     puts 'Downloading bedfiles metadata...'
     start = Time.now
-    File.write(t.name, URI.open("#{metadata_base}/fileList.tab").read)
+    download_file("#{metadata_base}/fileList.tab", t.name)
     puts "   Downloaded fileList.tab (#{sprintf('%.2f', Time.now - start)}s)"
   end
 
   file analysis_table_fpath => metadata_dir do |t|
     puts 'Downloading analysis metadata...'
     start = Time.now
-    File.write(t.name, URI.open("#{metadata_base}/analysisList.tab").read)
+    download_file("#{metadata_base}/analysisList.tab", t.name)
     puts "   Downloaded analysisList.tab (#{sprintf('%.2f', Time.now - start)}s)"
   end
 
   file bedsize_table_fpath => metadata_dir do |t|
     puts 'Downloading bedsize metadata...'
     start = Time.now
-    File.write(t.name, URI.open("#{util_base}/lineNum.tsv").read)
+    download_file("#{util_base}/lineNum.tsv", t.name)
     puts "   Downloaded lineNum.tsv (#{sprintf('%.2f', Time.now - start)}s)"
   end
 

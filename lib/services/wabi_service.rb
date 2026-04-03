@@ -1,21 +1,26 @@
 # frozen_string_literal: true
 
 require 'net/http'
-require 'open-uri'
 require 'uri'
 require 'timeout'
 
 module ChipAtlas
   module WabiService
-    ENDPOINT = 'https://dtn1.ddbj.nig.ac.jp/wabi/chipatlas/'.freeze
+    ENDPOINT = 'https://dtn1.ddbj.nig.ac.jp/wabi/chipatlas/'
 
     module_function
 
     def endpoint_available?
       Timeout.timeout(3) do
-        URI.open(ENDPOINT).read == 'chipatlas'
+        uri = URI.parse(ENDPOINT)
+        http = Net::HTTP.new(uri.host, uri.port)
+        http.use_ssl = true
+        http.open_timeout = 3
+        http.read_timeout = 3
+        response = http.get(uri.path)
+        response.body == 'chipatlas'
       end
-    rescue Timeout::Error, OpenURI::HTTPError, SocketError, Errno::ECONNREFUSED
+    rescue Timeout::Error, SocketError, Errno::ECONNREFUSED, Net::HTTPError
       false
     end
 
@@ -28,11 +33,12 @@ module ChipAtlas
     end
 
     def job_finished?(request_id)
-      server_url = 'https://dtn1.ddbj.nig.ac.jp'
-      endpoint = "/wabi/chipatlas/#{request_id}?info=result&format=html"
-
-      uri = URI.parse(server_url + endpoint)
-      response = Net::HTTP.get_response(uri)
+      uri = URI.parse("#{ENDPOINT}#{request_id}?info=result&format=html")
+      http = Net::HTTP.new(uri.host, uri.port)
+      http.use_ssl = true
+      http.open_timeout = 5
+      http.read_timeout = 10
+      response = http.request_head(uri.request_uri)
       response.code == '200'
     rescue Timeout::Error, SocketError, Errno::ECONNREFUSED, Net::HTTPError
       nil
@@ -40,8 +46,13 @@ module ChipAtlas
 
     def fetch_log(request_id)
       uri = URI.parse("#{ENDPOINT}#{request_id}?info=result&format=log")
-      URI.open(uri.to_s).read
-    rescue Timeout::Error, OpenURI::HTTPError, SocketError, Errno::ECONNREFUSED
+      http = Net::HTTP.new(uri.host, uri.port)
+      http.use_ssl = true
+      http.open_timeout = 5
+      http.read_timeout = 10
+      response = http.get(uri.request_uri)
+      response.code == '200' ? response.body : nil
+    rescue Timeout::Error, SocketError, Errno::ECONNREFUSED, Net::HTTPError
       nil
     end
   end

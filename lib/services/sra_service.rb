@@ -1,12 +1,13 @@
 # frozen_string_literal: true
 
-require 'open-uri'
+require 'net/http'
+require 'uri'
 require 'rexml/document'
 require 'json'
 
 module ChipAtlas
   class SraService
-    EUTILS_BASE = 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils'.freeze
+    EUTILS_BASE = 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils'
 
     def initialize(exp_id)
       @exp_id = exp_id
@@ -23,23 +24,37 @@ module ChipAtlas
 
     private
 
+    def http_get(url)
+      uri = URI.parse(url)
+      http = Net::HTTP.new(uri.host, uri.port)
+      http.use_ssl = uri.scheme == 'https'
+      http.open_timeout = 10
+      http.read_timeout = 15
+      response = http.get(uri.request_uri)
+      response.body if response.code == '200'
+    end
+
     def fetch_from_ncbi
       uid = get_uid
       return error_metadata unless uid
 
-      xml_str = URI.open("#{EUTILS_BASE}/efetch.fcgi?db=sra&id=#{uid}").read
+      xml_str = http_get("#{EUTILS_BASE}/efetch.fcgi?db=sra&id=#{uid}")
+      return error_metadata unless xml_str
+
       doc = REXML::Document.new(xml_str)
       parse_experiment(doc)
-    rescue OpenURI::HTTPError, Timeout::Error, SocketError, Errno::ECONNREFUSED, REXML::ParseException
+    rescue SocketError, Timeout::Error, Errno::ECONNREFUSED, REXML::ParseException
       error_metadata
     end
 
     def get_uid
-      url = "#{EUTILS_BASE}/esearch.fcgi?db=sra&term=#{@exp_id}&retmode=json"
-      result = JSON.parse(URI.open(url).read)
+      body = http_get("#{EUTILS_BASE}/esearch.fcgi?db=sra&term=#{@exp_id}&retmode=json")
+      return nil unless body
+
+      result = JSON.parse(body)
       ids = result.dig('esearchresult', 'idlist')
       ids&.size == 1 ? ids.first : nil
-    rescue OpenURI::HTTPError, Timeout::Error, SocketError, JSON::ParserError
+    rescue SocketError, Timeout::Error, JSON::ParserError
       nil
     end
 

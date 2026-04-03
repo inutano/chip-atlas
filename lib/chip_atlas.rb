@@ -13,5 +13,5 @@ require_relative 'services/wabi_service'
 require_relative 'services/sra_service'
 
 module ChipAtlas
-  VERSION = '2.0.0'.freeze
+  VERSION = '2.0.0'
 end
