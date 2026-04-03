@@ -125,7 +125,7 @@ module ChipAtlas
             http.read_timeout = 10
             response = http.request_head(uri.path)
             response.code
-          rescue => e
+          rescue SocketError, Timeout::Error, Errno::ECONNREFUSED, Net::HTTPError
             '500'
           end
         end

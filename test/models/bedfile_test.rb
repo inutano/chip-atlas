@@ -11,8 +11,8 @@ class BedfileTest < Minitest::Test
 
   def test_get_filename
     condition = {
-      'genome' => 'hg38', 'ag_class' => 'Histone', 'ag_sub_class' => 'H3K4me3',
-      'cl_class' => 'Blood', 'cl_sub_class' => '-', 'qval' => '05'
+      genome: 'hg38', ag_class: 'Histone', ag_sub_class: 'H3K4me3',
+      cl_class: 'Blood', cl_sub_class: '-', qval: '05'
     }
     filename = ChipAtlas::Bedfile.get_filename(condition)
     assert_equal 'H3K4me3.Blood.05', filename
@@ -20,8 +20,8 @@ class BedfileTest < Minitest::Test
 
   def test_get_filename_raises_on_no_match
     condition = {
-      'genome' => 'hg38', 'ag_class' => 'Histone', 'ag_sub_class' => 'NONEXISTENT',
-      'cl_class' => 'Blood', 'cl_sub_class' => '-', 'qval' => '05'
+      genome: 'hg38', ag_class: 'Histone', ag_sub_class: 'NONEXISTENT',
+      cl_class: 'Blood', cl_sub_class: '-', qval: '05'
     }
     assert_raises(ChipAtlas::Bedfile::NotFound) do
       ChipAtlas::Bedfile.get_filename(condition)

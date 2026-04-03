@@ -40,15 +40,15 @@ module ChipAtlas
 
     def normalize_condition(condition)
       {
-        'genome'       => condition['genome'],
-        'ag_class'     => condition['agClass'],
-        'ag_sub_class' => condition['agSubClass'],
-        'cl_class'     => condition['clClass'],
-        'cl_sub_class' => condition['clSubClass'],
-        'qval'         => condition['qval'],
-        'antigen'      => condition['antigen'],
-        'cellline'     => condition['cellline'],
-        'distance'     => condition['distance'],
+        genome:       condition['genome'],
+        ag_class:     condition['agClass'],
+        ag_sub_class: condition['agSubClass'],
+        cl_class:     condition['clClass'],
+        cl_sub_class: condition['clSubClass'],
+        qval:         condition['qval'],
+        antigen:      condition['antigen'],
+        cellline:     condition['cellline'],
+        distance:     condition['distance'],
       }
     end
   end

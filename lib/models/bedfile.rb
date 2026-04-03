@@ -25,12 +25,12 @@ module ChipAtlas
 
     def filesearch(condition)
       dataset
-        .where(genome: condition['genome'])
-        .where(ag_class: condition['ag_class'])
-        .where(ag_sub_class: condition['ag_sub_class'] || '-')
-        .where(cl_class: condition['cl_class'])
-        .where(cl_sub_class: condition['cl_sub_class'] || '-')
-        .where(qval: condition['qval'])
+        .where(genome: condition[:genome])
+        .where(ag_class: condition[:ag_class])
+        .where(ag_sub_class: condition[:ag_sub_class] || '-')
+        .where(cl_class: condition[:cl_class])
+        .where(cl_sub_class: condition[:cl_sub_class] || '-')
+        .where(qval: condition[:qval])
         .limit(2)
         .all
     end

@@ -53,19 +53,24 @@ class ChipAtlasApp < Sinatra::Base
         File.write(local_path, content)
         JSON.parse(content)
       end
-    rescue => e
+    rescue OpenURI::HTTPError, Timeout::Error, SocketError, Errno::ECONNREFUSED => e
       warn "Failed to download #{remote_url}: #{e.message}"
       raise "Unable to load #{remote_url} and no cached file available"
     end
   end
   private_class_method :download_json_with_fallback
 
+  def self.format_number(n)
+    n.to_s.gsub(/(\d)(?=(\d{3})+\z)/, '\1,')
+  end
+  private_class_method :format_number
+
   configure do
     set :wabi_endpoint, 'https://dtn1.ddbj.nig.ac.jp/wabi/chipatlas/'
 
     unless ENV['SKIP_APP_CONFIGURE']
       count = ChipAtlas::Experiment.number_of_experiments
-      set :number_of_experiments, (count / 1000 * 1000).to_s.reverse.gsub(/(\d{3})(?=\d)/, '\\1,').reverse
+      set :number_of_experiments, format_number((count / 1000) * 1000)
       set :index_all_genome, ChipAtlas::Experiment.index_all_genome
       set :list_of_genome, ChipAtlas::Experiment.list_of_genome
       set :list_of_experiment_types, ChipAtlas::Experiment.list_of_experiment_types

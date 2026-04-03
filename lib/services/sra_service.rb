@@ -43,28 +43,30 @@ module ChipAtlas
     end
 
     def parse_experiment(xml)
+      lib_layout_node = xml.at_css('LIBRARY_LAYOUT')&.children&.first
+
       {
         exp_id: @exp_id,
         library_description: {
-          library_name:                  xml.css('LIBRARY_NAME').inner_text,
-          library_strategy:              xml.css('LIBRARY_STRATEGY').inner_text,
-          library_source:                xml.css('LIBRARY_SOURCE').inner_text,
-          library_selection:             xml.css('LIBRARY_SELECTION').inner_text,
-          library_construction_protocol: xml.css('LIBRARY_CONSTRUCTION_PROTOCOL').inner_text,
+          library_name:                  xml.at_css('LIBRARY_NAME')&.text.to_s,
+          library_strategy:              xml.at_css('LIBRARY_STRATEGY')&.text.to_s,
+          library_source:                xml.at_css('LIBRARY_SOURCE')&.text.to_s,
+          library_selection:             xml.at_css('LIBRARY_SELECTION')&.text.to_s,
+          library_construction_protocol: xml.at_css('LIBRARY_CONSTRUCTION_PROTOCOL')&.text.to_s,
         },
         platform_information: {
-          instrument_model: xml.css('INSTRUMENT_MODEL').inner_text,
-          cycle_sequence:   xml.css('CYCLE_SEQUENCE').inner_text,
-          cycle_count:      xml.css('CYCLE_COUNT').inner_text,
-          flow_sequence:    xml.css('FLOW_SEQUENCE').inner_text,
-          flow_count:       xml.css('FLOW_COUNT').inner_text,
-          key_sequence:     xml.css('KEY_SEQUENCE').inner_text,
+          instrument_model: xml.at_css('INSTRUMENT_MODEL')&.text.to_s,
+          cycle_sequence:   xml.at_css('CYCLE_SEQUENCE')&.text.to_s,
+          cycle_count:      xml.at_css('CYCLE_COUNT')&.text.to_s,
+          flow_sequence:    xml.at_css('FLOW_SEQUENCE')&.text.to_s,
+          flow_count:       xml.at_css('FLOW_COUNT')&.text.to_s,
+          key_sequence:     xml.at_css('KEY_SEQUENCE')&.text.to_s,
         },
-        platform:               (xml.css('PLATFORM').first&.children&.first&.name rescue nil),
-        library_layout:         (xml.css('LIBRARY_LAYOUT').first&.children&.first&.name rescue nil),
-        library_orientation:    (xml.css('LIBRARY_LAYOUT').first&.children&.first&.attr('ORIENTATION').to_s rescue ''),
-        library_nominal_length: (xml.css('LIBRARY_LAYOUT').first&.children&.first&.attr('NOMINAL_LENGTH').to_s rescue ''),
-        library_nominal_sdev:   (xml.css('LIBRARY_LAYOUT').first&.children&.first&.attr('NOMINAL_SDEV').to_s rescue ''),
+        platform:               xml.at_css('PLATFORM')&.children&.first&.name,
+        library_layout:         lib_layout_node&.name,
+        library_orientation:    lib_layout_node&.attr('ORIENTATION').to_s,
+        library_nominal_length: lib_layout_node&.attr('NOMINAL_LENGTH').to_s,
+        library_nominal_sdev:   lib_layout_node&.attr('NOMINAL_SDEV').to_s,
       }
     end
 

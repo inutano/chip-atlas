@@ -24,8 +24,7 @@ module ChipAtlas
       body = response.body
       return nil unless body
 
-      id = body.split("\n").find { |l| l =~ /^requestId/ }&.split(/\s/)&.last
-      id
+      body.split("\n").find { |l| l.start_with?('requestId') }&.split(/\s/)&.last
     end
 
     def job_finished?(request_id)

@@ -5,6 +5,10 @@ require 'sequel'
 unless defined?(DB)
   ENV['DATABASE_URL'] ||= "sqlite://database.sqlite"
   DB = Sequel.connect(ENV['DATABASE_URL'], pool_timeout: 300)
-  DB.run("PRAGMA journal_mode=WAL") rescue nil
+  begin
+    DB.run("PRAGMA journal_mode=WAL")
+  rescue Sequel::DatabaseError
+    # WAL not supported (e.g., in-memory database)
+  end
   Sequel.extension :migration
 end

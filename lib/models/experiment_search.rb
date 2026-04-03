@@ -57,7 +57,7 @@ module ChipAtlas
           vals = COLUMNS.each_with_index.map do |_, i|
             v = row[i]
             v = v.join(', ') if v.is_a?(Array)
-            "'" + (v || '').to_s.gsub("'", "''") + "'"
+            DB.literal((v || '').to_s)
           end
           "(#{vals.join(', ')})"
         end.join(', ')
