@@ -4,7 +4,7 @@ source 'https://rubygems.org'
 gem 'sinatra'
 gem 'rackup'
 gem 'rack-protection'
-gem 'unicorn'
+gem 'puma'
 
 # Database
 gem 'sequel'
