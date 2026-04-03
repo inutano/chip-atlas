@@ -19,7 +19,8 @@ gem 'redcarpet'
 gem 'rexml'
 gem 'rake'
 
-group :test do
+group :development, :test do
+  gem 'webrick'
   gem 'minitest'
   gem 'rack-test'
 end

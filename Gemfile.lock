@@ -51,6 +51,7 @@ GEM
     unicorn (6.1.0)
       kgio (~> 2.6)
       raindrops (~> 0.7)
+    webrick (1.9.2)
 
 PLATFORMS
   aarch64-linux-gnu
@@ -78,6 +79,7 @@ DEPENDENCIES
   sqlite3
   tilt
   unicorn
+  webrick
 
 BUNDLED WITH
    2.5.3
