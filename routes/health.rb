@@ -15,7 +15,7 @@ module ChipAtlas
 
           config_loaded = begin
             settings.respond_to?(:list_of_genome) && settings.list_of_genome
-          rescue
+          rescue NoMethodError
             false
           end
           checks[:config] = config_loaded ? 'ok' : 'not_loaded'

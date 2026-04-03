@@ -36,7 +36,7 @@ module ChipAtlas
       result = JSON.parse(URI.open(url).read)
       ids = result.dig('esearchresult', 'idlist')
       ids&.size == 1 ? ids.first : nil
-    rescue
+    rescue OpenURI::HTTPError, Timeout::Error, SocketError, JSON::ParserError
       nil
     end
 

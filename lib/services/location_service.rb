@@ -1,3 +1,5 @@
+require 'uri'
+
 module ChipAtlas
   class LocationService
     ARCHIVE_BASE = 'https://chip-atlas.dbcls.jp/data/'.freeze
@@ -27,8 +29,8 @@ module ChipAtlas
     end
 
     def colo_url(type)
-      antigen  = @condition['antigen']
-      cellline = @condition['cellline'].gsub(' ', '_')
+      antigen  = URI.encode_www_form_component(@condition['antigen'])
+      cellline = URI.encode_www_form_component(@condition['cellline'].gsub(' ', '_'))
       base     = File.join(ARCHIVE_BASE, @genome, 'colo')
       case type
       when 'submit' then "#{base}/#{antigen}.#{cellline}.html"
@@ -38,7 +40,7 @@ module ChipAtlas
     end
 
     def target_genes_url(type)
-      antigen  = @condition['antigen']
+      antigen  = URI.encode_www_form_component(@condition['antigen'])
       distance = @condition['distance']
       base     = File.join(ARCHIVE_BASE, @genome, 'target')
       ext = type == 'submit' ? 'html' : 'tsv'

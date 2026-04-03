@@ -28,11 +28,11 @@ class SerializersTest < Minitest::Test
   end
 
   def test_search_result_serializer
-    fts_row = { 'exp_id' => 'SRX018625', 'sra_id' => 'SRA123',
-                'geo_id' => 'GSM456', 'genome' => 'hg38',
-                'ag_class' => 'Histone', 'ag_sub_class' => 'H3K4me3',
-                'cl_class' => 'Blood', 'cl_sub_class' => 'K-562',
-                'title' => 'test', 'attributes' => 'cell line' }
+    fts_row = { exp_id: 'SRX018625', sra_id: 'SRA123',
+                geo_id: 'GSM456', genome: 'hg38',
+                ag_class: 'Histone', ag_sub_class: 'H3K4me3',
+                cl_class: 'Blood', cl_sub_class: 'K-562',
+                title: 'test', attributes: 'cell line' }
 
     result = ChipAtlas::Serializers.search_result(fts_row)
 

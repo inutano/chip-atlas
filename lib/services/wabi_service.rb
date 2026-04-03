@@ -13,7 +13,7 @@ module ChipAtlas
       Timeout.timeout(3) do
         URI.open(ENDPOINT).read == 'chipatlas'
       end
-    rescue
+    rescue Timeout::Error, OpenURI::HTTPError, SocketError, Errno::ECONNREFUSED
       false
     end
 
@@ -33,14 +33,14 @@ module ChipAtlas
       uri = URI.parse(server_url + endpoint)
       response = Net::HTTP.get_response(uri)
       response.code == '200'
-    rescue
+    rescue Timeout::Error, SocketError, Errno::ECONNREFUSED, Net::HTTPError
       nil
     end
 
     def fetch_log(request_id)
       uri = URI.parse("#{ENDPOINT}#{request_id}?info=result&format=log")
       URI.open(uri.to_s).read
-    rescue
+    rescue Timeout::Error, OpenURI::HTTPError, SocketError, Errno::ECONNREFUSED
       nil
     end
   end

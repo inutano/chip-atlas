@@ -1,3 +1,5 @@
+require 'shellwords'
+
 module ChipAtlas
   module Run
     module_function
@@ -20,7 +22,7 @@ module ChipAtlas
       total_processed = 0
       batch_size = 50_000
 
-      IO.popen("awk -F '\t' '$8 == \"live\" { print $1 \"\\t\" $3 }' #{table_path}") do |pipe|
+      IO.popen("awk -F '\t' '$8 == \"live\" { print $1 \"\\t\" $3 }' #{Shellwords.escape(table_path)}") do |pipe|
         pipe.each_line do |line|
           total_processed += 1
 

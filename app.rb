@@ -11,14 +11,9 @@ require 'uri'
 require 'open-uri'
 require 'timeout'
 require 'fileutils'
-require 'sequel'
 require 'sinatra/base'
 
-unless defined?(DB)
-  ENV['DATABASE_URL'] ||= "sqlite://database.sqlite"
-  DB = Sequel.connect(ENV['DATABASE_URL'], pool_timeout: 300)
-  DB.run("PRAGMA journal_mode=WAL") rescue nil
-end
+require 'lib/db'
 
 require 'lib/chip_atlas'
 require 'routes/health'
@@ -93,14 +88,16 @@ class ChipAtlasApp < Sinatra::Base
   end
 
   before do
-    rack_input = request.env['rack.input']&.read.to_s
-    unless rack_input.empty?
-      posted_data = JSON.parse(rack_input) rescue nil
-      if posted_data
-        log = [Time.now, request.ip, request.path_info, posted_data].join("\t")
-        logfile = './log/access_log'
-        FileUtils.mkdir_p(File.dirname(logfile))
-        File.open(logfile, 'a') { |f| f.puts(log) }
+    if request.post?
+      rack_input = request.env['rack.input']&.read.to_s
+      unless rack_input.empty?
+        posted_data = JSON.parse(rack_input) rescue nil
+        if posted_data
+          log = [Time.now, request.ip, request.path_info, posted_data].join("\t")
+          logfile = './log/access_log'
+          FileUtils.mkdir_p(File.dirname(logfile))
+          File.open(logfile, 'a') { |f| f.puts(log) }
+        end
       end
     end
   end

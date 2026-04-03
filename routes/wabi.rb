@@ -39,23 +39,15 @@ module ChipAtlas
           end
         end
 
-        app.get '/enrichment_analysis_log' do
-          log = ChipAtlas::WabiService.fetch_log(params[:id])
-          if log
-            log
-          else
-            status 404
-            'Log file not available yet'
-          end
-        end
-
-        app.get '/diff_analysis_log' do
-          log = ChipAtlas::WabiService.fetch_log(params[:id])
-          if log
-            log
-          else
-            status 404
-            'Log file not available yet'
+        %w[enrichment_analysis_log diff_analysis_log].each do |path|
+          app.get "/#{path}" do
+            log = ChipAtlas::WabiService.fetch_log(params[:id])
+            if log
+              log
+            else
+              status 404
+              'Log file not available yet'
+            end
           end
         end
       end

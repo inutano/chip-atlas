@@ -1,16 +1,9 @@
 ENV['SKIP_APP_CONFIGURE'] = '1'
 
-require 'sequel'
-ENV['DATABASE_URL'] ||= "sqlite://database.sqlite"
-
-unless defined?(DB)
-  DB = Sequel.connect(ENV['DATABASE_URL'])
-end
-
 $LOAD_PATH << __dir__
 $LOAD_PATH << File.join(__dir__, 'lib')
 
-Sequel.extension :migration
+require_relative 'lib/db'
 require 'lib/chip_atlas'
 require 'rake'
 require 'json'

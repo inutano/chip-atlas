@@ -21,18 +21,18 @@ module ChipAtlas
       { id: id, label: id, count: count }
     end
 
-    def search_result(fts_row)
+    def search_result(row)
       {
-        expid:      fts_row['exp_id'],
-        sra_id:     fts_row['sra_id'],
-        geo_id:     fts_row['geo_id'],
-        genome:     fts_row['genome'],
-        agClass:    fts_row['ag_class'],
-        agSubClass: fts_row['ag_sub_class'],
-        clClass:    fts_row['cl_class'],
-        clSubClass: fts_row['cl_sub_class'],
-        title:      fts_row['title'],
-        attributes: fts_row['attributes'],
+        expid:      row[:exp_id],
+        sra_id:     row[:sra_id],
+        geo_id:     row[:geo_id],
+        genome:     row[:genome],
+        agClass:    row[:ag_class],
+        agSubClass: row[:ag_sub_class],
+        clClass:    row[:cl_class],
+        clSubClass: row[:cl_sub_class],
+        title:      row[:title],
+        attributes: row[:attributes],
       }
     end
   end
