@@ -33,7 +33,7 @@ module ChipAtlas
 
         app.get '/view' do
           @expid = params[:id].upcase
-          if @expid =~ /^GSM/
+          if @expid.start_with?('GSM')
             srx = settings.respond_to?(:gsm_to_srx) ? settings.gsm_to_srx[@expid] : nil
             redirect "/view?id=#{srx}" if srx
           end

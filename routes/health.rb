@@ -10,7 +10,7 @@ module ChipAtlas
           begin
             DB.test_connection
             checks[:database] = 'ok'
-          rescue => e
+          rescue Sequel::DatabaseError => e
             checks[:database] = 'error'
             checks[:database_error] = e.message
           end

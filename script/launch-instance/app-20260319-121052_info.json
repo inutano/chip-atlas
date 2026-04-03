@@ -1,0 +1,143 @@
+{
+    "ReservationId": "r-0b6befc773014dad8",
+    "OwnerId": "905945394038",
+    "Groups": [],
+    "Instances": [
+        {
+            "Architecture": "x86_64",
+            "BlockDeviceMappings": [],
+            "ClientToken": "78ea3389-4681-4245-a41f-6c0d864d32a9",
+            "EbsOptimized": true,
+            "EnaSupport": true,
+            "Hypervisor": "xen",
+            "NetworkInterfaces": [
+                {
+                    "Attachment": {
+                        "AttachTime": "2026-03-19T03:10:54+00:00",
+                        "AttachmentId": "eni-attach-07f1a5e02494e1b76",
+                        "DeleteOnTermination": true,
+                        "DeviceIndex": 0,
+                        "Status": "attaching",
+                        "NetworkCardIndex": 0
+                    },
+                    "Description": "",
+                    "Groups": [
+                        {
+                            "GroupId": "sg-065b702c2d8b5c432",
+                            "GroupName": "ChIP-Atlsa-Default-SG"
+                        }
+                    ],
+                    "Ipv6Addresses": [],
+                    "MacAddress": "06:a3:54:db:3a:7b",
+                    "NetworkInterfaceId": "eni-0d73a4bcad3ba7c20",
+                    "OwnerId": "905945394038",
+                    "PrivateDnsName": "ip-10-1-1-252.ap-northeast-1.compute.internal",
+                    "PrivateIpAddress": "10.1.1.252",
+                    "PrivateIpAddresses": [
+                        {
+                            "Primary": true,
+                            "PrivateDnsName": "ip-10-1-1-252.ap-northeast-1.compute.internal",
+                            "PrivateIpAddress": "10.1.1.252"
+                        }
+                    ],
+                    "SourceDestCheck": true,
+                    "Status": "in-use",
+                    "SubnetId": "subnet-0eaf6ab9177a579d2",
+                    "VpcId": "vpc-051247e2e78c5bd60",
+                    "InterfaceType": "interface",
+                    "Operator": {
+                        "Managed": false
+                    }
+                }
+            ],
+            "RootDeviceName": "/dev/sda1",
+            "RootDeviceType": "ebs",
+            "SecurityGroups": [
+                {
+                    "GroupId": "sg-065b702c2d8b5c432",
+                    "GroupName": "ChIP-Atlsa-Default-SG"
+                }
+            ],
+            "SourceDestCheck": true,
+            "StateReason": {
+                "Code": "pending",
+                "Message": "pending"
+            },
+            "Tags": [
+                {
+                    "Key": "Name",
+                    "Value": "app-20260319-121052"
+                },
+                {
+                    "Key": "aws:ec2launchtemplate:version",
+                    "Value": "1"
+                },
+                {
+                    "Key": "aws:ec2launchtemplate:id",
+                    "Value": "lt-0dceffe78954c3e10"
+                }
+            ],
+            "VirtualizationType": "hvm",
+            "CpuOptions": {
+                "CoreCount": 1,
+                "ThreadsPerCore": 2
+            },
+            "CapacityReservationSpecification": {
+                "CapacityReservationPreference": "open"
+            },
+            "HibernationOptions": {
+                "Configured": false
+            },
+            "MetadataOptions": {
+                "State": "pending",
+                "HttpTokens": "optional",
+                "HttpPutResponseHopLimit": 1,
+                "HttpEndpoint": "enabled",
+                "HttpProtocolIpv6": "disabled",
+                "InstanceMetadataTags": "disabled"
+            },
+            "EnclaveOptions": {
+                "Enabled": false
+            },
+            "PrivateDnsNameOptions": {
+                "HostnameType": "ip-name",
+                "EnableResourceNameDnsARecord": false,
+                "EnableResourceNameDnsAAAARecord": false
+            },
+            "MaintenanceOptions": {
+                "AutoRecovery": "default",
+                "RebootMigration": "default"
+            },
+            "CurrentInstanceBootMode": "legacy-bios",
+            "Operator": {
+                "Managed": false
+            },
+            "InstanceId": "i-0753fb8f0b33946ff",
+            "ImageId": "ami-047c61fea594d4c5f",
+            "State": {
+                "Code": 0,
+                "Name": "pending"
+            },
+            "PrivateDnsName": "ip-10-1-1-252.ap-northeast-1.compute.internal",
+            "PublicDnsName": "",
+            "StateTransitionReason": "",
+            "KeyName": "chipatlas-202406",
+            "AmiLaunchIndex": 0,
+            "ProductCodes": [],
+            "InstanceType": "t3.medium",
+            "LaunchTime": "2026-03-19T03:10:54+00:00",
+            "Placement": {
+                "AvailabilityZoneId": "apne1-az4",
+                "GroupName": "",
+                "Tenancy": "default",
+                "AvailabilityZone": "ap-northeast-1a"
+            },
+            "Monitoring": {
+                "State": "disabled"
+            },
+            "SubnetId": "subnet-0eaf6ab9177a579d2",
+            "VpcId": "vpc-051247e2e78c5bd60",
+            "PrivateIpAddress": "10.1.1.252"
+        }
+    ]
+}
