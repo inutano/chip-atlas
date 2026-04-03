@@ -1,0 +1,64 @@
+require 'json'
+
+module ChipAtlas
+  module Routes
+    module Wabi
+      def self.registered(app)
+        app.get '/wabi_endpoint_status' do
+          ChipAtlas::WabiService.endpoint_available? ? 'chipatlas' : ''
+        end
+
+        app.get '/wabi_chipatlas' do
+          result = ChipAtlas::WabiService.job_finished?(params[:id])
+          case result
+          when true  then 'finished'
+          when false then 'running'
+          else 'server unavailable'
+          end
+        end
+
+        app.post '/wabi_chipatlas' do
+          unless ChipAtlas::WabiService.endpoint_available?
+            halt 503
+          end
+
+          post_data = if request.content_type&.include?('application/json')
+            request.body.rewind
+            JSON.parse(request.body.read)
+          else
+            params
+          end
+
+          request_id = ChipAtlas::WabiService.submit_job(post_data)
+          if request_id
+            content_type 'application/json'
+            JSON.generate({ 'requestId' => request_id })
+          else
+            content_type 'application/json'
+            JSON.generate({ 'request_body' => post_data.to_s })
+          end
+        end
+
+        app.get '/enrichment_analysis_log' do
+          log = ChipAtlas::WabiService.fetch_log(params[:id])
+          if log
+            log
+          else
+            status 404
+            'Log file not available yet'
+          end
+        end
+
+        app.get '/diff_analysis_log' do
+          log = ChipAtlas::WabiService.fetch_log(params[:id])
+          if log
+            log
+          else
+            status 404
+            'Log file not available yet'
+          end
+        end
+      end
+    end
+  end
+end
