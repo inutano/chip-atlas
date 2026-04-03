@@ -94,7 +94,7 @@ module ChipAtlas
     end
 
     def id_valid?(exp_id)
-      dataset.where(exp_id: exp_id).count > 0
+      !dataset.where(exp_id: exp_id).empty?
     end
 
     def number_of_experiments
@@ -117,20 +117,27 @@ module ChipAtlas
 
     def index_by_genome(genome)
       index = { antigen: {}, celltype: {} }
-      dataset.where(genome: genome).select(
-        :ag_class, :ag_sub_class, :cl_class, :cl_sub_class
-      ).each do |row|
-        ag_cls = row[:ag_class]
-        ag_sub = row[:ag_sub_class]
-        cl_cls = row[:cl_class]
-        cl_sub = row[:cl_sub_class]
 
-        index[:antigen][ag_cls] ||= Hash.new(0)
-        index[:antigen][ag_cls][ag_sub] += 1
+      # Antigen index via SQL GROUP BY
+      dataset.where(genome: genome)
+        .group_and_count(:ag_class, :ag_sub_class)
+        .each do |row|
+          ag_cls = row[:ag_class]
+          ag_sub = row[:ag_sub_class]
+          index[:antigen][ag_cls] ||= Hash.new(0)
+          index[:antigen][ag_cls][ag_sub] = row[:count]
+        end
 
-        index[:celltype][cl_cls] ||= Hash.new(0)
-        index[:celltype][cl_cls][cl_sub] += 1
-      end
+      # Cell type index via SQL GROUP BY
+      dataset.where(genome: genome)
+        .group_and_count(:cl_class, :cl_sub_class)
+        .each do |row|
+          cl_cls = row[:cl_class]
+          cl_sub = row[:cl_sub_class]
+          index[:celltype][cl_cls] ||= Hash.new(0)
+          index[:celltype][cl_cls][cl_sub] = row[:count]
+        end
+
       index
     end
 
@@ -144,18 +151,14 @@ module ChipAtlas
       subset = subset.where(cl_class: cl_class) unless cl_class == 'All cell types'
 
       col = subclass_type == 'ag' ? :ag_sub_class : :cl_sub_class
-      counts = {}
-      subset.select(col).each do |row|
-        val = row[col]
-        counts[val] ||= 0
-        counts[val] += 1
-      end
-      counts
+      subset.group_and_count(col).as_hash(col, :count)
     end
 
     def load_from_file(table_path)
       records = []
       timestamp = Time.now
+      total = 0
+      batch_size = 5_000
 
       File.foreach(table_path, encoding: 'UTF-8') do |line_n|
         cols = line_n.chomp.split("\t")
@@ -172,10 +175,19 @@ module ChipAtlas
           attributes:        cols[9..].to_a.join("\t"),
           created_at:        timestamp,
         }
+
+        if records.size >= batch_size
+          dataset.multi_insert(records)
+          total += records.size
+          records.clear
+        end
       end
 
-      dataset.multi_insert(records) if records.any?
-      records.size
+      if records.any?
+        dataset.multi_insert(records)
+        total += records.size
+      end
+      total
     end
   end
 end

@@ -21,16 +21,15 @@ module ChipAtlas
 
     def set(exp_id, metadata)
       json = JSON.generate(metadata)
-      if dataset.where(exp_id: exp_id).count > 0
-        dataset.where(exp_id: exp_id).update(
-          metadata_json: json, fetched_at: Time.now
-        )
-      else
-        dataset.insert(
-          exp_id: exp_id, metadata_json: json,
-          fetched_at: Time.now, created_at: Time.now
-        )
-      end
+      dataset.insert_conflict(
+        target: :exp_id,
+        update: { metadata_json: json, fetched_at: Time.now }
+      ).insert(
+        exp_id: exp_id,
+        metadata_json: json,
+        fetched_at: Time.now,
+        created_at: Time.now
+      )
     end
 
     def clear_expired
