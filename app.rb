@@ -38,28 +38,6 @@ class ChipAtlasApp < Sinatra::Base
     end
   end
 
-  def self.download_json_with_fallback(remote_url, local_filename)
-    local_path = File.join('public', local_filename)
-
-    if File.exist?(local_path)
-      warn "Using cached file: #{local_path}"
-      return JSON.parse(File.read(local_path))
-    end
-
-    begin
-      warn "No cached file found, downloading from remote: #{remote_url}"
-      Timeout.timeout(30) do
-        content = URI.open(remote_url).read
-        File.write(local_path, content)
-        JSON.parse(content)
-      end
-    rescue OpenURI::HTTPError, Timeout::Error, SocketError, Errno::ECONNREFUSED => e
-      warn "Failed to download #{remote_url}: #{e.message}"
-      raise "Unable to load #{remote_url} and no cached file available"
-    end
-  end
-  private_class_method :download_json_with_fallback
-
   def self.format_number(n)
     n.to_s.gsub(/(\d)(?=(\d{3})+\z)/, '\1,')
   end
@@ -77,15 +55,6 @@ class ChipAtlasApp < Sinatra::Base
       set :qval_range, ChipAtlas::Bedfile.qval_range
       set :target_genes_analysis, ChipAtlas::Analysis.target_genes_result
       set :bedsizes, ChipAtlas::Bedsize.dump
-
-      set :experiment_list, download_json_with_fallback(
-        'https://chip-atlas.dbcls.jp/data/metadata/ExperimentList.json', 'ExperimentList.json'
-      )
-      set :experiment_list_adv, download_json_with_fallback(
-        'https://chip-atlas.dbcls.jp/data/metadata/ExperimentList_adv.json', 'ExperimentList_adv.json'
-      )
-      ChipAtlas::ExperimentSearch.load_from_json(settings.experiment_list_adv)
-      set :gsm_to_srx, settings.experiment_list['data'].to_h { |a| [a[2], a[0]] }
     end
   end
 

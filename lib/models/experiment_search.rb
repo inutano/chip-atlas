@@ -7,6 +7,11 @@ module ChipAtlas
 
     module_function
 
+    def gsm_to_srx(gsm_id)
+      row = DB["SELECT exp_id FROM experiments_fts WHERE geo_id = ?", gsm_id].first
+      row&.[](:exp_id)
+    end
+
     def search(query, genome: nil, limit: 20, offset: 0)
       return { total: 0, returned: 0, experiments: [] } if query.nil? || query.strip.empty?
 

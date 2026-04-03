@@ -33,8 +33,16 @@ module ChipAtlas
                    ChipAtlas::Experiment.get_subclass(
                      params[:genome], params[:agClass], params[:clClass], params[:type]
                    )
-                 when 'ExperimentList'            then settings.experiment_list
-                 when 'ExperimentList_adv'        then settings.experiment_list_adv
+                 when 'ExperimentList'
+                   file_path = File.join(settings.public_folder, 'ExperimentList.json')
+                   halt 404 unless File.exist?(file_path)
+                   content_type 'application/json'
+                   return send_file(file_path)
+                 when 'ExperimentList_adv'
+                   file_path = File.join(settings.public_folder, 'ExperimentList_adv.json')
+                   halt 404 unless File.exist?(file_path)
+                   content_type 'application/json'
+                   return send_file(file_path)
                  end
           json_response(data)
         end
