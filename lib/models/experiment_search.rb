@@ -38,8 +38,7 @@ module ChipAtlas
       end
 
       experiments = rows.map do |row|
-        str_row = row.each_with_object({}) { |(k, v), h| h[k.to_s] = v }
-        ChipAtlas::Serializers.search_result(str_row)
+        ChipAtlas::Serializers.search_result(row)
       end
 
       { total: total, returned: experiments.size, experiments: experiments }
