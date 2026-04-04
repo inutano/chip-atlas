@@ -45,15 +45,17 @@ class ChipAtlasApp < Sinatra::Base
     end
 
     def log_activity(action, data = nil)
-      entry = { ip: request.ip, action: action }
-      entry[:data] = data if data
-      settings.access_logger.info(JSON.generate(entry))
+      fields = [Time.now.iso8601, request.ip, action]
+      fields << JSON.generate(data) if data
+      settings.access_logger.info(fields.join("\t"))
     end
   end
 
   configure do
     FileUtils.mkdir_p('log')
-    set :access_logger, Logger.new('log/access_log', 'daily')
+    access_log = Logger.new('log/access_log', 'daily')
+    access_log.formatter = proc { |_, _, _, msg| "#{msg}\n" }
+    set :access_logger, access_log
   end
 
   configure :production do
