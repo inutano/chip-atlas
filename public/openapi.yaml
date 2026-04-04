@@ -2,12 +2,16 @@ openapi: 3.1.0
 
 info:
   title: ChIP-Atlas API
-  version: "1.0.0"
+  version: "2.0.0"
   description: >-
     REST API for ChIP-Atlas, a comprehensive database of public ChIP-seq,
-    ATAC-seq, DNase-seq, and Bisulfite-seq experiments. Provides programmatic
-    access to experiment metadata, peak-call data, colocalization analysis,
-    and target gene predictions across 10+ genome assemblies.
+    ATAC-seq, DNase-seq, Bisulfite-seq, CUT&Tag, and CUT&RUN experiments.
+    Provides programmatic access to experiment metadata, peak-call data,
+    colocalization analysis, target gene predictions, enrichment analysis,
+    and differential analysis across seven genome assemblies.
+
+    All endpoints are under the /api/ prefix, return JSON, and use
+    snake_case field names.
   contact:
     name: ChIP-Atlas
     url: https://chip-atlas.org
@@ -25,13 +29,15 @@ servers:
 
 tags:
   - name: Classification
-    description: Browse the genome / experiment type / antigen / cell type hierarchy
-  - name: Experiments
-    description: Search and retrieve experiment metadata
+    description: Browse the genome / track class / cell type hierarchy with experiment counts
+  - name: Data
+    description: Search and retrieve experiment metadata, indices, and statistics
+  - name: URL Generation
+    description: Generate download, IGV, colocalization, and target gene result URLs
   - name: Analysis
-    description: Colocalization and target gene analysis data
-  - name: Download
-    description: Generate download URLs for peak-call BED files
+    description: Colocalization and target gene analysis indices
+  - name: Jobs
+    description: Submit and monitor enrichment/differential analysis jobs
 
 components:
   parameters:
@@ -42,13 +48,12 @@ components:
       description: Genome assembly identifier
       schema:
         $ref: "#/components/schemas/GenomeAssembly"
-    AgClass:
-      name: agClass
+    TrackClass:
+      name: track_class
       in: query
       required: true
       description: >-
-        Experiment / antigen class. Use chipatlas_list_experiment_types
-        to discover valid values.
+        Experiment / track class. Use /api/track_classes to discover valid values.
       schema:
         type: string
         enum:
@@ -59,17 +64,53 @@ components:
           - ATAC-Seq
           - DNase-seq
           - Bisulfite-Seq
+          - CUT&Tag
+          - CUT&RUN
       example: Histone
-    ClClass:
-      name: clClass
+    CellTypeClass:
+      name: cell_type_class
       in: query
       required: false
       description: >-
-        Cell type class (e.g. "Blood", "Brain"). Use "All cell types" for
-        unfiltered results. Use /data/sample_types to discover valid values.
+        Cell type class (e.g. "Blood", "Brain"). Use /api/cell_type_classes
+        to discover valid values.
       schema:
         type: string
       example: Blood
+    TrackSubclass:
+      name: track_subclass
+      in: query
+      required: false
+      description: >-
+        Specific target / antigen (e.g. "H3K4me3", "CTCF"). Use
+        /api/track_subclasses to discover valid values.
+      schema:
+        type: string
+      example: H3K4me3
+    CellTypeSubclass:
+      name: cell_type_subclass
+      in: query
+      required: false
+      description: >-
+        Specific cell type or cell line (e.g. "K-562", "HeLa"). Use "-"
+        for unspecified. Use /api/cell_type_subclasses to discover valid values.
+      schema:
+        type: string
+      example: K-562
+    Qval:
+      name: qval
+      in: query
+      required: false
+      description: >-
+        Q-value significance threshold. Use /api/qval_range to get valid values.
+      schema:
+        type: string
+        enum:
+          - "05"
+          - "10"
+          - "20"
+          - "50"
+      example: "05"
 
   schemas:
     GenomeAssembly:
@@ -77,16 +118,12 @@ components:
       description: UCSC-style genome assembly identifier
       enum:
         - hg38
-        - hg19
-        - mm39
         - mm10
-        - mm9
         - rn6
         - dm6
-        - dm3
         - ce11
-        - ce10
         - sacCer3
+        - TAIR10
       example: hg38
 
     ClassificationItem:
@@ -110,72 +147,133 @@ components:
     ExperimentMetadata:
       type: object
       properties:
-        expid:
+        experiment_id:
           type: string
-          description: Experiment accession (SRX or ERX)
+          description: Experiment accession (SRX, ERX, or DRX)
           example: SRX018625
         genome:
           type: string
           description: Genome assembly this record refers to
-        agClass:
+        track_class:
           type: string
-          description: Experiment / antigen class
-        agSubClass:
+          description: Experiment / track class
+        track_subclass:
           type: string
-          description: Antigen subclass (e.g. H3K4me3)
-        clClass:
+          description: Specific target (e.g. H3K4me3)
+        cell_type_class:
           type: string
           description: Cell type class
-        clSubClass:
+        cell_type_subclass:
           type: string
           description: Cell type subclass
+        cell_type_subclass_info:
+          type: string
+          description: Additional cell type metadata
+        read_info:
+          type: string
+          description: Read count and mapping stats (comma-separated)
         title:
           type: string
           description: Experiment title
         attributes:
           type: string
           description: Additional sample attributes
-        readInfo:
-          type: string
-          description: Read count and length info
 
-    DownloadCondition:
+    SearchResult:
+      type: object
+      properties:
+        total:
+          type: integer
+          description: Total number of matching experiments
+        returned:
+          type: integer
+          description: Number of experiments in this response page
+        experiments:
+          type: array
+          items:
+            $ref: "#/components/schemas/ExperimentMetadata"
+
+    ServiceStatus:
+      type: object
+      properties:
+        data_server:
+          type: boolean
+          description: Whether the data backend is reachable
+        wabi:
+          type: boolean
+          description: Whether the WABI job backend is available
+        wes:
+          type: boolean
+          description: Whether the WES job backend is available
+        feature_status:
+          type: object
+          description: Per-feature availability flags
+
+    ColoUrls:
+      type: object
+      properties:
+        data_url:
+          type: string
+          format: uri
+          description: URL to colocalization result data
+        tsv_url:
+          type: string
+          format: uri
+          description: URL to colocalization TSV file
+        gml_url:
+          type: string
+          format: uri
+          description: URL to colocalization GML network file
+
+    TargetGenesUrls:
+      type: object
+      properties:
+        data_url:
+          type: string
+          format: uri
+          description: URL to target genes result data
+        tsv_url:
+          type: string
+          format: uri
+          description: URL to target genes TSV file
+
+    JobSubmission:
       type: object
       required:
-        - genome
-        - agClass
+        - type
       properties:
-        genome:
-          $ref: "#/components/schemas/GenomeAssembly"
-        agClass:
+        type:
           type: string
-          description: Experiment / antigen class
-          example: Histone
-        agSubClass:
-          type: string
-          description: Antigen subclass filter
-          example: H3K4me3
-        clClass:
-          type: string
-          description: Cell type class filter
-          example: Blood
-        clSubClass:
-          type: string
-          description: Cell type subclass filter
-        qval:
-          type: string
-          description: >-
-            Q-value significance threshold. Lower values are stricter.
+          description: Analysis type
           enum:
-            - "1"
-            - "5"
-            - "10"
-            - "50"
-            - "100"
-          example: "5"
+            - enrichment_analysis
+            - diff_analysis
+        params:
+          type: object
+          description: Analysis-specific parameters
+
+    JobStatus:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Job identifier
+        status:
+          type: string
+          description: Current job state
+          enum:
+            - queued
+            - running
+            - completed
+            - failed
+        backend:
+          type: string
+          description: Compute backend handling the job
 
 paths:
-  /data/list_of_genome.json:
+  # ── Classification ──────────────────────────────────────────────────
+
+  /api/genomes:
     get:
       operationId: listGenomes
       tags: [Classification]
@@ -192,85 +290,70 @@ paths:
                   type: string
               example:
                 - hg38
-                - hg19
                 - mm10
-                - mm9
                 - rn6
                 - dm6
-                - dm3
                 - ce11
-                - ce10
                 - sacCer3
+                - TAIR10
 
-  /data/list_of_experiment_types.json:
+  /api/track_classes:
     get:
-      operationId: listExperimentTypesStatic
+      operationId: listTrackClasses
       tags: [Classification]
-      summary: List experiment type categories (static)
+      summary: List track (experiment) type categories
       description: >-
-        Returns the fixed list of experiment type categories without counts.
-        Use /data/experiment_types for counts by genome and cell type.
-      responses:
-        "200":
-          description: Array of experiment type objects
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  type: object
-                  properties:
-                    id:
-                      type: string
-                    label:
-                      type: string
-                  required: [id, label]
-              example:
-                - id: Histone
-                  label: "ChIP: Histone"
-                - id: TFs and others
-                  label: "ChIP: TFs and others"
-                - id: ATAC-Seq
-                  label: ATAC-Seq
-
-  /data/experiment_types:
-    get:
-      operationId: listExperimentTypesWithCounts
-      tags: [Classification]
-      summary: List experiment types with counts
-      description: >-
-        Returns experiment type categories with the number of experiments
-        for a given genome and cell type class.
+        Without parameters, returns the static list of track type categories.
+        With genome and cell_type_class parameters, returns categories with
+        experiment counts.
       parameters:
-        - $ref: "#/components/parameters/Genome"
-        - name: clClass
+        - name: genome
           in: query
-          required: true
-          description: Cell type class. Use "All cell types" for unfiltered counts.
+          required: false
+          description: Genome assembly identifier (required for counts)
+          schema:
+            $ref: "#/components/schemas/GenomeAssembly"
+        - name: cell_type_class
+          in: query
+          required: false
+          description: Cell type class filter (e.g. "Blood")
           schema:
             type: string
-          example: All cell types
+          example: Blood
       responses:
         "200":
-          description: Array of experiment types with counts
+          description: Array of track type objects, optionally with counts
           content:
             application/json:
               schema:
                 type: array
                 items:
                   $ref: "#/components/schemas/ClassificationItem"
+              example:
+                - id: Histone
+                  label: "ChIP: Histone"
+                  count: 12345
+                - id: TFs and others
+                  label: "ChIP: TFs and others"
+                  count: 8765
+                - id: ATAC-Seq
+                  label: ATAC-Seq
+                  count: 3456
+                - id: CUT&Tag
+                  label: CUT&Tag
+                  count: 1234
 
-  /data/sample_types:
+  /api/cell_type_classes:
     get:
-      operationId: listSampleTypes
+      operationId: listCellTypeClasses
       tags: [Classification]
       summary: List cell type classes with counts
       description: >-
         Returns cell type classes and their experiment counts for a given
-        genome and experiment class.
+        genome and track class.
       parameters:
         - $ref: "#/components/parameters/Genome"
-        - $ref: "#/components/parameters/AgClass"
+        - $ref: "#/components/parameters/TrackClass"
       responses:
         "200":
           description: Array of cell type classes with counts
@@ -281,28 +364,28 @@ paths:
                 items:
                   $ref: "#/components/schemas/ClassificationItem"
               example:
-                - id: All cell types
-                  label: All cell types
-                  count: 500
                 - id: Blood
                   label: Blood
-                  count: 120
+                  count: 9246
+                - id: Brain
+                  label: Brain
+                  count: 3421
 
-  /data/chip_antigen:
+  /api/track_subclasses:
     get:
-      operationId: listAntigens
+      operationId: listTrackSubclasses
       tags: [Classification]
-      summary: List antigen subclasses with counts
+      summary: List specific tracks (antigens/targets) with counts
       description: >-
-        Returns antigen subclasses (e.g. H3K4me3, CTCF) with experiment
-        counts for a given genome, experiment class, and optional cell type.
+        Returns specific track targets (e.g. H3K4me3, CTCF) with experiment
+        counts for a given genome, track class, and cell type class.
       parameters:
         - $ref: "#/components/parameters/Genome"
-        - $ref: "#/components/parameters/AgClass"
-        - $ref: "#/components/parameters/ClClass"
+        - $ref: "#/components/parameters/TrackClass"
+        - $ref: "#/components/parameters/CellTypeClass"
       responses:
         "200":
-          description: Array of antigen subclasses with counts
+          description: Array of track subclasses with counts
           content:
             application/json:
               schema:
@@ -310,25 +393,25 @@ paths:
                 items:
                   $ref: "#/components/schemas/ClassificationItem"
               example:
-                - id: "-"
-                  label: All
-                  count: null
                 - id: H3K4me3
                   label: H3K4me3
-                  count: 45
+                  count: 450
+                - id: H3K27ac
+                  label: H3K27ac
+                  count: 380
 
-  /data/cell_type:
+  /api/cell_type_subclasses:
     get:
-      operationId: listCellTypes
+      operationId: listCellTypeSubclasses
       tags: [Classification]
-      summary: List cell type subclasses with counts
+      summary: List specific cell types/lines with counts
       description: >-
-        Returns cell type subclasses with experiment counts for a given
-        genome, experiment class, and optional cell type class.
+        Returns specific cell types or cell lines (e.g. K-562, HeLa) with
+        experiment counts for a given genome, track class, and cell type class.
       parameters:
         - $ref: "#/components/parameters/Genome"
-        - $ref: "#/components/parameters/AgClass"
-        - $ref: "#/components/parameters/ClClass"
+        - $ref: "#/components/parameters/TrackClass"
+        - $ref: "#/components/parameters/CellTypeClass"
       responses:
         "200":
           description: Array of cell type subclasses with counts
@@ -338,105 +421,197 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/ClassificationItem"
+              example:
+                - id: K-562
+                  label: K-562
+                  count: 245
+                - id: HeLa
+                  label: HeLa
+                  count: 189
 
-  /data/ExperimentList.json:
-    get:
-      operationId: listAllExperiments
-      tags: [Experiments]
-      summary: Get full experiment list
-      description: >-
-        Returns the complete list of experiments as a 2D array. This is a
-        large response; prefer /data/exp_metadata.json for individual lookups.
-        Each row contains: SRX ID, SRA ID, GEO ID, genome, antigen class,
-        antigen subclass, cell type class, cell type subclass.
-      responses:
-        "200":
-          description: Object with a `data` array of experiment rows
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  data:
-                    type: array
-                    items:
-                      type: array
-                      items:
-                        type: string
+  # ── Data ────────────────────────────────────────────────────────────
 
-  /data/exp_metadata.json:
+  /api/experiment:
     get:
-      operationId: getExperimentMetadata
-      tags: [Experiments]
+      operationId: getExperiment
+      tags: [Data]
       summary: Get metadata for a single experiment
       description: >-
-        Returns detailed metadata for an experiment by its SRX or GSM
-        accession ID. May return multiple records if the experiment is
-        mapped to multiple genome assemblies.
+        Returns full metadata for an experiment by its SRX, ERX, or DRX
+        accession ID.
       parameters:
-        - name: expid
+        - name: experiment_id
           in: query
           required: true
-          description: Experiment accession ID
+          description: Experiment accession ID (SRX, ERX, or DRX)
           schema:
             type: string
           example: SRX018625
       responses:
         "200":
-          description: Array of experiment metadata records
+          description: Experiment metadata object
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ExperimentMetadata"
+              example:
+                experiment_id: SRX018625
+                genome: hg38
+                track_class: Histone
+                track_subclass: H3K4me3
+                cell_type_class: Blood
+                cell_type_subclass: K-562
+                title: "H3K4me3 ChIP-seq in K-562"
+                attributes: "cell line=K-562; tissue=Blood"
+
+  /api/search:
+    get:
+      operationId: searchExperiments
+      tags: [Data]
+      summary: Full-text search across experiments
+      description: >-
+        Searches the experiment database by keyword, accession ID, or
+        classification terms. Supports pagination via limit and offset.
+        Replaces the bulk JSON experiment list endpoint.
+      parameters:
+        - name: q
+          in: query
+          required: true
+          description: Search query string
+          schema:
+            type: string
+          example: H3K4me3
+        - name: genome
+          in: query
+          required: false
+          description: Filter results to a specific genome assembly
+          schema:
+            $ref: "#/components/schemas/GenomeAssembly"
+        - name: limit
+          in: query
+          required: false
+          description: Maximum number of results to return (default 20)
+          schema:
+            type: integer
+            default: 20
+          example: 20
+        - name: offset
+          in: query
+          required: false
+          description: Number of results to skip (default 0)
+          schema:
+            type: integer
+            default: 0
+          example: 0
+      responses:
+        "200":
+          description: Paginated search results
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SearchResult"
+              example:
+                total: 18546
+                returned: 20
+                experiments:
+                  - experiment_id: SRX018625
+                    genome: hg38
+                    track_class: Histone
+                    track_subclass: H3K4me3
+                    cell_type_class: Blood
+                    cell_type_subclass: K-562
+                    title: "H3K4me3 ChIP-seq in K-562"
+                    attributes: "cell line=K-562"
+
+  /api/genome_index:
+    get:
+      operationId: getGenomeIndex
+      tags: [Data]
+      summary: Full facet index for all genomes
+      description: >-
+        Returns the complete classification facet index for all genomes.
+        This is a large response cached for 1 hour. Useful for building
+        local facet navigation without multiple round-trips.
+      responses:
+        "200":
+          description: Full facet index object
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Nested object keyed by genome, track class, cell type class, etc.
+
+  /api/qval_range:
+    get:
+      operationId: getQvalRange
+      tags: [Data]
+      summary: Get available q-value thresholds
+      description: >-
+        Returns the list of valid q-value threshold strings that can be
+        used in download and analysis requests.
+      responses:
+        "200":
+          description: Array of q-value threshold strings
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: "#/components/schemas/ExperimentMetadata"
+                  type: string
+              example:
+                - "05"
+                - "10"
+                - "20"
+                - "50"
 
-  /data/colo_analysis.json:
+  /api/bed_sizes:
     get:
-      operationId: getColocalizationIndex
+      operationId: getBedSizes
+      tags: [Data]
+      summary: Get peak count statistics
+      description: Returns peak count statistics for available BED files.
+      responses:
+        "200":
+          description: Peak count statistics
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /api/colo_index:
+    get:
+      operationId: getColoIndex
       tags: [Analysis]
-      summary: Get colocalization analysis index
+      summary: Get colocalization analysis index for a genome
       description: >-
         Returns the index of available colocalization analyses for a genome.
-        The response maps antigens to their available cell types and vice versa.
+        Maps antigens to their available cell types and vice versa. Check
+        this before requesting colocalization URLs.
       parameters:
         - $ref: "#/components/parameters/Genome"
       responses:
         "200":
           description: >-
-            Object with `antigen` and `cellline` keys, each mapping names
-            to arrays of available partners.
+            Object with antigen and cell type mapping showing available
+            colocalization combinations.
           content:
             application/json:
               schema:
                 type: object
                 additionalProperties:
                   type: object
-                  properties:
-                    antigen:
-                      type: object
-                      additionalProperties:
-                        type: array
-                        items:
-                          type: string
-                    cellline:
-                      type: object
-                      additionalProperties:
-                        type: array
-                        items:
-                          type: string
 
-  /data/target_genes_analysis.json:
+  /api/target_genes_index:
     get:
       operationId: getTargetGenesIndex
       tags: [Analysis]
       summary: Get target genes analysis index
       description: >-
-        Returns a mapping of genome assemblies to lists of antigens that
+        Returns a mapping of genome assemblies to lists of tracks that
         have precomputed target gene analysis data.
       responses:
         "200":
-          description: Object mapping genome assemblies to antigen arrays
+          description: Object mapping genome assemblies to track arrays
           content:
             application/json:
               schema:
@@ -454,32 +629,24 @@ paths:
                   - H3K4me3
                   - H3K27ac
 
-  /download:
-    post:
-      operationId: getBedDownloadUrl
-      tags: [Download]
+  # ── URL Generation ─────────────────────────────────────────────────
+
+  /api/download_url:
+    get:
+      operationId: getDownloadUrl
+      tags: [URL Generation]
       summary: Get download URL for peak-call BED data
       description: >-
-        Generates a download URL for assembled peak-call BED files
-        matching the given filtering conditions.
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required:
-                - condition
-              properties:
-                condition:
-                  $ref: "#/components/schemas/DownloadCondition"
-            example:
-              condition:
-                genome: hg38
-                agClass: Histone
-                agSubClass: H3K4me3
-                clClass: Blood
-                qval: "5"
+        Generates a download URL for assembled peak-call BED files matching
+        the given filtering conditions. The URL points to a pre-computed
+        file on the data backend (chip-atlas.dbcls.jp).
+      parameters:
+        - $ref: "#/components/parameters/Genome"
+        - $ref: "#/components/parameters/TrackClass"
+        - $ref: "#/components/parameters/TrackSubclass"
+        - $ref: "#/components/parameters/CellTypeClass"
+        - $ref: "#/components/parameters/CellTypeSubclass"
+        - $ref: "#/components/parameters/Qval"
       responses:
         "200":
           description: Object containing the download URL
@@ -489,8 +656,299 @@ paths:
                 type: object
                 properties:
                   url:
+                    type:
+                      - string
+                      - "null"
+                    format: uri
+                    description: >-
+                      Direct download URL for the BED file, or null if no
+                      matching file exists.
+              example:
+                url: "https://chip-atlas.dbcls.jp/data/hg38/assembled/Histone.H3K4me3.Blood.-.05.bed"
+
+  /api/igv_url:
+    get:
+      operationId: getIgvUrl
+      tags: [URL Generation]
+      summary: Get IGV browser URL
+      description: >-
+        Generates a URL to open the matching peak-call data in the IGV
+        genome browser.
+      parameters:
+        - $ref: "#/components/parameters/Genome"
+        - $ref: "#/components/parameters/TrackClass"
+        - $ref: "#/components/parameters/TrackSubclass"
+        - $ref: "#/components/parameters/CellTypeClass"
+        - $ref: "#/components/parameters/CellTypeSubclass"
+        - $ref: "#/components/parameters/Qval"
+      responses:
+        "200":
+          description: Object containing the IGV browser URL
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  url:
+                    type:
+                      - string
+                      - "null"
+                    format: uri
+                    description: IGV browser URL, or null if no matching data exists.
+              example:
+                url: "https://igv.org/app/?sessionURL=..."
+
+  /api/colo_urls:
+    get:
+      operationId: getColoUrls
+      tags: [URL Generation]
+      summary: Get colocalization result URLs
+      description: >-
+        Returns URLs to pre-computed colocalization result files for a given
+        genome, track, and cell type combination. Check /api/colo_index first
+        to verify the combination has data.
+      parameters:
+        - $ref: "#/components/parameters/Genome"
+        - name: track
+          in: query
+          required: true
+          description: Track / antigen name (e.g. "CTCF")
+          schema:
+            type: string
+          example: CTCF
+        - name: cell_type
+          in: query
+          required: false
+          description: Cell type name (e.g. "K-562")
+          schema:
+            type: string
+          example: K-562
+      responses:
+        "200":
+          description: Object containing result file URLs
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ColoUrls"
+              example:
+                data_url: "https://chip-atlas.dbcls.jp/data/hg38/colo/CTCF.K-562.data"
+                tsv_url: "https://chip-atlas.dbcls.jp/data/hg38/colo/CTCF.K-562.tsv"
+                gml_url: "https://chip-atlas.dbcls.jp/data/hg38/colo/CTCF.K-562.gml"
+
+  /api/target_genes_urls:
+    get:
+      operationId: getTargetGenesUrls
+      tags: [URL Generation]
+      summary: Get target genes result URLs
+      description: >-
+        Returns URLs to pre-computed target gene result files for a given
+        genome, track, and distance. Check /api/target_genes_index first
+        to verify the combination has data.
+      parameters:
+        - $ref: "#/components/parameters/Genome"
+        - name: track
+          in: query
+          required: true
+          description: Track / antigen name (e.g. "CTCF")
+          schema:
+            type: string
+          example: CTCF
+        - name: distance
+          in: query
+          required: true
+          description: Distance from TSS in base pairs
+          schema:
+            type: integer
+          example: 5000
+      responses:
+        "200":
+          description: Object containing result file URLs
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TargetGenesUrls"
+              example:
+                data_url: "https://chip-atlas.dbcls.jp/data/hg38/target_genes/CTCF.5000.data"
+                tsv_url: "https://chip-atlas.dbcls.jp/data/hg38/target_genes/CTCF.5000.tsv"
+
+  # ── Jobs ────────────────────────────────────────────────────────────
+
+  /status:
+    get:
+      operationId: getServiceStatus
+      tags: [Jobs]
+      summary: Check service availability
+      description: >-
+        Returns the availability status of the data server and compute
+        backends (WABI, WES). Check this before submitting jobs.
+      responses:
+        "200":
+          description: Service status object
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ServiceStatus"
+              example:
+                data_server: true
+                wabi: true
+                wes: false
+                feature_status:
+                  enrichment_analysis: true
+                  diff_analysis: false
+
+  /jobs/available:
+    get:
+      operationId: checkJobAvailability
+      tags: [Jobs]
+      summary: Check if a compute backend is available for a job type
+      description: >-
+        Returns whether the compute backend for a given analysis type is
+        currently available.
+      parameters:
+        - name: type
+          in: query
+          required: true
+          description: Analysis type to check
+          schema:
+            type: string
+            enum:
+              - enrichment_analysis
+              - diff_analysis
+          example: enrichment_analysis
+      responses:
+        "200":
+          description: Availability status
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  available:
+                    type: boolean
+                  backend:
+                    type: string
+                    description: Name of the compute backend
+
+  /jobs/submit:
+    post:
+      operationId: submitJob
+      tags: [Jobs]
+      summary: Submit an analysis job
+      description: >-
+        Submits an enrichment analysis or differential analysis job to the
+        available compute backend. Check /jobs/available first to confirm
+        the backend is up.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/JobSubmission"
+      responses:
+        "200":
+          description: Job submission result with job ID
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    description: Job identifier for status polling
+                  backend:
+                    type: string
+                    description: Compute backend handling the job
+
+  /jobs/{id}/status:
+    get:
+      operationId: getJobStatus
+      tags: [Jobs]
+      summary: Check job status
+      description: Returns the current status of a submitted job.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Job identifier
+          schema:
+            type: string
+        - name: backend
+          in: query
+          required: true
+          description: Compute backend handling the job
+          schema:
+            type: string
+          example: wabi
+      responses:
+        "200":
+          description: Job status object
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JobStatus"
+
+  /jobs/{id}/result:
+    get:
+      operationId: getJobResult
+      tags: [Jobs]
+      summary: Get job result URLs
+      description: >-
+        Returns URLs to the result files of a completed job. Only available
+        after the job status is "completed".
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Job identifier
+          schema:
+            type: string
+        - name: backend
+          in: query
+          required: true
+          description: Compute backend handling the job
+          schema:
+            type: string
+          example: wabi
+      responses:
+        "200":
+          description: Result URLs
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result_url:
                     type: string
                     format: uri
-                    description: Direct download URL for the BED file
-              example:
-                url: "https://chip-atlas.dbcls.jp/data/hg38/assembled/H3K4me3.Blood.5.bed"
+
+  /jobs/{id}/log:
+    get:
+      operationId: getJobLog
+      tags: [Jobs]
+      summary: Get job execution log
+      description: Returns the execution log for a job.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Job identifier
+          schema:
+            type: string
+        - name: backend
+          in: query
+          required: true
+          description: Compute backend handling the job
+          schema:
+            type: string
+          example: wabi
+      responses:
+        "200":
+          description: Job log
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  log:
+                    type: string
+                    description: Execution log text
