@@ -13,7 +13,7 @@ module ChipAtlas
       def self.allowed_remote_url?(url)
         uri = URI.parse(url)
         return false unless uri.is_a?(URI::HTTP) || uri.is_a?(URI::HTTPS)
-        ALLOWED_HOSTS.any? { |host| uri.host&.end_with?(host) }
+        ALLOWED_HOSTS.any? { |host| uri.host == host || uri.host&.end_with?(".#{host}") }
       rescue URI::InvalidURIError
         false
       end
