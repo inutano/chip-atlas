@@ -143,26 +143,40 @@ module ChipAtlas
           json_response({ url: url })
         end
 
-        app.get '/api/colo_urls' do
+        # Colocalization data (proxied from data server)
+        app.get '/api/colo' do
           halt 400, json_response({ error: 'genome, track, and cell_type required' }) unless params[:genome] && params[:track] && params[:cell_type]
           svc = ChipAtlas::LocationService.new(condition_from_params)
-          json_response({ data_url: svc.colo_data_url, tsv_url: svc.colo_tsv_url, gml_url: svc.colo_gml_url })
+          body = ChipAtlas::DataProxy.fetch_json(svc.colo_data_url)
+          halt 404, json_response({ error: 'Colocalization data not found' }) unless body
+          log_activity('colo', { genome: params[:genome], track: params[:track], cell_type: params[:cell_type] })
+          content_type 'application/json'
+          body
         end
 
-        app.post '/api/colo_urls' do
-          svc = ChipAtlas::LocationService.new(parsed_json)
-          json_response({ data_url: svc.colo_data_url, tsv_url: svc.colo_tsv_url, gml_url: svc.colo_gml_url })
+        # Colocalization download URLs (TSV, GML)
+        app.get '/api/colo/downloads' do
+          halt 400, json_response({ error: 'genome, track, and cell_type required' }) unless params[:genome] && params[:track] && params[:cell_type]
+          svc = ChipAtlas::LocationService.new(condition_from_params)
+          json_response({ tsv_url: svc.colo_tsv_url, gml_url: svc.colo_gml_url })
         end
 
-        app.get '/api/target_genes_urls' do
+        # Target genes data (proxied from data server)
+        app.get '/api/target_genes' do
           halt 400, json_response({ error: 'genome, track, and distance required' }) unless params[:genome] && params[:track] && params[:distance]
           svc = ChipAtlas::LocationService.new(condition_from_params)
-          json_response({ data_url: svc.target_genes_data_url, tsv_url: svc.target_genes_tsv_url })
+          body = ChipAtlas::DataProxy.fetch_json(svc.target_genes_data_url)
+          halt 404, json_response({ error: 'Target genes data not found' }) unless body
+          log_activity('target_genes', { genome: params[:genome], track: params[:track], distance: params[:distance] })
+          content_type 'application/json'
+          body
         end
 
-        app.post '/api/target_genes_urls' do
-          svc = ChipAtlas::LocationService.new(parsed_json)
-          json_response({ data_url: svc.target_genes_data_url, tsv_url: svc.target_genes_tsv_url })
+        # Target genes download URL (TSV)
+        app.get '/api/target_genes/downloads' do
+          halt 400, json_response({ error: 'genome, track, and distance required' }) unless params[:genome] && params[:track] && params[:distance]
+          svc = ChipAtlas::LocationService.new(condition_from_params)
+          json_response({ tsv_url: svc.target_genes_tsv_url })
         end
 
         # === Internal endpoints (not in OpenAPI) ===

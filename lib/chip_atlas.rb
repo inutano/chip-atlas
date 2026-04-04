@@ -12,6 +12,7 @@ require_relative 'services/location_service'
 require_relative 'services/wabi_service'
 require_relative 'services/sapporo_service'
 require_relative 'services/compute_router'
+require_relative 'services/data_proxy'
 require_relative 'services/service_monitor'
 require_relative 'services/sra_service'
 
