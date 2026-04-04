@@ -23,8 +23,23 @@ class ApiTest < Minitest::Test
     get '/api/genomes'
     assert last_response.ok?
     data = JSON.parse(last_response.body)
-    assert_includes data, 'hg38'
-    assert_includes data, 'TAIR10'
+    assert_kind_of Hash, data
+    assert_includes data.keys, 'hg38'
+    assert_includes data.keys, 'TAIR10'
+    assert_equal 'H. sapiens (hg38)', data['hg38']
+  end
+
+  def test_stats
+    get '/api/stats'
+    assert last_response.ok?
+    data = JSON.parse(last_response.body)
+    assert_kind_of Hash, data
+    %w[total_experiments total_experiments_formatted by_genome by_track_class].each do |key|
+      assert data.key?(key), "Expected key '#{key}' in stats response"
+    end
+    assert_kind_of Integer, data['total_experiments']
+    assert_kind_of Hash, data['by_genome']
+    assert_kind_of Hash, data['by_track_class']
   end
 
   def test_track_classes_static

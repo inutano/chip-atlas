@@ -39,6 +39,25 @@ module ChipAtlas
       rounded.to_s.gsub(/(\d)(?=(\d{3})+\z)/, '\1,')
     end
 
+    def stats
+      genomes = {}
+      dataset.group_and_count(:genome).each do |row|
+        genomes[row[:genome]] = row[:count]
+      end
+
+      track_classes = {}
+      dataset.group_and_count(:track_class).each do |row|
+        track_classes[row[:track_class]] = row[:count]
+      end
+
+      {
+        total_experiments: number_of_experiments,
+        total_experiments_formatted: formatted_experiment_count,
+        by_genome: genomes,
+        by_track_class: track_classes,
+      }
+    end
+
     def cached_index_all_genome
       now = Time.now
       if @index_cache && @index_cache_at && (now - @index_cache_at) < INDEX_CACHE_TTL

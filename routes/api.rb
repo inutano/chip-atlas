@@ -41,7 +41,12 @@ module ChipAtlas
 
         app.get '/api/genomes' do
           cache_control :public, max_age: 86_400
-          json_response(ChipAtlas::Experiment.list_of_genome.keys)
+          json_response(ChipAtlas::Experiment.list_of_genome)
+        end
+
+        app.get '/api/stats' do
+          cache_control :public, max_age: 3600
+          json_response(ChipAtlas::Experiment.stats)
         end
 
         app.get '/api/track_classes' do
