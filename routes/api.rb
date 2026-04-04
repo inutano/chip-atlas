@@ -100,6 +100,7 @@ module ChipAtlas
           genome = params[:genome]
           limit  = (params[:limit] || 20).to_i.clamp(1, 100)
           offset = (params[:offset] || 0).to_i
+          log_activity('search', { q: query, genome: genome })
           json_response(ChipAtlas::ExperimentSearch.search(query, genome: genome, limit: limit, offset: offset))
         end
 

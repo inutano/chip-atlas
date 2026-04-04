@@ -42,6 +42,7 @@ module ChipAtlas
 
           request_id = ChipAtlas::WabiService.submit_job(post_data)
           if request_id
+            log_activity('wabi_submit', { requestId: request_id })
             json_response({ 'requestId' => request_id })
           else
             json_response({ 'request_body' => post_data.to_s })

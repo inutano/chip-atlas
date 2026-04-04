@@ -37,11 +37,17 @@ class ChipAtlasApp < Sinatra::Base
       @parsed_json ||= begin
         request.body.rewind
         data = JSON.parse(request.body.read)
-        settings.access_logger.info("#{request.ip}\t#{request.path_info}\t#{data}")
+        log_activity(request.path_info, data)
         data
       rescue JSON::ParserError
         halt 400, json_response({ error: 'Invalid JSON' })
       end
+    end
+
+    def log_activity(action, data = nil)
+      entry = { ip: request.ip, action: action }
+      entry[:data] = data if data
+      settings.access_logger.info(JSON.generate(entry))
     end
   end
 

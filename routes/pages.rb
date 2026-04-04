@@ -42,6 +42,7 @@ module ChipAtlas
             redirect "/view?id=#{srx}" if srx
           end
           redirect '/not_found', 404 unless ChipAtlas::Experiment.id_valid?(@expid)
+          log_activity('view_experiment', { expid: @expid })
           @ncbi = ChipAtlas::SraService.new(@expid).fetch
           erb :experiment
         end
@@ -76,6 +77,7 @@ module ChipAtlas
           @genes     = params['genes']
           @genesetA  = params['genesetA']
           @genesetB  = params['genesetB']
+          log_activity('enrichment_analysis', { taxonomy: @taxonomy })
           load_analysis_settings
           erb :enrichment_analysis
         end
