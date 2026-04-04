@@ -18,6 +18,14 @@ module ChipAtlas
             halt 400, json_response({ error: 'Invalid backend' }) unless %w[wabi wes].include?(backend)
             backend
           end
+
+          def backend_available?(backend)
+            case backend
+            when 'wabi' then ChipAtlas::ServiceMonitor.status(:wabi)
+            when 'wes'  then ChipAtlas::ServiceMonitor.status(:wes)
+            else false
+            end
+          end
         end
 
         # Check which compute backend is available for a given job type
@@ -36,22 +44,35 @@ module ChipAtlas
             log_activity('job_submit', { type: job_type, backend: result[:backend], job_id: result[:job_id] })
             json_response(result)
           else
-            halt 503, json_response({ error: 'No compute backend available' })
+            halt 503, json_response({ error: 'No compute backend available', retry: false })
           end
         end
 
-        # Check job status
+        # Check job status — fails fast if backend is known to be down
         app.get '/jobs/:id/status' do
           id = validated_job_id
           backend = validated_backend
+
+          unless backend_available?(backend)
+            halt 503, json_response({
+              backend: backend, job_id: id,
+              status: 'backend_unavailable', retry: false,
+            })
+          end
+
           status = ChipAtlas::ComputeRouter.status(backend, id)
-          json_response({ backend: backend, job_id: id, status: status || 'unknown' })
+          json_response({ backend: backend, job_id: id, status: status || 'unknown', retry: true })
         end
 
         # Get result URLs
         app.get '/jobs/:id/result' do
           id = validated_job_id
           backend = validated_backend
+
+          unless backend_available?(backend)
+            halt 503, json_response({ error: 'Backend unavailable', retry: false })
+          end
+
           urls = ChipAtlas::ComputeRouter.result_urls(backend, id)
           json_response({ backend: backend, job_id: id, urls: urls })
         end
@@ -60,6 +81,11 @@ module ChipAtlas
         app.get '/jobs/:id/log' do
           id = validated_job_id
           backend = validated_backend
+
+          unless backend_available?(backend)
+            halt 503, 'Backend unavailable'
+          end
+
           log = ChipAtlas::ComputeRouter.log(backend, id)
           if log
             content_type 'text/plain'

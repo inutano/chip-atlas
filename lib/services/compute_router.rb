@@ -10,9 +10,9 @@ module ChipAtlas
 
     # Returns { backend:, available: } or { backend: nil, available: false }
     def available_backend(job_type)
-      if ChipAtlas::WabiService.endpoint_available?
+      if ChipAtlas::ServiceMonitor.status(:wabi)
         { backend: 'wabi', available: true }
-      elsif job_type == 'enrichment_analysis' && ChipAtlas::SapporoService.endpoint_available?
+      elsif job_type == 'enrichment_analysis' && ChipAtlas::ServiceMonitor.status(:wes)
         { backend: 'wes', available: true }
       else
         { backend: nil, available: false }
