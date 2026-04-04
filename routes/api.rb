@@ -154,11 +154,16 @@ module ChipAtlas
           body
         end
 
-        # Colocalization download URLs (TSV, GML)
-        app.get '/api/colo/downloads' do
-          halt 400, json_response({ error: 'genome, track, and cell_type required' }) unless params[:genome] && params[:track] && params[:cell_type]
+        # Colocalization download URL
+        app.get '/api/colo/download' do
+          halt 400, json_response({ error: 'genome, track, cell_type, and format required' }) unless params[:genome] && params[:track] && params[:cell_type] && params[:format]
           svc = ChipAtlas::LocationService.new(condition_from_params)
-          json_response({ tsv_url: svc.colo_tsv_url, gml_url: svc.colo_gml_url })
+          url = case params[:format]
+                when 'tsv' then svc.colo_tsv_url
+                when 'gml' then svc.colo_gml_url
+                else halt 400, json_response({ error: "Unknown format: #{params[:format]}. Available: tsv, gml" })
+                end
+          json_response({ url: url, format: params[:format] })
         end
 
         # Target genes data (proxied from data server)
@@ -172,11 +177,15 @@ module ChipAtlas
           body
         end
 
-        # Target genes download URL (TSV)
-        app.get '/api/target_genes/downloads' do
-          halt 400, json_response({ error: 'genome, track, and distance required' }) unless params[:genome] && params[:track] && params[:distance]
+        # Target genes download URL
+        app.get '/api/target_genes/download' do
+          halt 400, json_response({ error: 'genome, track, distance, and format required' }) unless params[:genome] && params[:track] && params[:distance] && params[:format]
           svc = ChipAtlas::LocationService.new(condition_from_params)
-          json_response({ tsv_url: svc.target_genes_tsv_url })
+          url = case params[:format]
+                when 'tsv' then svc.target_genes_tsv_url
+                else halt 400, json_response({ error: "Unknown format: #{params[:format]}. Available: tsv" })
+                end
+          json_response({ url: url, format: params[:format] })
         end
 
         # === Internal endpoints (not in OpenAPI) ===
