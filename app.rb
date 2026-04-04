@@ -17,7 +17,7 @@ require_relative 'lib/middleware/json_body_parser'
 require_relative 'routes/health'
 require_relative 'routes/api'
 require_relative 'routes/pages'
-require_relative 'routes/wabi'
+require_relative 'routes/jobs'
 
 class ChipAtlasApp < Sinatra::Base
   use ChipAtlas::JsonBodyParser
@@ -27,7 +27,7 @@ class ChipAtlasApp < Sinatra::Base
 
   register ChipAtlas::Routes::Health
   register ChipAtlas::Routes::Api
-  register ChipAtlas::Routes::Wabi
+  register ChipAtlas::Routes::Jobs
   register ChipAtlas::Routes::Pages
 
   helpers do

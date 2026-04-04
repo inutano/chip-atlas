@@ -139,17 +139,6 @@ module ChipAtlas
           })
         end
 
-        app.post '/diff_analysis_estimated_time' do
-          data = parsed_json
-          total_reads = ChipAtlas::Experiment.total_number_of_reads(data['ids']).to_i
-          seconds = case data['analysis']
-                    when 'dmr'      then 117.13 * Math.log(total_reads) - 2012.5 + 600
-                    when 'diffbind' then 1.80e-6 * total_reads + 119.38 + 600
-                    end
-          minutes = (seconds && !seconds.infinite?) ? Rational(seconds, 60).to_f.round : nil
-          json_response({ minutes: minutes })
-        end
-
         app.get '/api/remoteUrlStatus' do
           url = params[:url]
           unless url && ChipAtlas::Routes::Api.allowed_remote_url?(url)

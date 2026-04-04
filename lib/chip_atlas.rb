@@ -10,6 +10,8 @@ require_relative 'models/experiment_search'
 require_relative 'models/sra_cache'
 require_relative 'services/location_service'
 require_relative 'services/wabi_service'
+require_relative 'services/sapporo_service'
+require_relative 'services/compute_router'
 require_relative 'services/sra_service'
 
 module ChipAtlas
