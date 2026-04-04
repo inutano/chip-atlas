@@ -19,14 +19,14 @@ module ChipAtlas
           end
 
           def load_analysis_settings
-            @index_all_genome = settings.index_all_genome
-            @list_of_genome   = settings.list_of_genome
-            @qval_range       = settings.qval_range
+            @index_all_genome = ChipAtlas::Experiment.cached_index_all_genome
+            @list_of_genome   = ChipAtlas::Experiment.list_of_genome
+            @qval_range       = ChipAtlas::Bedfile.qval_range
           end
         end
 
         app.get '/' do
-          @number_of_experiments = settings.respond_to?(:number_of_experiments) ? settings.number_of_experiments : '0'
+          @number_of_experiments = ChipAtlas::Experiment.formatted_experiment_count
           erb :about
         end
 
@@ -47,8 +47,8 @@ module ChipAtlas
         end
 
         app.get '/colo' do
-          @index_all_genome = settings.index_all_genome
-          @list_of_genome = settings.list_of_genome
+          @index_all_genome = ChipAtlas::Experiment.cached_index_all_genome
+          @list_of_genome   = ChipAtlas::Experiment.list_of_genome
           erb :colo
         end
 
@@ -57,8 +57,8 @@ module ChipAtlas
         end
 
         app.get '/target_genes' do
-          @index_all_genome = settings.index_all_genome
-          @list_of_genome = settings.list_of_genome
+          @index_all_genome = ChipAtlas::Experiment.cached_index_all_genome
+          @list_of_genome   = ChipAtlas::Experiment.list_of_genome
           erb :target_genes
         end
 

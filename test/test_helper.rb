@@ -2,7 +2,6 @@
 
 ENV['RACK_ENV'] = 'test'
 ENV['DATABASE_URL'] = 'sqlite:/'
-ENV['SKIP_APP_CONFIGURE'] = '1'
 
 require 'minitest/autorun'
 require 'rack/test'

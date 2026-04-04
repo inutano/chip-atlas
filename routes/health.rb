@@ -15,12 +15,7 @@ module ChipAtlas
             checks[:database_error] = e.message
           end
 
-          config_loaded = begin
-            settings.respond_to?(:list_of_genome) && settings.list_of_genome
-          rescue NoMethodError
-            false
-          end
-          checks[:config] = config_loaded ? 'ok' : 'not_loaded'
+          checks[:experiments] = DB[:experiments].count > 0 ? 'ok' : 'empty'
 
           healthy = checks[:database] == 'ok'
           status healthy ? 200 : 503

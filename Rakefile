@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-ENV['SKIP_APP_CONFIGURE'] = '1'
-
 require_relative 'lib/db'
 require_relative 'lib/chip_atlas'
 require 'rake'

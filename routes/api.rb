@@ -19,35 +19,35 @@ module ChipAtlas
       end
 
       def self.registered(app)
-        # Static data endpoints (cached at startup, safe to cache in browser)
+        # Static data endpoints (constants or cached, safe to cache in browser)
         app.get '/data/index_all_genome.json' do
           cache_control :public, max_age: 3600
-          json_response(settings.index_all_genome)
+          json_response(ChipAtlas::Experiment.cached_index_all_genome)
         end
 
         app.get '/data/list_of_genome.json' do
-          cache_control :public, max_age: 3600
-          json_response(settings.list_of_genome.keys)
+          cache_control :public, max_age: 86_400
+          json_response(ChipAtlas::Experiment.list_of_genome.keys)
         end
 
         app.get '/data/list_of_experiment_types.json' do
-          cache_control :public, max_age: 3600
-          json_response(settings.list_of_experiment_types)
+          cache_control :public, max_age: 86_400
+          json_response(ChipAtlas::Experiment.list_of_experiment_types)
         end
 
         app.get '/data/qval_range.json' do
           cache_control :public, max_age: 3600
-          json_response(settings.qval_range)
+          json_response(ChipAtlas::Bedfile.qval_range)
         end
 
         app.get '/data/target_genes_analysis.json' do
           cache_control :public, max_age: 3600
-          json_response(settings.target_genes_analysis)
+          json_response(ChipAtlas::Analysis.target_genes_result)
         end
 
         app.get '/data/number_of_lines.json' do
           cache_control :public, max_age: 3600
-          json_response(settings.bedsizes)
+          json_response(ChipAtlas::Bedsize.dump)
         end
 
         # Dynamic data endpoints (query the database)
@@ -105,10 +105,10 @@ module ChipAtlas
 
         app.get '/qvalue_range' do
           cache_control :public, max_age: 3600
-          json_response(settings.qval_range)
+          json_response(ChipAtlas::Bedfile.qval_range)
         end
 
-        # POST endpoints — use parsed_json helper
+        # POST endpoints
         app.post '/browse' do
           json = parsed_json
           url = ChipAtlas::LocationService.new(json).igv_browsing_url

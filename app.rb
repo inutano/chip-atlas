@@ -47,26 +47,9 @@ class ChipAtlasApp < Sinatra::Base
     end
   end
 
-  def self.format_number(n)
-    n.to_s.gsub(/(\d)(?=(\d{3})+\z)/, '\1,')
-  end
-  private_class_method :format_number
-
   configure do
-    set :wabi_endpoint, 'https://dtn1.ddbj.nig.ac.jp/wabi/chipatlas/'
     FileUtils.mkdir_p('log')
     set :access_logger, Logger.new('log/access_log', 'daily')
-
-    unless ENV['SKIP_APP_CONFIGURE']
-      count = ChipAtlas::Experiment.number_of_experiments
-      set :number_of_experiments, format_number((count / 1000) * 1000)
-      set :index_all_genome, ChipAtlas::Experiment.index_all_genome
-      set :list_of_genome, ChipAtlas::Experiment.list_of_genome
-      set :list_of_experiment_types, ChipAtlas::Experiment.list_of_experiment_types
-      set :qval_range, ChipAtlas::Bedfile.qval_range
-      set :target_genes_analysis, ChipAtlas::Analysis.target_genes_result
-      set :bedsizes, ChipAtlas::Bedsize.dump
-    end
   end
 
   configure :production do

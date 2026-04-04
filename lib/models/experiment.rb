@@ -27,7 +27,28 @@ module ChipAtlas
       { id: 'Annotation tracks', label: 'Annotation tracks' },
     ].freeze
 
+    @index_cache = nil
+    @index_cache_at = nil
+    INDEX_CACHE_TTL = 3600  # 1 hour
+
     module_function
+
+    def formatted_experiment_count
+      count = number_of_experiments
+      rounded = (count / 1000) * 1000
+      rounded.to_s.gsub(/(\d)(?=(\d{3})+\z)/, '\1,')
+    end
+
+    def cached_index_all_genome
+      now = Time.now
+      if @index_cache && @index_cache_at && (now - @index_cache_at) < INDEX_CACHE_TTL
+        return @index_cache
+      end
+
+      @index_cache = index_all_genome
+      @index_cache_at = now
+      @index_cache
+    end
 
     def dataset
       DB[:experiments]
