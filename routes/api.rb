@@ -124,6 +124,11 @@ module ChipAtlas
           json_response(ChipAtlas::Analysis.target_genes_result)
         end
 
+        app.get '/api/target_genes_distances' do
+          cache_control :public, max_age: 86_400
+          json_response(ChipAtlas::Analysis.target_genes_distances)
+        end
+
         # === URL generation endpoints (GET for agents, POST for frontend) ===
 
         app.get '/api/igv_url' do

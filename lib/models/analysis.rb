@@ -2,7 +2,17 @@
 
 module ChipAtlas
   module Analysis
+    TARGET_GENES_DISTANCES = [
+      { id: '1', label: '1 kb' },
+      { id: '5', label: '5 kb' },
+      { id: '10', label: '10 kb' },
+    ].freeze
+
     module_function
+
+    def target_genes_distances
+      TARGET_GENES_DISTANCES
+    end
 
     def dataset
       DB[:analyses]

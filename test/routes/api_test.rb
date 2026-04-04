@@ -130,4 +130,16 @@ class ApiTest < Minitest::Test
     data = JSON.parse(last_response.body)
     assert_match(/chip-atlas\.dbcls\.jp/, data['url'])
   end
+
+  def test_target_genes_distances
+    get '/api/target_genes_distances'
+    assert last_response.ok?
+    data = JSON.parse(last_response.body)
+    assert_kind_of Array, data
+    assert_equal 3, data.size
+    data.each do |item|
+      assert item.key?('id'), "Expected key 'id' in distance option"
+      assert item.key?('label'), "Expected key 'label' in distance option"
+    end
+  end
 end
