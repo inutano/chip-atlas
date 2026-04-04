@@ -9,18 +9,18 @@ module ChipAtlas
     end
 
     def colo_result_by_genome(genome)
-      result = { genome => { antigen: {}, cellline: {} } }
+      result = { genome => { track: {}, cell_type: {} } }
 
       dataset.where(genome: genome).each do |row|
         cell_list = row[:cell_list].to_s.split(',')
         next if cell_list.empty?
 
-        antigen = row[:antigen]
-        result[genome][:antigen][antigen] = cell_list
+        track = row[:track]
+        result[genome][:track][track] = cell_list
 
         cell_list.each do |cl|
-          result[genome][:cellline][cl] ||= []
-          result[genome][:cellline][cl] << antigen
+          result[genome][:cell_type][cl] ||= []
+          result[genome][:cell_type][cl] << track
         end
       end
       result
@@ -31,7 +31,7 @@ module ChipAtlas
       dataset.where(target_genes: true).each do |row|
         genome = row[:genome]
         result[genome] ||= []
-        result[genome] << row[:antigen]
+        result[genome] << row[:track]
       end
       result
     end
@@ -47,7 +47,7 @@ module ChipAtlas
         File.foreach(table_path, encoding: 'UTF-8') do |line_n|
           cols = line_n.chomp.split("\t")
           records << {
-            antigen:      cols[0],
+            track:        cols[0],
             cell_list:    cols[1],
             target_genes: cols[2] == '+',
             genome:       cols[3],

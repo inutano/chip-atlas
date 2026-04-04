@@ -68,7 +68,7 @@ class ExperimentTest < Minitest::Test
     records = ChipAtlas::Experiment.record_by_exp_id('SRX018625')
     assert_equal 1, records.size
     assert_equal 'SRX018625', records.first[:exp_id]
-    assert_equal 'Histone', records.first[:ag_class]
+    assert_equal 'Histone', records.first[:track_class]
   end
 
   def test_id_valid
@@ -89,8 +89,8 @@ class ExperimentTest < Minitest::Test
   def test_index_all_genome
     index = ChipAtlas::Experiment.index_all_genome
     assert index.key?('hg38')
-    assert index['hg38'].key?(:antigen)
-    assert index['hg38'].key?(:celltype)
-    assert index['hg38'][:antigen].key?('Histone')
+    assert index['hg38'].key?(:track)
+    assert index['hg38'].key?(:cell_type)
+    assert index['hg38'][:track].key?('Histone')
   end
 end

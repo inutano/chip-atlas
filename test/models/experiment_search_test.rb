@@ -7,15 +7,15 @@ class ExperimentSearchTest < Minitest::Test
 
   def setup
     DB.run <<-SQL
-      INSERT INTO experiments_fts (exp_id, sra_id, geo_id, genome, ag_class, ag_sub_class, cl_class, cl_sub_class, title, attributes)
+      INSERT INTO experiments_fts (exp_id, sra_id, geo_id, genome, track_class, track_subclass, cell_type_class, cell_type_subclass, title, attributes)
       VALUES ('SRX018625', 'SRA123', 'GSM456', 'hg38', 'Histone', 'H3K4me3', 'Blood', 'K-562', 'H3K4me3 ChIP-seq in K-562 cells', 'leukemia cell line');
     SQL
     DB.run <<-SQL
-      INSERT INTO experiments_fts (exp_id, sra_id, geo_id, genome, ag_class, ag_sub_class, cl_class, cl_sub_class, title, attributes)
+      INSERT INTO experiments_fts (exp_id, sra_id, geo_id, genome, track_class, track_subclass, cell_type_class, cell_type_subclass, title, attributes)
       VALUES ('SRX018626', 'SRA124', 'GSM457', 'hg38', 'TFs and others', 'CTCF', 'Blood', 'K-562', 'CTCF ChIP-seq in K-562', 'cell line');
     SQL
     DB.run <<-SQL
-      INSERT INTO experiments_fts (exp_id, sra_id, geo_id, genome, ag_class, ag_sub_class, cl_class, cl_sub_class, title, attributes)
+      INSERT INTO experiments_fts (exp_id, sra_id, geo_id, genome, track_class, track_subclass, cell_type_class, cell_type_subclass, title, attributes)
       VALUES ('SRX100002', 'SRA200', 'GSM500', 'mm10', 'ATAC-Seq', '-', 'Liver', 'Hepatocyte', 'ATAC-seq mouse liver', 'primary cell');
     SQL
   end

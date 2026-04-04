@@ -11,8 +11,8 @@ class BedfileTest < Minitest::Test
 
   def test_get_filename
     condition = {
-      genome: 'hg38', ag_class: 'Histone', ag_sub_class: 'H3K4me3',
-      cl_class: 'Blood', cl_sub_class: '-', qval: '05'
+      genome: 'hg38', track_class: 'Histone', track_subclass: 'H3K4me3',
+      cell_type_class: 'Blood', cell_type_subclass: '-', qval: '05'
     }
     filename = ChipAtlas::Bedfile.get_filename(condition)
     assert_equal 'H3K4me3.Blood.05', filename
@@ -20,8 +20,8 @@ class BedfileTest < Minitest::Test
 
   def test_get_filename_raises_on_no_match
     condition = {
-      genome: 'hg38', ag_class: 'Histone', ag_sub_class: 'NONEXISTENT',
-      cl_class: 'Blood', cl_sub_class: '-', qval: '05'
+      genome: 'hg38', track_class: 'Histone', track_subclass: 'NONEXISTENT',
+      cell_type_class: 'Blood', cell_type_subclass: '-', qval: '05'
     }
     assert_raises(ChipAtlas::Bedfile::NotFound) do
       ChipAtlas::Bedfile.get_filename(condition)
@@ -36,8 +36,8 @@ class BedfileTest < Minitest::Test
   def test_analysis_colo_result_by_genome
     seed_analyses
     result = ChipAtlas::Analysis.colo_result_by_genome('hg38')
-    assert result['hg38'][:antigen].key?('CTCF')
-    assert result['hg38'][:cellline].key?('K-562')
+    assert result['hg38'][:track].key?('CTCF')
+    assert result['hg38'][:cell_type].key?('K-562')
   end
 
   def test_analysis_target_genes_result

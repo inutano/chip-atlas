@@ -13,7 +13,7 @@ module ChipAtlas
     end
 
     def archive_url
-      case @condition[:ag_class]
+      case @condition[:track_class]
       when 'Annotation tracks' then annotation_url
       else bed_url
       end
@@ -21,7 +21,7 @@ module ChipAtlas
 
     def igv_browsing_url
       igv = @data['igv'] || 'http://localhost:60151'
-      case @condition[:ag_class]
+      case @condition[:track_class]
       when 'Annotation tracks'
         trackname = ChipAtlas::Bedfile.get_trackname(@condition).gsub(', ', '_')
         "#{igv}/load?genome=#{@genome}&file=#{annotation_url}&name=#{trackname}"
@@ -31,22 +31,22 @@ module ChipAtlas
     end
 
     def colo_url(type)
-      antigen  = URI.encode_www_form_component(@condition[:antigen])
-      cellline = URI.encode_www_form_component(@condition[:cellline].gsub(' ', '_'))
-      base     = "#{ARCHIVE_BASE}/#{@genome}/colo"
+      track     = URI.encode_www_form_component(@condition[:track])
+      cell_type = URI.encode_www_form_component(@condition[:cell_type].gsub(' ', '_'))
+      base      = "#{ARCHIVE_BASE}/#{@genome}/colo"
       case type
-      when 'submit' then "#{base}/#{antigen}.#{cellline}.html"
-      when 'tsv'    then "#{base}/#{antigen}.#{cellline}.tsv"
-      when 'gml'    then "#{base}/#{cellline}.gml"
+      when 'submit' then "#{base}/#{track}.#{cell_type}.html"
+      when 'tsv'    then "#{base}/#{track}.#{cell_type}.tsv"
+      when 'gml'    then "#{base}/#{cell_type}.gml"
       end
     end
 
     def target_genes_url(type)
-      antigen  = URI.encode_www_form_component(@condition[:antigen])
+      track    = URI.encode_www_form_component(@condition[:track])
       distance = @condition[:distance]
       base     = "#{ARCHIVE_BASE}/#{@genome}/target"
       ext = type == 'submit' ? 'html' : 'tsv'
-      "#{base}/#{antigen}.#{distance}.#{ext}"
+      "#{base}/#{track}.#{distance}.#{ext}"
     end
 
     private
@@ -59,7 +59,7 @@ module ChipAtlas
     end
 
     def annotation_url
-      condition_with_all = @condition.merge(cl_class: 'All cell types')
+      condition_with_all = @condition.merge(cell_type_class: 'All cell types')
       filename = ChipAtlas::Bedfile.get_filename(condition_with_all)
       "#{ARCHIVE_BASE}/annotations/#{@genome}/#{filename}"
     rescue ChipAtlas::Bedfile::NotFound

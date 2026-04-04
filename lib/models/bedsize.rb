@@ -11,7 +11,7 @@ module ChipAtlas
     def dump
       result = {}
       dataset.each do |row|
-        key = [row[:genome], row[:ag_class], row[:cl_class], row[:qval]].join(',')
+        key = [row[:genome], row[:track_class], row[:cell_type_class], row[:qval]].join(',')
         result[key] = row[:number_of_lines]
       end
       result
@@ -28,12 +28,12 @@ module ChipAtlas
         File.foreach(table_path, encoding: 'UTF-8') do |line_n|
           cols = line_n.chomp.split("\t")
           records << {
-            genome:          cols[0],
-            ag_class:        cols[1],
-            cl_class:        cols[2],
-            qval:            cols[3],
-            number_of_lines: cols[4].to_i,
-            created_at:      timestamp,
+            genome:           cols[0],
+            track_class:      cols[1],
+            cell_type_class:  cols[2],
+            qval:             cols[3],
+            number_of_lines:  cols[4].to_i,
+            created_at:       timestamp,
           }
 
           if records.size >= batch_size

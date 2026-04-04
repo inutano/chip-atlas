@@ -11,8 +11,8 @@ class LocationServiceTest < Minitest::Test
 
   def test_archive_url
     data = { 'condition' => {
-      'genome' => 'hg38', 'ag_class' => 'Histone', 'ag_sub_class' => 'H3K4me3',
-      'cl_class' => 'Blood', 'cl_sub_class' => '-', 'qval' => '05'
+      'genome' => 'hg38', 'track_class' => 'Histone', 'track_subclass' => 'H3K4me3',
+      'cell_type_class' => 'Blood', 'cell_type_subclass' => '-', 'qval' => '05'
     }}
     svc = ChipAtlas::LocationService.new(data)
     url = svc.archive_url
@@ -22,8 +22,8 @@ class LocationServiceTest < Minitest::Test
 
   def test_igv_browsing_url
     data = { 'condition' => {
-      'genome' => 'hg38', 'ag_class' => 'Histone', 'ag_sub_class' => 'H3K4me3',
-      'cl_class' => 'Blood', 'cl_sub_class' => '-', 'qval' => '05'
+      'genome' => 'hg38', 'track_class' => 'Histone', 'track_subclass' => 'H3K4me3',
+      'cell_type_class' => 'Blood', 'cell_type_subclass' => '-', 'qval' => '05'
     }}
     svc = ChipAtlas::LocationService.new(data)
     url = svc.igv_browsing_url
@@ -33,7 +33,7 @@ class LocationServiceTest < Minitest::Test
 
   def test_colo_url
     data = { 'condition' => {
-      'genome' => 'hg38', 'antigen' => 'CTCF', 'cellline' => 'K-562'
+      'genome' => 'hg38', 'track' => 'CTCF', 'cell_type' => 'K-562'
     }}
     svc = ChipAtlas::LocationService.new(data)
 
@@ -44,7 +44,7 @@ class LocationServiceTest < Minitest::Test
 
   def test_target_genes_url
     data = { 'condition' => {
-      'genome' => 'hg38', 'antigen' => 'CTCF', 'distance' => '5000'
+      'genome' => 'hg38', 'track' => 'CTCF', 'distance' => '5000'
     }}
     svc = ChipAtlas::LocationService.new(data)
 
@@ -54,8 +54,8 @@ class LocationServiceTest < Minitest::Test
 
   def test_archive_url_returns_nil_for_missing_bedfile
     data = { 'condition' => {
-      'genome' => 'hg38', 'ag_class' => 'Histone', 'ag_sub_class' => 'NONEXISTENT',
-      'cl_class' => 'Blood', 'cl_sub_class' => '-', 'qval' => '05'
+      'genome' => 'hg38', 'track_class' => 'Histone', 'track_subclass' => 'NONEXISTENT',
+      'cell_type_class' => 'Blood', 'cell_type_subclass' => '-', 'qval' => '05'
     }}
     svc = ChipAtlas::LocationService.new(data)
     assert_nil svc.archive_url

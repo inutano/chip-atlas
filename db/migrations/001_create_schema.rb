@@ -6,11 +6,11 @@ Sequel.migration do
       primary_key :id
       String :exp_id, null: false
       String :genome, null: false
-      String :ag_class
-      String :ag_sub_class
-      String :cl_class
-      String :cl_sub_class
-      String :cl_sub_class_info
+      String :track_class
+      String :track_subclass
+      String :cell_type_class
+      String :cell_type_subclass
+      String :cell_type_subclass_info
       String :read_info
       String :title
       String :attributes, text: true
@@ -18,52 +18,52 @@ Sequel.migration do
 
       index :exp_id
       index :genome
-      index :ag_class
-      index :ag_sub_class
-      index :cl_class
-      index :cl_sub_class
-      index [:genome, :ag_class]
-      index [:genome, :ag_class, :cl_class]
+      index :track_class
+      index :track_subclass
+      index :cell_type_class
+      index :cell_type_subclass
+      index [:genome, :track_class]
+      index [:genome, :track_class, :cell_type_class]
     end
 
     create_table :bedfiles do
       primary_key :id
       String :filename, null: false
       String :genome, null: false
-      String :ag_class
-      String :ag_sub_class
-      String :cl_class
-      String :cl_sub_class
+      String :track_class
+      String :track_subclass
+      String :cell_type_class
+      String :cell_type_subclass
       String :qval
       String :experiments, text: true
       DateTime :created_at
 
       index :genome
-      index [:genome, :ag_class, :ag_sub_class, :cl_class, :cl_sub_class, :qval],
+      index [:genome, :track_class, :track_subclass, :cell_type_class, :cell_type_subclass, :qval],
             name: :idx_bedfiles_lookup
     end
 
     create_table :bedsizes do
       primary_key :id
       String :genome, null: false
-      String :ag_class
-      String :cl_class
+      String :track_class
+      String :cell_type_class
       String :qval
       Bignum :number_of_lines
       DateTime :created_at
 
-      index [:genome, :ag_class, :cl_class, :qval], name: :idx_bedsizes_lookup
+      index [:genome, :track_class, :cell_type_class, :qval], name: :idx_bedsizes_lookup
     end
 
     create_table :analyses do
       primary_key :id
-      String :antigen
+      String :track
       String :cell_list, text: true
       TrueClass :target_genes
       String :genome, null: false
       DateTime :created_at
 
-      index :antigen
+      index :track
       index :genome
       index :target_genes
     end
@@ -92,10 +92,10 @@ Sequel.migration do
         sra_id,
         geo_id,
         genome,
-        ag_class,
-        ag_sub_class,
-        cl_class,
-        cl_sub_class,
+        track_class,
+        track_subclass,
+        cell_type_class,
+        cell_type_subclass,
         title,
         attributes
       );

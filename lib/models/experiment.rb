@@ -62,26 +62,26 @@ module ChipAtlas
       EXPERIMENT_TYPES
     end
 
-    def experiment_types(genome, cl_class)
+    def experiment_types(genome, cell_type_class)
       subset = dataset.where(genome: genome)
-      subset = subset.where(cl_class: cl_class) unless cl_class == 'All cell types'
-      counts = subset.group_and_count(:ag_class).as_hash(:ag_class, :count)
+      subset = subset.where(cell_type_class: cell_type_class) unless cell_type_class == 'All cell types'
+      counts = subset.group_and_count(:track_class).as_hash(:track_class, :count)
 
       EXPERIMENT_TYPES.map do |t|
         { id: t[:id], label: t[:label], count: counts[t[:id]] }
       end
     end
 
-    def sample_types(genome, ag_class)
-      ag_class = EXPERIMENT_TYPES.first[:id] if ag_class == 'undefined'
+    def sample_types(genome, track_class)
+      track_class = EXPERIMENT_TYPES.first[:id] if track_class == 'undefined'
 
-      groups = dataset.where(genome: genome, ag_class: ag_class)
-                      .group_and_count(:cl_class)
+      groups = dataset.where(genome: genome, track_class: track_class)
+                      .group_and_count(:cell_type_class)
 
       total = 0
       result = []
       groups.each do |row|
-        result << { id: row[:cl_class], label: row[:cl_class], count: row[:count] }
+        result << { id: row[:cell_type_class], label: row[:cell_type_class], count: row[:count] }
         total += row[:count]
       end
 
@@ -89,29 +89,29 @@ module ChipAtlas
       result
     end
 
-    def chip_antigen(genome, ag_class, cl_class)
-      ag_class = EXPERIMENT_TYPES.first[:id] if ag_class == 'undefined'
+    def chip_antigen(genome, track_class, cell_type_class)
+      track_class = EXPERIMENT_TYPES.first[:id] if track_class == 'undefined'
       result = [{ id: '-', label: 'All', count: nil }]
 
-      subset = dataset.where(genome: genome, ag_class: ag_class)
-      unless cl_class == 'undefined' || cl_class == 'All cell types'
-        subset = subset.where(cl_class: cl_class)
+      subset = dataset.where(genome: genome, track_class: track_class)
+      unless cell_type_class == 'undefined' || cell_type_class == 'All cell types'
+        subset = subset.where(cell_type_class: cell_type_class)
       end
 
-      subset.group_and_count(:ag_sub_class).each do |row|
-        result << { id: row[:ag_sub_class], label: row[:ag_sub_class], count: row[:count] }
+      subset.group_and_count(:track_subclass).each do |row|
+        result << { id: row[:track_subclass], label: row[:track_subclass], count: row[:count] }
       end
       result
     end
 
-    def cell_type(genome, ag_class, cl_class)
+    def cell_type(genome, track_class, cell_type_class)
       result = [{ id: '-', label: 'All', count: nil }]
 
-      if cl_class != 'undefined' && cl_class != 'All cell types'
-        ag_class = EXPERIMENT_TYPES.first[:id] if ag_class == 'undefined'
-        subset = dataset.where(genome: genome, ag_class: ag_class, cl_class: cl_class)
-        subset.group_and_count(:cl_sub_class).each do |row|
-          result << { id: row[:cl_sub_class], label: row[:cl_sub_class], count: row[:count] }
+      if cell_type_class != 'undefined' && cell_type_class != 'All cell types'
+        track_class = EXPERIMENT_TYPES.first[:id] if track_class == 'undefined'
+        subset = dataset.where(genome: genome, track_class: track_class, cell_type_class: cell_type_class)
+        subset.group_and_count(:cell_type_subclass).each do |row|
+          result << { id: row[:cell_type_subclass], label: row[:cell_type_subclass], count: row[:count] }
         end
       end
       result
@@ -119,8 +119,8 @@ module ChipAtlas
 
     def record_by_exp_id(exp_id)
       dataset.where(exp_id: exp_id)
-        .select(:exp_id, :genome, :ag_class, :ag_sub_class, :cl_class, :cl_sub_class,
-                :title, :attributes, :read_info, :cl_sub_class_info)
+        .select(:exp_id, :genome, :track_class, :track_subclass, :cell_type_class, :cell_type_subclass,
+                :title, :attributes, :read_info, :cell_type_subclass_info)
         .all
         .sort_by { |r| GENOME_ORDER.fetch(r[:genome], 999) }
     end
@@ -143,37 +143,37 @@ module ChipAtlas
 
     def index_all_genome
       result = {}
-      GENOMES.each_key { |g| result[g] = { antigen: {}, celltype: {} } }
+      GENOMES.each_key { |g| result[g] = { track: {}, cell_type: {} } }
 
-      # One query for all antigen counts across all genomes
-      dataset.group_and_count(:genome, :ag_class, :ag_sub_class).each do |row|
+      # One query for all track counts across all genomes
+      dataset.group_and_count(:genome, :track_class, :track_subclass).each do |row|
         g = row[:genome]
         next unless result.key?(g)
-        result[g][:antigen][row[:ag_class]] ||= Hash.new(0)
-        result[g][:antigen][row[:ag_class]][row[:ag_sub_class]] = row[:count]
+        result[g][:track][row[:track_class]] ||= Hash.new(0)
+        result[g][:track][row[:track_class]][row[:track_subclass]] = row[:count]
       end
 
-      # One query for all celltype counts across all genomes
-      dataset.group_and_count(:genome, :cl_class, :cl_sub_class).each do |row|
+      # One query for all cell_type counts across all genomes
+      dataset.group_and_count(:genome, :cell_type_class, :cell_type_subclass).each do |row|
         g = row[:genome]
         next unless result.key?(g)
-        result[g][:celltype][row[:cl_class]] ||= Hash.new(0)
-        result[g][:celltype][row[:cl_class]][row[:cl_sub_class]] = row[:count]
+        result[g][:cell_type][row[:cell_type_class]] ||= Hash.new(0)
+        result[g][:cell_type][row[:cell_type_class]][row[:cell_type_subclass]] = row[:count]
       end
 
       result
     end
 
-    def get_subclass(genome, ag_class, cl_class, subclass_type)
-      ag_eval = ag_class == 'All antigens' && subclass_type == 'ag'
-      cl_eval = cl_class == 'All cell types' && subclass_type == 'cl'
+    def get_subclass(genome, track_class, cell_type_class, subclass_type)
+      ag_eval = track_class == 'All antigens' && subclass_type == 'ag'
+      cl_eval = cell_type_class == 'All cell types' && subclass_type == 'cl'
       return {} if ag_eval || cl_eval
 
       subset = dataset.where(genome: genome)
-      subset = subset.where(ag_class: ag_class) unless ag_class == 'All antigens'
-      subset = subset.where(cl_class: cl_class) unless cl_class == 'All cell types'
+      subset = subset.where(track_class: track_class) unless track_class == 'All antigens'
+      subset = subset.where(cell_type_class: cell_type_class) unless cell_type_class == 'All cell types'
 
-      col = subclass_type == 'ag' ? :ag_sub_class : :cl_sub_class
+      col = subclass_type == 'ag' ? :track_subclass : :cell_type_subclass
       subset.group_and_count(col).as_hash(col, :count)
     end
 
@@ -188,17 +188,17 @@ module ChipAtlas
         File.foreach(table_path, encoding: 'UTF-8') do |line_n|
           cols = line_n.chomp.split("\t")
           records << {
-            exp_id:            cols[0],
-            genome:            cols[1],
-            ag_class:          cols[2],
-            ag_sub_class:      cols[3],
-            cl_class:          cols[4],
-            cl_sub_class:      cols[5],
-            cl_sub_class_info: cols[6],
-            read_info:         cols[7],
-            title:             cols[8],
-            attributes:        cols[9..].to_a.join("\t"),
-            created_at:        timestamp,
+            exp_id:                 cols[0],
+            genome:                 cols[1],
+            track_class:            cols[2],
+            track_subclass:         cols[3],
+            cell_type_class:        cols[4],
+            cell_type_subclass:     cols[5],
+            cell_type_subclass_info: cols[6],
+            read_info:              cols[7],
+            title:                  cols[8],
+            attributes:             cols[9..].to_a.join("\t"),
+            created_at:             timestamp,
           }
 
           if records.size >= batch_size

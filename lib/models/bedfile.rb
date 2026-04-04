@@ -20,16 +20,16 @@ module ChipAtlas
     def get_trackname(condition)
       results = filesearch(condition)
       raise NotFound if results.size != 1
-      results.first[:ag_sub_class]
+      results.first[:track_subclass]
     end
 
     def filesearch(condition)
       dataset
         .where(genome: condition[:genome])
-        .where(ag_class: condition[:ag_class])
-        .where(ag_sub_class: condition[:ag_sub_class] || '-')
-        .where(cl_class: condition[:cl_class])
-        .where(cl_sub_class: condition[:cl_sub_class] || '-')
+        .where(track_class: condition[:track_class])
+        .where(track_subclass: condition[:track_subclass] || '-')
+        .where(cell_type_class: condition[:cell_type_class])
+        .where(cell_type_subclass: condition[:cell_type_subclass] || '-')
         .where(qval: condition[:qval])
         .limit(2)
         .all
@@ -37,8 +37,8 @@ module ChipAtlas
 
     def qval_range
       dataset
-        .exclude(ag_class: 'Bisulfite-Seq')
-        .exclude(ag_class: 'Annotation tracks')
+        .exclude(track_class: 'Bisulfite-Seq')
+        .exclude(track_class: 'Annotation tracks')
         .distinct
         .select_map(:qval)
         .compact
@@ -56,15 +56,15 @@ module ChipAtlas
         File.foreach(table_path, encoding: 'UTF-8') do |line_n|
           cols = line_n.chomp.split("\t")
           records << {
-            filename:     cols[0],
-            genome:       cols[1],
-            ag_class:     cols[2],
-            ag_sub_class: cols[3],
-            cl_class:     cols[4],
-            cl_sub_class: cols[5],
-            qval:         cols[6],
-            experiments:  cols[7],
-            created_at:   timestamp,
+            filename:           cols[0],
+            genome:             cols[1],
+            track_class:        cols[2],
+            track_subclass:     cols[3],
+            cell_type_class:    cols[4],
+            cell_type_subclass: cols[5],
+            qval:               cols[6],
+            experiments:        cols[7],
+            created_at:         timestamp,
           }
 
           if records.size >= batch_size

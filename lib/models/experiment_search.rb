@@ -2,8 +2,8 @@
 
 module ChipAtlas
   module ExperimentSearch
-    COLUMNS = %w[exp_id sra_id geo_id genome ag_class ag_sub_class
-                 cl_class cl_sub_class title attributes].freeze
+    COLUMNS = %w[exp_id sra_id geo_id genome track_class track_subclass
+                 cell_type_class cell_type_subclass title attributes].freeze
 
     module_function
 
