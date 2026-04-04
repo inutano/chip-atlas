@@ -5,6 +5,8 @@ module ChipAtlas
     COLUMNS = %w[experiment_id sra_id geo_id genome track_class track_subclass
                  cell_type_class cell_type_subclass title attributes].freeze
 
+    SUPPORTED_GENOMES = ChipAtlas::Experiment::GENOMES.keys.freeze
+
     module_function
 
     def gsm_to_srx(gsm_id)
@@ -52,6 +54,18 @@ module ChipAtlas
         DB.run("DELETE FROM experiments_fts")
 
         rows.each_slice(500) do |batch|
+          batch = batch.reject do |row|
+            genomes = row[3]
+            if genomes.is_a?(Array)
+              genomes = genomes.select { |g| SUPPORTED_GENOMES.include?(g) }
+              row[3] = genomes.first  # store single genome
+              genomes.empty?
+            else
+              !SUPPORTED_GENOMES.include?(genomes.to_s)
+            end
+          end
+          next if batch.empty?
+
           values_sql = batch.map do |row|
             vals = COLUMNS.each_with_index.map do |_, i|
               v = row[i]

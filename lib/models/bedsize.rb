@@ -27,8 +27,11 @@ module ChipAtlas
 
         File.foreach(table_path, encoding: 'UTF-8') do |line_n|
           cols = line_n.chomp.split("\t")
+          genome = cols[0]
+          next unless ChipAtlas::Experiment::GENOMES.key?(genome)
+
           records << {
-            genome:           cols[0],
+            genome:           genome,
             track_class:      cols[1],
             cell_type_class:  cols[2],
             qval:             cols[3],
