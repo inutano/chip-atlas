@@ -69,13 +69,13 @@ class ApiTest < Minitest::Test
     assert last_response.ok?
     data = JSON.parse(last_response.body)
     assert_equal 1, data.size
-    assert_equal 'SRX018625', data.first['exp_id']
+    assert_equal 'SRX018625', data.first['experiment_id']
     assert_equal 'Histone', data.first['track_class']
   end
 
   def test_search
     DB.run <<-SQL
-      INSERT INTO experiments_fts (exp_id, sra_id, geo_id, genome, track_class, track_subclass, cell_type_class, cell_type_subclass, title, attributes)
+      INSERT INTO experiments_fts (experiment_id, sra_id, geo_id, genome, track_class, track_subclass, cell_type_class, cell_type_subclass, title, attributes)
       VALUES ('SRX018625', '', '', 'hg38', 'Histone', 'H3K4me3', 'Blood', 'K-562', 'H3K4me3 in K-562', '');
     SQL
 

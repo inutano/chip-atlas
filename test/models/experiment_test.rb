@@ -64,10 +64,10 @@ class ExperimentTest < Minitest::Test
     assert_equal '-', result.first[:id]
   end
 
-  def test_record_by_exp_id
-    records = ChipAtlas::Experiment.record_by_exp_id('SRX018625')
+  def test_record_by_experiment_id
+    records = ChipAtlas::Experiment.record_by_experiment_id('SRX018625')
     assert_equal 1, records.size
-    assert_equal 'SRX018625', records.first[:exp_id]
+    assert_equal 'SRX018625', records.first[:experiment_id]
     assert_equal 'Histone', records.first[:track_class]
   end
 

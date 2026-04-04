@@ -4,7 +4,7 @@ Sequel.migration do
   up do
     create_table :experiments do
       primary_key :id
-      String :exp_id, null: false
+      String :experiment_id, null: false
       String :genome, null: false
       String :track_class
       String :track_subclass
@@ -16,7 +16,7 @@ Sequel.migration do
       String :attributes, text: true
       DateTime :created_at
 
-      index :exp_id
+      index :experiment_id
       index :genome
       index :track_class
       index :track_subclass
@@ -71,16 +71,16 @@ Sequel.migration do
     create_table :runs do
       primary_key :id
       String :run_id, null: false
-      String :exp_id, null: false
+      String :experiment_id, null: false
       DateTime :created_at
 
       index :run_id
-      index :exp_id
+      index :experiment_id
     end
 
     create_table :sra_cache do
       primary_key :id
-      String :exp_id, null: false, unique: true
+      String :experiment_id, null: false, unique: true
       String :metadata_json, text: true
       DateTime :fetched_at
       DateTime :created_at
@@ -88,7 +88,7 @@ Sequel.migration do
 
     run <<-SQL
       CREATE VIRTUAL TABLE IF NOT EXISTS experiments_fts USING fts5(
-        exp_id,
+        experiment_id,
         sra_id,
         geo_id,
         genome,

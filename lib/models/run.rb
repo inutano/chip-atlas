@@ -10,13 +10,13 @@ module ChipAtlas
       DB[:runs]
     end
 
-    def exp2run(exp_id)
-      dataset.where(exp_id: exp_id).select_map(:run_id)
+    def exp2run(experiment_id)
+      dataset.where(experiment_id: experiment_id).select_map(:run_id)
     end
 
     def load_from_file(table_path)
-      existing_exp_ids = DB[:experiments].distinct.select_map(:exp_id).to_set
-      warn "   Found #{existing_exp_ids.size} experiment IDs for filtering"
+      existing_experiment_ids = DB[:experiments].distinct.select_map(:experiment_id).to_set
+      warn "   Found #{existing_experiment_ids.size} experiment IDs for filtering"
 
       timestamp = Time.now
       filtered_count = 0
@@ -37,10 +37,10 @@ module ChipAtlas
             cols = line.chomp.split("\t")
             next if cols.size < 2
 
-            run_id, exp_id = cols[0], cols[1]
+            run_id, experiment_id = cols[0], cols[1]
 
-            if existing_exp_ids.include?(exp_id)
-              records << { run_id: run_id, exp_id: exp_id, created_at: timestamp }
+            if existing_experiment_ids.include?(experiment_id)
+              records << { run_id: run_id, experiment_id: experiment_id, created_at: timestamp }
               filtered_count += 1
 
               if records.size >= batch_size

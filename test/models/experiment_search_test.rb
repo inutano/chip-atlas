@@ -7,15 +7,15 @@ class ExperimentSearchTest < Minitest::Test
 
   def setup
     DB.run <<-SQL
-      INSERT INTO experiments_fts (exp_id, sra_id, geo_id, genome, track_class, track_subclass, cell_type_class, cell_type_subclass, title, attributes)
+      INSERT INTO experiments_fts (experiment_id, sra_id, geo_id, genome, track_class, track_subclass, cell_type_class, cell_type_subclass, title, attributes)
       VALUES ('SRX018625', 'SRA123', 'GSM456', 'hg38', 'Histone', 'H3K4me3', 'Blood', 'K-562', 'H3K4me3 ChIP-seq in K-562 cells', 'leukemia cell line');
     SQL
     DB.run <<-SQL
-      INSERT INTO experiments_fts (exp_id, sra_id, geo_id, genome, track_class, track_subclass, cell_type_class, cell_type_subclass, title, attributes)
+      INSERT INTO experiments_fts (experiment_id, sra_id, geo_id, genome, track_class, track_subclass, cell_type_class, cell_type_subclass, title, attributes)
       VALUES ('SRX018626', 'SRA124', 'GSM457', 'hg38', 'TFs and others', 'CTCF', 'Blood', 'K-562', 'CTCF ChIP-seq in K-562', 'cell line');
     SQL
     DB.run <<-SQL
-      INSERT INTO experiments_fts (exp_id, sra_id, geo_id, genome, track_class, track_subclass, cell_type_class, cell_type_subclass, title, attributes)
+      INSERT INTO experiments_fts (experiment_id, sra_id, geo_id, genome, track_class, track_subclass, cell_type_class, cell_type_subclass, title, attributes)
       VALUES ('SRX100002', 'SRA200', 'GSM500', 'mm10', 'ATAC-Seq', '-', 'Liver', 'Hepatocyte', 'ATAC-seq mouse liver', 'primary cell');
     SQL
   end
@@ -23,13 +23,13 @@ class ExperimentSearchTest < Minitest::Test
   def test_search_by_keyword
     result = ChipAtlas::ExperimentSearch.search('K-562')
     assert_equal 2, result[:total]
-    assert result[:experiments].all? { |e| e[:exp_id] }
+    assert result[:experiments].all? { |e| e[:experiment_id] }
   end
 
   def test_search_with_genome_filter
     result = ChipAtlas::ExperimentSearch.search('ATAC', genome: 'mm10')
     assert_equal 1, result[:total]
-    assert_equal 'SRX100002', result[:experiments].first[:exp_id]
+    assert_equal 'SRX100002', result[:experiments].first[:experiment_id]
   end
 
   def test_search_with_limit
@@ -60,10 +60,10 @@ class ExperimentSearchTest < Minitest::Test
   end
 
   def test_sra_cache_set_and_get
-    metadata = { exp_id: 'SRX018625', platform: 'ILLUMINA' }
+    metadata = { experiment_id: 'SRX018625', platform: 'ILLUMINA' }
     ChipAtlas::SraCache.set('SRX018625', metadata)
     cached = ChipAtlas::SraCache.get('SRX018625')
-    assert_equal 'SRX018625', cached[:exp_id]
+    assert_equal 'SRX018625', cached[:experiment_id]
     assert_equal 'ILLUMINA', cached[:platform]
   end
 

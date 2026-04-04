@@ -17,19 +17,19 @@ require_relative '../lib/chip_atlas'
 module TestHelper
   def seed_experiments
     DB[:experiments].multi_insert([
-      { exp_id: 'SRX018625', genome: 'hg38', track_class: 'Histone',
+      { experiment_id: 'SRX018625', genome: 'hg38', track_class: 'Histone',
         track_subclass: 'H3K4me3', cell_type_class: 'Blood', cell_type_subclass: 'K-562',
         cell_type_subclass_info: '', read_info: '15000000,50', title: 'H3K4me3 in K-562',
         attributes: 'cell line', created_at: Time.now },
-      { exp_id: 'SRX018626', genome: 'hg38', track_class: 'TFs and others',
+      { experiment_id: 'SRX018626', genome: 'hg38', track_class: 'TFs and others',
         track_subclass: 'CTCF', cell_type_class: 'Blood', cell_type_subclass: 'K-562',
         cell_type_subclass_info: '', read_info: '20000000,50', title: 'CTCF in K-562',
         attributes: 'cell line', created_at: Time.now },
-      { exp_id: 'SRX100001', genome: 'hg38', track_class: 'Histone',
+      { experiment_id: 'SRX100001', genome: 'hg38', track_class: 'Histone',
         track_subclass: 'H3K27ac', cell_type_class: 'Brain', cell_type_subclass: 'Neuron',
         cell_type_subclass_info: '', read_info: '10000000,75', title: 'H3K27ac in Neuron',
         attributes: 'primary cell', created_at: Time.now },
-      { exp_id: 'SRX100002', genome: 'mm10', track_class: 'ATAC-Seq',
+      { experiment_id: 'SRX100002', genome: 'mm10', track_class: 'ATAC-Seq',
         track_subclass: '-', cell_type_class: 'Liver', cell_type_subclass: 'Hepatocyte',
         cell_type_subclass_info: '', read_info: '8000000,150', title: 'ATAC-seq in Hepatocyte',
         attributes: 'primary cell', created_at: Time.now },

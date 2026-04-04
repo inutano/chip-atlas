@@ -12,8 +12,8 @@ module ChipAtlas
       DB[:sra_cache]
     end
 
-    def get(exp_id)
-      row = dataset.where(exp_id: exp_id).first
+    def get(experiment_id)
+      row = dataset.where(experiment_id: experiment_id).first
       return nil unless row
       return nil if row[:fetched_at] && (Time.now - row[:fetched_at]) > TTL_SECONDS
       JSON.parse(row[:metadata_json], symbolize_names: true)
@@ -21,13 +21,13 @@ module ChipAtlas
       nil
     end
 
-    def set(exp_id, metadata)
+    def set(experiment_id, metadata)
       json = JSON.generate(metadata)
       dataset.insert_conflict(
-        target: :exp_id,
+        target: :experiment_id,
         update: { metadata_json: json, fetched_at: Time.now }
       ).insert(
-        exp_id: exp_id,
+        experiment_id: experiment_id,
         metadata_json: json,
         fetched_at: Time.now,
         created_at: Time.now

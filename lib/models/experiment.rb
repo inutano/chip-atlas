@@ -117,27 +117,27 @@ module ChipAtlas
       result
     end
 
-    def record_by_exp_id(exp_id)
-      dataset.where(exp_id: exp_id)
-        .select(:exp_id, :genome, :track_class, :track_subclass, :cell_type_class, :cell_type_subclass,
+    def record_by_experiment_id(experiment_id)
+      dataset.where(experiment_id: experiment_id)
+        .select(:experiment_id, :genome, :track_class, :track_subclass, :cell_type_class, :cell_type_subclass,
                 :title, :attributes, :read_info, :cell_type_subclass_info)
         .all
         .sort_by { |r| GENOME_ORDER.fetch(r[:genome], 999) }
     end
 
-    def id_valid?(exp_id)
-      !dataset.where(exp_id: exp_id).empty?
+    def id_valid?(experiment_id)
+      !dataset.where(experiment_id: experiment_id).empty?
     end
 
     def number_of_experiments
-      dataset.distinct.select(:exp_id).count
+      dataset.distinct.select(:experiment_id).count
     end
 
     def total_number_of_reads(ids)
       return 0 if ids.nil? || ids.empty?
 
       placeholders = ids.map { '?' }.join(', ')
-      sql = "SELECT COALESCE(SUM(CAST(SUBSTR(read_info, 1, INSTR(read_info, ',') - 1) AS INTEGER)), 0) AS total FROM experiments WHERE exp_id IN (#{placeholders})"
+      sql = "SELECT COALESCE(SUM(CAST(SUBSTR(read_info, 1, INSTR(read_info, ',') - 1) AS INTEGER)), 0) AS total FROM experiments WHERE experiment_id IN (#{placeholders})"
       DB[sql, *ids].first[:total]
     end
 
@@ -188,7 +188,7 @@ module ChipAtlas
         File.foreach(table_path, encoding: 'UTF-8') do |line_n|
           cols = line_n.chomp.split("\t")
           records << {
-            exp_id:                 cols[0],
+            experiment_id:                 cols[0],
             genome:                 cols[1],
             track_class:            cols[2],
             track_subclass:         cols[3],

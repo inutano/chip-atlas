@@ -2,14 +2,14 @@
 
 module ChipAtlas
   module ExperimentSearch
-    COLUMNS = %w[exp_id sra_id geo_id genome track_class track_subclass
+    COLUMNS = %w[experiment_id sra_id geo_id genome track_class track_subclass
                  cell_type_class cell_type_subclass title attributes].freeze
 
     module_function
 
     def gsm_to_srx(gsm_id)
-      row = DB["SELECT exp_id FROM experiments_fts WHERE geo_id = ?", gsm_id].first
-      row&.[](:exp_id)
+      row = DB["SELECT experiment_id FROM experiments_fts WHERE geo_id = ?", gsm_id].first
+      row&.[](:experiment_id)
     end
 
     def search(query, genome: nil, limit: 20, offset: 0)

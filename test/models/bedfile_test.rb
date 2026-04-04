@@ -55,7 +55,7 @@ class BedfileTest < Minitest::Test
   end
 
   def test_run_exp2run
-    DB[:runs].insert(run_id: 'SRR123', exp_id: 'SRX018625', created_at: Time.now)
+    DB[:runs].insert(run_id: 'SRR123', experiment_id: 'SRX018625', created_at: Time.now)
     runs = ChipAtlas::Run.exp2run('SRX018625')
     assert_equal ['SRR123'], runs
   end

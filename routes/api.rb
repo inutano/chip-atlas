@@ -53,7 +53,7 @@ module ChipAtlas
         # Dynamic data endpoints (query the database)
         app.get '/data/exp_metadata.json' do
           halt 400, json_response({ error: 'expid parameter required' }) unless params[:expid]
-          json_response(ChipAtlas::Experiment.record_by_exp_id(params[:expid]))
+          json_response(ChipAtlas::Experiment.record_by_experiment_id(params[:expid]))
         end
 
         app.get '/data/colo_analysis.json' do

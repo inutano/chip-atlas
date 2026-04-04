@@ -9,16 +9,16 @@ module ChipAtlas
   class SraService
     EUTILS_BASE = 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils'
 
-    def initialize(exp_id)
-      @exp_id = exp_id
+    def initialize(experiment_id)
+      @experiment_id = experiment_id
     end
 
     def fetch
-      cached = ChipAtlas::SraCache.get(@exp_id)
+      cached = ChipAtlas::SraCache.get(@experiment_id)
       return cached if cached
 
       metadata = fetch_from_ncbi
-      ChipAtlas::SraCache.set(@exp_id, metadata) if metadata
+      ChipAtlas::SraCache.set(@experiment_id, metadata) if metadata
       metadata
     end
 
@@ -48,7 +48,7 @@ module ChipAtlas
     end
 
     def get_uid
-      body = http_get("#{EUTILS_BASE}/esearch.fcgi?db=sra&term=#{@exp_id}&retmode=json")
+      body = http_get("#{EUTILS_BASE}/esearch.fcgi?db=sra&term=#{@experiment_id}&retmode=json")
       return nil unless body
 
       result = JSON.parse(body)
@@ -62,7 +62,7 @@ module ChipAtlas
       lib_layout_el = doc.elements['.//LIBRARY_LAYOUT']&.elements&.first
 
       {
-        exp_id: @exp_id,
+        experiment_id: @experiment_id,
         library_description: {
           library_name:                  xml_text(doc, 'LIBRARY_NAME'),
           library_strategy:              xml_text(doc, 'LIBRARY_STRATEGY'),
@@ -93,7 +93,7 @@ module ChipAtlas
     def error_metadata
       msg = 'ERROR: cannot retrieve data from NCBI'
       {
-        exp_id: @exp_id,
+        experiment_id: @experiment_id,
         library_description: {
           library_name: msg, library_strategy: msg, library_source: msg,
           library_selection: msg, library_construction_protocol: msg,
