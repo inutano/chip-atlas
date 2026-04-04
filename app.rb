@@ -13,12 +13,15 @@ require 'sinatra/base'
 require_relative 'lib/db'
 
 require_relative 'lib/chip_atlas'
+require_relative 'lib/middleware/json_body_parser'
 require_relative 'routes/health'
 require_relative 'routes/api'
 require_relative 'routes/pages'
 require_relative 'routes/wabi'
 
 class ChipAtlasApp < Sinatra::Base
+  use ChipAtlas::JsonBodyParser
+
   set :erb, escape_html: true
   set :views, File.join(__dir__, 'views')
 
@@ -34,14 +37,10 @@ class ChipAtlasApp < Sinatra::Base
     end
 
     def parsed_json
-      @parsed_json ||= begin
-        request.body.rewind
-        data = JSON.parse(request.body.read)
-        log_activity(request.path_info, data)
-        data
-      rescue JSON::ParserError
-        halt 400, json_response({ error: 'Invalid JSON' })
-      end
+      data = env['parsed_body']
+      halt 400, json_response({ error: 'No JSON body' }) unless data
+      log_activity(request.path_info, data)
+      data
     end
 
     def log_activity(action, data = nil)
