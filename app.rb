@@ -28,10 +28,6 @@ class ChipAtlasApp < Sinatra::Base
   register ChipAtlas::Routes::Pages
 
   helpers do
-    def app_root
-      "#{env['rack.url_scheme']}://#{env['HTTP_HOST']}#{env['SCRIPT_NAME']}"
-    end
-
     def json_response(data)
       content_type 'application/json'
       JSON.generate(data)
@@ -40,7 +36,9 @@ class ChipAtlasApp < Sinatra::Base
     def parsed_json
       @parsed_json ||= begin
         request.body.rewind
-        JSON.parse(request.body.read)
+        data = JSON.parse(request.body.read)
+        settings.access_logger.info("#{request.ip}\t#{request.path_info}\t#{data}")
+        data
       rescue JSON::ParserError
         halt 400, json_response({ error: 'Invalid JSON' })
       end
@@ -54,21 +52,5 @@ class ChipAtlasApp < Sinatra::Base
 
   configure :production do
     set :host_authorization, { permitted_hosts: ['.chip-atlas.org'] }
-  end
-
-  before do
-    if request.post? && request.content_type&.include?('application/json')
-      request.body.rewind
-      body_str = request.body.read
-      request.body.rewind
-      unless body_str.empty?
-        begin
-          data = JSON.parse(body_str)
-          settings.access_logger.info("#{request.ip}\t#{request.path_info}\t#{data}")
-        rescue JSON::ParserError
-          # not valid JSON, skip logging
-        end
-      end
-    end
   end
 end
