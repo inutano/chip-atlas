@@ -68,16 +68,6 @@ Sequel.migration do
       index :target_genes
     end
 
-    create_table :runs do
-      primary_key :id
-      String :run_id, null: false
-      String :experiment_id, null: false
-      DateTime :created_at
-
-      index :run_id
-      index :experiment_id
-    end
-
     create_table :sra_cache do
       primary_key :id
       String :experiment_id, null: false, unique: true
@@ -105,7 +95,6 @@ Sequel.migration do
   down do
     run "DROP TABLE IF EXISTS experiments_fts"
     drop_table :sra_cache
-    drop_table :runs
     drop_table :analyses
     drop_table :bedsizes
     drop_table :bedfiles

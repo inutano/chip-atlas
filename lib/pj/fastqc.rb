@@ -18,8 +18,9 @@ module PJ
       end
 
       def get_images_url(exp_id, app_root)
-        run_ids = PJ::Run.exp2run(exp_id)
-        run_ids.map{|runid| PJ::FastQC.new(runid, app_root).images_url }.flatten
+        # Run ID conversion has been outsourced to togoid.dbcls.jp
+        # This method is no longer functional without PJ::Run
+        []
       end
     end
 

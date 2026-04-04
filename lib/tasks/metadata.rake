@@ -24,8 +24,6 @@ namespace :metadata do
   bedfile_table_fpath     = File.join(metadata_dir, 'fileList.tab')
   analysis_table_fpath    = File.join(metadata_dir, 'analysisList.tab')
   bedsize_table_fpath     = File.join(metadata_dir, 'lineNum.tsv')
-  run_members_table_fpath = File.join(metadata_dir, 'SRA_Run_Members.tab')
-
   metadata_base = 'https://chip-atlas.dbcls.jp/data/metadata'
   util_base     = 'https://chip-atlas.dbcls.jp/data/util'
 
@@ -57,21 +55,12 @@ namespace :metadata do
     puts "   Downloaded lineNum.tsv (#{sprintf('%.2f', Time.now - start)}s)"
   end
 
-  file run_members_table_fpath => metadata_dir do |t|
-    puts 'Downloading SRA run members metadata...'
-    start = Time.now
-    base  = 'ftp.ncbi.nlm.nih.gov/sra/reports/Metadata'
-    fname = 'SRA_Run_Members.tab'
-    `lftp -c "open #{base} && pget -n 8 -O #{File.dirname(t.name)} #{fname}"`
-    puts "   Downloaded SRA_Run_Members.tab (#{sprintf('%.2f', Time.now - start)}s)"
-  end
-
-  task :load => [:load_experiment, :load_bedfile, :load_analysis, :load_bedsize, :load_run, :load_fts] do
+  task :load => [:load_experiment, :load_bedfile, :load_analysis, :load_bedsize, :load_fts] do
     puts 'All metadata loading completed successfully!'
   end
 
   task :load_experiment => experiment_table_fpath do
-    puts '[1/6] Loading experiments data...'
+    puts '[1/5] Loading experiments data...'
     start = Time.now
     DB[:experiments].delete
     count = ChipAtlas::Experiment.load_from_file(experiment_table_fpath)
@@ -79,7 +68,7 @@ namespace :metadata do
   end
 
   task :load_bedfile => bedfile_table_fpath do
-    puts '[2/6] Loading bedfiles data...'
+    puts '[2/5] Loading bedfiles data...'
     start = Time.now
     DB[:bedfiles].delete
     count = ChipAtlas::Bedfile.load_from_file(bedfile_table_fpath)
@@ -87,7 +76,7 @@ namespace :metadata do
   end
 
   task :load_analysis => analysis_table_fpath do
-    puts '[3/6] Loading analysis data...'
+    puts '[3/5] Loading analysis data...'
     start = Time.now
     DB[:analyses].delete
     count = ChipAtlas::Analysis.load_from_file(analysis_table_fpath)
@@ -95,28 +84,15 @@ namespace :metadata do
   end
 
   task :load_bedsize => bedsize_table_fpath do
-    puts '[4/6] Loading bedsize data...'
+    puts '[4/5] Loading bedsize data...'
     start = Time.now
     DB[:bedsizes].delete
     count = ChipAtlas::Bedsize.load_from_file(bedsize_table_fpath)
     puts "   #{count} bedsizes loaded (#{sprintf('%.2f', Time.now - start)}s)"
   end
 
-  task :load_run => run_members_table_fpath do
-    puts '[5/6] Loading runs data...'
-    exp_count = DB[:experiments].count
-    if exp_count == 0
-      puts '   ERROR: No experiments found. Run metadata:load_experiment first.'
-      exit 1
-    end
-    start = Time.now
-    DB[:runs].delete
-    count = ChipAtlas::Run.load_from_file(run_members_table_fpath)
-    puts "   #{count} runs loaded (#{sprintf('%.2f', Time.now - start)}s)"
-  end
-
   task :load_fts do
-    puts '[6/6] Loading FTS5 search index...'
+    puts '[5/5] Loading FTS5 search index...'
     start = Time.now
     json_path = File.join(PROJ_ROOT, 'public', 'ExperimentList_adv.json')
     if File.exist?(json_path)

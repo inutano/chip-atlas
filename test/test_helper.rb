@@ -77,7 +77,6 @@ module TestHelper
     DB[:bedfiles].delete
     DB[:bedsizes].delete
     DB[:analyses].delete
-    DB[:runs].delete
     DB[:sra_cache].delete
     DB.run("DELETE FROM experiments_fts")
   end
