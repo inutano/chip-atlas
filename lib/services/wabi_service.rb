@@ -11,6 +11,17 @@ module ChipAtlas
     module_function
 
     def endpoint_available?
+      now = Time.now
+      if @wabi_checked_at && (now - @wabi_checked_at) < 60
+        return @wabi_available
+      end
+
+      @wabi_available = check_endpoint
+      @wabi_checked_at = now
+      @wabi_available
+    end
+
+    def check_endpoint
       Timeout.timeout(3) do
         uri = URI.parse(ENDPOINT)
         http = Net::HTTP.new(uri.host, uri.port)

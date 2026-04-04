@@ -6,12 +6,21 @@ module ChipAtlas
   module Routes
     module Wabi
       def self.registered(app)
+        app.helpers do
+          def validated_wabi_id
+            id = params[:id]
+            halt 400, 'Invalid request ID' unless id&.match?(/\A[\w\-]+\z/)
+            id
+          end
+        end
+
         app.get '/wabi_endpoint_status' do
           ChipAtlas::WabiService.endpoint_available? ? 'chipatlas' : ''
         end
 
         app.get '/wabi_chipatlas' do
-          result = ChipAtlas::WabiService.job_finished?(params[:id])
+          id = validated_wabi_id
+          result = ChipAtlas::WabiService.job_finished?(id)
           case result
           when true  then 'finished'
           when false then 'running'
@@ -41,7 +50,8 @@ module ChipAtlas
 
         %w[enrichment_analysis_log diff_analysis_log].each do |path|
           app.get "/#{path}" do
-            log = ChipAtlas::WabiService.fetch_log(params[:id])
+            id = validated_wabi_id
+            log = ChipAtlas::WabiService.fetch_log(id)
             if log
               log
             else

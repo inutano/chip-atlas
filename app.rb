@@ -7,6 +7,7 @@ require 'net/http'
 require 'uri'
 require 'timeout'
 require 'fileutils'
+require 'logger'
 require 'sinatra/base'
 
 require_relative 'lib/db'
@@ -19,7 +20,7 @@ require_relative 'routes/wabi'
 
 class ChipAtlasApp < Sinatra::Base
   set :erb, escape_html: true
-  set :views, File.join(File.dirname(__FILE__), 'views')
+  set :views, File.join(__dir__, 'views')
 
   register ChipAtlas::Routes::Health
   register ChipAtlas::Routes::Api
@@ -35,6 +36,15 @@ class ChipAtlasApp < Sinatra::Base
       content_type 'application/json'
       JSON.generate(data)
     end
+
+    def parsed_json
+      @parsed_json ||= begin
+        request.body.rewind
+        JSON.parse(request.body.read)
+      rescue JSON::ParserError
+        halt 400, json_response({ error: 'Invalid JSON' })
+      end
+    end
   end
 
   def self.format_number(n)
@@ -44,6 +54,8 @@ class ChipAtlasApp < Sinatra::Base
 
   configure do
     set :wabi_endpoint, 'https://dtn1.ddbj.nig.ac.jp/wabi/chipatlas/'
+    FileUtils.mkdir_p('log')
+    set :access_logger, Logger.new('log/access_log', 'daily')
 
     unless ENV['SKIP_APP_CONFIGURE']
       count = ChipAtlas::Experiment.number_of_experiments
@@ -62,19 +74,16 @@ class ChipAtlasApp < Sinatra::Base
   end
 
   before do
-    if request.post?
-      rack_input = request.env['rack.input']&.read.to_s
-      unless rack_input.empty?
+    if request.post? && request.content_type&.include?('application/json')
+      request.body.rewind
+      body_str = request.body.read
+      request.body.rewind
+      unless body_str.empty?
         begin
-          posted_data = JSON.parse(rack_input)
+          data = JSON.parse(body_str)
+          settings.access_logger.info("#{request.ip}\t#{request.path_info}\t#{data}")
         rescue JSON::ParserError
-          posted_data = nil
-        end
-        if posted_data
-          log = [Time.now, request.ip, request.path_info, posted_data].join("\t")
-          logfile = './log/access_log'
-          FileUtils.mkdir_p(File.dirname(logfile))
-          File.open(logfile, 'a') { |f| f.puts(log) }
+          # not valid JSON, skip logging
         end
       end
     end

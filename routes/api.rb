@@ -19,44 +19,80 @@ module ChipAtlas
       end
 
       def self.registered(app)
-        app.get '/data/:data.json' do
-          data = case params[:data]
-                 when 'index_all_genome'          then settings.index_all_genome
-                 when 'list_of_genome'            then settings.list_of_genome.keys
-                 when 'list_of_experiment_types'  then settings.list_of_experiment_types
-                 when 'qval_range'                then settings.qval_range
-                 when 'exp_metadata'              then ChipAtlas::Experiment.record_by_exp_id(params[:expid])
-                 when 'colo_analysis'             then ChipAtlas::Analysis.colo_result_by_genome(params[:genome])
-                 when 'target_genes_analysis'     then settings.target_genes_analysis
-                 when 'number_of_lines'           then settings.bedsizes
-                 when 'index_subclass'
-                   ChipAtlas::Experiment.get_subclass(
-                     params[:genome], params[:agClass], params[:clClass], params[:type]
-                   )
-                 when 'ExperimentList', 'ExperimentList_adv'
-                   halt 410, '{"error": "Use /data/search for experiment queries"}'
-                 end
-          json_response(data)
+        # Static data endpoints (cached at startup, safe to cache in browser)
+        app.get '/data/index_all_genome.json' do
+          cache_control :public, max_age: 3600
+          json_response(settings.index_all_genome)
         end
 
+        app.get '/data/list_of_genome.json' do
+          cache_control :public, max_age: 3600
+          json_response(settings.list_of_genome.keys)
+        end
+
+        app.get '/data/list_of_experiment_types.json' do
+          cache_control :public, max_age: 3600
+          json_response(settings.list_of_experiment_types)
+        end
+
+        app.get '/data/qval_range.json' do
+          cache_control :public, max_age: 3600
+          json_response(settings.qval_range)
+        end
+
+        app.get '/data/target_genes_analysis.json' do
+          cache_control :public, max_age: 3600
+          json_response(settings.target_genes_analysis)
+        end
+
+        app.get '/data/number_of_lines.json' do
+          cache_control :public, max_age: 3600
+          json_response(settings.bedsizes)
+        end
+
+        # Dynamic data endpoints (query the database)
+        app.get '/data/exp_metadata.json' do
+          halt 400, json_response({ error: 'expid parameter required' }) unless params[:expid]
+          json_response(ChipAtlas::Experiment.record_by_exp_id(params[:expid]))
+        end
+
+        app.get '/data/colo_analysis.json' do
+          halt 400, json_response({ error: 'genome parameter required' }) unless params[:genome]
+          json_response(ChipAtlas::Analysis.colo_result_by_genome(params[:genome]))
+        end
+
+        app.get '/data/index_subclass.json' do
+          json_response(
+            ChipAtlas::Experiment.get_subclass(
+              params[:genome], params[:agClass], params[:clClass], params[:type]
+            )
+          )
+        end
+
+        # Deprecated bulk JSON endpoints
+        app.get '/data/ExperimentList.json' do
+          halt 410, json_response({ error: 'Use /data/search for experiment queries' })
+        end
+
+        app.get '/data/ExperimentList_adv.json' do
+          halt 410, json_response({ error: 'Use /data/search for experiment queries' })
+        end
+
+        # Faceted search endpoints (query the database)
         app.get '/data/experiment_types' do
-          data = ChipAtlas::Experiment.experiment_types(params[:genome], params[:clClass])
-          json_response(data)
+          json_response(ChipAtlas::Experiment.experiment_types(params[:genome], params[:clClass]))
         end
 
         app.get '/data/sample_types' do
-          data = ChipAtlas::Experiment.sample_types(params[:genome], params[:agClass])
-          json_response(data)
+          json_response(ChipAtlas::Experiment.sample_types(params[:genome], params[:agClass]))
         end
 
         app.get '/data/chip_antigen' do
-          data = ChipAtlas::Experiment.chip_antigen(params[:genome], params[:agClass], params[:clClass])
-          json_response(data)
+          json_response(ChipAtlas::Experiment.chip_antigen(params[:genome], params[:agClass], params[:clClass]))
         end
 
         app.get '/data/cell_type' do
-          data = ChipAtlas::Experiment.cell_type(params[:genome], params[:agClass], params[:clClass])
-          json_response(data)
+          json_response(ChipAtlas::Experiment.cell_type(params[:genome], params[:agClass], params[:clClass]))
         end
 
         app.get '/data/search' do
@@ -64,45 +100,41 @@ module ChipAtlas
           genome = params[:genome]
           limit  = (params[:limit] || 20).to_i.clamp(1, 100)
           offset = (params[:offset] || 0).to_i
-          data = ChipAtlas::ExperimentSearch.search(query, genome: genome, limit: limit, offset: offset)
-          json_response(data)
+          json_response(ChipAtlas::ExperimentSearch.search(query, genome: genome, limit: limit, offset: offset))
         end
 
         app.get '/qvalue_range' do
+          cache_control :public, max_age: 3600
           json_response(settings.qval_range)
         end
 
+        # POST endpoints — use parsed_json helper
         app.post '/browse' do
-          request.body.rewind
-          json = JSON.parse(request.body.read)
+          json = parsed_json
           url = ChipAtlas::LocationService.new(json).igv_browsing_url
           json_response({ 'url' => url })
         end
 
         app.post '/download' do
-          request.body.rewind
-          json = JSON.parse(request.body.read)
+          json = parsed_json
           url = ChipAtlas::LocationService.new(json).archive_url
           json_response({ 'url' => url })
         end
 
         app.post '/colo' do
-          request.body.rewind
-          json = JSON.parse(request.body.read)
+          json = parsed_json
           url = ChipAtlas::LocationService.new(json).colo_url(params[:type])
           json_response({ 'url' => url })
         end
 
         app.post '/target_genes' do
-          request.body.rewind
-          json = JSON.parse(request.body.read)
+          json = parsed_json
           url = ChipAtlas::LocationService.new(json).target_genes_url(params[:type])
           json_response({ 'url' => url })
         end
 
         app.post '/diff_analysis_estimated_time' do
-          request.body.rewind
-          data = JSON.parse(request.body.read)
+          data = parsed_json
           total_reads = ChipAtlas::Experiment.total_number_of_reads(data['ids']).to_i
           seconds = case data['analysis']
                     when 'dmr'      then 117.13 * Math.log(total_reads) - 2012.5 + 600
@@ -123,7 +155,7 @@ module ChipAtlas
             http.use_ssl = uri.scheme == 'https'
             http.open_timeout = 5
             http.read_timeout = 10
-            response = http.request_head(uri.path)
+            response = http.request_head(uri.request_uri)
             response.code
           rescue SocketError, Timeout::Error, Errno::ECONNREFUSED, Net::HTTPError
             '500'

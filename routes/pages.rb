@@ -17,6 +17,12 @@ module ChipAtlas
           rescue SocketError, Timeout::Error, Errno::ECONNREFUSED, Net::HTTPError
             halt 404
           end
+
+          def load_analysis_settings
+            @index_all_genome = settings.index_all_genome
+            @list_of_genome   = settings.list_of_genome
+            @qval_range       = settings.qval_range
+          end
         end
 
         app.get '/' do
@@ -25,9 +31,7 @@ module ChipAtlas
         end
 
         app.get '/peak_browser' do
-          @index_all_genome = settings.index_all_genome
-          @list_of_genome   = settings.list_of_genome
-          @qval_range       = settings.qval_range
+          load_analysis_settings
           erb :peak_browser
         end
 
@@ -63,9 +67,7 @@ module ChipAtlas
         end
 
         app.get '/enrichment_analysis' do
-          @index_all_genome = settings.index_all_genome
-          @list_of_genome   = settings.list_of_genome
-          @qval_range       = settings.qval_range
+          load_analysis_settings
           erb :enrichment_analysis
         end
 
@@ -74,9 +76,7 @@ module ChipAtlas
           @genes     = params['genes']
           @genesetA  = params['genesetA']
           @genesetB  = params['genesetB']
-          @index_all_genome = settings.index_all_genome
-          @list_of_genome   = settings.list_of_genome
-          @qval_range       = settings.qval_range
+          load_analysis_settings
           erb :enrichment_analysis
         end
 
@@ -85,9 +85,7 @@ module ChipAtlas
         end
 
         app.get '/diff_analysis' do
-          @index_all_genome = settings.index_all_genome
-          @list_of_genome   = settings.list_of_genome
-          @qval_range       = settings.qval_range
+          load_analysis_settings
           erb :diff_analysis
         end
 
