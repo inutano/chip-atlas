@@ -19,49 +19,56 @@ module ChipAtlas
       end
 
       def self.registered(app)
-        # Static data endpoints (constants or cached, safe to cache in browser)
-        app.get '/data/index_all_genome.json' do
-          cache_control :public, max_age: 3600
-          json_response(ChipAtlas::Experiment.cached_index_all_genome)
+        app.helpers do
+          def condition_from_params
+            {
+              'condition' => {
+                'genome'             => params[:genome],
+                'track_class'        => params[:track_class],
+                'track_subclass'     => params[:track_subclass],
+                'cell_type_class'    => params[:cell_type_class],
+                'cell_type_subclass' => params[:cell_type_subclass],
+                'qval'               => params[:qval],
+                'track'              => params[:track],
+                'cell_type'          => params[:cell_type],
+                'distance'           => params[:distance],
+              }.compact
+            }
+          end
         end
 
-        app.get '/data/list_of_genome.json' do
+        # === Classification endpoints ===
+
+        app.get '/api/genomes' do
           cache_control :public, max_age: 86_400
           json_response(ChipAtlas::Experiment.list_of_genome.keys)
         end
 
-        app.get '/data/list_of_experiment_types.json' do
-          cache_control :public, max_age: 86_400
-          json_response(ChipAtlas::Experiment.list_of_experiment_types)
+        app.get '/api/track_classes' do
+          if params[:genome]
+            json_response(ChipAtlas::Experiment.experiment_types(params[:genome], params[:cell_type_class] || 'All cell types'))
+          else
+            cache_control :public, max_age: 86_400
+            json_response(ChipAtlas::Experiment.list_of_experiment_types)
+          end
         end
 
-        app.get '/data/qval_range.json' do
-          cache_control :public, max_age: 3600
-          json_response(ChipAtlas::Bedfile.qval_range)
+        app.get '/api/cell_type_classes' do
+          halt 400, json_response({ error: 'genome and track_class required' }) unless params[:genome] && params[:track_class]
+          json_response(ChipAtlas::Experiment.sample_types(params[:genome], params[:track_class]))
         end
 
-        app.get '/data/target_genes_analysis.json' do
-          cache_control :public, max_age: 3600
-          json_response(ChipAtlas::Analysis.target_genes_result)
+        app.get '/api/track_subclasses' do
+          halt 400, json_response({ error: 'genome and track_class required' }) unless params[:genome] && params[:track_class]
+          json_response(ChipAtlas::Experiment.chip_antigen(params[:genome], params[:track_class], params[:cell_type_class]))
         end
 
-        app.get '/data/number_of_lines.json' do
-          cache_control :public, max_age: 3600
-          json_response(ChipAtlas::Bedsize.dump)
+        app.get '/api/cell_type_subclasses' do
+          halt 400, json_response({ error: 'genome and track_class required' }) unless params[:genome] && params[:track_class]
+          json_response(ChipAtlas::Experiment.cell_type(params[:genome], params[:track_class], params[:cell_type_class]))
         end
 
-        # Dynamic data endpoints (query the database)
-        app.get '/data/exp_metadata.json' do
-          halt 400, json_response({ error: 'expid parameter required' }) unless params[:expid]
-          json_response(ChipAtlas::Experiment.record_by_experiment_id(params[:expid]))
-        end
-
-        app.get '/data/colo_analysis.json' do
-          halt 400, json_response({ error: 'genome parameter required' }) unless params[:genome]
-          json_response(ChipAtlas::Analysis.colo_result_by_genome(params[:genome]))
-        end
-
-        app.get '/data/index_subclass.json' do
+        app.get '/api/subclasses' do
           json_response(
             ChipAtlas::Experiment.get_subclass(
               params[:genome], params[:track_class], params[:cell_type_class], params[:type]
@@ -69,33 +76,19 @@ module ChipAtlas
           )
         end
 
-        # Deprecated bulk JSON endpoints
-        app.get '/data/ExperimentList.json' do
-          halt 410, json_response({ error: 'Use /data/search for experiment queries' })
+        # === Data endpoints ===
+
+        app.get '/api/genome_index' do
+          cache_control :public, max_age: 3600
+          json_response(ChipAtlas::Experiment.cached_index_all_genome)
         end
 
-        app.get '/data/ExperimentList_adv.json' do
-          halt 410, json_response({ error: 'Use /data/search for experiment queries' })
+        app.get '/api/experiment' do
+          halt 400, json_response({ error: 'experiment_id parameter required' }) unless params[:experiment_id]
+          json_response(ChipAtlas::Experiment.record_by_experiment_id(params[:experiment_id]))
         end
 
-        # Faceted search endpoints (query the database)
-        app.get '/data/experiment_types' do
-          json_response(ChipAtlas::Experiment.experiment_types(params[:genome], params[:cell_type_class]))
-        end
-
-        app.get '/data/sample_types' do
-          json_response(ChipAtlas::Experiment.sample_types(params[:genome], params[:track_class]))
-        end
-
-        app.get '/data/chip_antigen' do
-          json_response(ChipAtlas::Experiment.chip_antigen(params[:genome], params[:track_class], params[:cell_type_class]))
-        end
-
-        app.get '/data/cell_type' do
-          json_response(ChipAtlas::Experiment.cell_type(params[:genome], params[:track_class], params[:cell_type_class]))
-        end
-
-        app.get '/data/search' do
+        app.get '/api/search' do
           query  = params[:q]
           genome = params[:genome]
           limit  = (params[:limit] || 20).to_i.clamp(1, 100)
@@ -104,42 +97,77 @@ module ChipAtlas
           json_response(ChipAtlas::ExperimentSearch.search(query, genome: genome, limit: limit, offset: offset))
         end
 
-        app.get '/qvalue_range' do
+        app.get '/api/qval_range' do
           cache_control :public, max_age: 3600
           json_response(ChipAtlas::Bedfile.qval_range)
         end
 
-        # POST endpoints
-        app.post '/browse' do
-          json = parsed_json
-          url = ChipAtlas::LocationService.new(json).igv_browsing_url
-          json_response({ 'url' => url })
+        app.get '/api/bed_sizes' do
+          cache_control :public, max_age: 3600
+          json_response(ChipAtlas::Bedsize.dump)
         end
 
-        app.post '/download' do
-          json = parsed_json
-          url = ChipAtlas::LocationService.new(json).archive_url
-          json_response({ 'url' => url })
+        # === Analysis index endpoints ===
+
+        app.get '/api/colo_index' do
+          halt 400, json_response({ error: 'genome parameter required' }) unless params[:genome]
+          json_response(ChipAtlas::Analysis.colo_result_by_genome(params[:genome]))
         end
 
-        app.post '/colo' do
+        app.get '/api/target_genes_index' do
+          cache_control :public, max_age: 3600
+          json_response(ChipAtlas::Analysis.target_genes_result)
+        end
+
+        # === URL generation endpoints (GET for agents, POST for frontend) ===
+
+        app.get '/api/igv_url' do
+          halt 400, json_response({ error: 'genome and track_class required' }) unless params[:genome] && params[:track_class]
+          url = ChipAtlas::LocationService.new(condition_from_params).igv_browsing_url
+          json_response({ url: url })
+        end
+
+        app.post '/api/igv_url' do
+          url = ChipAtlas::LocationService.new(parsed_json).igv_browsing_url
+          json_response({ url: url })
+        end
+
+        app.get '/api/download_url' do
+          halt 400, json_response({ error: 'genome and track_class required' }) unless params[:genome] && params[:track_class]
+          url = ChipAtlas::LocationService.new(condition_from_params).archive_url
+          json_response({ url: url })
+        end
+
+        app.post '/api/download_url' do
+          url = ChipAtlas::LocationService.new(parsed_json).archive_url
+          json_response({ url: url })
+        end
+
+        app.get '/api/colo_urls' do
+          halt 400, json_response({ error: 'genome, track, and cell_type required' }) unless params[:genome] && params[:track] && params[:cell_type]
+          svc = ChipAtlas::LocationService.new(condition_from_params)
+          json_response({ data_url: svc.colo_data_url, tsv_url: svc.colo_tsv_url, gml_url: svc.colo_gml_url })
+        end
+
+        app.post '/api/colo_urls' do
           svc = ChipAtlas::LocationService.new(parsed_json)
-          json_response({
-            data_url: svc.colo_data_url,
-            tsv_url:  svc.colo_tsv_url,
-            gml_url:  svc.colo_gml_url,
-          })
+          json_response({ data_url: svc.colo_data_url, tsv_url: svc.colo_tsv_url, gml_url: svc.colo_gml_url })
         end
 
-        app.post '/target_genes' do
+        app.get '/api/target_genes_urls' do
+          halt 400, json_response({ error: 'genome, track, and distance required' }) unless params[:genome] && params[:track] && params[:distance]
+          svc = ChipAtlas::LocationService.new(condition_from_params)
+          json_response({ data_url: svc.target_genes_data_url, tsv_url: svc.target_genes_tsv_url })
+        end
+
+        app.post '/api/target_genes_urls' do
           svc = ChipAtlas::LocationService.new(parsed_json)
-          json_response({
-            data_url: svc.target_genes_data_url,
-            tsv_url:  svc.target_genes_tsv_url,
-          })
+          json_response({ data_url: svc.target_genes_data_url, tsv_url: svc.target_genes_tsv_url })
         end
 
-        app.get '/api/remoteUrlStatus' do
+        # === Internal endpoints (not in OpenAPI) ===
+
+        app.get '/api/remote_url_status' do
           url = params[:url]
           unless url && ChipAtlas::Routes::Api.allowed_remote_url?(url)
             halt 400, 'Invalid or disallowed URL'

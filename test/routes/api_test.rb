@@ -19,53 +19,53 @@ class ApiTest < Minitest::Test
     ChipAtlasApp.set :list_of_experiment_types, ChipAtlas::Experiment.list_of_experiment_types
   end
 
-  def test_list_of_genome
-    get '/data/list_of_genome.json'
+  def test_genomes
+    get '/api/genomes'
     assert last_response.ok?
     data = JSON.parse(last_response.body)
     assert_includes data, 'hg38'
     assert_includes data, 'TAIR10'
   end
 
-  def test_list_of_experiment_types
-    get '/data/list_of_experiment_types.json'
+  def test_track_classes_static
+    get '/api/track_classes'
     assert last_response.ok?
     data = JSON.parse(last_response.body)
     assert data.any? { |t| t['id'] == 'CUT&Tag' }
   end
 
-  def test_experiment_types_with_counts
-    get '/data/experiment_types', genome: 'hg38', cell_type_class: 'All cell types'
+  def test_track_classes_with_counts
+    get '/api/track_classes', genome: 'hg38', cell_type_class: 'All cell types'
     assert last_response.ok?
     data = JSON.parse(last_response.body)
     histone = data.find { |d| d['id'] == 'Histone' }
     assert_equal 2, histone['count']
   end
 
-  def test_sample_types
-    get '/data/sample_types', genome: 'hg38', track_class: 'Histone'
+  def test_cell_type_classes
+    get '/api/cell_type_classes', genome: 'hg38', track_class: 'Histone'
     assert last_response.ok?
     data = JSON.parse(last_response.body)
     assert_equal 'All cell types', data.first['id']
   end
 
-  def test_chip_antigen
-    get '/data/chip_antigen', genome: 'hg38', track_class: 'Histone', cell_type_class: 'All cell types'
+  def test_track_subclasses
+    get '/api/track_subclasses', genome: 'hg38', track_class: 'Histone', cell_type_class: 'All cell types'
     assert last_response.ok?
     data = JSON.parse(last_response.body)
     assert_equal '-', data.first['id']
   end
 
-  def test_cell_type
-    get '/data/cell_type', genome: 'hg38', track_class: 'Histone', cell_type_class: 'Blood'
+  def test_cell_type_subclasses
+    get '/api/cell_type_subclasses', genome: 'hg38', track_class: 'Histone', cell_type_class: 'Blood'
     assert last_response.ok?
     data = JSON.parse(last_response.body)
     k562 = data.find { |d| d['id'] == 'K-562' }
     assert k562
   end
 
-  def test_exp_metadata
-    get '/data/exp_metadata.json', expid: 'SRX018625'
+  def test_experiment
+    get '/api/experiment', experiment_id: 'SRX018625'
     assert last_response.ok?
     data = JSON.parse(last_response.body)
     assert_equal 1, data.size
@@ -79,14 +79,14 @@ class ApiTest < Minitest::Test
       VALUES ('SRX018625', '', '', 'hg38', 'Histone', 'H3K4me3', 'Blood', 'K-562', 'H3K4me3 in K-562', '');
     SQL
 
-    get '/data/search', q: 'K-562', genome: 'hg38', limit: '10'
+    get '/api/search', q: 'K-562', genome: 'hg38', limit: '10'
     assert last_response.ok?
     data = JSON.parse(last_response.body)
     assert data['total'] >= 1
   end
 
-  def test_post_download
-    post '/download', JSON.generate({
+  def test_post_download_url
+    post '/api/download_url', JSON.generate({
       condition: { genome: 'hg38', track_class: 'Histone', track_subclass: 'H3K4me3',
                    cell_type_class: 'Blood', cell_type_subclass: '-', qval: '05' }
     }), 'CONTENT_TYPE' => 'application/json'
@@ -96,8 +96,8 @@ class ApiTest < Minitest::Test
     assert_match(/chip-atlas\.dbcls\.jp/, data['url'])
   end
 
-  def test_post_browse
-    post '/browse', JSON.generate({
+  def test_post_igv_url
+    post '/api/igv_url', JSON.generate({
       condition: { genome: 'hg38', track_class: 'Histone', track_subclass: 'H3K4me3',
                    cell_type_class: 'Blood', cell_type_subclass: '-', qval: '05' }
     }), 'CONTENT_TYPE' => 'application/json'
@@ -105,5 +105,14 @@ class ApiTest < Minitest::Test
     assert last_response.ok?
     data = JSON.parse(last_response.body)
     assert_match(/localhost:60151/, data['url'])
+  end
+
+  def test_get_download_url
+    get '/api/download_url', genome: 'hg38', track_class: 'Histone', track_subclass: 'H3K4me3',
+                             cell_type_class: 'Blood', cell_type_subclass: '-', qval: '05'
+
+    assert last_response.ok?
+    data = JSON.parse(last_response.body)
+    assert_match(/chip-atlas\.dbcls\.jp/, data['url'])
   end
 end
