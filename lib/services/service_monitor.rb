@@ -38,13 +38,16 @@ module ChipAtlas
     def all_statuses
       SERVICES.each_key { |s| status(s) }
 
+      data = @statuses[:data_server]
+      compute = @statuses[:wabi] || @statuses[:wes]
+
       features = {
-        peak_browser:         @statuses[:data_server] ? 'ok' : 'unavailable',
-        colo:                 @statuses[:data_server] ? 'ok' : 'unavailable',
-        target_genes:         @statuses[:data_server] ? 'ok' : 'unavailable',
+        peak_browser:         data ? 'ok' : 'unavailable',
+        colo:                 data ? 'ok' : 'unavailable',
+        target_genes:         data ? 'ok' : 'unavailable',
         search:               'ok',
-        enrichment_analysis:  enrichment_status,
-        diff_analysis:        @statuses[:wabi] ? 'ok' : 'unavailable',
+        enrichment_analysis:  enrichment_feature_status(data, compute),
+        diff_analysis:        data && @statuses[:wabi] ? 'ok' : 'unavailable',
       }
 
       {
@@ -79,16 +82,13 @@ module ChipAtlas
       false
     end
 
-    def enrichment_status
-      if @statuses[:wabi]
-        'ok'
-      elsif @statuses[:wes]
-        'ok (backup)'
-      else
-        'unavailable'
-      end
+    def enrichment_feature_status(data, compute)
+      return 'unavailable' unless data
+      return 'unavailable' unless compute
+
+      @statuses[:wabi] ? 'ok' : 'ok (backup)'
     end
 
-    private_class_method :check, :enrichment_status
+    private_class_method :check, :enrichment_feature_status
   end
 end
