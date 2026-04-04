@@ -64,7 +64,7 @@ module ChipAtlas
         app.get '/data/index_subclass.json' do
           json_response(
             ChipAtlas::Experiment.get_subclass(
-              params[:genome], params[:agClass], params[:clClass], params[:type]
+              params[:genome], params[:ag_class], params[:cl_class], params[:type]
             )
           )
         end
@@ -80,19 +80,19 @@ module ChipAtlas
 
         # Faceted search endpoints (query the database)
         app.get '/data/experiment_types' do
-          json_response(ChipAtlas::Experiment.experiment_types(params[:genome], params[:clClass]))
+          json_response(ChipAtlas::Experiment.experiment_types(params[:genome], params[:cl_class]))
         end
 
         app.get '/data/sample_types' do
-          json_response(ChipAtlas::Experiment.sample_types(params[:genome], params[:agClass]))
+          json_response(ChipAtlas::Experiment.sample_types(params[:genome], params[:ag_class]))
         end
 
         app.get '/data/chip_antigen' do
-          json_response(ChipAtlas::Experiment.chip_antigen(params[:genome], params[:agClass], params[:clClass]))
+          json_response(ChipAtlas::Experiment.chip_antigen(params[:genome], params[:ag_class], params[:cl_class]))
         end
 
         app.get '/data/cell_type' do
-          json_response(ChipAtlas::Experiment.cell_type(params[:genome], params[:agClass], params[:clClass]))
+          json_response(ChipAtlas::Experiment.cell_type(params[:genome], params[:ag_class], params[:cl_class]))
         end
 
         app.get '/data/search' do

@@ -39,7 +39,7 @@ module ChipAtlas
       end
 
       total = rows.first&.[](:total_count) || 0
-      experiments = rows.map { |row| ChipAtlas::Serializers.search_result(row) }
+      experiments = rows.map { |row| row.except(:rank, :total_count) }
 
       { total: total, returned: experiments.size, experiments: experiments }
     end

@@ -35,7 +35,7 @@ class ApiTest < Minitest::Test
   end
 
   def test_experiment_types_with_counts
-    get '/data/experiment_types', genome: 'hg38', clClass: 'All cell types'
+    get '/data/experiment_types', genome: 'hg38', cl_class: 'All cell types'
     assert last_response.ok?
     data = JSON.parse(last_response.body)
     histone = data.find { |d| d['id'] == 'Histone' }
@@ -43,21 +43,21 @@ class ApiTest < Minitest::Test
   end
 
   def test_sample_types
-    get '/data/sample_types', genome: 'hg38', agClass: 'Histone'
+    get '/data/sample_types', genome: 'hg38', ag_class: 'Histone'
     assert last_response.ok?
     data = JSON.parse(last_response.body)
     assert_equal 'All cell types', data.first['id']
   end
 
   def test_chip_antigen
-    get '/data/chip_antigen', genome: 'hg38', agClass: 'Histone', clClass: 'All cell types'
+    get '/data/chip_antigen', genome: 'hg38', ag_class: 'Histone', cl_class: 'All cell types'
     assert last_response.ok?
     data = JSON.parse(last_response.body)
     assert_equal '-', data.first['id']
   end
 
   def test_cell_type
-    get '/data/cell_type', genome: 'hg38', agClass: 'Histone', clClass: 'Blood'
+    get '/data/cell_type', genome: 'hg38', ag_class: 'Histone', cl_class: 'Blood'
     assert last_response.ok?
     data = JSON.parse(last_response.body)
     k562 = data.find { |d| d['id'] == 'K-562' }
@@ -69,8 +69,8 @@ class ApiTest < Minitest::Test
     assert last_response.ok?
     data = JSON.parse(last_response.body)
     assert_equal 1, data.size
-    assert_equal 'SRX018625', data.first['expid']
-    assert_equal 'Histone', data.first['agClass']
+    assert_equal 'SRX018625', data.first['exp_id']
+    assert_equal 'Histone', data.first['ag_class']
   end
 
   def test_search
@@ -87,8 +87,8 @@ class ApiTest < Minitest::Test
 
   def test_post_download
     post '/download', JSON.generate({
-      condition: { genome: 'hg38', agClass: 'Histone', agSubClass: 'H3K4me3',
-                   clClass: 'Blood', clSubClass: '-', qval: '05' }
+      condition: { genome: 'hg38', ag_class: 'Histone', ag_sub_class: 'H3K4me3',
+                   cl_class: 'Blood', cl_sub_class: '-', qval: '05' }
     }), 'CONTENT_TYPE' => 'application/json'
 
     assert last_response.ok?
@@ -98,8 +98,8 @@ class ApiTest < Minitest::Test
 
   def test_post_browse
     post '/browse', JSON.generate({
-      condition: { genome: 'hg38', agClass: 'Histone', agSubClass: 'H3K4me3',
-                   clClass: 'Blood', clSubClass: '-', qval: '05' }
+      condition: { genome: 'hg38', ag_class: 'Histone', ag_sub_class: 'H3K4me3',
+                   cl_class: 'Blood', cl_sub_class: '-', qval: '05' }
     }), 'CONTENT_TYPE' => 'application/json'
 
     assert last_response.ok?

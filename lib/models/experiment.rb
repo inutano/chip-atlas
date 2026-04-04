@@ -118,10 +118,11 @@ module ChipAtlas
     end
 
     def record_by_exp_id(exp_id)
-      records = dataset.where(exp_id: exp_id).map do |row|
-        ChipAtlas::Serializers.experiment(row)
-      end
-      records.sort_by { |r| GENOME_ORDER.fetch(r[:genome], 999) }
+      dataset.where(exp_id: exp_id)
+        .select(:exp_id, :genome, :ag_class, :ag_sub_class, :cl_class, :cl_sub_class,
+                :title, :attributes, :read_info, :cl_sub_class_info)
+        .all
+        .sort_by { |r| GENOME_ORDER.fetch(r[:genome], 999) }
     end
 
     def id_valid?(exp_id)

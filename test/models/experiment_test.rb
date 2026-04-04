@@ -67,8 +67,8 @@ class ExperimentTest < Minitest::Test
   def test_record_by_exp_id
     records = ChipAtlas::Experiment.record_by_exp_id('SRX018625')
     assert_equal 1, records.size
-    assert_equal 'SRX018625', records.first[:expid]
-    assert_equal 'Histone', records.first[:agClass]
+    assert_equal 'SRX018625', records.first[:exp_id]
+    assert_equal 'Histone', records.first[:ag_class]
   end
 
   def test_id_valid

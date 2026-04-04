@@ -23,13 +23,13 @@ class ExperimentSearchTest < Minitest::Test
   def test_search_by_keyword
     result = ChipAtlas::ExperimentSearch.search('K-562')
     assert_equal 2, result[:total]
-    assert result[:experiments].all? { |e| e[:expid] }
+    assert result[:experiments].all? { |e| e[:exp_id] }
   end
 
   def test_search_with_genome_filter
     result = ChipAtlas::ExperimentSearch.search('ATAC', genome: 'mm10')
     assert_equal 1, result[:total]
-    assert_equal 'SRX100002', result[:experiments].first[:expid]
+    assert_equal 'SRX100002', result[:experiments].first[:exp_id]
   end
 
   def test_search_with_limit

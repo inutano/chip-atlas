@@ -8,7 +8,7 @@ module ChipAtlas
 
     def initialize(data)
       @data      = data
-      @condition = ChipAtlas::Serializers.normalize_condition(data['condition'])
+      @condition = data['condition'].transform_keys(&:to_sym)
       @genome    = @condition[:genome]
     end
 

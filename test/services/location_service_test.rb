@@ -11,8 +11,8 @@ class LocationServiceTest < Minitest::Test
 
   def test_archive_url
     data = { 'condition' => {
-      'genome' => 'hg38', 'agClass' => 'Histone', 'agSubClass' => 'H3K4me3',
-      'clClass' => 'Blood', 'clSubClass' => '-', 'qval' => '05'
+      'genome' => 'hg38', 'ag_class' => 'Histone', 'ag_sub_class' => 'H3K4me3',
+      'cl_class' => 'Blood', 'cl_sub_class' => '-', 'qval' => '05'
     }}
     svc = ChipAtlas::LocationService.new(data)
     url = svc.archive_url
@@ -22,8 +22,8 @@ class LocationServiceTest < Minitest::Test
 
   def test_igv_browsing_url
     data = { 'condition' => {
-      'genome' => 'hg38', 'agClass' => 'Histone', 'agSubClass' => 'H3K4me3',
-      'clClass' => 'Blood', 'clSubClass' => '-', 'qval' => '05'
+      'genome' => 'hg38', 'ag_class' => 'Histone', 'ag_sub_class' => 'H3K4me3',
+      'cl_class' => 'Blood', 'cl_sub_class' => '-', 'qval' => '05'
     }}
     svc = ChipAtlas::LocationService.new(data)
     url = svc.igv_browsing_url
@@ -54,8 +54,8 @@ class LocationServiceTest < Minitest::Test
 
   def test_archive_url_returns_nil_for_missing_bedfile
     data = { 'condition' => {
-      'genome' => 'hg38', 'agClass' => 'Histone', 'agSubClass' => 'NONEXISTENT',
-      'clClass' => 'Blood', 'clSubClass' => '-', 'qval' => '05'
+      'genome' => 'hg38', 'ag_class' => 'Histone', 'ag_sub_class' => 'NONEXISTENT',
+      'cl_class' => 'Blood', 'cl_sub_class' => '-', 'qval' => '05'
     }}
     svc = ChipAtlas::LocationService.new(data)
     assert_nil svc.archive_url
