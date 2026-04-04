@@ -154,7 +154,7 @@ module ChipAtlas
           body
         end
 
-        # Colocalization download URL
+        # Colocalization file download (proxied from data server)
         app.get '/api/colo/download' do
           halt 400, json_response({ error: 'genome, track, cell_type, and format required' }) unless params[:genome] && params[:track] && params[:cell_type] && params[:format]
           svc = ChipAtlas::LocationService.new(condition_from_params)
@@ -163,7 +163,11 @@ module ChipAtlas
                 when 'gml' then svc.colo_gml_url
                 else halt 400, json_response({ error: "Unknown format: #{params[:format]}. Available: tsv, gml" })
                 end
-          json_response({ url: url, format: params[:format] })
+          body = ChipAtlas::DataProxy.fetch_json(url)
+          halt 404, 'File not found' unless body
+          content_type params[:format] == 'tsv' ? 'text/tab-separated-values' : 'application/xml'
+          attachment "#{params[:track]}.#{params[:cell_type]}.#{params[:format]}"
+          body
         end
 
         # Target genes data (proxied from data server)
@@ -177,7 +181,7 @@ module ChipAtlas
           body
         end
 
-        # Target genes download URL
+        # Target genes file download (proxied from data server)
         app.get '/api/target_genes/download' do
           halt 400, json_response({ error: 'genome, track, distance, and format required' }) unless params[:genome] && params[:track] && params[:distance] && params[:format]
           svc = ChipAtlas::LocationService.new(condition_from_params)
@@ -185,7 +189,11 @@ module ChipAtlas
                 when 'tsv' then svc.target_genes_tsv_url
                 else halt 400, json_response({ error: "Unknown format: #{params[:format]}. Available: tsv" })
                 end
-          json_response({ url: url, format: params[:format] })
+          body = ChipAtlas::DataProxy.fetch_json(url)
+          halt 404, 'File not found' unless body
+          content_type 'text/tab-separated-values'
+          attachment "#{params[:track]}.#{params[:distance]}.tsv"
+          body
         end
 
         # === Internal endpoints (not in OpenAPI) ===
