@@ -4,7 +4,7 @@ require 'uri'
 
 module ChipAtlas
   class LocationService
-    ARCHIVE_BASE = 'https://chip-atlas.dbcls.jp/data'.freeze
+    ARCHIVE_BASE = 'https://chip-atlas.dbcls.jp/data'
 
     def initialize(data)
       @data      = data
@@ -30,26 +30,45 @@ module ChipAtlas
       end
     end
 
-    def colo_url(type)
-      track     = URI.encode_www_form_component(@condition[:track])
-      cell_type = URI.encode_www_form_component(@condition[:cell_type].gsub(' ', '_'))
-      base      = "#{ARCHIVE_BASE}/#{@genome}/colo"
-      case type
-      when 'submit' then "#{base}/#{track}.#{cell_type}.html"
-      when 'tsv'    then "#{base}/#{track}.#{cell_type}.tsv"
-      when 'gml'    then "#{base}/#{cell_type}.gml"
-      end
+    # Colocalization result URLs
+    def colo_data_url
+      "#{colo_base}/#{encoded_track}.#{encoded_cell_type}.json"
     end
 
-    def target_genes_url(type)
-      track    = URI.encode_www_form_component(@condition[:track])
-      distance = @condition[:distance]
-      base     = "#{ARCHIVE_BASE}/#{@genome}/target"
-      ext = type == 'submit' ? 'html' : 'tsv'
-      "#{base}/#{track}.#{distance}.#{ext}"
+    def colo_tsv_url
+      "#{colo_base}/#{encoded_track}.#{encoded_cell_type}.tsv"
+    end
+
+    def colo_gml_url
+      "#{colo_base}/#{encoded_cell_type}.gml"
+    end
+
+    # Target genes result URLs
+    def target_genes_data_url
+      "#{target_genes_base}/#{encoded_track}.#{@condition[:distance]}.json"
+    end
+
+    def target_genes_tsv_url
+      "#{target_genes_base}/#{encoded_track}.#{@condition[:distance]}.tsv"
     end
 
     private
+
+    def encoded_track
+      URI.encode_www_form_component(@condition[:track])
+    end
+
+    def encoded_cell_type
+      URI.encode_www_form_component(@condition[:cell_type].gsub(' ', '_'))
+    end
+
+    def colo_base
+      "#{ARCHIVE_BASE}/#{@genome}/colo"
+    end
+
+    def target_genes_base
+      "#{ARCHIVE_BASE}/#{@genome}/target"
+    end
 
     def bed_url
       filename = ChipAtlas::Bedfile.get_filename(@condition)

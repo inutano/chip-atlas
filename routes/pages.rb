@@ -5,19 +5,6 @@ module ChipAtlas
     module Pages
       def self.registered(app)
         app.helpers do
-          def check_remote_result(url)
-            halt 404 unless url&.start_with?('https://chip-atlas.dbcls.jp/')
-            uri = URI.parse(url)
-            http = Net::HTTP.new(uri.host, uri.port)
-            http.use_ssl = true
-            http.open_timeout = 5
-            http.read_timeout = 10
-            response = http.request_head(uri.path)
-            response.code == '200' ? redirect(url) : (halt 404)
-          rescue SocketError, Timeout::Error, Errno::ECONNREFUSED, Net::HTTPError
-            halt 404
-          end
-
           def load_analysis_settings
             @index_all_genome = ChipAtlas::Experiment.cached_index_all_genome
             @list_of_genome   = ChipAtlas::Experiment.list_of_genome
@@ -54,7 +41,9 @@ module ChipAtlas
         end
 
         app.get '/colo_result' do
-          check_remote_result(params[:base])
+          @data_url = params[:data_url]
+          halt 400 unless @data_url&.start_with?('https://chip-atlas.dbcls.jp/')
+          erb :colo_result
         end
 
         app.get '/target_genes' do
@@ -64,7 +53,9 @@ module ChipAtlas
         end
 
         app.get '/target_genes_result' do
-          check_remote_result(params[:base])
+          @data_url = params[:data_url]
+          halt 400 unless @data_url&.start_with?('https://chip-atlas.dbcls.jp/')
+          erb :target_genes_result
         end
 
         app.get '/enrichment_analysis' do

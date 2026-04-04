@@ -123,15 +123,20 @@ module ChipAtlas
         end
 
         app.post '/colo' do
-          json = parsed_json
-          url = ChipAtlas::LocationService.new(json).colo_url(params[:type])
-          json_response({ 'url' => url })
+          svc = ChipAtlas::LocationService.new(parsed_json)
+          json_response({
+            data_url: svc.colo_data_url,
+            tsv_url:  svc.colo_tsv_url,
+            gml_url:  svc.colo_gml_url,
+          })
         end
 
         app.post '/target_genes' do
-          json = parsed_json
-          url = ChipAtlas::LocationService.new(json).target_genes_url(params[:type])
-          json_response({ 'url' => url })
+          svc = ChipAtlas::LocationService.new(parsed_json)
+          json_response({
+            data_url: svc.target_genes_data_url,
+            tsv_url:  svc.target_genes_tsv_url,
+          })
         end
 
         app.post '/diff_analysis_estimated_time' do
