@@ -36,7 +36,12 @@ module ChipAtlas
     end
 
     def all_statuses
-      SERVICES.each_key { |s| status(s) }
+      # Always check data_server and wabi (usually up)
+      status(:data_server)
+      status(:wabi)
+      # Only check wes when wabi is down (wes is on-demand backup)
+      wes_checked = !@statuses[:wabi]
+      status(:wes) if wes_checked
 
       features = {
         peak_browser:         @statuses[:data_server] ? 'ok' : 'unavailable',
@@ -51,7 +56,7 @@ module ChipAtlas
         services: {
           data_server: @statuses[:data_server] ? 'ok' : 'down',
           wabi:        @statuses[:wabi] ? 'ok' : 'down',
-          wes:         @statuses[:wes] ? 'ok' : 'down',
+          wes:         wes_checked ? (@statuses[:wes] ? 'ok' : 'down') : 'not_checked',
         },
         features: features,
       }
@@ -80,13 +85,9 @@ module ChipAtlas
     end
 
     def enrichment_feature_status
-      if @statuses[:wabi]
-        'ok'
-      elsif @statuses[:wes]
-        'ok (backup)'
-      else
-        'unavailable'
-      end
+      return 'ok' if @statuses[:wabi]
+      # WABI is down — check WES on demand
+      status(:wes) ? 'ok (backup)' : 'unavailable'
     end
 
     private_class_method :check, :enrichment_feature_status
