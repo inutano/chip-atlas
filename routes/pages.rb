@@ -23,6 +23,7 @@ module ChipAtlas
         end
 
         app.get '/view' do
+          halt 400, json_response({ error: 'id parameter required' }) unless params[:id]
           @expid = params[:id].upcase
           if @expid.start_with?('GSM')
             srx = ChipAtlas::ExperimentSearch.gsm_to_srx(@expid)
