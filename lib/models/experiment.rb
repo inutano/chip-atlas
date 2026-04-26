@@ -184,12 +184,10 @@ module ChipAtlas
     end
 
     def get_subclass(genome, track_class, cell_type_class, subclass_type)
-      ag_eval = track_class == 'All antigens' && subclass_type == 'ag'
-      cl_eval = cell_type_class == 'All cell types' && subclass_type == 'cl'
-      return {} if ag_eval || cl_eval
+      return {} if cell_type_class == 'All cell types' && subclass_type == 'cl'
 
       subset = dataset.where(genome: genome)
-      subset = subset.where(track_class: track_class) unless track_class == 'All antigens'
+      subset = subset.where(track_class: track_class) if track_class
       subset = subset.where(cell_type_class: cell_type_class) unless cell_type_class == 'All cell types'
 
       col = subclass_type == 'ag' ? :track_subclass : :cell_type_subclass

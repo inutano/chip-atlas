@@ -73,6 +73,9 @@ module ChipAtlas
           json_response(ChipAtlas::Experiment.cell_type(params[:genome], params[:track_class], params[:cell_type_class]))
         end
 
+        # Legacy endpoint — kept for backward compatibility; new frontend uses
+        # /api/track_subclasses and /api/cell_type_subclasses instead.
+        # No parameter validation; callers are expected to supply valid values.
         app.get '/api/subclasses' do
           json_response(
             ChipAtlas::Experiment.get_subclass(
