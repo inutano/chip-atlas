@@ -1,0 +1,12 @@
+.git
+.github
+.claude
+database.sqlite
+test/
+docs/
+tmp/
+log/
+*.md
+public/ExperimentList.json
+public/ExperimentList_adv.json
+script/
