@@ -11,17 +11,6 @@ module ChipAtlas
 
     module_function
 
-    def endpoint_available?
-      now = Time.now
-      if @checked_at && (now - @checked_at) < 60
-        return @available
-      end
-
-      @available = check_endpoint
-      @checked_at = now
-      @available
-    end
-
     def submit_job(params)
       uri = URI.parse("#{ENDPOINT}/runs")
       http = Net::HTTP.new(uri.host, uri.port)
@@ -88,20 +77,5 @@ module ChipAtlas
       nil
     end
 
-    def check_endpoint
-      Timeout.timeout(3) do
-        uri = URI.parse("#{ENDPOINT}/service-info")
-        http = Net::HTTP.new(uri.host, uri.port)
-        http.use_ssl = true
-        http.open_timeout = 3
-        http.read_timeout = 3
-        response = http.get(uri.path)
-        response.code == '200'
-      end
-    rescue Timeout::Error, SocketError, Errno::ECONNREFUSED, Net::HTTPError
-      false
-    end
-
-    private_class_method :check_endpoint
   end
 end
