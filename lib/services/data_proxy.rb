@@ -5,7 +5,7 @@ require 'uri'
 require 'json'
 
 module ChipAtlas
-  # Fetches JSON data from the chip-atlas.dbcls.jp data server.
+  # Fetches data from the chip-atlas.dbcls.jp data server.
   # Used by the API to proxy colo and target_genes result data
   # so agents and the frontend don't need direct CORS access.
   module DataProxy
@@ -13,7 +13,7 @@ module ChipAtlas
 
     module_function
 
-    def fetch_json(url)
+    def fetch(url)
       uri = URI.parse(url)
       return nil unless uri.host == DATA_HOST
 

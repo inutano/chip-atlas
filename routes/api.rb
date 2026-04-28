@@ -161,7 +161,7 @@ module ChipAtlas
         app.get '/api/colo' do
           halt 400, json_response({ error: 'genome, track, and cell_type required' }) unless params[:genome] && params[:track] && params[:cell_type]
           svc = ChipAtlas::LocationService.new(condition_from_params)
-          body = ChipAtlas::DataProxy.fetch_json(svc.colo_data_url)
+          body = ChipAtlas::DataProxy.fetch(svc.colo_data_url)
           halt 404, json_response({ error: 'Colocalization data not found' }) unless body
           log_activity('colo', { genome: params[:genome], track: params[:track], cell_type: params[:cell_type] })
           content_type 'application/json'
@@ -177,7 +177,7 @@ module ChipAtlas
                 when 'gml' then svc.colo_gml_url
                 else halt 400, json_response({ error: "Unknown format: #{params[:format]}. Available: tsv, gml" })
                 end
-          body = ChipAtlas::DataProxy.fetch_json(url)
+          body = ChipAtlas::DataProxy.fetch(url)
           halt 404, 'File not found' unless body
           content_type params[:format] == 'tsv' ? 'text/tab-separated-values' : 'application/xml'
           attachment "#{params[:track]}.#{params[:cell_type]}.#{params[:format]}"
@@ -188,7 +188,7 @@ module ChipAtlas
         app.get '/api/target_genes' do
           halt 400, json_response({ error: 'genome, track, and distance required' }) unless params[:genome] && params[:track] && params[:distance]
           svc = ChipAtlas::LocationService.new(condition_from_params)
-          body = ChipAtlas::DataProxy.fetch_json(svc.target_genes_data_url)
+          body = ChipAtlas::DataProxy.fetch(svc.target_genes_data_url)
           halt 404, json_response({ error: 'Target genes data not found' }) unless body
           log_activity('target_genes', { genome: params[:genome], track: params[:track], distance: params[:distance] })
           content_type 'application/json'
@@ -203,7 +203,7 @@ module ChipAtlas
                 when 'tsv' then svc.target_genes_tsv_url
                 else halt 400, json_response({ error: "Unknown format: #{params[:format]}. Available: tsv" })
                 end
-          body = ChipAtlas::DataProxy.fetch_json(url)
+          body = ChipAtlas::DataProxy.fetch(url)
           halt 404, 'File not found' unless body
           content_type 'text/tab-separated-values'
           attachment "#{params[:track]}.#{params[:distance]}.tsv"
