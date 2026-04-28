@@ -119,6 +119,7 @@ module ChipAtlas
 
         app.get '/api/colo_index' do
           halt 400, json_response({ error: 'genome parameter required' }) unless params[:genome]
+          cache_control :public, max_age: 3600
           json_response(ChipAtlas::Analysis.colo_result_by_genome(params[:genome]))
         end
 
