@@ -124,11 +124,11 @@ GenomeTabs.init(container: HTMLElement, genomes: Record<string, string>)
 
 ### 2. FacetFilter (~120 lines TS)
 
-Cascading dropdowns: genome → track_class → cell_type_class → qval. Each selection triggers an API call that populates the next dropdown with counts.
+Cascading dropdowns: genome → track_class → cell_type_class → qval. Each selection triggers an API call that populates the next dropdown with counts. **Bidirectional count updates** — selecting a cell type re-fetches track_class counts filtered by that cell type, and vice versa. This matches the current enrichment analysis behavior.
 
 **Used on:** Peak Browser, Enrichment Analysis, Diff Analysis
 
-**API calls:** `/api/track_classes`, `/api/cell_type_classes`, `/api/track_subclasses`, `/api/cell_type_subclasses`, `/api/qval_range`
+**API calls:** `/api/track_classes?genome=X&cell_type_class=Y` (counts filtered by cell type), `/api/cell_type_classes`, `/api/track_subclasses`, `/api/cell_type_subclasses`, `/api/qval_range`
 
 **Interface:**
 ```typescript
@@ -138,7 +138,7 @@ FacetFilter.getCondition() → { genome, track_class, track_subclass, cell_type_
 
 ### 3. Autocomplete (~80 lines TS)
 
-Text input with dropdown suggestions. Filters items as user types. Keyboard navigation (arrow keys, enter, escape). Uses Bootstrap 5 dropdown markup.
+Text input with dropdown suggestions. **Substring matching** — typing "562" finds "K-562", typing "me3" finds "H3K4me3". Improvement over the old Typeahead which only matched from word boundaries. Keyboard navigation (arrow keys, enter, escape). Uses Bootstrap 5 dropdown markup.
 
 **Used on:** Peak Browser, Target Genes, Colo, Enrichment Analysis
 
