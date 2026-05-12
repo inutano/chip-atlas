@@ -4,9 +4,9 @@
 > with fresh materials while preserving its original form, spirit, and purpose.
 > The shrine at Ise has been rebuilt every 20 years for over a millennium.*
 
-**Date:** 2026-04-03 (updated 2026-04-04)
+**Date:** 2026-04-03 (updated 2026-05-01)
 **Author:** Tazro Ohta + Claude
-**Status:** Decisions finalized, ready to build
+**Status:** Backend complete, frontend pending
 
 ---
 
@@ -18,7 +18,7 @@
 | 2 | SPA vs Server-rendered | **Server-rendered HTML + TypeScript** - Ruby for templates, TS for interactivity |
 | 3 | DataTables / big JSON | **Drop both** - server-side paginated search via SQLite FTS5, no more 44MB JSON in browser |
 | 4 | SRA metadata caching | **Yes** - cache in SQLite, source-agnostic (NCBI/EBI/SPARQL), 30-day TTL |
-| 5 | Column naming | **snake_case internally, camelCase in API responses** - clean up all legacy names |
+| 5 | Column naming | **snake_case everywhere** - internal code, database columns, and API responses. No camelCase conversion layer. |
 | 6 | Branch / deploy strategy | **New branch (`sengu`)** in same repo, deploy to **new AWS instance** all at once |
 | 7 | Scope changes | **Add** CUT&Tag, CUT&RUN, Arabidopsis. **Drop** hg19, mm9, dm3, ce10. **Postpone** KD/KO/disease filtering (depends on bsllmner-mk2). **No chatbot** - invest in agent-friendliness instead |
 
@@ -99,12 +99,12 @@ sits as a smiley face on line 1 of `app.rb`.
 
 ### 2.2 Backend (refinement, not revolution)
 
-**Current state:**
-- Sinatra + ActiveRecord + SQLite - exactly what we want
-- 506-line `app.rb` doing routing, request parsing, and response formatting
-- 9 model classes in `lib/pj/` (~1,098 lines)
+**Current state (after renewal):**
+- Sinatra + Sequel + SQLite
+- ~63-line `app.rb` (routing separated into route modules in `routes/`)
+- 6 modules in `lib/models/` + 7 services in `lib/services/`
 - Data cached in Sinatra `settings` at boot
-- 18 gem dependencies
+- 7 production gems
 
 **Problems:**
 - `app.rb` mixes routing with business logic
@@ -116,13 +116,14 @@ sits as a smiley face on line 1 of `app.rb`.
 - `net-ping` gem just for a simple HTTP check
 - NCBI SRA fetch happens synchronously on page load (blocks rendering)
 
-**Renewal:**
-- Keep Sinatra as the HTTP framework
-- Replace ActiveRecord with Sequel (lighter, better SQLite support, still has migrations)
-- Organize routes into separate files by feature
-- Move business logic into service objects
-- Use `Net::HTTP` or `httpx` gem consistently for all HTTP calls
-- Reduce gem count from 18 to ~12
+**Renewal (done):**
+- Kept Sinatra as the HTTP framework
+- Replaced ActiveRecord with Sequel (lighter, better SQLite support, still has migrations)
+- Organized routes into separate files by feature (`routes/api.rb`, `routes/pages.rb`, `routes/jobs.rb`, `routes/health.rb`)
+- Moved business logic into service objects (`lib/services/`)
+- Using `Net::HTTP` consistently for all HTTP calls
+- Reduced gem count from 18 to 7 production gems
+- Switched from Unicorn to Puma
 
 ### 2.3 Database (clean schema, same engine)
 
@@ -133,16 +134,18 @@ sits as a smiley face on line 1 of `app.rb`.
 - `experiments` table has no genome index
 - `number_of_experiments` counts by loading ALL records into Ruby
 
-**Renewal:**
-- Keep SQLite (the right choice then, the right choice now)
-- Clean schema with snake_case columns (ag_class, cl_sub_class)
-- Add composite indexes for common query patterns
-- Use SQL COUNT/GROUP BY instead of Ruby-side aggregation
-- Keep FTS5 for full-text search
-- Add a `genome` index on experiments
-- Consider WAL mode for better concurrent read performance
+**Renewal (done):**
+- Kept SQLite (the right choice then, the right choice now)
+- Clean schema with snake_case columns: `track_class`, `track_subclass`, `cell_type_class`, `cell_type_subclass` (not `ag_class`/`cl_class`); `experiment_id` (not `exp_id`); `track` in analyses (not `antigen`)
+- Composite indexes implemented for common query patterns (e.g., `[:genome, :track_class, :cell_type_class]`, `idx_bedfiles_lookup`)
+- SQL COUNT/GROUP BY instead of Ruby-side aggregation
+- FTS5 virtual table (`experiments_fts`) for full-text search
+- `genome` index on experiments
+- WAL mode enabled for better concurrent read performance
 
 ### 2.4 Templates (HAML to ERB)
+
+**Decision made, migration in progress.** New templates are written in ERB; legacy HAML templates are being converted as pages are rebuilt.
 
 **Why ERB over HAML:**
 - ERB is Ruby stdlib - zero dependencies, zero risk of abandonment
@@ -179,20 +182,21 @@ sits as a smiley face on line 1 of `app.rb`.
 │  Sinatra App        │                               │
 │  ┌──────────────────▼────────────────────────────┐  │
 │  │  Routes (organized by feature)                │  │
-│  │  /api/v1/*  → JSON API (agents, frontend)     │  │
+│  │  /api/*     → JSON API (agents, frontend)     │  │
 │  │  /*         → HTML pages (ERB templates)      │  │
 │  └──────────────────┬────────────────────────────┘  │
 │  ┌──────────────────▼────────────────────────────┐  │
 │  │  Services                                     │  │
-│  │  - ExperimentService (queries, faceted search)│  │
 │  │  - LocationService (URL generation)           │  │
 │  │  - WabiService (DDBJ job submission)          │  │
 │  │  - SraService (NCBI metadata fetch)           │  │
+│  │  - SapporoService, ComputeRouter, DataProxy   │  │
+│  │  - ServiceMonitor                             │  │
 │  └──────────────────┬────────────────────────────┘  │
 │  ┌──────────────────▼────────────────────────────┐  │
 │  │  Models (Sequel)                              │  │
 │  │  - Experiment, Bedfile, Bedsize               │  │
-│  │  - Analysis, Run                              │  │
+│  │  - Analysis, SraCache                         │  │
 │  │  - ExperimentSearch (FTS5)                    │  │
 │  └──────────────────┬────────────────────────────┘  │
 │                     │                               │
@@ -211,30 +215,38 @@ sits as a smiley face on line 1 of `app.rb`.
   └───────────────┘          └────────────────┘
 ```
 
-### 3.1 API Versioning Strategy
+### 3.1 API Path Strategy
 
-Introduce `/api/v1/` prefix for all JSON endpoints. Keep the old paths as aliases
-for backward compatibility during transition:
+All JSON endpoints live under flat `/api/` paths with no versioning prefix:
 
 ```
-GET /api/v1/genomes              ← new canonical path
-GET /data/list_of_genome.json    ← alias (deprecated, keep forever for agents)
+GET /api/genomes
+GET /api/search
+GET /api/track_classes
+GET /api/cell_type_classes
+GET /api/track_subclasses
+GET /api/cell_type_subclasses
+GET /api/experiment
+GET /api/stats
+...
 ```
 
-This lets us evolve the API without breaking existing integrations.
+No `/api/v1/` prefix was introduced. No `/data/` aliases were kept. The old
+`/data/list_of_genome.json`-style paths are gone; agents should use `/api/genomes` etc.
 
 ### 3.2 File Structure
 
 ```
 chip-atlas/
-├── app.rb                    # Entry point: require routes, configure app
+├── app.rb                    # Entry point: require routes, configure app (~63 lines)
 ├── config.ru                 # Rack entry point
 ├── Gemfile                   # Ruby dependencies
 ├── Rakefile                  # Metadata loading, DB tasks
 ├── database.sqlite           # SQLite database
+├── .dockerignore
 │
 ├── config/
-│   ├── database.yml          # DB config
+│   ├── puma.rb               # Puma server config
 │   └── nginx/                # NGINX config
 │
 ├── db/
@@ -242,24 +254,33 @@ chip-atlas/
 │   └── schema.sql            # Reference schema
 │
 ├── lib/
+│   ├── chip_atlas.rb         # Namespace and shared setup
+│   ├── db.rb                 # Database connection
 │   ├── models/               # Sequel model classes
 │   │   ├── experiment.rb
 │   │   ├── bedfile.rb
 │   │   ├── bedsize.rb
 │   │   ├── analysis.rb
-│   │   ├── run.rb
+│   │   ├── sra_cache.rb
 │   │   └── experiment_search.rb
 │   ├── services/             # Business logic
 │   │   ├── location_service.rb
 │   │   ├── wabi_service.rb
-│   │   └── sra_service.rb
+│   │   ├── sra_service.rb
+│   │   ├── sapporo_service.rb
+│   │   ├── compute_router.rb
+│   │   ├── data_proxy.rb
+│   │   └── service_monitor.rb
+│   ├── middleware/
+│   │   └── json_body_parser.rb
 │   └── tasks/                # Rake tasks
-│       └── metadata.rake
+│       ├── metadata.rake
+│       └── clean_old_genomes.rake
 │
 ├── routes/                   # Sinatra route modules
 │   ├── api.rb                # JSON API endpoints
 │   ├── pages.rb              # HTML page routes
-│   ├── wabi.rb               # WABI proxy routes
+│   ├── jobs.rb               # Job submission routes (Sapporo/WABI)
 │   └── health.rb             # Health check
 │
 ├── views/                    # ERB templates
@@ -277,7 +298,7 @@ chip-atlas/
 │   ├── publications.erb
 │   └── ...
 │
-├── frontend/                 # TypeScript source
+├── frontend/                 # TypeScript source (planned)
 │   ├── tsconfig.json
 │   ├── api/                  # Typed API client
 │   │   └── client.ts         # fetch wrappers for all endpoints
@@ -318,38 +339,49 @@ chip-atlas/
 ├── script/                   # Ops scripts (keep existing)
 ├── Dockerfile
 ├── docker-compose.yml
-└── esbuild.config.mjs        # TypeScript build config
+└── esbuild.config.mjs        # TypeScript build config (planned)
 ```
 
 ---
 
 ## 4. Technology Decisions
 
-### 4.1 Gems (target: ~12)
+### 4.1 Gems (actual: 7 production, 3 dev)
+
+**Production gems:**
 
 | Gem | Purpose | Replaces |
 |-----|---------|----------|
-| `sinatra` | Web framework | (same) |
-| `rackup` | Rack runner | (same) |
-| `rack-protection` | Security middleware | (same) |
+| `sinatra` | Web framework (includes rack, rack-protection, tilt) | (same) |
+| `puma` | Production server | `unicorn` |
 | `sequel` | Database ORM | `activerecord`, `sinatra-activerecord` |
 | `sqlite3` | SQLite adapter | (same) |
-| `erubi` | ERB template engine | `haml` |
-| `redcarpet` | Markdown rendering | (same) |
-| `nokogiri` | XML parsing (SRA) | (same) |
-| `unicorn` | Production server | (same) |
+| `kramdown` | Markdown rendering | `redcarpet` |
+| `rexml` | XML parsing | `nokogiri` |
 | `rake` | Task runner | (same) |
-| `minitest` | Testing | (new) |
-| `rack-test` | HTTP testing | (new) |
+
+**Dev/test gems:**
+
+| Gem | Purpose |
+|-----|---------|
+| `webrick` | Dev server |
+| `minitest` | Testing |
+| `rack-test` | HTTP testing |
 
 **Removed gems:**
-- `haml` → replaced by ERB (stdlib + erubi)
+- `haml` → replaced by ERB (Ruby stdlib, no gem needed)
 - `sass-embedded` → replaced by plain CSS
 - `activerecord` → replaced by Sequel
 - `sinatra-activerecord` → no longer needed
-- `webrick` → only needed for development, optional
-- `rubyzip` → evaluate if still needed
+- `webrick` → moved to dev-only dependency
+- `rubyzip` → removed
 - `net-ping` → replaced by simple `Net::HTTP` check
+- `nokogiri` → replaced by `rexml` (stdlib-adjacent, lighter)
+- `redcarpet` → replaced by `kramdown` (pure Ruby, no C extension)
+- `unicorn` → replaced by `puma`
+- `rackup` → not needed (Puma includes its own Rack handler)
+- `rack-protection` → included in `sinatra` gem
+- `erubi` → using ERB from Ruby stdlib instead
 
 ### 4.2 Frontend Dependencies
 
@@ -409,52 +441,54 @@ Design principles:
 
 ## 5. Phase Plan
 
-### Phase 0: Preparation (1-2 days)
-- [ ] Set up the development branch (`sengu`)
+### Phase 0: Preparation -- PARTIAL (backend done 2026-04-04, frontend setup pending)
+- [x] Set up the development branch (`sengu`)
 - [ ] Set up esbuild with TypeScript compilation
 - [ ] Create the `frontend/` directory structure
 - [ ] Write the typed API client (`frontend/api/client.ts`)
 - [ ] Write `style.css` with the base design system
-- [ ] Set up Sequel with the existing SQLite database
-- [ ] Write migration to create clean schema (snake_case columns)
-- [ ] Add test infrastructure (minitest + rack-test)
-- [ ] Write smoke tests that cover all existing endpoints
+- [x] Set up Sequel with the existing SQLite database
+- [x] Write migration to create clean schema (snake_case columns)
+- [x] Add test infrastructure (minitest + rack-test)
+- [x] Write smoke tests that cover all existing endpoints
 
-### Phase 1: Backend Rebuild (3-5 days)
-- [ ] Port models from ActiveRecord to Sequel
-  - [ ] Experiment model (the largest, ~255 lines)
-  - [ ] Bedfile model
-  - [ ] Bedsize model
-  - [ ] Analysis model
-  - [ ] Run model
-  - [ ] ExperimentSearch (FTS5)
-- [ ] Port services
-  - [ ] LocationService (URL generation)
-  - [ ] WabiService (DDBJ job submission/polling)
-  - [ ] SraService (NCBI metadata - consider async/caching)
-- [ ] Port routes (organized by feature)
-  - [ ] API routes (JSON endpoints)
-  - [ ] Page routes (HTML rendering)
-  - [ ] WABI proxy routes
-  - [ ] Health check
-- [ ] Port metadata Rake tasks
-- [ ] Port configure block (startup data loading)
-- [ ] Run smoke tests against both old and new apps
+### Phase 1: Backend Rebuild -- DONE (completed 2026-04-05, reviews through 2026-04-30)
+- [x] Port models from ActiveRecord to Sequel
+  - [x] Experiment model (the largest, ~255 lines)
+  - [x] Bedfile model
+  - [x] Bedsize model
+  - [x] Analysis model
+  - [x] ExperimentSearch (FTS5)
+- [x] Port services
+  - [x] LocationService (URL generation)
+  - [x] ComputeRouter (multi-backend job routing, replaces WabiService)
+  - [x] SapporoService (WES-based job submission)
+  - [x] SraService (NCBI metadata with caching)
+  - [x] DataProxy (proxied data fetching from chip-atlas.dbcls.jp)
+  - [x] ServiceMonitor (health checks for external backends)
+- [x] Port routes (organized by feature)
+  - [x] API routes (`routes/api.rb` -- JSON endpoints)
+  - [x] Page routes (`routes/pages.rb` -- HTML rendering)
+  - [x] Job routes (`routes/jobs.rb` -- compute job submission/polling)
+  - [x] Health routes (`routes/health.rb` -- health check + service status)
+- [x] Port metadata Rake tasks
+- [x] Port configure block (startup data loading)
+- [x] Run smoke tests against both old and new apps
 
-### Phase 2: Frontend - Shared Components (3-5 days)
+### Phase 2: Frontend - Shared Components (3-5 days) -- TODO
 - [ ] Autocomplete component (replaces Typeahead + Flexselect)
 - [ ] Genome tab switcher component
 - [ ] Cascading facet filter component (the core UI pattern)
-- [ ] Job tracker component (WABI status polling)
+- [ ] Job tracker component (compute job status polling)
 - [ ] File upload handler
 - [ ] Layout template (ERB) with navigation and footer
 
-### Phase 3: Frontend - Page by Page (5-8 days)
+### Phase 3: Frontend - Page by Page (5-8 days) -- TODO
 Port each page, keeping the same structure and workflow:
 - [ ] Homepage (about) - simplest, good starting point
 - [ ] Peak Browser - most complex filter UI, the flagship feature
 - [ ] Experiment View - metadata display + IGV integration
-- [ ] Search - DataTables integration
+- [ ] Search - server-side paginated search via FTS5
 - [ ] Target Genes - simpler filter + typeahead
 - [ ] Colocalization - similar to Target Genes
 - [ ] Enrichment Analysis - complex form with file upload
@@ -464,7 +498,7 @@ Port each page, keeping the same structure and workflow:
 - [ ] Publications - markdown rendering
 - [ ] Agents/Demo - markdown rendering
 
-### Phase 4: Polish and Verify (2-3 days)
+### Phase 4: Polish and Verify (2-3 days) -- TODO
 - [ ] Cross-browser testing (Chrome, Firefox, Safari, mobile)
 - [ ] Accessibility audit (keyboard navigation, screen reader)
 - [ ] Performance comparison (old vs new, page load, API response)
@@ -474,7 +508,7 @@ Port each page, keeping the same structure and workflow:
 - [ ] Update smoke tests
 - [ ] Docker build verification
 
-### Phase 5: Migration (1-2 days)
+### Phase 5: Migration (1-2 days) -- TODO
 - [ ] Deploy new version alongside old (blue-green or A/B)
 - [ ] Monitor error logs
 - [ ] Switch DNS
@@ -505,10 +539,11 @@ Replace with server-side search via SQLite FTS5 + pagination. The search
 page sends queries to the API and renders results from small JSON responses.
 No CDN dependencies.
 
-### 6.4 CSS Framework: None (confirmed)
+### 6.4 CSS Framework: Bootstrap 5 (confirmed)
 
-Modern CSS (Grid, Flexbox, custom properties, nesting) covers everything.
-No Bootstrap. Inline SVGs replace Font Awesome.
+Bootstrap 5, self-hosted (vendored in public/). Upgrade from current Bootstrap 3.
+No CDN dependencies. Chosen for 15-year track record, built-in accessibility,
+and minimal visual change from the current app. Inline SVGs replace Font Awesome.
 
 ### 6.5 SRA Metadata Caching (confirmed)
 
@@ -518,9 +553,11 @@ can be populated from NCBI E-utilities, EBI API, or RDF triplestore.
 
 ### 6.6 Clean Naming (confirmed)
 
-snake_case for all internal code and database columns. camelCase preserved
-in API JSON responses via a serialization layer. All legacy variable names
-("in silico chip" etc.) cleaned up.
+snake_case everywhere -- database columns, internal Ruby code, AND API JSON
+responses. No camelCase conversion layer, no serialization step. The frontend
+TypeScript and agents use snake_case field names directly (e.g.
+`track_class`, `cell_type_subclass`, `experiment_id`). All legacy variable
+names ("in silico chip", "agClass", etc.) cleaned up.
 
 ### 6.7 Branch and Deploy Strategy (confirmed)
 
@@ -560,95 +597,125 @@ No user data lives in SQLite.
 
 ### 7.2 Column Name Mapping
 
-| Old (camelCase) | New (snake_case) |
-|-----------------|------------------|
-| `agClass` | `ag_class` |
-| `agSubClass` | `ag_sub_class` |
-| `clClass` | `cl_class` |
-| `clSubClass` | `cl_sub_class` |
-| `clSubClassInfo` | `cl_sub_class_info` |
+| Old | New |
+|-----|-----|
+| `agClass` | `track_class` |
+| `agSubClass` | `track_subclass` |
+| `clClass` | `cell_type_class` |
+| `clSubClass` | `cell_type_subclass` |
+| `clSubClassInfo` | `cell_type_subclass_info` |
 | `readInfo` | `read_info` |
 | `additional_attributes` | `attributes` |
-| `expid` | `exp_id` |
+| `expid` | `experiment_id` |
+| `antigen` (in analyses) | `track` |
 
-**API compatibility:** The JSON API continues to return `agClass`, `agSubClass`,
-etc. The serialization layer handles the translation. Internal code uses
-snake_case. External contracts don't change.
+snake_case is used consistently in the database, internal code, and API
+responses. There is no camelCase serialization layer.
 
 ### 7.3 New Schema (Sequel Migration)
 
+From `db/migrations/001_create_schema.rb`:
+
 ```ruby
 Sequel.migration do
-  change do
+  up do
     create_table :experiments do
       primary_key :id
-      String :exp_id, null: false, index: true
-      String :genome, null: false, index: true
-      String :ag_class, index: true
-      String :ag_sub_class, index: true
-      String :cl_class, index: true
-      String :cl_sub_class, index: true
-      String :cl_sub_class_info
+      String :experiment_id, null: false
+      String :genome, null: false
+      String :track_class
+      String :track_subclass
+      String :cell_type_class
+      String :cell_type_subclass
+      String :cell_type_subclass_info
       String :read_info
       String :title
-      String :attributes
+      String :attributes, text: true
       DateTime :created_at
 
-      index [:genome, :ag_class]
-      index [:genome, :ag_class, :cl_class]
+      index :experiment_id
+      index :genome
+      index :track_class
+      index :track_subclass
+      index :cell_type_class
+      index :cell_type_subclass
+      index [:genome, :track_class]
+      index [:genome, :track_class, :cell_type_class]
     end
 
     create_table :bedfiles do
       primary_key :id
       String :filename, null: false
-      String :genome, null: false, index: true
-      String :ag_class, index: true
-      String :ag_sub_class, index: true
-      String :cl_class, index: true
-      String :cl_sub_class, index: true
-      String :qval, index: true
-      String :experiments
+      String :genome, null: false
+      String :track_class
+      String :track_subclass
+      String :cell_type_class
+      String :cell_type_subclass
+      String :qval
+      String :experiments, text: true
       DateTime :created_at
 
-      index [:genome, :ag_class, :ag_sub_class, :cl_class, :cl_sub_class, :qval],
+      index :genome
+      index [:genome, :track_class, :track_subclass, :cell_type_class, :cell_type_subclass, :qval],
             name: :idx_bedfiles_lookup
     end
 
     create_table :bedsizes do
       primary_key :id
       String :genome, null: false
-      String :ag_class
-      String :cl_class
+      String :track_class
+      String :cell_type_class
       String :qval
       Bignum :number_of_lines
       DateTime :created_at
 
-      index [:genome, :ag_class, :cl_class, :qval], name: :idx_bedsizes_lookup
+      index [:genome, :track_class, :cell_type_class, :qval], name: :idx_bedsizes_lookup
     end
 
     create_table :analyses do
       primary_key :id
-      String :antigen, index: true
-      String :cell_list
-      TrueClass :target_genes, index: true
-      String :genome, null: false, index: true
+      String :track
+      String :cell_list, text: true
+      TrueClass :target_genes
+      String :genome, null: false
       DateTime :created_at
-    end
 
-    create_table :runs do
-      primary_key :id
-      String :run_id, null: false, index: true
-      String :exp_id, null: false, index: true
-      DateTime :created_at
+      index :track
+      index :genome
+      index :target_genes
     end
 
     create_table :sra_cache do
       primary_key :id
-      String :exp_id, null: false, unique: true
+      String :experiment_id, null: false, unique: true
       String :metadata_json, text: true
       DateTime :fetched_at
       DateTime :created_at
     end
+
+    run <<-SQL
+      CREATE VIRTUAL TABLE IF NOT EXISTS experiments_fts USING fts5(
+        experiment_id,
+        sra_id,
+        geo_id,
+        genome,
+        track_class,
+        track_subclass,
+        cell_type_class,
+        cell_type_subclass,
+        title,
+        attributes
+      );
+    SQL
+  end
+
+  down do
+    run "DROP TABLE IF EXISTS experiments_fts"
+    drop_table :sra_cache
+    drop_table :analyses
+    drop_table :bedsizes
+    drop_table :bedfiles
+    drop_table :experiments
   end
 end
 ```
@@ -658,7 +725,8 @@ end
 ## 8. TypeScript API Client Design
 
 The API client is the bridge between frontend and backend. Type it once,
-use it everywhere:
+use it everywhere. All field names use snake_case to match the API responses
+directly -- no camelCase conversion needed.
 
 ```typescript
 // frontend/api/client.ts
@@ -672,15 +740,16 @@ export interface ClassificationItem {
 }
 
 export interface ExperimentMetadata {
-  expid: string;
+  experiment_id: string;
   genome: string;
-  agClass: string;
-  agSubClass: string;
-  clClass: string;
-  clSubClass: string;
+  track_class: string;
+  track_subclass: string;
+  cell_type_class: string;
+  cell_type_subclass: string;
+  cell_type_subclass_info: string;
   title: string;
   attributes: string;
-  readInfo: string;
+  read_info: string;
 }
 
 export interface SearchResult {
@@ -689,63 +758,209 @@ export interface SearchResult {
   experiments: ExperimentMetadata[];
 }
 
-// Classification endpoints
-export async function listGenomes(): Promise<string[]> {
-  return fetchJSON('/data/list_of_genome.json');
+export interface JobSubmission {
+  backend: string;
+  job_id: string;
 }
 
-export async function listExperimentTypes(
-  genome: string, clClass: string
+export interface JobStatus {
+  backend: string;
+  job_id: string;
+  status: string;
+  retry: boolean;
+}
+
+export interface HealthCheck {
+  status: string;
+  checks: Record<string, string>;
+}
+
+// === Classification endpoints ===
+
+export async function listGenomes(): Promise<Record<string, string>> {
+  return fetchJSON('/api/genomes');
+}
+
+export async function getStats(): Promise<Record<string, unknown>> {
+  return fetchJSON('/api/stats');
+}
+
+export async function listTrackClasses(
+  genome?: string, cell_type_class?: string
 ): Promise<ClassificationItem[]> {
-  return fetchJSON(`/data/experiment_types?genome=${enc(genome)}&clClass=${enc(clClass)}`);
+  const params = new URLSearchParams();
+  if (genome) params.set('genome', genome);
+  if (cell_type_class) params.set('cell_type_class', cell_type_class);
+  return fetchJSON(`/api/track_classes?${params}`);
 }
 
-export async function listSampleTypes(
-  genome: string, agClass: string
+export async function listCellTypeClasses(
+  genome: string, track_class: string
 ): Promise<ClassificationItem[]> {
-  return fetchJSON(`/data/sample_types?genome=${enc(genome)}&agClass=${enc(agClass)}`);
+  return fetchJSON(
+    `/api/cell_type_classes?genome=${enc(genome)}&track_class=${enc(track_class)}`
+  );
 }
 
-export async function listAntigens(
-  genome: string, agClass: string, clClass?: string
+export async function listTrackSubclasses(
+  genome: string, track_class: string, cell_type_class?: string
 ): Promise<ClassificationItem[]> {
-  const params = `genome=${enc(genome)}&agClass=${enc(agClass)}&clClass=${enc(clClass ?? '')}`;
-  return fetchJSON(`/data/chip_antigen?${params}`);
+  const params = `genome=${enc(genome)}&track_class=${enc(track_class)}`;
+  const extra = cell_type_class ? `&cell_type_class=${enc(cell_type_class)}` : '';
+  return fetchJSON(`/api/track_subclasses?${params}${extra}`);
 }
 
-export async function listCellTypes(
-  genome: string, agClass: string, clClass?: string
+export async function listCellTypeSubclasses(
+  genome: string, track_class: string, cell_type_class?: string
 ): Promise<ClassificationItem[]> {
-  const params = `genome=${enc(genome)}&agClass=${enc(agClass)}&clClass=${enc(clClass ?? '')}`;
-  return fetchJSON(`/data/cell_type?${params}`);
+  const params = `genome=${enc(genome)}&track_class=${enc(track_class)}`;
+  const extra = cell_type_class ? `&cell_type_class=${enc(cell_type_class)}` : '';
+  return fetchJSON(`/api/cell_type_subclasses?${params}${extra}`);
 }
 
-// Experiment endpoints
-export async function getExperiment(expid: string): Promise<ExperimentMetadata[]> {
-  return fetchJSON(`/data/exp_metadata.json?expid=${enc(expid)}`);
+// === Data endpoints ===
+
+export async function getGenomeIndex(): Promise<Record<string, unknown>> {
+  return fetchJSON('/api/genome_index');
+}
+
+export async function getExperiment(experiment_id: string): Promise<ExperimentMetadata> {
+  return fetchJSON(`/api/experiment?experiment_id=${enc(experiment_id)}`);
 }
 
 export async function searchExperiments(
-  query: string, genome?: string, limit?: number
+  query: string, genome?: string, limit?: number, offset?: number
 ): Promise<SearchResult> {
   const params = new URLSearchParams({ q: query });
   if (genome) params.set('genome', genome);
   if (limit) params.set('limit', String(limit));
-  return fetchJSON(`/data/search?${params}`);
+  if (offset) params.set('offset', String(offset));
+  return fetchJSON(`/api/search?${params}`);
 }
 
-// Action endpoints
-export async function getBrowseUrl(condition: Record<string, string>): Promise<string> {
-  const res = await postJSON('/browse', { condition });
+export async function getQvalRange(): Promise<string[]> {
+  return fetchJSON('/api/qval_range');
+}
+
+export async function getBedSizes(): Promise<Record<string, unknown>> {
+  return fetchJSON('/api/bed_sizes');
+}
+
+// === Analysis index endpoints ===
+
+export async function getColoIndex(genome: string): Promise<unknown[]> {
+  return fetchJSON(`/api/colo_index?genome=${enc(genome)}`);
+}
+
+export async function getTargetGenesIndex(): Promise<unknown[]> {
+  return fetchJSON('/api/target_genes_index');
+}
+
+export async function getTargetGenesDistances(): Promise<string[]> {
+  return fetchJSON('/api/target_genes_distances');
+}
+
+// === URL generation endpoints ===
+
+export async function getIgvUrl(condition: Record<string, string>): Promise<string> {
+  const params = new URLSearchParams(condition);
+  const res = await fetchJSON<{ url: string }>(`/api/igv_url?${params}`);
+  return res.url;
+}
+
+export async function getIgvUrlPost(condition: Record<string, string>): Promise<string> {
+  const res = await postJSON<{ url: string }>('/api/igv_url', { condition });
   return res.url;
 }
 
 export async function getDownloadUrl(condition: Record<string, string>): Promise<string> {
-  const res = await postJSON('/download', { condition });
+  const params = new URLSearchParams(condition);
+  const res = await fetchJSON<{ url: string }>(`/api/download_url?${params}`);
   return res.url;
 }
 
-// Helpers
+export async function getDownloadUrlPost(condition: Record<string, string>): Promise<string> {
+  const res = await postJSON<{ url: string }>('/api/download_url', { condition });
+  return res.url;
+}
+
+// === Data proxy endpoints ===
+
+export async function getColoData(
+  genome: string, track: string, cell_type: string
+): Promise<unknown> {
+  return fetchJSON(
+    `/api/colo?genome=${enc(genome)}&track=${enc(track)}&cell_type=${enc(cell_type)}`
+  );
+}
+
+export async function getTargetGenesData(
+  genome: string, track: string, distance: string
+): Promise<unknown> {
+  return fetchJSON(
+    `/api/target_genes?genome=${enc(genome)}&track=${enc(track)}&distance=${enc(distance)}`
+  );
+}
+
+export function coloDownloadUrl(
+  genome: string, track: string, cell_type: string, format: 'tsv' | 'gml'
+): string {
+  return `/api/colo/download?genome=${enc(genome)}&track=${enc(track)}&cell_type=${enc(cell_type)}&format=${format}`;
+}
+
+export function targetGenesDownloadUrl(
+  genome: string, track: string, distance: string, format: 'tsv'
+): string {
+  return `/api/target_genes/download?genome=${enc(genome)}&track=${enc(track)}&distance=${enc(distance)}&format=${format}`;
+}
+
+// === Job endpoints ===
+
+export async function getAvailableBackend(type?: string): Promise<Record<string, unknown>> {
+  const params = type ? `?type=${enc(type)}` : '';
+  return fetchJSON(`/jobs/available${params}`);
+}
+
+export async function submitJob(
+  type: string, jobParams: Record<string, unknown>
+): Promise<JobSubmission> {
+  return postJSON('/jobs/submit', { type, params: jobParams });
+}
+
+export async function getJobStatus(id: string, backend: string): Promise<JobStatus> {
+  return fetchJSON(`/jobs/${enc(id)}/status?backend=${enc(backend)}`);
+}
+
+export async function getJobResult(
+  id: string, backend: string
+): Promise<{ urls: Record<string, string> }> {
+  return fetchJSON(`/jobs/${enc(id)}/result?backend=${enc(backend)}`);
+}
+
+export async function getJobLog(id: string, backend: string): Promise<string> {
+  const res = await fetch(`${BASE}/jobs/${enc(id)}/log?backend=${enc(backend)}`);
+  if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
+  return res.text();
+}
+
+export async function getEstimatedTime(
+  analysis: string, ids: string[]
+): Promise<{ minutes: number | null }> {
+  return postJSON('/jobs/estimated_time', { analysis, ids });
+}
+
+// === Health endpoints ===
+
+export async function getHealth(): Promise<HealthCheck> {
+  return fetchJSON('/health');
+}
+
+export async function getStatus(): Promise<Record<string, unknown>> {
+  return fetchJSON('/status');
+}
+
+// === Helpers ===
+
 function enc(s: string): string {
   return encodeURIComponent(s);
 }
@@ -801,8 +1016,8 @@ async function postJSON<T>(url: string, body: unknown): Promise<T> {
 // frontend/components/facet-filter.ts
 // The core interaction pattern of ChIP-Atlas: cascading filters.
 // Given a genome, the user selects:
-//   experiment type → (optionally) antigen subclass
-//                   → (optionally) cell type class → cell type subclass
+//   track class → (optionally) track subclass
+//               → (optionally) cell type class → cell type subclass
 // Each selection updates the available options and counts for downstream filters.
 // This logic is currently duplicated across peak_browser.js,
 // enrichment_analysis.js, and diff_analysis.js.
@@ -848,7 +1063,7 @@ async function postJSON<T>(url: string, body: unknown): Promise<T> {
 - **Data backend architecture**: chip-atlas.dbcls.jp serves files, app generates URLs.
 - **WABI integration pattern**: POST job → poll status → redirect to results.
 - **OpenAPI spec**: Same contract, maybe minor additions.
-- **Deployment**: Docker + Unicorn + NGINX. Same topology.
+- **Deployment**: Docker + Puma + NGINX. Same topology.
 - **The smiley face on line 1**: `:)`
 
 ---
@@ -864,70 +1079,106 @@ The rebuild is successful when:
 5. The Gemfile has fewer dependencies
 6. The `public/js/` directory has fewer files
 7. A new developer can understand the codebase in an afternoon
-8. The app runs with `bundle exec rackup` and nothing else
+8. The app runs with `bundle exec puma -C config/puma.rb` and nothing else
 9. The SQLite database can be regenerated from flat files in under 5 minutes
 10. It feels like the same shrine, rebuilt with fresh timber
 
 ---
 
-## Appendix A: Current Route → New Route Mapping
+## Appendix A: Route Mapping
 
-| Current Path | Method | New Path | Notes |
-|-------------|--------|----------|-------|
-| `/` | GET | `/` | Homepage |
-| `/peak_browser` | GET | `/peak_browser` | Keep |
-| `/view` | GET | `/view` | Keep (with SRA caching) |
-| `/colo` | GET/POST | `/colo` | Keep |
-| `/target_genes` | GET/POST | `/target_genes` | Keep |
-| `/enrichment_analysis` | GET/POST | `/enrichment_analysis` | Keep |
-| `/enrichment_analysis_result` | GET | `/enrichment_analysis_result` | Keep |
-| `/diff_analysis` | GET | `/diff_analysis` | Keep |
-| `/diff_analysis_result` | GET | `/diff_analysis_result` | Keep |
-| `/search` | GET | `/search` | Keep |
-| `/publications` | GET | `/publications` | Keep |
-| `/agents` | GET | `/agents` | Keep |
-| `/demo` | GET | `/demo` | Keep |
-| `/data/:data.json` | GET | `/data/:data.json` + `/api/v1/*` | Dual paths |
-| `/data/experiment_types` | GET | `/data/experiment_types` | Keep |
-| `/data/sample_types` | GET | `/data/sample_types` | Keep |
-| `/data/chip_antigen` | GET | `/data/chip_antigen` | Keep |
-| `/data/cell_type` | GET | `/data/cell_type` | Keep |
-| `/data/search` | GET | `/data/search` | Keep |
-| `/browse` | POST | `/browse` | Keep |
-| `/download` | POST | `/download` | Keep |
-| `/health` | GET | `/health` | Keep |
-| `/wabi_chipatlas` | GET/POST | `/wabi_chipatlas` | Keep |
-| `/wabi_endpoint_status` | GET | `/wabi_endpoint_status` | Keep |
-| `/qvalue_range` | GET | `/qvalue_range` | Keep |
-| `/colo_result` | GET | `/colo_result` | Keep |
-| `/target_genes_result` | GET | `/target_genes_result` | Keep |
-| `/enrichment_analysis_log` | GET | `/enrichment_analysis_log` | Keep |
-| `/diff_analysis_log` | GET | `/diff_analysis_log` | Keep |
-| `/diff_analysis_estimated_time` | POST | `/diff_analysis_estimated_time` | Keep |
-| `/api/remoteUrlStatus` | GET | `/api/remoteUrlStatus` | Keep |
+### Page routes (`routes/pages.rb`)
 
-**Every existing path is preserved.** No breaking changes for agents or bookmarks.
+| Path | Method | Notes |
+|------|--------|-------|
+| `/` | GET | Homepage |
+| `/peak_browser` | GET | Peak Browser |
+| `/view` | GET | Experiment detail (with SRA caching, GSM redirect) |
+| `/colo` | GET | Colocalization setup |
+| `/colo_result` | GET | Colocalization results |
+| `/target_genes` | GET | Target Genes setup |
+| `/target_genes_result` | GET | Target Genes results |
+| `/enrichment_analysis` | GET/POST | Enrichment Analysis form |
+| `/enrichment_analysis_result` | GET | Enrichment Analysis results |
+| `/diff_analysis` | GET | Diff Analysis form |
+| `/diff_analysis_result` | GET | Diff Analysis results |
+| `/search` | GET | Search page |
+| `/publications` | GET | Publications |
+| `/agents` | GET | Agent documentation |
+| `/demo` | GET | Demo page |
+
+### API routes (`routes/api.rb`)
+
+| Path | Method | Notes |
+|------|--------|-------|
+| `/api/genomes` | GET | List genome assemblies (id -> label hash) |
+| `/api/stats` | GET | Experiment counts per genome |
+| `/api/track_classes` | GET | List track classes (optionally filtered by genome) |
+| `/api/cell_type_classes` | GET | List cell type classes (requires genome + track_class) |
+| `/api/track_subclasses` | GET | List track subclasses (requires genome + track_class) |
+| `/api/cell_type_subclasses` | GET | List cell type subclasses (requires genome + track_class) |
+| `/api/subclasses` | GET | Legacy combined subclass endpoint |
+| `/api/genome_index` | GET | Cached index for all genomes |
+| `/api/experiment` | GET | Single experiment metadata by experiment_id |
+| `/api/search` | GET | Full-text search with pagination (q, genome, limit, offset) |
+| `/api/qval_range` | GET | Available q-value thresholds |
+| `/api/bed_sizes` | GET | BED file size data |
+| `/api/colo_index` | GET | Colocalization index by genome |
+| `/api/target_genes_index` | GET | Target genes analysis index |
+| `/api/target_genes_distances` | GET | Available distance thresholds |
+| `/api/igv_url` | GET/POST | Generate IGV browsing URL |
+| `/api/download_url` | GET/POST | Generate archive download URL |
+| `/api/colo` | GET | Colocalization data (proxied from data server) |
+| `/api/colo/download` | GET | Colocalization file download (tsv/gml) |
+| `/api/target_genes` | GET | Target genes data (proxied from data server) |
+| `/api/target_genes/download` | GET | Target genes file download (tsv) |
+| `/api/remote_url_status` | GET | Check remote URL availability (internal) |
+
+### Job routes (`routes/jobs.rb`)
+
+| Path | Method | Notes |
+|------|--------|-------|
+| `/jobs/available` | GET | Check available compute backend |
+| `/jobs/submit` | POST | Submit enrichment or diff analysis job |
+| `/jobs/:id/status` | GET | Poll job status (requires backend param) |
+| `/jobs/:id/result` | GET | Get result URLs |
+| `/jobs/:id/log` | GET | Get execution log |
+| `/jobs/estimated_time` | POST | Estimate diff analysis runtime |
+
+### Health routes (`routes/health.rb`)
+
+| Path | Method | Notes |
+|------|--------|-------|
+| `/health` | GET | Internal health check (database, experiment count) |
+| `/status` | GET | External service status (for frontend alerts) |
+
+All old `/data/*` paths have been removed. The API uses `/api/*` exclusively.
 
 ---
 
 ## Appendix B: Dependency Comparison
 
-### Ruby Gems: 18 → 12
+### Ruby Gems: 18 → 10 (7 production + 3 dev)
 
-```
-REMOVED:                    ADDED:
-- haml                      + sequel
-- sass-embedded             + erubi
-- activerecord              + minitest (dev)
-- sinatra-activerecord      + rack-test (dev)
-- webrick
-- rubyzip (evaluate)
-- net-ping
+**Production (7 gems):**
+sinatra, puma, sequel, sqlite3, kramdown, rexml, rake
 
-KEPT:
-  sinatra, rackup, rack-protection, sqlite3,
-  redcarpet, nokogiri, unicorn, rake
-```
+**Development (3 gems):**
+webrick, minitest, rack-test
+
+**Removed gems (9+):**
+- `haml` -- replaced by ERB (stdlib)
+- `sass-embedded` -- replaced by plain CSS
+- `activerecord` -- replaced by Sequel
+- `sinatra-activerecord` -- no longer needed
+- `nokogiri` -- replaced by rexml (stdlib-adjacent, lighter)
+- `redcarpet` -- replaced by kramdown (pure Ruby)
+- `unicorn` -- replaced by Puma
+- `rackup` -- bundled in Puma
+- `rack-protection` -- bundled in Sinatra
+- `net-ping` -- replaced by simple `Net::HTTP` check
+- `rubyzip` -- no longer needed
+- `erubi` -- ERB stdlib is sufficient
 
 ### Frontend JS: ~15 files → ~3 compiled bundles
 
@@ -947,6 +1198,8 @@ REMOVED:                    ADDED:
 KEPT:
   (nothing - zero legacy JS, zero CDN dependencies)
 ```
+
+**Frontend build tooling:** esbuild + TypeScript (same plan as before)
 
 ---
 
