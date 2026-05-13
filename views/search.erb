@@ -1,0 +1,64 @@
+<%
+  @page_title = 'Dataset Search'
+  @page_description = 'Search ChIP-Atlas dataset by keywords.'
+  @active_menu = nil
+%>
+<div class="row mb-3">
+  <div class="col-md-10">
+    <h1>ChIP-Atlas: Dataset Search</h1>
+    <p>Find experiments by keywords. Same track type classes, cell type classes, and reference genomes as the
+      <a href="/peak_browser">Peak Browser</a>. For bulk processing, see the
+      <a href="https://github.com/inutano/chip-atlas/wiki#tables-summarizing-metadata-and-files" target="_blank" rel="noopener noreferrer">metadata table</a>.
+    </p>
+  </div>
+</div>
+
+<form id="search-form" class="row g-2 mb-3" role="search" autocomplete="off">
+  <div class="col-md-7">
+    <input type="search" id="search-query" class="form-control" placeholder="e.g. K562 H3K4me3" aria-label="Search query">
+  </div>
+  <div class="col-md-3">
+    <select id="search-genome" class="form-select" aria-label="Filter by genome">
+      <option value="">All genomes</option>
+    </select>
+  </div>
+  <div class="col-md-2">
+    <button type="submit" class="btn btn-primary w-100">Search</button>
+  </div>
+</form>
+
+<div id="search-status" class="mb-2 text-muted small" aria-live="polite"></div>
+
+<div id="search-results-wrap" class="mb-3" hidden>
+  <div class="d-flex justify-content-between align-items-center mb-2">
+    <div id="search-summary" class="small text-muted"></div>
+    <div class="btn-group btn-group-sm" role="group">
+      <button type="button" id="copy-results" class="btn btn-outline-secondary" title="Copy table to clipboard">Copy</button>
+      <button type="button" id="download-tsv" class="btn btn-outline-secondary" title="Download results as TSV">TSV</button>
+    </div>
+  </div>
+  <div class="table-responsive">
+    <table class="table table-striped table-sm">
+      <thead>
+        <tr>
+          <th scope="col">SRX</th>
+          <th scope="col">SRA</th>
+          <th scope="col">GEO</th>
+          <th scope="col">Genome</th>
+          <th scope="col">Track class</th>
+          <th scope="col">Track type</th>
+          <th scope="col">Cell type class</th>
+          <th scope="col">Cell type</th>
+        </tr>
+      </thead>
+      <tbody id="search-tbody"></tbody>
+    </table>
+  </div>
+  <nav aria-label="Search pagination">
+    <ul class="pagination pagination-sm justify-content-center mb-0">
+      <li class="page-item" id="page-prev"><a class="page-link" href="#" role="button">Previous</a></li>
+      <li class="page-item disabled"><span class="page-link" id="page-indicator">—</span></li>
+      <li class="page-item" id="page-next"><a class="page-link" href="#" role="button">Next</a></li>
+    </ul>
+  </nav>
+</div>

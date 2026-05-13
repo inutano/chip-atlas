@@ -190,3 +190,17 @@ footer .acknowledgement {
   color: #333;
   opacity: 1;
 }
+
+/* ===== Search page ===== */
+#search-tbody td {
+  vertical-align: middle;
+}
+
+#search-tbody a.expid-link {
+  text-decoration: none;
+  font-family: var(--bs-font-monospace, monospace);
+}
+
+#search-tbody a.expid-link:hover {
+  text-decoration: underline;
+}

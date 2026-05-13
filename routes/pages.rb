@@ -89,6 +89,7 @@ module ChipAtlas
         end
 
         app.get '/search' do
+          @page_js = 'search'
           erb :search
         end
 
