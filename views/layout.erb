@@ -10,11 +10,11 @@
   <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
-  <%= erb :_navbar %>
+  <%== erb :_navbar %>
   <div class="container">
-    <%= yield %>
+    <%== yield %>
   </div>
-  <%= erb :_footer %>
+  <%== erb :_footer %>
   <script src="/js/bootstrap.bundle.min.js"></script>
   <% if @page_js %>
     <script type="module" src="/js/<%= @page_js %>.js"></script>

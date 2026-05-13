@@ -4,7 +4,7 @@
   @active_menu = nil
   metadata = @records[0]
 %>
-<script id="experiment-data" type="application/json"><%= { expid: @expid, records: @records }.to_json.gsub('</', '<\/') %></script>
+<script id="experiment-data" type="application/json"><%== { expid: @expid, records: @records }.to_json.gsub('</', '<\/') %></script>
 
 <div class="row mb-3">
   <div class="col-md-10 offset-md-1">

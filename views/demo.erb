@@ -5,7 +5,7 @@
 %>
 <div class="row">
   <div class="col-md-8 offset-md-2 markdown-content">
-    <%= Kramdown::Document.new(File.read(File.join(settings.views, 'demo.markdown')), input: 'GFM', hard_wrap: false).to_html %>
+    <%== Kramdown::Document.new(File.read(File.join(settings.views, 'demo.markdown')), input: 'GFM', hard_wrap: false).to_html %>
   </div>
 </div>
-<%= erb :_copy_code %>
+<%== erb :_copy_code %>

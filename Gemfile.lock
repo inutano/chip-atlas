@@ -4,6 +4,7 @@ GEM
     base64 (0.3.0)
     bigdecimal (4.1.0)
     drb (2.2.3)
+    erubi (1.13.1)
     kramdown (2.5.2)
       rexml (>= 3.4.4)
     kramdown-parser-gfm (1.1.0)
@@ -64,6 +65,7 @@ PLATFORMS
   x86_64-linux-musl
 
 DEPENDENCIES
+  erubi
   kramdown
   kramdown-parser-gfm
   minitest
