@@ -72,11 +72,27 @@ function renderResults(result: SearchResult): void {
 
   $('page-indicator').textContent = `Page ${Math.floor(state.offset / PAGE_SIZE) + 1} of ${Math.max(1, Math.ceil(result.total / PAGE_SIZE))}`
 
-  $('page-prev').classList.toggle('disabled', state.offset === 0)
-  $('page-next').classList.toggle('disabled', state.offset + result.returned >= result.total)
+  const prevDisabled = state.offset === 0
+  const nextDisabled = state.offset + result.returned >= result.total
+
+  $('page-prev').classList.toggle('disabled', prevDisabled)
+  $('page-next').classList.toggle('disabled', nextDisabled)
+
+  const prevAnchor = $('page-prev').querySelector('a')
+  const nextAnchor = $('page-next').querySelector('a')
+  if (prevAnchor) {
+    prevAnchor.setAttribute('aria-disabled', String(prevDisabled))
+    prevAnchor.tabIndex = prevDisabled ? -1 : 0
+  }
+  if (nextAnchor) {
+    nextAnchor.setAttribute('aria-disabled', String(nextDisabled))
+    nextAnchor.tabIndex = nextDisabled ? -1 : 0
+  }
 
   ;($('search-results-wrap') as HTMLElement).hidden = false
 }
+
+let searchGeneration = 0
 
 async function runSearch(): Promise<void> {
   const status = $('search-status')
@@ -86,11 +102,14 @@ async function runSearch(): Promise<void> {
     return
   }
   status.textContent = 'Searching…'
+  const gen = ++searchGeneration
   try {
     const result = await searchExperiments(state.query, state.genome || undefined, PAGE_SIZE, state.offset)
+    if (gen !== searchGeneration) return  // stale response — newer search already in flight
     status.textContent = ''
     renderResults(result)
   } catch (err) {
+    if (gen !== searchGeneration) return
     console.error(err)
     status.textContent = 'Search failed. Please try again.'
   }
@@ -107,11 +126,26 @@ function toTsv(rows: SearchExperiment[]): string {
   return lines.join('\n') + '\n'
 }
 
+async function clipboardWrite(text: string): Promise<void> {
+  if (navigator.clipboard && window.isSecureContext) {
+    return navigator.clipboard.writeText(text)
+  }
+  const ta = document.createElement('textarea')
+  ta.value = text
+  ta.style.position = 'fixed'
+  ta.style.left = '-9999px'
+  document.body.appendChild(ta)
+  ta.focus()
+  ta.select()
+  try { document.execCommand('copy') } catch (_) {}
+  document.body.removeChild(ta)
+}
+
 async function copyResultsToClipboard(): Promise<void> {
   if (!state.lastResult) return
   const tsv = toTsv(state.lastResult.experiments)
   try {
-    await navigator.clipboard.writeText(tsv)
+    await clipboardWrite(tsv)
     const btn = $('copy-results')
     const original = btn.textContent || 'Copy'
     btn.textContent = 'Copied!'
