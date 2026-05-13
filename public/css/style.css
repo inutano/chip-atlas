@@ -1,0 +1,192 @@
+/* ChIP-Atlas custom styles — overrides for Bootstrap 5 */
+
+/* ===== Colors ===== */
+:root {
+  --bs-primary: #337ab7;
+  --bs-primary-rgb: 51, 122, 183;
+  --bs-font-sans-serif: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --bs-body-font-size: 0.95rem;
+}
+
+.btn-primary {
+  --bs-btn-bg: #337ab7;
+  --bs-btn-border-color: #2e6da4;
+  --bs-btn-hover-bg: #286090;
+  --bs-btn-hover-border-color: #204d74;
+}
+
+/* ===== Body ===== */
+body {
+  padding-top: 70px;
+}
+
+/* ===== Navbar ===== */
+.navbar {
+  min-height: 50px;
+}
+
+.navbar .nav-link {
+  padding-top: 15px;
+  padding-bottom: 15px;
+}
+
+.navbar .nav-link i {
+  margin-right: 5px;
+}
+
+#jumpToExperiment {
+  width: 8em;
+}
+
+/* ===== Homepage feature cards ===== */
+.feature-card {
+  text-decoration: none !important;
+  color: #333 !important;
+}
+
+.feature-card .card {
+  height: 100%;
+  transition: box-shadow 0.2s;
+}
+
+.feature-card:hover .card {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.feature-card .card-body {
+  display: flex;
+  align-items: center;
+  padding: 1.5rem;
+}
+
+.feature-card .feature-icon {
+  font-size: 3.5rem;
+  color: #337ab7;
+  min-width: 80px;
+  text-align: center;
+}
+
+.feature-card .badge {
+  font-size: 0.75rem;
+  padding: 0.4em 0.6em;
+  margin-left: 3px;
+}
+
+/* ===== Footer ===== */
+footer {
+  margin-top: 10em;
+  margin-bottom: 5em;
+  text-align: center;
+  text-transform: uppercase;
+  font-style: italic;
+  font-size: 66%;
+}
+
+footer .org-logo {
+  margin-left: 30px;
+  display: inline-block;
+}
+
+footer .org-logo img {
+  width: 100px;
+  height: auto;
+}
+
+footer .org-logo:nth-child(4) img,
+footer .org-logo:nth-child(6) img {
+  width: 150px;
+}
+
+footer .acknowledgement {
+  margin-top: 2em;
+}
+
+/* ===== Responsive: abbreviations in navbar ===== */
+.full-text {
+  display: inline;
+}
+
+.abbrev-text {
+  display: none;
+}
+
+@media (max-width: 1375px) {
+  .full-text {
+    display: none;
+  }
+  .abbrev-text {
+    display: inline;
+  }
+  .navbar .nav-link {
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+  #jumpToExperiment {
+    width: 80px;
+  }
+}
+
+@media (max-width: 767px) {
+  footer .org-logo {
+    margin-left: 10px;
+  }
+  footer .org-logo img {
+    width: 20vw;
+    max-width: 100px;
+  }
+  footer .org-logo:nth-child(4) img,
+  footer .org-logo:nth-child(6) img {
+    width: 28vw;
+    max-width: 150px;
+  }
+}
+
+/* ===== Markdown content pages (publications, agents, demo) ===== */
+.markdown-content {
+  margin-top: 0.5em;
+  line-height: 1.5;
+}
+
+.markdown-content table {
+  width: 100%;
+  margin-bottom: 1em;
+  border-collapse: collapse;
+}
+
+.markdown-content th,
+.markdown-content td {
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  text-align: left;
+}
+
+.markdown-content th {
+  background-color: #f5f5f5;
+  font-weight: bold;
+}
+
+.markdown-content tbody tr:hover {
+  background-color: #f9f9f9;
+}
+
+/* ===== Copy button on code blocks ===== */
+.copy-btn {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  background: #e8e8e8;
+  border: none;
+  border-radius: 3px;
+  padding: 4px 7px;
+  cursor: pointer;
+  font-size: 13px;
+  color: #555;
+  opacity: 0.6;
+  transition: opacity 0.15s;
+}
+
+.copy-btn:hover {
+  background: #d0d0d0;
+  color: #333;
+  opacity: 1;
+}
