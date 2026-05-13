@@ -14,6 +14,7 @@ module ChipAtlas
 
         app.get '/' do
           @number_of_experiments = ChipAtlas::Experiment.formatted_experiment_count
+          @page_js = 'homepage'
           erb :about
         end
 

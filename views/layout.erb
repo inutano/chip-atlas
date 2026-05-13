@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="<%= @page_description || 'Browse and analyse public ChIP-Seq/DNase-Seq/ATAC-Seq/Bisulfite-Seq data.' %>">
+  <meta name="author" content="Shinya Oki, Tazro Ohta">
+  <title><%= @page_title ? "ChIP-Atlas: #{@page_title}" : "ChIP-Atlas" %></title>
+  <link rel="stylesheet" href="/css/bootstrap5.min.css">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <%= erb :_navbar %>
+  <div class="container">
+    <%= yield %>
+  </div>
+  <%= erb :_footer %>
+  <script src="/js/bootstrap.bundle.min.js"></script>
+  <% if @page_js %>
+    <script type="module" src="/js/<%= @page_js %>.js"></script>
+  <% end %>
+</body>
+</html>

@@ -1,0 +1,78 @@
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="/">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
+        <path d="M8 1l2 5h5l-4 3 1.5 5L8 11 3.5 14 5 9 1 6h5z"/>
+      </svg>
+    </a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar-collapse-main" aria-controls="navbar-collapse-main" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbar-collapse-main">
+      <ul class="navbar-nav me-auto">
+        <li class="nav-item">
+          <a class="nav-link<%= ' active' if @active_menu == 'peak_browser' %>" href="/peak_browser">
+            <span class="full-text">Peak Browser</span>
+            <span class="abbrev-text">PB</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link<%= ' active' if @active_menu == 'enrichment_analysis' %>" href="/enrichment_analysis">
+            <span class="full-text">Enrichment Analysis</span>
+            <span class="abbrev-text">EA</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link<%= ' active' if @active_menu == 'diff_analysis' %>" href="/diff_analysis">
+            <span class="full-text">Diff Analysis</span>
+            <span class="abbrev-text">DA</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link<%= ' active' if @active_menu == 'target_genes' %>" href="/target_genes">
+            <span class="full-text">Target Genes</span>
+            <span class="abbrev-text">TG</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link<%= ' active' if @active_menu == 'colo' %>" href="/colo">
+            <span class="full-text">Colo</span>
+            <span class="abbrev-text">Colo</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link<%= ' active' if @active_menu == 'publications' %>" href="/publications">
+            <span class="full-text">Publications</span>
+            <span class="abbrev-text">Pub</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link<%= ' active' if @active_menu == 'agents' %>" href="/agents">
+            <span class="full-text">Agents</span>
+            <span class="abbrev-text">API</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="https://github.com/inutano/chip-atlas/wiki">
+            <span class="full-text">Docs</span>
+            <span class="abbrev-text">Doc</span>
+          </a>
+        </li>
+      </ul>
+      <div class="d-flex align-items-center">
+        <a class="nav-link text-light me-3" href="/search">
+          <span class="full-text">Search</span>
+          <span class="abbrev-text">?</span>
+        </a>
+        <span class="text-light me-2">
+          <span class="full-text">ID:</span>
+          <span class="abbrev-text">ID:</span>
+        </span>
+        <form class="d-flex" role="search" onsubmit="event.preventDefault(); window.open('/view?id=' + document.getElementById('jumpToExperiment').value);">
+          <input class="form-control form-control-sm me-2" type="text" id="jumpToExperiment" value="SRX018625" aria-label="Experiment ID">
+          <button class="btn btn-outline-light btn-sm" type="submit">Go</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</nav>
