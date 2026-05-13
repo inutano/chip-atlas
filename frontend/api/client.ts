@@ -38,10 +38,23 @@ export interface ExperimentRecord {
   cell_type_subclass_info: string
 }
 
+export interface SearchExperiment {
+  experiment_id: string
+  sra_id: string
+  geo_id: string
+  genome: string
+  track_class: string
+  track_subclass: string
+  cell_type_class: string
+  cell_type_subclass: string
+  title: string
+  attributes: string
+}
+
 export interface SearchResult {
   total: number
   returned: number
-  experiments: ExperimentRecord[]
+  experiments: SearchExperiment[]
 }
 
 export type QvalRange = string[]
