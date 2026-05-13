@@ -1,0 +1,123 @@
+<%
+  @page_title = nil
+  @page_description = 'Browse and analyse the public ChIP-Seq/DNase-Seq/ATAC-Seq/Bisulfite-Seq data on your browser.'
+  @active_menu = nil
+%>
+<div class="page-header mb-4">
+  <h1>ChIP-Atlas</h1>
+  <p class="lead">
+    A data-mining suite for exploring epigenomic landscapes by fully integrating
+    <span id="experiment-count"><%= @number_of_experiments %></span>
+    ChIP-seq, ATAC-seq and Bisulfite-seq experiments.
+  </p>
+</div>
+
+<div class="row g-3 mb-3">
+  <div class="col-md-4">
+    <a href="/peak_browser" class="feature-card">
+      <div class="card">
+        <div class="card-body">
+          <div class="feature-icon">&#x1F50D;</div>
+          <div class="ms-3">
+            <h5 class="card-title mb-1">Peak Browser</h5>
+            <div>
+              <span class="badge bg-primary">ChIP</span>
+              <span class="badge bg-primary">ATAC</span>
+              <span class="badge bg-primary">Bisulfite</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </a>
+  </div>
+  <div class="col-md-4">
+    <a href="/enrichment_analysis" class="feature-card">
+      <div class="card">
+        <div class="card-body">
+          <div class="feature-icon">&#x2764;</div>
+          <div class="ms-3">
+            <h5 class="card-title mb-1">Enrichment Analysis</h5>
+            <div>
+              <span class="badge bg-primary">ChIP</span>
+              <span class="badge bg-primary">ATAC</span>
+              <span class="badge bg-primary">Bisulfite</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </a>
+  </div>
+  <div class="col-md-4">
+    <a href="/diff_analysis" class="feature-card">
+      <div class="card">
+        <div class="card-body">
+          <div class="feature-icon">&#x2696;</div>
+          <div class="ms-3">
+            <h5 class="card-title mb-1">Diff Analysis</h5>
+            <div>
+              <span class="badge bg-primary">ChIP</span>
+              <span class="badge bg-primary">ATAC</span>
+              <span class="badge bg-primary">Bisulfite</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </a>
+  </div>
+</div>
+
+<div class="row g-3 mb-4">
+  <div class="col-md-4">
+    <a href="/target_genes" class="feature-card">
+      <div class="card">
+        <div class="card-body">
+          <div class="feature-icon">&#x1F3AF;</div>
+          <div class="ms-3">
+            <h5 class="card-title mb-1">Target Genes</h5>
+            <div>
+              <span class="badge bg-primary">ChIP</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </a>
+  </div>
+  <div class="col-md-4">
+    <a href="/colo" class="feature-card">
+      <div class="card">
+        <div class="card-body">
+          <div class="feature-icon">&#x1F517;</div>
+          <div class="ms-3">
+            <h5 class="card-title mb-1">Colocalization</h5>
+            <div>
+              <span class="badge bg-primary">ChIP</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </a>
+  </div>
+  <div class="col-md-4">
+    <a href="/search" class="feature-card">
+      <div class="card">
+        <div class="card-body">
+          <div class="feature-icon">&#x1F50E;</div>
+          <div class="ms-3">
+            <h5 class="card-title mb-1">Dataset Search</h5>
+            <div>
+              <span class="badge bg-primary">ChIP</span>
+              <span class="badge bg-primary">ATAC</span>
+              <span class="badge bg-primary">Bisulfite</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </a>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-md-10 offset-md-1 markdown-content">
+    <%= Kramdown::Document.new(File.read(File.join(settings.views, 'updates.markdown')), input: 'GFM', hard_wrap: false).to_html %>
+  </div>
+</div>
