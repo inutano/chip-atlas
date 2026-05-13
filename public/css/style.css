@@ -214,3 +214,19 @@ footer .acknowledgement {
 .dropdown-menu.dropdown-menu-end {
   min-width: 14rem;
 }
+
+/* ===== Autocomplete component ===== */
+.autocomplete-menu {
+  margin-top: 0.25rem;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.autocomplete-menu .list-group-item {
+  padding: 0.4rem 0.75rem;
+}
+
+.autocomplete-menu .list-group-item.active {
+  background-color: var(--bs-primary);
+  border-color: var(--bs-primary);
+  color: white;
+}
