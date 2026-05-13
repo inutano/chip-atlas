@@ -1,0 +1,155 @@
+<%
+  @page_title = @expid
+  @page_description = "Experimental attributes and details of processing for #{@expid}"
+  @active_menu = nil
+  metadata = @records[0]
+%>
+<script id="experiment-data" type="application/json"><%= { expid: @expid, records: @records }.to_json %></script>
+
+<div class="row mb-3">
+  <div class="col-md-10 offset-md-1">
+    <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-3">
+      <div>
+        <h2 class="mb-1"><%= @expid %></h2>
+        <small class="text-muted"><%= metadata[:title] != '-' ? metadata[:title] : 'No title provided' %></small>
+      </div>
+      <div class="btn-toolbar" role="toolbar" aria-label="Experiment actions">
+        <div class="btn-group me-2" role="group">
+          <button type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">Visualize</button>
+          <ul class="dropdown-menu" id="visualize-menu"></ul>
+        </div>
+        <div class="btn-group me-2" role="group">
+          <button type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">Analyze</button>
+          <ul class="dropdown-menu" id="analyze-menu"></ul>
+        </div>
+        <div class="btn-group me-2" role="group">
+          <button type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">Download</button>
+          <ul class="dropdown-menu" id="download-menu"></ul>
+        </div>
+        <div class="btn-group" role="group">
+          <button type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">Link Out</button>
+          <ul class="dropdown-menu dropdown-menu-end" id="linkout-menu"></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row mb-3">
+  <div class="col-md-10 offset-md-1">
+    <div class="card">
+      <div class="card-header"><h5 class="mb-0">Sample Information Curated by ChIP-Atlas</h5></div>
+      <div class="card-body">
+        <div class="row">
+          <div class="col-md-6">
+            <h6>Antigen Information</h6>
+            <dl class="row mb-0">
+              <dt class="col-sm-5">Antigen Class</dt><dd class="col-sm-7"><%= metadata[:track_class] %></dd>
+              <dt class="col-sm-5">Antigen</dt><dd class="col-sm-7"><%= metadata[:track_subclass] %></dd>
+            </dl>
+          </div>
+          <div class="col-md-6">
+            <h6>Cell Type Information</h6>
+            <dl class="row mb-0">
+              <dt class="col-sm-5">Cell Type Class</dt><dd class="col-sm-7"><%= metadata[:cell_type_class] %></dd>
+              <dt class="col-sm-5">Cell Type</dt><dd class="col-sm-7"><%= metadata[:cell_type_subclass] %></dd>
+              <% metadata[:cell_type_subclass_info].to_s.split('|').each do |kv| %>
+                <% k, v = kv.split('=', 2) %>
+                <% next if k.nil? || k.strip.empty? %>
+                <dt class="col-sm-5"><%= k %></dt><dd class="col-sm-7"><%= v %></dd>
+              <% end %>
+            </dl>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row mb-3">
+  <div class="col-md-10 offset-md-1">
+    <div class="card">
+      <div class="card-header"><h5 class="mb-0">Original Experimental Metadata</h5></div>
+      <div class="card-body">
+        <h6>Sample Attributes</h6>
+        <% attr_str = metadata[:attributes].to_s.strip %>
+        <% if attr_str.empty? %>
+          <p class="text-muted">No sample attributes were provided by the original submitter.</p>
+        <% else %>
+          <dl class="row mb-3">
+            <% attr_str.split("\t").each do |kv| %>
+              <% k, v = kv.split('=', 2) %>
+              <% next if k.nil? || k.strip.empty? %>
+              <dt class="col-sm-4"><%= k %></dt><dd class="col-sm-8"><%= v %></dd>
+            <% end %>
+          </dl>
+        <% end %>
+
+        <hr>
+
+        <div class="row">
+          <div class="col-md-6">
+            <h6>Sequenced DNA Library</h6>
+            <% if @ncbi[:library_description].values.uniq == [''] %>
+              <p class="text-muted">No library information was found.</p>
+            <% else %>
+              <dl class="row mb-0">
+                <% @ncbi[:library_description].each_pair do |k, v| %>
+                  <% next if v.to_s.empty? %>
+                  <dt class="col-sm-5"><%= k %></dt><dd class="col-sm-7"><%= v %></dd>
+                <% end %>
+              </dl>
+            <% end %>
+          </div>
+          <div class="col-md-6">
+            <h6>Sequencing Platform</h6>
+            <% if @ncbi[:platform_information].values.uniq == [''] %>
+              <p class="text-muted">No platform information was found.</p>
+            <% else %>
+              <dl class="row mb-0">
+                <% @ncbi[:platform_information].each_pair do |k, v| %>
+                  <% next if v.to_s.empty? %>
+                  <dt class="col-sm-5"><%= k %></dt><dd class="col-sm-7"><%= v %></dd>
+                <% end %>
+              </dl>
+            <% end %>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row mb-3">
+  <div class="col-md-10 offset-md-1">
+    <div class="card">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">Read Processing Pipeline</h5>
+        <a href="https://github.com/inutano/chip-atlas/wiki#2-primary-processing" target="_blank" rel="noopener noreferrer" class="small">Pipeline docs</a>
+      </div>
+      <div class="card-body">
+        <div class="row">
+          <% @records.each do |record| %>
+            <% readinfo = record[:read_info].to_s.split(',') %>
+            <div class="col-md-6 mb-3">
+              <h6 class="text-muted"><%= record[:genome] %></h6>
+              <dl class="row mb-0">
+                <% if metadata[:track_class] != 'Bisulfite-Seq' %>
+                  <dt class="col-sm-7">Number of total reads</dt><dd class="col-sm-5"><%= readinfo[0] %></dd>
+                  <dt class="col-sm-7">Reads aligned (%)</dt><dd class="col-sm-5"><%= readinfo[1] %></dd>
+                  <dt class="col-sm-7">Duplicates removed (%)</dt><dd class="col-sm-5"><%= readinfo[2] %></dd>
+                  <dt class="col-sm-7">Number of peaks</dt><dd class="col-sm-5"><%= readinfo[3] %> (qval &lt; 1E-05)</dd>
+                <% else %>
+                  <dt class="col-sm-7">Number of total reads</dt><dd class="col-sm-5"><%= readinfo[0] %></dd>
+                  <dt class="col-sm-7">Reads aligned (%)</dt><dd class="col-sm-5"><%= readinfo[1] %></dd>
+                  <dt class="col-sm-7">Coverage rate (×)</dt><dd class="col-sm-5"><%= readinfo[2] %></dd>
+                  <dt class="col-sm-7">Number of hyper MRs</dt><dd class="col-sm-5"><%= readinfo[3] %> (qval &lt; 1E-05)</dd>
+                <% end %>
+              </dl>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

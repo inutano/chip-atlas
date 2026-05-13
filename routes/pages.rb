@@ -32,7 +32,9 @@ module ChipAtlas
           end
           redirect '/not_found', 404 unless ChipAtlas::Experiment.id_valid?(@expid)
           log_activity('view_experiment', { expid: @expid })
+          @records = ChipAtlas::Experiment.record_by_experiment_id(@expid)
           @ncbi = ChipAtlas::SraService.new(@expid).fetch
+          @page_js = 'experiment'
           erb :experiment
         end
 

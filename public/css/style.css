@@ -204,3 +204,13 @@ footer .acknowledgement {
 #search-tbody a.expid-link:hover {
   text-decoration: underline;
 }
+
+/* ===== Experiment detail page ===== */
+.dropdown-menu .dropdown-header {
+  font-weight: 600;
+  color: #495057;
+}
+
+.dropdown-menu.dropdown-menu-end {
+  min-width: 14rem;
+}
