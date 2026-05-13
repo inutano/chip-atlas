@@ -10,6 +10,7 @@ gem 'sqlite3'
 
 # Templates & rendering (ERB is stdlib, no gem needed)
 gem 'kramdown'
+gem 'kramdown-parser-gfm'
 
 # Utilities
 gem 'rexml'

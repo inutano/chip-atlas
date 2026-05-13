@@ -6,6 +6,8 @@ GEM
     drb (2.2.3)
     kramdown (2.5.2)
       rexml (>= 3.4.4)
+    kramdown-parser-gfm (1.1.0)
+      kramdown (~> 2.0)
     logger (1.7.0)
     minitest (6.0.2)
       drb (~> 2.0)
@@ -63,6 +65,7 @@ PLATFORMS
 
 DEPENDENCIES
   kramdown
+  kramdown-parser-gfm
   minitest
   puma
   rack-test

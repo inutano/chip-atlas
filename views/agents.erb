@@ -1,0 +1,47 @@
+<%
+  @page_title = 'Agent Guide'
+  @page_description = 'Guide for AI agents to use ChIP-Atlas MCP tools and API endpoints.'
+  @active_menu = 'agents'
+%>
+<div class="row">
+  <div class="col-md-8 offset-md-2 markdown-content">
+    <%= Kramdown::Document.new(File.read(File.join(settings.views, 'agents.markdown')), input: 'GFM', hard_wrap: false).to_html %>
+  </div>
+</div>
+<script>
+  // Copy button for code blocks (ported from _copy_code.haml)
+  document.addEventListener('DOMContentLoaded', function() {
+    function copyText(text) {
+      if (navigator.clipboard && window.isSecureContext) {
+        return navigator.clipboard.writeText(text);
+      }
+      var ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.left = '-9999px';
+      document.body.appendChild(ta);
+      ta.focus();
+      ta.select();
+      try { document.execCommand('copy'); } catch(e) {}
+      document.body.removeChild(ta);
+      return Promise.resolve();
+    }
+
+    document.querySelectorAll('.markdown-content pre').forEach(function(pre) {
+      pre.style.position = 'relative';
+      var btn = document.createElement('button');
+      btn.className = 'copy-btn';
+      btn.title = 'Copy to clipboard';
+      btn.textContent = 'Copy';
+      btn.addEventListener('click', function() {
+        var code = pre.querySelector('code');
+        var text = (code || pre).textContent.replace(/\n$/, '');
+        copyText(text).then(function() {
+          btn.textContent = 'Copied!';
+          setTimeout(function() { btn.textContent = 'Copy'; }, 1500);
+        });
+      });
+      pre.appendChild(btn);
+    });
+  });
+</script>

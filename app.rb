@@ -9,6 +9,7 @@ require 'timeout'
 require 'fileutils'
 require 'logger'
 require 'sinatra/base'
+require 'kramdown'
 
 require_relative 'lib/db'
 
