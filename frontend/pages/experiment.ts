@@ -165,10 +165,11 @@ function buildLinkOutMenu(data: PageData): HTMLElement[] {
   const antigen = m.track_subclass
   const celltype = m.cell_type_subclass
 
+  const encExpid = encodeURIComponent(expid)
   items.push(header('Sequence Read Archive'))
-  items.push(item(`https://ddbj.nig.ac.jp/search/entry/sra-experiment/${expid}`, 'DDBJ Search', { external: true }))
-  items.push(item(`https://www.ncbi.nlm.nih.gov/sra/?term=${expid}`, 'NCBI SRA', { external: true }))
-  items.push(item(`https://www.ebi.ac.uk/ena/browser/view/${expid}`, 'ENA', { external: true }))
+  items.push(item(`https://ddbj.nig.ac.jp/search/entry/sra-experiment/${encExpid}`, 'DDBJ Search', { external: true }))
+  items.push(item(`https://www.ncbi.nlm.nih.gov/sra/?term=${encExpid}`, 'NCBI SRA', { external: true }))
+  items.push(item(`https://www.ebi.ac.uk/ena/browser/view/${encExpid}`, 'ENA', { external: true }))
   items.push(divider())
 
   items.push(header(`Antigen: ${antigen}`))
