@@ -55,12 +55,17 @@ function render(inst: Instance): void {
   if (filtered.length === 0) {
     menu.style.display = 'none'
     menu.replaceChildren()
+    inst.input.removeAttribute('aria-activedescendant')
     return
   }
+  const inputId = inst.input.id || ''
+  const optionId = (i: number) => `${inputId || 'ac'}-opt-${i}`
   menu.replaceChildren(...filtered.map((value, i) => {
     const li = document.createElement('li')
+    li.id = optionId(i)
     li.className = 'list-group-item list-group-item-action' + (i === active ? ' active' : '')
     li.setAttribute('role', 'option')
+    li.setAttribute('aria-selected', i === active ? 'true' : 'false')
     li.dataset.index = String(i)
     li.style.cursor = 'pointer'
     li.textContent = value
@@ -70,6 +75,11 @@ function render(inst: Instance): void {
     })
     return li
   }))
+  if (active >= 0) {
+    inst.input.setAttribute('aria-activedescendant', optionId(active))
+  } else {
+    inst.input.removeAttribute('aria-activedescendant')
+  }
   menu.style.display = 'block'
   placeMenu(inst.input, menu)
 }
