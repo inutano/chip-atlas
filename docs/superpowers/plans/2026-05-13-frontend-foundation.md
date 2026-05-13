@@ -1609,8 +1609,8 @@ async function init(): Promise<void> {
 
   try {
     const stats = await getStats()
-    if (stats.formatted_count) {
-      countEl.textContent = stats.formatted_count
+    if (stats.total_experiments_formatted) {
+      countEl.textContent = stats.total_experiments_formatted
     }
   } catch (err) {
     // If the API call fails, keep the server-rendered count

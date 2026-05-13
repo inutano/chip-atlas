@@ -9,17 +9,20 @@ export interface GenomeInfo {
 
 export interface Stats {
   total_experiments: number
-  formatted_count: string
+  total_experiments_formatted: string
   by_genome: Record<string, number>
+  by_track_class: Record<string, number>
 }
 
 export interface ClassificationItem {
-  name: string
-  count: number
+  id: string
+  label: string
+  count: number | null
 }
 
-export interface SubclassItem {
-  name: string
+export interface ExperimentTypeItem {
+  id: string
+  label: string
 }
 
 export interface ExperimentRecord {
@@ -29,19 +32,19 @@ export interface ExperimentRecord {
   track_subclass: string
   cell_type_class: string
   cell_type_subclass: string
-  [key: string]: unknown
+  title: string
+  attributes: string
+  read_info: string
+  cell_type_subclass_info: string
 }
 
 export interface SearchResult {
-  results: ExperimentRecord[]
   total: number
-  limit: number
-  offset: number
+  returned: number
+  experiments: ExperimentRecord[]
 }
 
-export interface QvalRange {
-  [key: string]: string  // e.g. { "50": "50", "100": "100", ... }
-}
+export type QvalRange = string[]
 
 export interface BedSizes {
   [key: string]: number
@@ -125,7 +128,19 @@ export interface HealthCheck {
 }
 
 export interface ServiceStatus {
-  [service: string]: boolean | string
+  services: {
+    data_server: 'ok' | 'down'
+    wabi: 'ok' | 'down'
+    wes: 'ok' | 'down' | 'not_checked'
+  }
+  features: {
+    peak_browser: 'ok' | 'unavailable'
+    colo: 'ok' | 'unavailable'
+    target_genes: 'ok' | 'unavailable'
+    search: 'ok'
+    enrichment_analysis: 'ok' | 'ok (backup)' | 'unavailable'
+    diff_analysis: 'ok' | 'unavailable'
+  }
 }
 
 // ===== Error handling =====
@@ -177,14 +192,16 @@ export async function getStats(): Promise<Stats> {
 }
 
 export async function listTrackClasses(
-  genome?: string,
+  genome: string,
   cellTypeClass?: string
-): Promise<ClassificationItem[] | Record<string, ClassificationItem[]>> {
-  const params: Record<string, string | undefined> = {
-    genome,
-    cell_type_class: cellTypeClass,
-  }
-  return request('/api/track_classes' + qs(params))
+): Promise<ClassificationItem[]> {
+  return request<ClassificationItem[]>(
+    '/api/track_classes' + qs({ genome, cell_type_class: cellTypeClass })
+  )
+}
+
+export async function listAllTrackClasses(): Promise<ExperimentTypeItem[]> {
+  return request<ExperimentTypeItem[]>('/api/track_classes')
 }
 
 export async function listCellTypeClasses(
@@ -200,8 +217,8 @@ export async function listTrackSubclasses(
   genome: string,
   trackClass: string,
   cellTypeClass?: string
-): Promise<SubclassItem[]> {
-  return request<SubclassItem[]>(
+): Promise<ClassificationItem[]> {
+  return request<ClassificationItem[]>(
     '/api/track_subclasses' + qs({ genome, track_class: trackClass, cell_type_class: cellTypeClass })
   )
 }
@@ -210,8 +227,8 @@ export async function listCellTypeSubclasses(
   genome: string,
   trackClass: string,
   cellTypeClass?: string
-): Promise<SubclassItem[]> {
-  return request<SubclassItem[]>(
+): Promise<ClassificationItem[]> {
+  return request<ClassificationItem[]>(
     '/api/cell_type_subclasses' + qs({ genome, track_class: trackClass, cell_type_class: cellTypeClass })
   )
 }
@@ -222,8 +239,8 @@ export async function getGenomeIndex(): Promise<Record<string, unknown>> {
   return request<Record<string, unknown>>('/api/genome_index')
 }
 
-export async function getExperiment(experimentId: string): Promise<ExperimentRecord> {
-  return request<ExperimentRecord>(
+export async function getExperiment(experimentId: string): Promise<ExperimentRecord[]> {
+  return request<ExperimentRecord[]>(
     '/api/experiment' + qs({ experiment_id: experimentId })
   )
 }
@@ -328,7 +345,7 @@ export async function downloadTargetGenesFile(
 // ===== Job endpoints =====
 
 export async function checkJobAvailability(
-  type: string = 'enrichment_analysis'
+  type: 'enrichment_analysis' | 'diff_analysis' = 'enrichment_analysis'
 ): Promise<JobAvailability> {
   return request<JobAvailability>('/jobs/available' + qs({ type }))
 }
