@@ -86,6 +86,7 @@ module ChipAtlas
         end
 
         app.get '/diff_analysis_result' do
+          @page_js = 'diff-result'
           erb :diff_analysis_result
         end
 
