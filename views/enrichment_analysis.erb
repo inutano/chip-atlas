@@ -1,0 +1,91 @@
+<%
+  @page_title = 'Enrichment Analysis'
+  @page_description = 'Identify common epigenetic features of a given set of genomic loci and genes.'
+  @active_menu = 'enrichment_analysis'
+%>
+<script id="page-data" type="application/json"><%== {
+  genomes: @list_of_genome,
+  prefill: {
+    taxonomy: @taxonomy,
+    genes: @genes,
+    genesetA: @genesetA,
+    genesetB: @genesetB,
+  }
+}.to_json.gsub('</', '<\/') %></script>
+
+<div class="row mb-3">
+  <div class="col-md-12">
+    <h1>ChIP-Atlas: Enrichment Analysis</h1>
+    <p>Identify common epigenetic features of a given set of genomic loci and genes.</p>
+  </div>
+</div>
+
+<div id="genome-tabs"></div>
+
+<div class="row">
+  <div class="col-md-6">
+    <div class="card mb-3">
+      <div class="card-header"><h5 class="mb-0">1. Filter</h5></div>
+      <div class="card-body">
+        <div id="facet-filter"></div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-6">
+    <div class="card mb-3">
+      <div class="card-header"><h5 class="mb-0">2. Dataset A (your data)</h5></div>
+      <div class="card-body">
+        <div class="form-check"><input class="form-check-input" type="radio" name="dataA-type" id="dataA-bed" value="bed" checked><label class="form-check-label" for="dataA-bed">Genomic regions (BED)</label></div>
+        <div class="form-check"><input class="form-check-input" type="radio" name="dataA-type" id="dataA-genes" value="gene"><label class="form-check-label" for="dataA-genes">Gene list (symbols or IDs)</label></div>
+        <div class="form-check mb-2"><input class="form-check-input" type="radio" name="dataA-type" id="dataA-count" value="count"><label class="form-check-label" for="dataA-count">Gene count table (CSV/TSV)</label></div>
+        <textarea class="form-control mb-2" id="dataA-text" rows="6" placeholder="Paste content or use the file picker below."></textarea>
+        <input type="file" id="dataA-file" class="form-control form-control-sm">
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-md-6">
+    <div class="card mb-3">
+      <div class="card-header"><h5 class="mb-0">3. Dataset B (compare with)</h5></div>
+      <div class="card-body">
+        <div class="form-check"><input class="form-check-input" type="radio" name="dataB-type" id="dataB-rnd" value="rnd" checked><label class="form-check-label" for="dataB-rnd">Random permutation of dataset A</label></div>
+        <div id="permutation-row" class="ms-4 mb-2">
+          <span class="form-check form-check-inline"><input class="form-check-input" type="radio" name="dataB-perm" id="perm-1" value="1" checked><label class="form-check-label" for="perm-1">×1</label></span>
+          <span class="form-check form-check-inline"><input class="form-check-input" type="radio" name="dataB-perm" id="perm-10" value="10"><label class="form-check-label" for="perm-10">×10</label></span>
+          <span class="form-check form-check-inline"><input class="form-check-input" type="radio" name="dataB-perm" id="perm-100" value="100"><label class="form-check-label" for="perm-100">×100</label></span>
+        </div>
+        <div class="form-check"><input class="form-check-input" type="radio" name="dataB-type" id="dataB-bed" value="bed"><label class="form-check-label" for="dataB-bed">Genomic regions (BED)</label></div>
+        <div class="form-check"><input class="form-check-input" type="radio" name="dataB-type" id="dataB-refseq" value="refseq" disabled><label class="form-check-label" for="dataB-refseq">Refseq coding genes (gene-list mode only)</label></div>
+        <div class="form-check mb-2"><input class="form-check-input" type="radio" name="dataB-type" id="dataB-userlist" value="userlist" disabled><label class="form-check-label" for="dataB-userlist">Gene list (gene-list mode only)</label></div>
+        <textarea class="form-control mb-2" id="dataB-text" rows="6" placeholder="Paste content or use the file picker below." hidden></textarea>
+        <input type="file" id="dataB-file" class="form-control form-control-sm" hidden>
+        <p id="dataB-note" class="text-muted small mb-0">Random permutation needs no input.</p>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-6">
+    <div class="card mb-3">
+      <div class="card-header"><h5 class="mb-0">4. Analysis description</h5></div>
+      <div class="card-body">
+        <div class="mb-2">
+          <label for="title" class="form-label small text-muted">Analysis title</label>
+          <input type="text" id="title" class="form-control form-control-sm">
+        </div>
+        <div class="mb-2">
+          <label for="dataA-title" class="form-label small text-muted">Dataset A title</label>
+          <input type="text" id="dataA-title" class="form-control form-control-sm">
+        </div>
+        <div class="mb-3">
+          <label for="dataB-title" class="form-label small text-muted">Dataset B title</label>
+          <input type="text" id="dataB-title" class="form-control form-control-sm">
+        </div>
+        <div class="d-grid">
+          <button type="button" id="submit-job" class="btn btn-primary btn-lg">Submit</button>
+        </div>
+        <div id="submit-status" class="text-muted small mt-2" aria-live="polite"></div>
+      </div>
+    </div>
+  </div>
+</div>

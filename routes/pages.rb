@@ -62,7 +62,8 @@ module ChipAtlas
         end
 
         app.get '/enrichment_analysis' do
-          load_analysis_settings
+          @list_of_genome = ChipAtlas::Experiment.list_of_genome
+          @page_js = 'enrichment-analysis'
           erb :enrichment_analysis
         end
 
@@ -72,7 +73,8 @@ module ChipAtlas
           @genesetA  = params['genesetA']
           @genesetB  = params['genesetB']
           log_activity('enrichment_analysis', { taxonomy: @taxonomy })
-          load_analysis_settings
+          @list_of_genome = ChipAtlas::Experiment.list_of_genome
+          @page_js = 'enrichment-analysis'
           erb :enrichment_analysis
         end
 
