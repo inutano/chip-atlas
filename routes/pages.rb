@@ -57,8 +57,7 @@ module ChipAtlas
         end
 
         app.get '/target_genes_result' do
-          @data_url = params[:data_url]
-          halt 400 unless @data_url&.start_with?('https://chip-atlas.dbcls.jp/')
+          @page_js = 'target-genes-result'
           erb :target_genes_result
         end
 
