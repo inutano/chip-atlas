@@ -63,8 +63,13 @@ export interface BedSizes {
   [key: string]: number
 }
 
+export interface ColoIndexEntry {
+  track: Record<string, string[]>      // track -> cell_types
+  cell_type: Record<string, string[]>  // cell_type -> tracks
+}
+
 export interface ColoIndex {
-  [track: string]: string[]  // track -> cell_types
+  [genome: string]: ColoIndexEntry
 }
 
 export interface TargetGenesIndex {
