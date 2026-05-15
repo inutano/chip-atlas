@@ -1,0 +1,35 @@
+<%
+  @page_title = 'Peak Browser'
+  @page_description = 'Visualize all peaks of the public ChIP-Seq data on IGV.'
+  @active_menu = 'peak_browser'
+%>
+<script id="page-data" type="application/json"><%== { genomes: @list_of_genome }.to_json.gsub('</', '<\/') %></script>
+
+<div class="row mb-3">
+  <div class="col-md-12">
+    <h1>ChIP-Atlas: Peak Browser</h1>
+    <p>Visualize TF-binding, histone marks, chromatin accessibility, and DNA methylation on
+      <a href="http://software.broadinstitute.org/software/igv/home" target="_blank" rel="noopener noreferrer">IGV</a>.
+    </p>
+  </div>
+</div>
+
+<div id="genome-tabs"></div>
+
+<div class="row">
+  <div class="col-md-9">
+    <div class="card mb-3">
+      <div class="card-header"><h5 class="mb-0">Filter</h5></div>
+      <div class="card-body">
+        <div id="facet-filter"></div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="d-grid gap-2">
+      <button type="button" id="view-igv" class="btn btn-primary btn-lg">View on IGV</button>
+      <button type="button" id="download-bed" class="btn btn-outline-primary btn-lg">Download BED</button>
+    </div>
+    <div id="action-status" class="text-muted small mt-2" aria-live="polite"></div>
+  </div>
+</div>

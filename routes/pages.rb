@@ -19,7 +19,8 @@ module ChipAtlas
         end
 
         app.get '/peak_browser' do
-          load_analysis_settings
+          @list_of_genome = ChipAtlas::Experiment.list_of_genome
+          @page_js = 'peak-browser'
           erb :peak_browser
         end
 
