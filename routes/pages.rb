@@ -84,7 +84,8 @@ module ChipAtlas
         end
 
         app.get '/diff_analysis' do
-          load_analysis_settings
+          @list_of_genome = ChipAtlas::Experiment.list_of_genome
+          @page_js = 'diff-analysis'
           erb :diff_analysis
         end
 
