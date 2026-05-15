@@ -51,8 +51,8 @@ module ChipAtlas
         end
 
         app.get '/target_genes' do
-          @index_all_genome = ChipAtlas::Experiment.cached_index_all_genome
-          @list_of_genome   = ChipAtlas::Experiment.list_of_genome
+          @list_of_genome = ChipAtlas::Experiment.list_of_genome
+          @page_js = 'target-genes'
           erb :target_genes
         end
 

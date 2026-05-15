@@ -1,0 +1,52 @@
+<%
+  @page_title = 'Target Genes'
+  @page_description = 'Search for genes bound by given transcription factors.'
+  @active_menu = 'target_genes'
+%>
+<script id="page-data" type="application/json"><%== { genomes: @list_of_genome }.to_json.gsub('</', '<\/') %></script>
+
+<div class="row mb-3">
+  <div class="col-md-12">
+    <h1>ChIP-Atlas: Target Genes</h1>
+    <p>Search for genes bound by given transcription factors.</p>
+  </div>
+</div>
+
+<div id="genome-tabs"></div>
+
+<div class="row">
+  <div class="col-md-6">
+    <div class="card mb-3">
+      <div class="card-header"><h5 class="mb-0">1. Choose Antigen</h5></div>
+      <div class="card-body">
+        <input type="text" id="track-input" class="form-control" placeholder="type to search" autocomplete="off">
+      </div>
+    </div>
+  </div>
+  <div class="col-md-6">
+    <div class="card mb-3">
+      <div class="card-header"><h5 class="mb-0">2. Choose Distance from TSS</h5></div>
+      <div class="card-body">
+        <div class="form-check">
+          <input class="form-check-input" type="radio" name="distance" id="distance-1" value="1" checked>
+          <label class="form-check-label" for="distance-1">±1 kb</label>
+        </div>
+        <div class="form-check">
+          <input class="form-check-input" type="radio" name="distance" id="distance-5" value="5">
+          <label class="form-check-label" for="distance-5">±5 kb</label>
+        </div>
+        <div class="form-check">
+          <input class="form-check-input" type="radio" name="distance" id="distance-10" value="10">
+          <label class="form-check-label" for="distance-10">±10 kb</label>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row mb-4">
+  <div class="col-md-6 offset-md-3 d-grid gap-2">
+    <button type="button" id="view-target-genes" class="btn btn-primary btn-lg">View Potential Target Genes</button>
+    <button type="button" id="download-tsv" class="btn btn-outline-primary btn-lg">Download (TSV)</button>
+  </div>
+</div>
