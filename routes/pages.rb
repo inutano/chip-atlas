@@ -39,8 +39,8 @@ module ChipAtlas
         end
 
         app.get '/colo' do
-          @index_all_genome = ChipAtlas::Experiment.cached_index_all_genome
-          @list_of_genome   = ChipAtlas::Experiment.list_of_genome
+          @list_of_genome = ChipAtlas::Experiment.list_of_genome
+          @page_js = 'colo'
           erb :colo
         end
 

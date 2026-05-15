@@ -1,0 +1,64 @@
+<%
+  @page_title = 'Colocalization'
+  @page_description = 'Predict potential partner proteins that form complexes with given TFs.'
+  @active_menu = 'colo'
+%>
+<script id="page-data" type="application/json"><%== { genomes: @list_of_genome }.to_json.gsub('</', '<\/') %></script>
+
+<div class="row mb-3">
+  <div class="col-md-12">
+    <h1>ChIP-Atlas: Colocalization</h1>
+    <p>Predict potential partner proteins that form complexes with given TFs.</p>
+  </div>
+</div>
+
+<div id="genome-tabs"></div>
+
+<div class="row">
+  <div class="col-md-4">
+    <div class="card mb-3">
+      <div class="card-header"><h5 class="mb-0">1. Search mode</h5></div>
+      <div class="card-body">
+        <div class="form-check">
+          <input class="form-check-input" type="radio" name="direction" id="direction-track" value="track" checked>
+          <label class="form-check-label" for="direction-track">Antigens → Cell Type</label>
+        </div>
+        <div class="form-check">
+          <input class="form-check-input" type="radio" name="direction" id="direction-cell" value="cell_type">
+          <label class="form-check-label" for="direction-cell">Cell Type → Antigen</label>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card mb-3">
+      <div class="card-header"><h5 class="mb-0">2. Choose Primary Type</h5></div>
+      <div class="card-body">
+        <input type="text" id="primary-input" class="form-control" placeholder="type to search" autocomplete="off">
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card mb-3">
+      <div class="card-header"><h5 class="mb-0">3. Choose Secondary Type</h5></div>
+      <div class="card-body">
+        <input type="text" id="secondary-input" class="form-control" placeholder="type to search" autocomplete="off">
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row mb-2">
+  <div class="col-md-6 offset-md-3 d-grid">
+    <button type="button" id="view-colo" class="btn btn-primary btn-lg">View Colocalization Data</button>
+  </div>
+</div>
+
+<div class="row mb-4">
+  <div class="col-md-3 offset-md-3 d-grid">
+    <button type="button" id="download-tsv" class="btn btn-outline-primary">Download (TSV)</button>
+  </div>
+  <div class="col-md-3 d-grid">
+    <button type="button" id="download-gml" class="btn btn-outline-primary">Download (GML)</button>
+  </div>
+</div>
