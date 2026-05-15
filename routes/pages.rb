@@ -45,8 +45,7 @@ module ChipAtlas
         end
 
         app.get '/colo_result' do
-          @data_url = params[:data_url]
-          halt 400 unless @data_url&.start_with?('https://chip-atlas.dbcls.jp/')
+          @page_js = 'colo-result'
           erb :colo_result
         end
 

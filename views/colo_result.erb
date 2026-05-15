@@ -1,0 +1,43 @@
+<%
+  @page_title = 'Colocalization Result'
+  @page_description = 'Predicted colocalization partners ranked by score.'
+  @active_menu = 'colo'
+%>
+<div class="row mb-3">
+  <div class="col-md-12">
+    <h1>ChIP-Atlas: Colocalization Result</h1>
+    <div id="result-summary" class="text-muted small"></div>
+  </div>
+</div>
+
+<div id="loading-state" class="text-muted">Loading…</div>
+<div id="error-state" class="alert alert-danger" hidden></div>
+
+<div id="result-wrap" hidden>
+  <div class="row mb-2">
+    <div class="col-md-6">
+      <input type="search" id="partner-search" class="form-control form-control-sm" placeholder="Filter by track or cell type" aria-label="Filter partners">
+    </div>
+    <div class="col-md-6 text-end">
+      <button type="button" id="download-tsv" class="btn btn-sm btn-outline-secondary">Download TSV</button>
+      <button type="button" id="download-gml" class="btn btn-sm btn-outline-secondary">Download GML</button>
+    </div>
+  </div>
+  <div class="table-responsive">
+    <table class="table table-striped table-sm">
+      <thead>
+        <tr>
+          <th scope="col">Rank</th>
+          <th scope="col">Track</th>
+          <th scope="col">Cell Type</th>
+          <th scope="col">Cell Type Class</th>
+          <th scope="col">Score</th>
+          <th scope="col">Shared Bins</th>
+          <th scope="col">Experiment ID</th>
+        </tr>
+      </thead>
+      <tbody id="result-tbody"></tbody>
+    </table>
+  </div>
+  <div id="row-count" class="text-muted small mt-2"></div>
+</div>
