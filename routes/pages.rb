@@ -76,6 +76,7 @@ module ChipAtlas
         end
 
         app.get '/enrichment_analysis_result' do
+          @page_js = 'enrichment-result'
           erb :enrichment_analysis_result
         end
 
