@@ -10,3 +10,9 @@ log/
 public/ExperimentList.json
 public/ExperimentList_adv.json
 script/
+
+# Host-only build artifacts — the image runs a clean bundle install,
+# and TypeScript is precompiled to public/js (no Node in the runtime image).
+vendor/bundle
+node_modules
+frontend/
