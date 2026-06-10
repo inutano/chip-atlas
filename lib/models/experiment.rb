@@ -183,17 +183,6 @@ module ChipAtlas
       result
     end
 
-    def get_subclass(genome, track_class, cell_type_class, subclass_type)
-      return {} if cell_type_class == 'All cell types' && subclass_type == 'cl'
-
-      subset = dataset.where(genome: genome)
-      subset = subset.where(track_class: track_class) if track_class
-      subset = subset.where(cell_type_class: cell_type_class) unless cell_type_class == 'All cell types'
-
-      col = subclass_type == 'ag' ? :track_subclass : :cell_type_subclass
-      subset.group_and_count(col).as_hash(col, :count)
-    end
-
     def load_from_file(table_path)
       timestamp = Time.now
       total = 0
