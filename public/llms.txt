@@ -15,9 +15,8 @@ ChIP-Atlas integrates data from NCBI SRA, GEO, and other public repositories. Al
 
 ## API for Agents
 
-- [Agent Guide](https://chip-atlas.org/agents): Full documentation of MCP tools, HTTP API endpoints, data model, and usage workflows for AI agents
+- [Agent Guide](https://chip-atlas.org/agents): Full documentation of HTTP API endpoints, the data model, and usage workflows for AI agents
 - [OpenAPI 3.1 Spec](https://chip-atlas.org/openapi.yaml): Machine-readable API specification for all JSON endpoints
-- [MCP Server Source](https://github.com/inutano/chip-atlas/tree/master/mcp): TypeScript MCP server providing read-only tools for querying ChIP-Atlas programmatically
 
 ## API Endpoints
 
@@ -45,8 +44,10 @@ All endpoints are under the `/api/` prefix, return JSON, and use snake_case fiel
 
 - [Download URL](https://chip-atlas.org/api/download_url?genome=hg38&track_class=Histone&track_subclass=H3K4me3&cell_type_class=Blood&cell_type_subclass=-&qval=05): GET — BED file download URL
 - [IGV URL](https://chip-atlas.org/api/igv_url?genome=hg38&track_class=Histone&track_subclass=H3K4me3&cell_type_class=Blood&cell_type_subclass=-&qval=05): GET — IGV genome browser URL
-- [Colocalization URLs](https://chip-atlas.org/api/colo_urls?genome=hg38&track=CTCF&cell_type=K-562): GET — colocalization result URLs (data_url, tsv_url, gml_url)
-- [Target Genes URLs](https://chip-atlas.org/api/target_genes_urls?genome=hg38&track=CTCF&distance=5000): GET — target genes result URLs (data_url, tsv_url)
+- [Colocalization Data](https://chip-atlas.org/api/colo?genome=hg38&track=CTCF&cell_type=K-562): GET — colocalization result data (JSON), proxied from the data backend
+- [Colocalization Download](https://chip-atlas.org/api/colo/download?genome=hg38&track=CTCF&cell_type=K-562&format=tsv): GET — download colocalization result (format=tsv or gml)
+- [Target Genes Data](https://chip-atlas.org/api/target_genes?genome=hg38&track=CTCF&distance=5): GET — target gene result data (JSON)
+- [Target Genes Download](https://chip-atlas.org/api/target_genes/download?genome=hg38&track=CTCF&distance=5&format=tsv): GET — download target gene result (tsv)
 
 ### Jobs
 
@@ -83,7 +84,7 @@ The download URL requires all of: `genome`, `track_class`, `track_subclass`, `ce
 
 ### Colocalization and Target Genes results
 
-`GET /api/colo_urls` and `GET /api/target_genes_urls` return URLs to pre-computed result files on the data backend. Not all track/cell type combinations have pre-computed results. A 404 from the result URL means that combination has no data available, not that the API is broken. Use the colocalization and target genes index endpoints to check which combinations have data before requesting results.
+`GET /api/colo` and `GET /api/target_genes` return pre-computed result data (JSON) proxied from the data backend; `GET /api/colo/download` and `GET /api/target_genes/download` stream the same results as files (`format=tsv`, or `gml` for colocalization). Not all track/cell type combinations have pre-computed results. A 404 means that combination has no data available, not that the API is broken. Use the `/api/colo_index` and `/api/target_genes_index` endpoints to check which combinations have data before requesting results.
 
 ### Experiment Search
 

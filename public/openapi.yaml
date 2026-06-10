@@ -209,34 +209,6 @@ components:
           type: object
           description: Per-feature availability flags
 
-    ColoUrls:
-      type: object
-      properties:
-        data_url:
-          type: string
-          format: uri
-          description: URL to colocalization result data
-        tsv_url:
-          type: string
-          format: uri
-          description: URL to colocalization TSV file
-        gml_url:
-          type: string
-          format: uri
-          description: URL to colocalization GML network file
-
-    TargetGenesUrls:
-      type: object
-      properties:
-        data_url:
-          type: string
-          format: uri
-          description: URL to target genes result data
-        tsv_url:
-          type: string
-          format: uri
-          description: URL to target genes TSV file
-
     JobSubmission:
       type: object
       required:
@@ -578,6 +550,43 @@ paths:
               schema:
                 type: object
 
+  /api/stats:
+    get:
+      operationId: getStats
+      tags: [Data]
+      summary: Get database statistics
+      description: >-
+        Returns total experiment counts and breakdowns by genome and track class.
+      responses:
+        "200":
+          description: Database statistics
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total_experiments:
+                    type: integer
+                  total_experiments_formatted:
+                    type: string
+                  by_genome:
+                    type: object
+                    additionalProperties:
+                      type: integer
+                  by_track_class:
+                    type: object
+                    additionalProperties:
+                      type: integer
+              example:
+                total_experiments: 432640
+                total_experiments_formatted: "432,000"
+                by_genome:
+                  hg38: 197044
+                  mm10: 194162
+                by_track_class:
+                  Histone: 88496
+                  TFs and others: 66602
+
   /api/colo_index:
     get:
       operationId: getColoIndex
@@ -628,6 +637,29 @@ paths:
                 mm10:
                   - H3K4me3
                   - H3K27ac
+
+  /api/target_genes_distances:
+    get:
+      operationId: getTargetGenesDistances
+      tags: [Analysis]
+      summary: Get valid target gene distance options
+      description: Returns the valid distance options for target gene analysis.
+      responses:
+        "200":
+          description: Array of distance options
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ClassificationItem"
+              example:
+                - id: "1"
+                  label: 1 kb
+                - id: "5"
+                  label: 5 kb
+                - id: "10"
+                  label: 10 kb
 
   # ── URL Generation ─────────────────────────────────────────────────
 
@@ -698,15 +730,15 @@ paths:
               example:
                 url: "https://igv.org/app/?sessionURL=..."
 
-  /api/colo_urls:
+  /api/colo:
     get:
-      operationId: getColoUrls
-      tags: [URL Generation]
-      summary: Get colocalization result URLs
+      operationId: getColocalizationData
+      tags: [Analysis]
+      summary: Get colocalization result data
       description: >-
-        Returns URLs to pre-computed colocalization result files for a given
-        genome, track, and cell type combination. Check /api/colo_index first
-        to verify the combination has data.
+        Returns pre-computed colocalization result data (JSON) for a given
+        genome, track, and cell type, proxied from the data backend. Check
+        /api/colo_index first to verify the combination has data.
       parameters:
         - $ref: "#/components/parameters/Genome"
         - name: track
@@ -718,32 +750,77 @@ paths:
           example: CTCF
         - name: cell_type
           in: query
-          required: false
+          required: true
           description: Cell type name (e.g. "K-562")
           schema:
             type: string
           example: K-562
       responses:
         "200":
-          description: Object containing result file URLs
+          description: Colocalization result data
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ColoUrls"
-              example:
-                data_url: "https://chip-atlas.dbcls.jp/data/hg38/colo/CTCF.K-562.data"
-                tsv_url: "https://chip-atlas.dbcls.jp/data/hg38/colo/CTCF.K-562.tsv"
-                gml_url: "https://chip-atlas.dbcls.jp/data/hg38/colo/CTCF.K-562.gml"
+                type: object
+        "404":
+          description: No pre-computed colocalization data for this combination
 
-  /api/target_genes_urls:
+  /api/colo/download:
     get:
-      operationId: getTargetGenesUrls
-      tags: [URL Generation]
-      summary: Get target genes result URLs
+      operationId: downloadColocalization
+      tags: [Analysis]
+      summary: Download colocalization result file
       description: >-
-        Returns URLs to pre-computed target gene result files for a given
-        genome, track, and distance. Check /api/target_genes_index first
-        to verify the combination has data.
+        Streams a pre-computed colocalization result file (TSV table or GML
+        network) for a given genome, track, and cell type.
+      parameters:
+        - $ref: "#/components/parameters/Genome"
+        - name: track
+          in: query
+          required: true
+          description: Track / antigen name (e.g. "CTCF")
+          schema:
+            type: string
+          example: CTCF
+        - name: cell_type
+          in: query
+          required: true
+          description: Cell type name (e.g. "K-562")
+          schema:
+            type: string
+          example: K-562
+        - name: format
+          in: query
+          required: true
+          description: Output file format
+          schema:
+            type: string
+            enum:
+              - tsv
+              - gml
+          example: tsv
+      responses:
+        "200":
+          description: Colocalization result file
+          content:
+            text/tab-separated-values:
+              schema:
+                type: string
+            application/xml:
+              schema:
+                type: string
+        "404":
+          description: No pre-computed colocalization data for this combination
+
+  /api/target_genes:
+    get:
+      operationId: getTargetGenesData
+      tags: [Analysis]
+      summary: Get target genes result data
+      description: >-
+        Returns pre-computed target gene result data (JSON) for a given
+        genome, track, and distance, proxied from the data backend. Check
+        /api/target_genes_index first to verify the combination has data.
       parameters:
         - $ref: "#/components/parameters/Genome"
         - name: track
@@ -756,20 +833,70 @@ paths:
         - name: distance
           in: query
           required: true
-          description: Distance from TSS in base pairs
+          description: >-
+            Distance from TSS in kb. Use /api/target_genes_distances for
+            valid values.
           schema:
-            type: integer
-          example: 5000
+            type: string
+            enum:
+              - "1"
+              - "5"
+              - "10"
+          example: "5"
       responses:
         "200":
-          description: Object containing result file URLs
+          description: Target gene result data
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/TargetGenesUrls"
-              example:
-                data_url: "https://chip-atlas.dbcls.jp/data/hg38/target_genes/CTCF.5000.data"
-                tsv_url: "https://chip-atlas.dbcls.jp/data/hg38/target_genes/CTCF.5000.tsv"
+                type: object
+        "404":
+          description: No pre-computed target gene data for this combination
+
+  /api/target_genes/download:
+    get:
+      operationId: downloadTargetGenes
+      tags: [Analysis]
+      summary: Download target genes result file
+      description: Streams a pre-computed target gene result file (TSV).
+      parameters:
+        - $ref: "#/components/parameters/Genome"
+        - name: track
+          in: query
+          required: true
+          description: Track / antigen name (e.g. "CTCF")
+          schema:
+            type: string
+          example: CTCF
+        - name: distance
+          in: query
+          required: true
+          description: Distance from TSS in kb
+          schema:
+            type: string
+            enum:
+              - "1"
+              - "5"
+              - "10"
+          example: "5"
+        - name: format
+          in: query
+          required: true
+          description: Output file format
+          schema:
+            type: string
+            enum:
+              - tsv
+          example: tsv
+      responses:
+        "200":
+          description: Target gene result file (TSV)
+          content:
+            text/tab-separated-values:
+              schema:
+                type: string
+        "404":
+          description: No pre-computed target gene data for this combination
 
   # ── Jobs ────────────────────────────────────────────────────────────
 

@@ -1,39 +1,19 @@
 ## ChIP-Atlas for AI Agents
 
-ChIP-Atlas is a comprehensive database of public ChIP-seq, ATAC-seq, DNase-seq, and Bisulfite-seq experiments. This page describes how AI agents can query ChIP-Atlas programmatically via the MCP (Model Context Protocol) server or the HTTP API directly.
+ChIP-Atlas is a comprehensive database of public ChIP-seq, ATAC-seq, DNase-seq, Bisulfite-seq, CUT&Tag, and CUT&RUN experiments. This page describes how AI agents and scripts can query ChIP-Atlas programmatically via its HTTP API.
 
 **New here?** Check out the [hands-on demo tutorial](/demo) for step-by-step scenarios you can try with your preferred LLM.
 
+**Machine-readable spec:** [OpenAPI 3.1 (openapi.yaml)](/openapi.yaml) &middot; **Quick reference:** [llms.txt](/llms.txt)
+
 ---
 
-## MCP Server
+## API Basics
 
-The ChIP-Atlas MCP server provides 10 read-only tools for exploring and retrieving epigenomic data. It uses stdio transport and is compatible with Claude Desktop, Claude Code, and other MCP clients.
-
-**Installation:**
-
-```
-cd mcp && npm install && npm run build
-```
-
-**Configuration (Claude Desktop / Claude Code):**
-
-```json
-{
-  "mcpServers": {
-    "chipatlas": {
-      "command": "node",
-      "args": ["path/to/chip-atlas/mcp/dist/index.js"]
-    }
-  }
-}
-```
-
-Set `CHIP_ATLAS_BASE_URL` to override the default base URL (`https://chip-atlas.org`).
-
-Source code: [github.com/inutano/chip-atlas/tree/master/mcp](https://github.com/inutano/chip-atlas/tree/master/mcp)
-
-**Machine-readable API spec:** [OpenAPI 3.1 (openapi.yaml)](/openapi.yaml)
+- **Base URL:** `https://chip-atlas.org`
+- All endpoints are under the `/api/` prefix, return JSON, and use **snake_case** field names.
+- Read-only. No authentication required.
+- Classification endpoints return arrays of `{id, label, count}` objects (`count` is `null` when not applicable). Search returns `{total, returned, experiments: [...]}`.
 
 ---
 
@@ -41,157 +21,115 @@ Source code: [github.com/inutano/chip-atlas/tree/master/mcp](https://github.com/
 
 ChIP-Atlas organizes data along these dimensions:
 
-| Dimension | Examples | Notes |
-|-----------|----------|-------|
-| **Genome** | hg38, mm10, dm6, sacCer3 | Assembly identifier |
-| **Experiment class** (agClass) | Histone, TFs and others, ATAC-Seq, DNase-seq, Bisulfite-Seq | Top-level category |
-| **Antigen subclass** (agSubClass) | H3K4me3, CTCF, p300 | Specific target |
-| **Cell type class** (clClass) | Blood, Brain, Liver, All cell types | Broad tissue/cell category |
-| **Cell type subclass** (clSubClass) | K-562, HeLa, GM12878 | Specific cell line or tissue |
-| **Q-value** | 1, 5, 10, 50, 100 | Peak-call significance threshold (smaller = stricter) |
+| Dimension | Field | Examples |
+|-----------|-------|----------|
+| **Genome** | `genome` | hg38, mm10, rn6, dm6, ce11, sacCer3, TAIR10 |
+| **Track class** | `track_class` | Histone, TFs and others, RNA polymerase, Input control, ATAC-Seq, DNase-seq, Bisulfite-Seq, CUT&Tag, CUT&RUN |
+| **Track subclass** | `track_subclass` | H3K4me3, CTCF, p300 (the specific antigen/target) |
+| **Cell type class** | `cell_type_class` | Blood, Brain, Liver, All cell types (broad category) |
+| **Cell type subclass** | `cell_type_subclass` | K-562, HeLa, GM12878 (specific cell line/tissue) |
+| **Q-value** | `qval` | 05, 10, 20, 50 (peak-call threshold; smaller = stricter) |
 
-Experiments are identified by SRX (SRA experiment) or GSM (GEO sample) accession IDs.
-
----
-
-## Tools Reference
-
-### Browsing the hierarchy
-
-Start broad and drill down through the classification tree.
-
-**`chipatlas_list_genomes`** — Returns available genome assemblies as a string array. No parameters. This is the typical entry point.
-
-**`chipatlas_list_experiment_types`** — Lists experiment classes (e.g. Histone, TFs and others, ATAC-Seq). Call without arguments for the static list. Call with `genome` + `clClass` to get experiment counts for a specific context.
-
-| Parameter | Required | Description |
-|-----------|----------|-------------|
-| genome | No | Genome assembly (e.g. hg38). Required with clClass. |
-| clClass | No | Cell type class (e.g. "Blood"). Use "All cell types" for all. |
-
-**`chipatlas_list_sample_types`** — Lists cell type classes with experiment counts.
-
-| Parameter | Required | Description |
-|-----------|----------|-------------|
-| genome | Yes | Genome assembly |
-| agClass | Yes | Experiment class (e.g. "Histone") |
-
-**`chipatlas_list_antigens`** — Lists antigen subclasses (e.g. H3K4me3, CTCF) with counts.
-
-| Parameter | Required | Description |
-|-----------|----------|-------------|
-| genome | Yes | Genome assembly |
-| agClass | Yes | Experiment class |
-| clClass | No | Cell type class to filter by |
-
-**`chipatlas_list_cell_types`** — Lists cell type subclasses with counts.
-
-| Parameter | Required | Description |
-|-----------|----------|-------------|
-| genome | Yes | Genome assembly |
-| agClass | Yes | Experiment class |
-| clClass | No | Cell type class to filter by |
-
-### Searching and retrieving experiments
-
-**`chipatlas_search_experiments`** — Full-text search across all experiment fields (accession IDs, genome, antigen, cell type, etc.).
-
-| Parameter | Required | Description |
-|-----------|----------|-------------|
-| query | Yes | Search keyword (e.g. "H3K4me3", "HeLa", "SRX123456") |
-| limit | No | Max results to return (default 20, max 100) |
-
-Returns structured records with fields: `srx`, `sra`, `geo`, `genome`, `agClass`, `agSubClass`, `clClass`, `clSubClass`.
-
-**`chipatlas_get_experiment`** — Detailed metadata for a single experiment.
-
-| Parameter | Required | Description |
-|-----------|----------|-------------|
-| expid | Yes | Experiment ID (e.g. SRX123456 or GSM123456) |
-
-### Analysis data
-
-**`chipatlas_get_colocalization`** — Colocalization analysis index for a genome: which antigen/cell type combinations have precomputed results.
-
-| Parameter | Required | Description |
-|-----------|----------|-------------|
-| genome | Yes | Genome assembly |
-
-**`chipatlas_get_target_genes`** — Target gene analysis availability. Returns a mapping of genomes to lists of antigens with precomputed data. No parameters.
-
-**`chipatlas_get_bed_url`** — Generates a download URL for assembled peak-call BED files.
-
-| Parameter | Required | Description |
-|-----------|----------|-------------|
-| genome | Yes | Genome assembly |
-| agClass | Yes | Experiment class |
-| agSubClass | No | Antigen subclass (e.g. "H3K4me3") |
-| clClass | No | Cell type class |
-| clSubClass | No | Cell type subclass |
-| qval | No | Q-value threshold (e.g. "5", "10") |
+Experiments are identified by an SRX, ERX, or DRX accession ID (`experiment_id`). GEO sample IDs (GSM…) are accepted where noted.
 
 ---
 
-## HTTP API Endpoints
+## Endpoint Reference
 
-These are the underlying REST endpoints. The MCP tools wrap these, but agents can also call them directly.
+### Classification — browse the hierarchy
+
+Start broad and drill down. Each returns an array of `{id, label, count}`.
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| GET | `/data/list_of_genome.json` | List genome assemblies |
-| GET | `/data/list_of_experiment_types.json` | List experiment types (static) |
-| GET | `/data/experiment_types?genome=X&clClass=Y` | Experiment types with counts |
-| GET | `/data/sample_types?genome=X&agClass=Y` | Cell type classes with counts |
-| GET | `/data/chip_antigen?genome=X&agClass=Y&clClass=Z` | Antigen subclasses with counts |
-| GET | `/data/cell_type?genome=X&agClass=Y&clClass=Z` | Cell type subclasses with counts |
-| GET | `/data/ExperimentList.json` | Full experiment list (large) |
-| GET | `/data/exp_metadata.json?expid=X` | Single experiment metadata |
-| GET | `/data/colo_analysis.json?genome=X` | Colocalization analysis index |
-| GET | `/data/target_genes_analysis.json` | Target genes analysis index |
-| POST | `/download` | Get BED file download URL |
+| GET | `/api/genomes` | Available genome assemblies (object: `id` → label) |
+| GET | `/api/track_classes` | Static list of track classes; add `?genome=hg38&cell_type_class=Blood` for counts |
+| GET | `/api/cell_type_classes?genome=hg38&track_class=Histone` | Cell type classes with counts |
+| GET | `/api/track_subclasses?genome=hg38&track_class=Histone&cell_type_class=Blood` | Track subclasses (H3K4me3, CTCF, …) with counts |
+| GET | `/api/cell_type_subclasses?genome=hg38&track_class=Histone&cell_type_class=Blood` | Cell type subclasses (K-562, …) with counts |
 
-The POST `/download` endpoint accepts a JSON body: `{"condition": {"genome": "...", "agClass": "...", ...}}`.
+### Experiments
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/search?q=CTCF&genome=hg38&limit=20&offset=0` | Full-text search with pagination. Returns `{total, returned, experiments}` |
+| GET | `/api/experiment?experiment_id=SRX018625` | Full metadata for one experiment |
+| GET | `/api/stats` | Database totals and breakdowns by genome and track class |
+
+### Analysis indexes
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/colo_index?genome=hg38` | Which track / cell-type combinations have precomputed colocalization results |
+| GET | `/api/target_genes_index` | Genomes → tracks with precomputed target-gene data |
+| GET | `/api/target_genes_distances` | Valid distance options (1, 5, 10 kb) |
+| GET | `/api/qval_range` | Valid q-value thresholds (05, 10, 20, 50) |
+
+### Result data and downloads
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/download_url?genome=…&track_class=…&track_subclass=…&cell_type_class=…&cell_type_subclass=-&qval=05` | BED file download URL for a peak-call dataset |
+| GET | `/api/igv_url?genome=…&track_class=…&…` | IGV genome-browser URL (same parameters as `download_url`) |
+| GET | `/api/colo?genome=hg38&track=CTCF&cell_type=K-562` | Colocalization result data (JSON), proxied from the data backend |
+| GET | `/api/colo/download?genome=hg38&track=CTCF&cell_type=K-562&format=tsv` | Download colocalization result (`format=tsv` or `gml`) |
+| GET | `/api/target_genes?genome=hg38&track=CTCF&distance=5` | Target-gene result data (JSON) |
+| GET | `/api/target_genes/download?genome=hg38&track=CTCF&distance=5&format=tsv` | Download target-gene result (tsv) |
+
+For `download_url` / `igv_url`, supply `-` for any unspecified `track_subclass` / `cell_type_subclass`. A combination with no precomputed file returns `{"url": null}`.
+
+### Jobs — enrichment & differential analysis
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/status` | Data server / compute backend availability |
+| GET | `/jobs/available?type=enrichment_analysis` | Is a backend up for this job type? |
+| POST | `/jobs/submit` | Submit an enrichment or differential analysis job |
+| GET | `/jobs/:id/status?backend=wabi` | Poll job status |
+| GET | `/jobs/:id/result?backend=wabi` | Result URLs for a finished job |
+| GET | `/jobs/:id/log?backend=wabi` | Execution log |
 
 ---
 
 ## Common Workflows
 
-### Find what data is available for a genome
+### Discover what data exists for a genome
 
 ```
-chipatlas_list_genomes()
-chipatlas_list_experiment_types(genome="hg38", clClass="All cell types")
-chipatlas_list_sample_types(genome="hg38", agClass="Histone")
+GET /api/genomes
+GET /api/track_classes?genome=hg38&cell_type_class=Blood
+GET /api/cell_type_classes?genome=hg38&track_class=Histone
 ```
 
 ### Search for specific experiments
 
 ```
-chipatlas_search_experiments(query="CTCF K-562")
-chipatlas_get_experiment(expid="SRX018625")
+GET /api/search?q=CTCF%20K-562&genome=hg38
+GET /api/experiment?experiment_id=SRX018625
 ```
 
 ### Get a download URL for peak data
 
 ```
-chipatlas_list_antigens(genome="hg38", agClass="Histone", clClass="Blood")
-chipatlas_get_bed_url(genome="hg38", agClass="Histone", agSubClass="H3K4me3", clClass="Blood", qval="5")
+GET /api/track_subclasses?genome=hg38&track_class=Histone&cell_type_class=Blood
+GET /api/download_url?genome=hg38&track_class=Histone&track_subclass=H3K4me3&cell_type_class=Blood&cell_type_subclass=-&qval=05
 ```
 
 ### Check available analyses
 
 ```
-chipatlas_get_target_genes()
-chipatlas_get_colocalization(genome="hg38")
+GET /api/target_genes_index
+GET /api/colo_index?genome=hg38
 ```
 
 ---
 
 ## Tips
 
-- **Start with `chipatlas_list_genomes`** if the user hasn't specified a genome.
-- **`agClass` values are fixed strings**: "Histone", "TFs and others", "RNA polymerase", "Input control", "ATAC-Seq", "DNase-seq", "Bisulfite-Seq". Use `chipatlas_list_experiment_types` to confirm.
-- **`clClass` values are case-sensitive.** Use `chipatlas_list_sample_types` to discover valid values.
-- **`search_experiments` downloads a large dataset** on first call. Prefer browsing tools when you know the classification.
-- **Q-value**: lower = stricter peak calling. 5 or 10 are reasonable defaults.
-- **BED file URLs** from `chipatlas_get_bed_url` are direct download links to potentially large files. Present them to the user rather than fetching them.
+- **Start with `/api/genomes`** if the user hasn't specified a genome.
+- **`track_class` values are fixed strings:** "Histone", "TFs and others", "RNA polymerase", "Input control", "ATAC-Seq", "DNase-seq", "Bisulfite-Seq", "CUT&Tag", "CUT&RUN". Use `/api/track_classes` to confirm.
+- **Classification values are case-sensitive.** Use the classification endpoints to discover valid values rather than guessing.
+- **Search is paginated** (`limit` ≤ 100, `offset`). It replaces the previous bulk JSON experiment dump.
+- **Q-value** controls peak-call stringency: lower = stricter. "05" or "10" are reasonable defaults; `/api/qval_range` lists valid values.
+- **Download and result URLs** point to potentially large files on the data backend (chip-atlas.dbcls.jp). Present them to the user rather than fetching them.
+- **URL-encode** spaces in parameter values (e.g. "All cell types", "TFs and others") as `%20`.
