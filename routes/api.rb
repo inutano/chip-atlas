@@ -35,6 +35,12 @@ module ChipAtlas
               }.compact
             }
           end
+
+          def body_with_condition
+            data = parsed_json
+            halt 400, json_response({ error: 'condition object required' }) unless data['condition'].is_a?(Hash)
+            data
+          end
         end
 
         # === Classification endpoints ===
@@ -142,7 +148,7 @@ module ChipAtlas
         end
 
         app.post '/api/igv_url' do
-          url = ChipAtlas::LocationService.new(parsed_json).igv_browsing_url
+          url = ChipAtlas::LocationService.new(body_with_condition).igv_browsing_url
           json_response({ url: url })
         end
 
@@ -153,7 +159,7 @@ module ChipAtlas
         end
 
         app.post '/api/download_url' do
-          url = ChipAtlas::LocationService.new(parsed_json).archive_url
+          url = ChipAtlas::LocationService.new(body_with_condition).archive_url
           json_response({ url: url })
         end
 

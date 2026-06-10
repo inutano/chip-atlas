@@ -122,6 +122,16 @@ class ApiTest < Minitest::Test
     assert_match(/localhost:60151/, data['url'])
   end
 
+  def test_post_download_url_without_condition_returns_400
+    post '/api/download_url', JSON.generate({}), 'CONTENT_TYPE' => 'application/json'
+    assert_equal 400, last_response.status
+  end
+
+  def test_post_igv_url_without_condition_returns_400
+    post '/api/igv_url', JSON.generate({}), 'CONTENT_TYPE' => 'application/json'
+    assert_equal 400, last_response.status
+  end
+
   def test_get_download_url
     get '/api/download_url', genome: 'hg38', track_class: 'Histone', track_subclass: 'H3K4me3',
                              cell_type_class: 'Blood', cell_type_subclass: '-', qval: '05'
