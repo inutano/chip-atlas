@@ -23,9 +23,11 @@
     </div>
   </div>
   <div class="col-md-3">
-    <div class="d-grid gap-2">
-      <button type="button" id="view-igv" class="btn btn-primary btn-lg">View on IGV</button>
-      <button type="button" id="download-bed" class="btn btn-outline-primary btn-lg">Download BED</button>
+    <div class="button-submit">
+      <button type="button" id="view-igv" class="btn btn-primary btn-lg btn-block">View on IGV</button>
+      <a class="igv-help" href="https://github.com/inutano/chip-atlas/wiki#igv_doc"
+         target="_blank" rel="noopener noreferrer">Error connecting to IGV?</a>
+      <button type="button" id="download-bed" class="btn btn-primary btn-lg btn-block">Download BED file</button>
     </div>
     <div id="action-status" class="text-muted small mt-2" aria-live="polite"></div>
   </div>

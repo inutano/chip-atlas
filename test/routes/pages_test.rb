@@ -113,4 +113,12 @@ class PagesTest < Minitest::Test
     refute_includes body, '&#x2764;',  'heart emoji must be gone'
     assert_includes body, 'class="jumbotron"'
   end
+
+  def test_action_buttons_are_solid_and_full_width
+    get '/peak_browser'
+    body = last_response.body
+    assert_includes body, 'Download BED file'
+    refute_includes body, 'btn-outline-primary'
+    assert_includes body, 'btn-block'
+  end
 end

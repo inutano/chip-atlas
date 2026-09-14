@@ -352,3 +352,13 @@ h1 .icon, h3 .icon, h4 .icon { margin-right: 8px; }
   .jumbotron { flex-direction: column; text-align: center; }
   .jumbotron .col-labels { text-align: center; }
 }
+
+/* ===== Bootstrap 3 .btn-block, dropped in BS5 ===== */
+.btn-block {
+  display: block;
+  width: 100%;
+}
+
+.button-submit { margin-top: 5em; }
+.button-submit .btn + .btn { margin-top: 5px; }
+.button-submit .igv-help { display: block; text-align: right; font-size: 13px; margin: 4px 0; }
