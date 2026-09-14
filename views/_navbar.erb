@@ -51,19 +51,6 @@
           </a>
         </li>
         <li class="nav-item">
-          <a class="nav-link<%= ' active' if @active_menu == 'agents' %>" href="/agents">
-            <%== erb :_icon, locals: { name: 'robot' } %>
-            <span class="full-text">Agents</span>
-            <span class="abbrev-text">API</span>
-          </a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link<%= ' active' if @active_menu == 'demo' %>" href="/demo">
-            <span class="full-text">Demo</span>
-            <span class="abbrev-text">Demo</span>
-          </a>
-        </li>
-        <li class="nav-item">
           <a class="nav-link" href="https://github.com/inutano/chip-atlas/wiki">
             <%== erb :_icon, locals: { name: 'github' } %>
             <span class="full-text">Docs</span>

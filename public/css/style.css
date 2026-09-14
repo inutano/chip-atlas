@@ -10,6 +10,7 @@
   --ca-panel-border: #ddd;
   --ca-jumbotron-bg: #eee;
   --ca-rule: #eee;
+  --ca-navbar-h: 76px;
 
   --bs-primary: #428bca;
   --bs-primary-rgb: 66, 139, 202;
@@ -40,17 +41,22 @@
 
 /* ===== Body ===== */
 body {
-  padding-top: 70px;
+  /* Must clear the fixed navbar. Driven by one token so the two cannot drift:
+     the navbar measured 101px against 70px of padding, so 31px of every page
+     sat underneath it and headings were clipped. */
+  padding-top: var(--ca-navbar-h);
 }
 
 /* ===== Navbar ===== */
 .navbar {
   min-height: 50px;
+  padding-top: 2px;
+  padding-bottom: 2px;
 }
 
 .navbar .nav-link {
-  padding-top: 15px;
-  padding-bottom: 15px;
+  padding-top: 8px;
+  padding-bottom: 8px;
 }
 
 .navbar .nav-link i {
@@ -254,7 +260,7 @@ h1 .icon, h3 .icon, h4 .icon { margin-right: 8px; }
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  gap: 4px;
+  gap: 1px;
 }
 
 .navbar-id-form {

@@ -60,8 +60,7 @@ class PagesTest < Minitest::Test
     'diff_analysis'       => 'balance-scale-left',
     'target_genes'        => 'bullseye',
     'colo'                => 'compress-arrows-alt',
-    'publications'        => 'book',
-    'agents'              => 'robot'
+    'publications'        => 'book'
   }.freeze
 
   def test_navbar_links_carry_their_icons

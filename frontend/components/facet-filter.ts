@@ -159,6 +159,16 @@ class ListBoxControl implements FacetControl {
   }
 }
 
+// A page that has no control for a facet (Enrichment Analysis has no track/cell
+// subclass panels, matching production) gets this stand-in. '-' is the API's
+// "All" sentinel, so an omitted facet simply does not narrow the query.
+class AbsentControl implements FacetControl {
+  get value(): string { return '-' }
+  setLabeledItems(_items: ClassificationItem[]): void { /* nothing to render */ }
+  setPlainValues(_values: string[]): void { /* nothing to render */ }
+  onChange(_handler: () => void): void { /* never fires */ }
+}
+
 function requireMount(mount: Record<string, HTMLElement>, key: FacetKey): HTMLElement {
   const el = mount[key]
   if (!el) throw new Error(`FacetFilter: missing mount point for "${key}"`)
@@ -272,8 +282,12 @@ function buildListBoxControls(mount: Record<string, HTMLElement>): {
   return {
     trackClass: new ListBoxControl(requireMount(mount, 'track_class'), 'facet-track-class'),
     cellTypeClass: new ListBoxControl(requireMount(mount, 'cell_type_class'), 'facet-cell-type-class'),
-    trackSubclass: new ListBoxControl(requireMount(mount, 'track_subclass'), 'facet-track-subclass'),
-    cellTypeSubclass: new ListBoxControl(requireMount(mount, 'cell_type_subclass'), 'facet-cell-type-subclass'),
+    trackSubclass: mount.track_subclass
+      ? new ListBoxControl(mount.track_subclass, 'facet-track-subclass')
+      : new AbsentControl(),
+    cellTypeSubclass: mount.cell_type_subclass
+      ? new ListBoxControl(mount.cell_type_subclass, 'facet-cell-type-subclass')
+      : new AbsentControl(),
     qval: new ListBoxControl(requireMount(mount, 'qval'), 'facet-qval'),
   }
 }

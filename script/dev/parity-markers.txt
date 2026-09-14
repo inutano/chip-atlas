@@ -5,7 +5,6 @@
 /	navbar Target Genes icon	chip-atlas.svg#bullseye
 /	navbar Colo icon	chip-atlas.svg#compress-arrows-alt
 /	navbar Publications icon	chip-atlas.svg#book
-/	navbar Agents icon	chip-atlas.svg#robot
 /	navbar Docs icon	chip-atlas.svg#github
 /	navbar Search icon	chip-atlas.svg#search
 /	container pinned to Bootstrap 3 width	container-narrow
