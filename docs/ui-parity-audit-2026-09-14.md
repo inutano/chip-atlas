@@ -41,6 +41,7 @@ These are the exact values to target. **Two are currently wrong in `public/css/s
 | Body text colour | `#333` | BS5 default `#212529` |
 | Navbar background | `#222` | `bg-dark` = `#212529` |
 | Navbar active item | `#080808` | BS5 default |
+| Navbar link text | `white` (forced by `.navbar-inverse a`) | `rgba(255,255,255,.55)` ❌ (BS5 `navbar-dark` default, visibly dim) |
 | Container max-width | `1170px` (at ≥1200px) | `1320px` (BS5 xxl) ❌ |
 | Body padding-top | `70px` | `70px` ✓ |
 | Navbar min-height | `50px` | `50px` ✓ |
