@@ -369,3 +369,18 @@ h1 .icon, h3 .icon, h4 .icon { margin-right: 8px; }
   font-weight: 500;
   margin: 0 0 12px;
 }
+
+/* ===== List box (Bootstrap 3 select[size]) ===== */
+select.list-box {
+  height: auto;
+  padding: 0;
+  overflow-y: auto;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background-image: none;
+}
+
+select.list-box option {
+  padding: 2px 6px;
+  line-height: 1.42857143;
+}

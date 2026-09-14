@@ -1,0 +1,63 @@
+// frontend/components/list-box.ts
+// Bootstrap 3 style multi-row list box: a <select size="8"> with counts.
+// Replaces the old Flexselect control.
+
+export interface ListBoxOption {
+  id: string
+  label: string
+  count?: number | null
+}
+
+export interface ListBoxOptions {
+  container: HTMLElement
+  id: string
+  size?: number
+  options: ListBoxOption[]
+  selected?: string
+  onChange?: (id: string) => void
+}
+
+export class ListBox {
+  private select: HTMLSelectElement
+  private onChange?: (id: string) => void
+
+  constructor(opts: ListBoxOptions) {
+    this.onChange = opts.onChange
+
+    const select = document.createElement('select')
+    select.className = 'form-control list-box'
+    select.id = opts.id
+    select.size = opts.size ?? 8
+    select.addEventListener('change', () => {
+      if (this.onChange && select.value) this.onChange(select.value)
+    })
+
+    opts.container.innerHTML = ''
+    opts.container.appendChild(select)
+    this.select = select
+
+    this.setOptions(opts.options, opts.selected)
+  }
+
+  setOptions(options: ListBoxOption[], selected?: string): void {
+    this.select.innerHTML = ''
+    for (const opt of options) {
+      const el = document.createElement('option')
+      el.value = opt.id
+      el.textContent =
+        opt.count === null || opt.count === undefined
+          ? opt.label
+          : `${opt.label} (${opt.count.toLocaleString()})`
+      if (opt.id === selected) el.selected = true
+      this.select.appendChild(el)
+    }
+  }
+
+  get value(): string | null {
+    return this.select.value || null
+  }
+
+  set value(id: string | null) {
+    this.select.value = id ?? ''
+  }
+}
