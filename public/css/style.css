@@ -230,3 +230,10 @@ footer .acknowledgement {
   border-color: var(--bs-primary);
   color: white;
 }
+
+/* ===== Layout: match Bootstrap 3 container widths ===== */
+@media (min-width: 1200px) {
+  .container-narrow {
+    max-width: 1170px;
+  }
+}
