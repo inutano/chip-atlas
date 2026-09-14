@@ -12,7 +12,7 @@ import { GenomeTabs } from '../components/genome-tabs'
 import { FacetFilter } from '../components/facet-filter'
 import { Autocomplete } from '../components/autocomplete'
 import { initInfoPopovers } from '../components/info-popover'
-import { submitJob } from '../api/client'
+import { submitJob, getEstimatedTime } from '../api/client'
 
 interface PageData {
   genomes: Record<string, string>
@@ -167,14 +167,8 @@ async function refreshEstimate(): Promise<void> {
   const out = document.getElementById('estimated-run-time')
   if (!out) return
   try {
-    const res = await fetch('/jobs/estimated_time', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ ids: [], analysis: 'enrichment' }),
-    })
-    if (!res.ok) throw new Error(`estimated_time: ${res.status}`)
-    const data = (await res.json()) as { minutes: number | null }
-    out.textContent = data.minutes != null ? `${data.minutes} min` : '—'
+    const res = await getEstimatedTime([], 'enrichment')
+    out.textContent = res.minutes != null ? `${res.minutes} min` : '—'
   } catch (err) {
     console.error(err)
     out.textContent = '—'

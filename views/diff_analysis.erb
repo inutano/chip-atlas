@@ -38,6 +38,9 @@
       <div class="panel-heading"><h4 class="panel-title">2. Dataset A (Experiment IDs)</h4></div>
       <div class="panel-body">
         <textarea class="form-control" id="dataA-text" rows="8" placeholder="SRX or GSM ID(s), one per line"></textarea>
+        <div class="mt-2">
+          <a class="linkExample float-end" href="#" id="try-example-a">Try with example</a>
+        </div>
       </div>
     </div>
   </div>
@@ -47,30 +50,41 @@
       <div class="panel-heading"><h4 class="panel-title">3. Dataset B (Experiment IDs)</h4></div>
       <div class="panel-body">
         <textarea class="form-control" id="dataB-text" rows="8" placeholder="SRX or GSM ID(s), one per line"></textarea>
+        <div class="mt-2">
+          <a class="linkExample float-end" href="#" id="try-example-b">Try with example</a>
+        </div>
       </div>
     </div>
   </div>
 
   <div class="col-md-3">
     <div class="panel panel-default">
-      <div class="panel-heading"><h4 class="panel-title">4. Description</h4></div>
+      <div class="panel-heading"><h4 class="panel-title">4. Analysis description</h4></div>
       <div class="panel-body">
         <div class="mb-2">
           <label for="title" class="form-label small text-muted">Analysis title</label>
+          <a class="info-btn" href="#" data-info="project-title" role="button" aria-label="About analysis title">&#x24D8;</a>
           <input type="text" id="title" class="form-control form-control-sm">
         </div>
         <div class="mb-2">
           <label for="dataA-title" class="form-label small text-muted">Dataset A title</label>
+          <a class="info-btn" href="#" data-info="dataset-a-title" role="button" aria-label="About dataset A title">&#x24D8;</a>
           <input type="text" id="dataA-title" class="form-control form-control-sm">
         </div>
         <div class="mb-3">
           <label for="dataB-title" class="form-label small text-muted">Dataset B title</label>
+          <a class="info-btn" href="#" data-info="dataset-b-title" role="button" aria-label="About dataset B title">&#x24D8;</a>
           <input type="text" id="dataB-title" class="form-control form-control-sm">
         </div>
         <div class="d-grid mb-2">
           <button type="button" id="submit-job" class="btn btn-primary btn-lg">Submit</button>
         </div>
-        <div id="estimated-time" class="text-muted small">Estimated run time: —</div>
+        <p class="estimated-run-time mb-1">
+          Estimated run time: <span id="estimated-run-time">&mdash;</span>
+        </p>
+        <p class="job-info mb-0">
+          <a href="https://sc.ddbj.nig.ac.jp/en/operation/job_queue_status/" target="_blank" rel="noopener noreferrer">node status (epyc.q)</a>
+        </p>
         <div id="submit-status" class="text-muted small mt-2" aria-live="polite"></div>
       </div>
     </div>

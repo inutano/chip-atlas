@@ -194,6 +194,32 @@ class PagesTest < Minitest::Test
     assert_includes last_response.body, 'class="panel panel-default"'
   end
 
+  def test_diff_analysis_has_info_buttons_examples_and_node_status
+    get '/diff_analysis'
+    body = last_response.body
+    assert_includes body, '4. Analysis description'
+    assert_includes body, 'data-info="project-title"'
+    assert_includes body, 'data-info="dataset-a-title"'
+    assert_includes body, 'data-info="dataset-b-title"'
+    assert_includes body, 'Try with example'
+    assert_includes body, 'id="try-example-a"'
+    assert_includes body, 'id="try-example-b"'
+    assert_includes body, 'node status (epyc.q)'
+    assert_includes body, 'sc.ddbj.nig.ac.jp/en/operation/job_queue_status/'
+    assert_includes body, 'id="estimated-run-time"'
+  end
+
+  def test_diff_analysis_title_inputs_are_empty_in_markup
+    # Production seeds "My project" / "dataset A" / "dataset B" via JS
+    # (diff_analysis.js), not in server-rendered markup. Unlike Enrichment
+    # Analysis's panel, these inputs must render with no value attribute.
+    get '/diff_analysis'
+    body = last_response.body
+    refute_includes body, 'value="My project"'
+    refute_includes body, 'value="dataset A"'
+    refute_includes body, 'value="dataset B"'
+  end
+
   def test_colo_has_paired_list_boxes_and_three_column_panels
     get '/colo'
     body = last_response.body

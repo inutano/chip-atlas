@@ -390,7 +390,11 @@ export async function getJobLog(id: string, backend: string): Promise<string> {
 
 export async function getEstimatedTime(
   ids: string[],
-  analysis: 'dmr' | 'diffbind'
+  // The server only models 'dmr' and 'diffbind' (routes/jobs.rb); any other
+  // value — 'enrichment' included — falls through to a null estimate.
+  // Enrichment Analysis has no modeled formula yet but still calls this
+  // endpoint through the shared typed client rather than a raw fetch.
+  analysis: 'dmr' | 'diffbind' | 'enrichment'
 ): Promise<EstimatedTime> {
   return request<EstimatedTime>('/jobs/estimated_time', {
     method: 'POST',
