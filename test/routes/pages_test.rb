@@ -168,4 +168,18 @@ class PagesTest < Minitest::Test
     assert_includes body, 'value="Dataset B"'
     assert_includes body, 'Try with example'
   end
+
+  def test_target_genes_has_an_antigen_list_box
+    get '/target_genes'
+    body = last_response.body
+    assert_includes body, '1. Choose Antigen'
+    assert_includes body, '2. Choose Distance from TSS'
+    assert_includes body, 'id="antigen-list"'
+    assert_includes body, 'class="panel panel-default"'
+  end
+
+  def test_diff_analysis_uses_panels
+    get '/diff_analysis'
+    assert_includes last_response.body, 'class="panel panel-default"'
+  end
 end

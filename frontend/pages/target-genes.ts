@@ -52,7 +52,7 @@ async function init(): Promise<void> {
   const trackInput = $('track-input') as HTMLInputElement
   Autocomplete.init(trackInput, [], (value) => {
     currentTrack = value
-  })
+  }, { pairedList: $('antigen-list') })
 
   GenomeTabs.init(tabsContainer, data.genomes)
 
