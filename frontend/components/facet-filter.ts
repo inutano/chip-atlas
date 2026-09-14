@@ -31,6 +31,14 @@ export interface FacetCondition {
 
 export type FacetRenderMode = 'dropdown' | 'listbox'
 
+// Production labels each qval option with -10*Log10(Q) ("05" -> "50"), matching
+// the info-btn text ("If 50 is set here, peaks with Q value < 1E-05 are shown").
+// The underlying option value stays the raw file-suffix string ("05") either way.
+function qvalLabel(value: string): string {
+  const n = parseInt(value, 10)
+  return Number.isNaN(n) ? value : String(n * 10)
+}
+
 type FacetKey = 'track_class' | 'track_subclass' | 'cell_type_class' | 'cell_type_subclass' | 'qval'
 
 export interface FacetFilterOptions {
@@ -105,7 +113,7 @@ class DropdownControl implements FacetControl {
     this.select.replaceChildren(...values.map((v) => {
       const opt = document.createElement('option')
       opt.value = v
-      opt.textContent = v
+      opt.textContent = qvalLabel(v)
       return opt
     }))
   }
@@ -142,7 +150,7 @@ class ListBoxControl implements FacetControl {
   setPlainValues(values: string[]): void {
     const previous = this.box.value ?? undefined
     const selected = previous != null && values.includes(previous) ? previous : undefined
-    const options: ListBoxOption[] = values.map((v) => ({ id: v, label: v, count: null }))
+    const options: ListBoxOption[] = values.map((v) => ({ id: v, label: qvalLabel(v), count: null }))
     this.box.setOptions(options, selected)
   }
 

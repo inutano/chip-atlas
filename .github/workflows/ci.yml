@@ -25,6 +25,15 @@ jobs:
       - name: Set up database
         run: bundle exec rake db:migrate
 
+      - name: Run test suite
+        run: bundle exec ruby -Itest -e 'Dir.glob("./test/**/*_test.rb").sort.each { |f| require f }'
+
+      - name: Build frontend
+        run: |
+          npm ci
+          npx tsc --noEmit -p frontend/tsconfig.json
+          NODE_ENV=production npm run build
+
       - name: Boot app and verify endpoints
         run: |
           bundle exec rackup -p 9292 -D -P tmp/rackup.pid
