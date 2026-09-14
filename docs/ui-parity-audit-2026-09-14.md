@@ -221,6 +221,14 @@ Caveat: the PNGs carry `Last-Modified` dates of Sept 2025. They are published an
 
 ---
 
+## Follow-ups left open after the parity work (2026-09-14)
+
+Three known differences remain after the implementation. None is a regression; each was weighed and deliberately left.
+
+- **Diff Analysis panel 2/3 headings.** They read "2. Dataset A (Experiment IDs)" / "3. Dataset B (Experiment IDs)"; production's convention (already used on Enrichment Analysis) is "Enter dataset A/B". Two strings on one page.
+- **`/api/remote_url_status` still caches a genuine upstream 5xx for an hour.** The reported bug — a transient *network* failure being cached and hiding the Comparative Profile — is fixed; the rescue path no longer sets `cache_control`. The narrower remaining case is a reachable server that returns 500: that response is exception-free, so it still gets the hour-long public cache. Tightening the header to 2xx/4xx only would close it.
+- **Tutorial button placement.** Production anchors it top-right beside the page title; the rebuild places it below the genome tabs. Functionally identical, visually offset.
+
 ## Out of scope / open questions
 
 - **Target Genes has no human data in the current metadata.** `analysisList.tab` dated 2026-09-09 contains no `hg38` or `hg19` rows at all — only mm9/mm10, dm3/dm6, ce10/ce11, sacCer3, rn6 and TAIR12. The loader reads the file correctly; the rows are simply absent. The underlying data files DO exist (`https://chip-atlas.dbcls.jp/data/hg38/target/CTCF.1.tsv` returns 200) and production offers hg38 on that page, so this is an upstream metadata gap that would ship an empty Target Genes for the most-used organism. Belongs with the data-regeneration work, not with UI parity.
