@@ -65,6 +65,16 @@ function filter(items: string[], query: string): string[] {
   return out
 }
 
+// Unlike filter(), never caps an empty query: this feeds the paired list box
+// (a browsable <select size="8">, not a dropdown), which production shows in
+// full and which must not silently shrink to MAX_RESULTS the moment the
+// input receives focus. A non-empty query still caps, matching the dropdown.
+function filterForPairedList(items: string[], query: string): string[] {
+  const q = query.trim().toLowerCase()
+  if (!q) return items
+  return filter(items, query)
+}
+
 function render(inst: Instance): void {
   const { menu, filtered, active } = inst
   if (filtered.length === 0) {
@@ -111,7 +121,7 @@ function open(inst: Instance): void {
   inst.filtered = filter(inst.items, inst.input.value)
   inst.active = inst.filtered.length > 0 ? 0 : -1
   render(inst)
-  if (inst.listBox) inst.listBox.setOptions(toOptions(inst.filtered))
+  if (inst.listBox) inst.listBox.setOptions(toOptions(filterForPairedList(inst.items, inst.input.value)))
 }
 
 function close(inst: Instance): void {
