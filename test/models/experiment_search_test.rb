@@ -40,12 +40,12 @@ class ExperimentSearchTest < Minitest::Test
 
   def test_search_empty_query
     result = ChipAtlas::ExperimentSearch.search('')
-    assert_equal 0, result[:total]
+    assert_equal 3, result[:total]
   end
 
   def test_search_nil_query
     result = ChipAtlas::ExperimentSearch.search(nil)
-    assert_equal 0, result[:total]
+    assert_equal 3, result[:total]
   end
 
   def test_search_with_offset
@@ -57,6 +57,17 @@ class ExperimentSearchTest < Minitest::Test
   def test_sanitizes_special_characters
     result = ChipAtlas::ExperimentSearch.search('"CTCF" AND (test)')
     assert result.key?(:total)
+  end
+
+  def test_blank_query_lists_all_experiments
+    result = ChipAtlas::ExperimentSearch.search('', limit: 2, offset: 0)
+    assert_operator result[:total], :>, 0, 'blank query must list everything'
+    assert_equal 2, result[:experiments].size
+  end
+
+  def test_blank_query_respects_genome_filter
+    result = ChipAtlas::ExperimentSearch.search('', genome: 'hg38', limit: 10)
+    assert result[:experiments].all? { |e| e[:genome] == 'hg38' }
   end
 
   def test_sra_cache_set_and_get

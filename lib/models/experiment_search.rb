@@ -15,7 +15,7 @@ module ChipAtlas
     end
 
     def search(query, genome: nil, limit: 20, offset: 0)
-      return { total: 0, returned: 0, experiments: [] } if query.nil? || query.strip.empty?
+      return list_all(genome: genome, limit: limit, offset: offset) if query.nil? || query.strip.empty?
 
       sanitized = fts5_sanitize(query)
       return { total: 0, returned: 0, experiments: [] } if sanitized.empty?
@@ -42,6 +42,32 @@ module ChipAtlas
 
       total = rows.first&.[](:total_count) || 0
       experiments = rows.map { |row| row.except(:rank, :total_count) }
+
+      { total: total, returned: experiments.size, experiments: experiments }
+    end
+
+    def list_all(genome: nil, limit: 20, offset: 0)
+      if genome && !genome.empty?
+        sql = <<~SQL
+          SELECT #{COLUMNS.join(', ')}, COUNT(*) OVER() AS total_count
+          FROM experiments_fts
+          WHERE genome = ?
+          ORDER BY experiment_id
+          LIMIT ? OFFSET ?
+        SQL
+        rows = DB[sql, genome, limit.to_i, offset.to_i].all
+      else
+        sql = <<~SQL
+          SELECT #{COLUMNS.join(', ')}, COUNT(*) OVER() AS total_count
+          FROM experiments_fts
+          ORDER BY experiment_id
+          LIMIT ? OFFSET ?
+        SQL
+        rows = DB[sql, limit.to_i, offset.to_i].all
+      end
+
+      total = rows.first&.[](:total_count) || 0
+      experiments = rows.map { |row| row.except(:total_count) }
 
       { total: total, returned: experiments.size, experiments: experiments }
     end

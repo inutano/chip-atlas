@@ -100,6 +100,18 @@ class ApiTest < Minitest::Test
     assert data['total'] >= 1
   end
 
+  def test_search_without_query_lists_experiments
+    DB.run <<-SQL
+      INSERT INTO experiments_fts (experiment_id, sra_id, geo_id, genome, track_class, track_subclass, cell_type_class, cell_type_subclass, title, attributes)
+      VALUES ('SRX018625', '', '', 'hg38', 'Histone', 'H3K4me3', 'Blood', 'K-562', 'H3K4me3 in K-562', '');
+    SQL
+
+    get '/api/search?limit=2'
+    assert_equal 200, last_response.status
+    data = JSON.parse(last_response.body)
+    assert_operator data['total'], :>, 0
+  end
+
   def test_post_download_url
     post '/api/download_url', JSON.generate({
       condition: { genome: 'hg38', track_class: 'Histone', track_subclass: 'H3K4me3',

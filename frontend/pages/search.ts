@@ -70,6 +70,11 @@ function renderResults(result: SearchResult): void {
   const end = state.offset + result.returned
   $('search-summary').textContent = `${result.total.toLocaleString()} results · showing ${start}–${end}`
 
+  const label = result.total === 0
+    ? 'No entries found'
+    : `Showing ${state.offset + 1} to ${state.offset + result.returned} of ${result.total.toLocaleString()} entries`
+  $('search-count').textContent = label
+
   $('page-indicator').textContent = `Page ${Math.floor(state.offset / PAGE_SIZE) + 1} of ${Math.max(1, Math.ceil(result.total / PAGE_SIZE))}`
 
   const prevDisabled = state.offset === 0
@@ -96,11 +101,6 @@ let searchGeneration = 0
 
 async function runSearch(): Promise<void> {
   const status = $('search-status')
-  if (!state.query.trim()) {
-    status.textContent = 'Enter a search query above.'
-    ;($('search-results-wrap') as HTMLElement).hidden = true
-    return
-  }
   status.textContent = 'Searching…'
   const gen = ++searchGeneration
   try {
@@ -170,6 +170,7 @@ function downloadTsv(): void {
 
 function init(): void {
   populateGenomeOptions()
+  runSearch()  // load the full, unfiltered listing on page load (mirrors production)
 
   const form = $('search-form') as HTMLFormElement
   form.addEventListener('submit', (e) => {
