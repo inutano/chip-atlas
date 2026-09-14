@@ -1,6 +1,15 @@
 // frontend/components/autocomplete.ts
 // Text input with substring-matching dropdown suggestions.
 // Keyboard navigation: ArrowDown, ArrowUp, Enter, Escape.
+// Optionally paired with a ListBox (a visible <select size="8">) that mirrors
+// the same filtered set, restoring the old Flexselect "browse below the
+// input" affordance. The paired list is fully optional and off by default.
+
+import { ListBox, type ListBoxOption } from './list-box'
+
+export interface AutocompleteOptions {
+  pairedList?: HTMLElement
+}
 
 interface Instance {
   input: HTMLInputElement
@@ -9,10 +18,16 @@ interface Instance {
   filtered: string[]
   active: number
   onSelect: (value: string) => void
+  listBox?: ListBox
 }
 
 const MAX_RESULTS = 50
 const registry = new WeakMap<HTMLInputElement, Instance>()
+let listBoxSeq = 0
+
+function toOptions(items: string[]): ListBoxOption[] {
+  return items.map((value) => ({ id: value, label: value, count: null }))
+}
 
 function buildMenu(): HTMLUListElement {
   const menu = document.createElement('ul')
@@ -96,6 +111,7 @@ function open(inst: Instance): void {
   inst.filtered = filter(inst.items, inst.input.value)
   inst.active = inst.filtered.length > 0 ? 0 : -1
   render(inst)
+  if (inst.listBox) inst.listBox.setOptions(toOptions(inst.filtered))
 }
 
 function close(inst: Instance): void {
@@ -136,7 +152,7 @@ function attachKeyboard(inst: Instance): void {
 }
 
 export const Autocomplete = {
-  init(input: HTMLInputElement, items: string[], onSelect: (value: string) => void): void {
+  init(input: HTMLInputElement, items: string[], onSelect: (value: string) => void, opts?: AutocompleteOptions): void {
     const menu = buildMenu()
     const inst: Instance = { input, menu, items, filtered: [], active: -1, onSelect }
     registry.set(input, inst)
@@ -144,6 +160,22 @@ export const Autocomplete = {
     input.setAttribute('autocomplete', 'off')
     input.setAttribute('role', 'combobox')
     input.setAttribute('aria-autocomplete', 'list')
+
+    if (opts?.pairedList) {
+      // A real <select>: keyboard-accessible on its own. Do not layer
+      // aria-activedescendant (that belongs to the dropdown menu only).
+      const id = input.id ? `${input.id}-list-box` : `autocomplete-list-box-${++listBoxSeq}`
+      inst.listBox = new ListBox({
+        container: opts.pairedList,
+        id,
+        options: toOptions(items),
+        onChange: (value) => {
+          input.value = value
+          onSelect(value)
+          close(inst)
+        },
+      })
+    }
 
     input.addEventListener('focus', () => open(inst))
     input.addEventListener('input', () => open(inst))
@@ -159,6 +191,7 @@ export const Autocomplete = {
     const inst = registry.get(input)
     if (!inst) return
     inst.items = items
+    if (inst.listBox) inst.listBox.setOptions(toOptions(items))
     if (document.activeElement === input) open(inst)
   },
 }

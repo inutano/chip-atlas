@@ -220,6 +220,12 @@ footer .acknowledgement {
   color: white;
 }
 
+/* Paired list box mounted below an autocomplete input (restores the old
+   Flexselect "browse below the input" affordance). */
+.autocomplete-paired-list {
+  margin-top: 0.5rem;
+}
+
 /* ===== Layout: match Bootstrap 3 container widths ===== */
 @media (min-width: 1200px) {
   .container-narrow {
