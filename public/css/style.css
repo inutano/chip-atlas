@@ -1,18 +1,41 @@
 /* ChIP-Atlas custom styles — overrides for Bootstrap 5 */
 
-/* ===== Colors ===== */
+/* ===== Design tokens — Bootstrap 3.2.0 values from production ===== */
 :root {
-  --bs-primary: #337ab7;
-  --bs-primary-rgb: 51, 122, 183;
-  --bs-font-sans-serif: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  --bs-body-font-size: 0.95rem;
+  --ca-primary: #428bca;
+  --ca-primary-dark: #357ebd;
+  --ca-navbar-bg: #222;
+  --ca-navbar-active: #080808;
+  --ca-panel-head: #f5f5f5;
+  --ca-panel-border: #ddd;
+  --ca-jumbotron-bg: #eee;
+  --ca-rule: #eee;
+
+  --bs-primary: #428bca;
+  --bs-primary-rgb: 66, 139, 202;
+  --bs-link-color: #428bca;
+  --bs-link-color-rgb: 66, 139, 202;
+  --bs-link-hover-color: #2a6496;
+  --bs-font-sans-serif: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --bs-body-font-size: 14px;
+  --bs-body-line-height: 1.42857143;
+  --bs-body-color: #333;
 }
 
 .btn-primary {
-  --bs-btn-bg: #337ab7;
-  --bs-btn-border-color: #2e6da4;
-  --bs-btn-hover-bg: #286090;
-  --bs-btn-hover-border-color: #204d74;
+  --bs-btn-bg: var(--ca-primary);
+  --bs-btn-border-color: var(--ca-primary-dark);
+  --bs-btn-hover-bg: #3276b1;
+  --bs-btn-hover-border-color: #285e8e;
+}
+
+.navbar.bg-dark {
+  background-color: var(--ca-navbar-bg) !important;
+}
+
+.navbar-dark .navbar-nav .nav-link.active {
+  background-color: var(--ca-navbar-active);
+  color: #fff;
 }
 
 /* ===== Body ===== */
@@ -61,7 +84,7 @@ body {
 
 .feature-card .feature-icon {
   font-size: 3.5rem;
-  color: #337ab7;
+  color: var(--ca-primary);
   min-width: 80px;
   text-align: center;
 }

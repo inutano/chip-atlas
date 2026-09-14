@@ -27,4 +27,10 @@ class PagesTest < Minitest::Test
     get '/'
     assert_includes last_response.body, 'class="container container-narrow"'
   end
+
+  def test_stylesheet_uses_bootstrap3_primary
+    css = File.read(File.join(__dir__, '..', '..', 'public', 'css', 'style.css'))
+    assert_includes css, '#428bca', 'primary colour must match Bootstrap 3.2'
+    refute_includes css, '#337ab7', 'Bootstrap 3.3 primary must not be used'
+  end
 end
