@@ -55,14 +55,12 @@ module ChipAtlas
 
         rows.each_slice(500) do |batch|
           batch = batch.reject do |row|
+            # The genome field may be an array or a comma-separated string like "hg19, hg38"
             genomes = row[3]
-            if genomes.is_a?(Array)
-              genomes = genomes.select { |g| SUPPORTED_GENOMES.include?(g) }
-              row[3] = genomes.first  # store single genome
-              genomes.empty?
-            else
-              !SUPPORTED_GENOMES.include?(genomes.to_s)
-            end
+            genomes = genomes.to_s.split(/,\s*/) unless genomes.is_a?(Array)
+            kept = genomes.map(&:strip).reject(&:empty?).select { |g| SUPPORTED_GENOMES.include?(g) }
+            row[3] = kept.first  # store single genome
+            kept.empty?
           end
           next if batch.empty?
 
