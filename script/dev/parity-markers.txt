@@ -1,0 +1,35 @@
+/	navbar brand is the mountain glyph	chip-atlas.svg#mountain
+/	navbar Peak Browser icon	chip-atlas.svg#glasses
+/	navbar Enrichment Analysis icon	chip-atlas.svg#hand-holding-heart
+/	navbar Diff Analysis icon	chip-atlas.svg#balance-scale-left
+/	navbar Target Genes icon	chip-atlas.svg#bullseye
+/	navbar Colo icon	chip-atlas.svg#compress-arrows-alt
+/	navbar Publications icon	chip-atlas.svg#book
+/	navbar Agents icon	chip-atlas.svg#robot
+/	navbar Docs icon	chip-atlas.svg#github
+/	navbar Search icon	chip-atlas.svg#search
+/	container pinned to Bootstrap 3 width	container-narrow
+/	page header rule	class="page-header"
+/	homepage tiles are jumbotrons	class="jumbotron"
+/	homepage tiles use Bootstrap 3 labels	class="label label-primary"
+/peak_browser	panel 1 heading	1. Track type class
+/peak_browser	panel 2 heading	2. Cell type Class
+/peak_browser	panel 3 heading	3. Threshold for Significance
+/peak_browser	optional track type panel	Track type (optional)
+/peak_browser	optional cell type panel	Cell type (optional)
+/peak_browser	Bootstrap 3 panels	class="panel panel-default"
+/peak_browser	full download button label	Download BED file
+/peak_browser	IGV help link	Error connecting to IGV?
+/peak_browser	Tutorial dropdown	Tutorial
+/enrichment_analysis	EA panel 1	1. Experiment type
+/enrichment_analysis	EA panel 4	4. Enter dataset A
+/enrichment_analysis	EA panel 5	5. Enter dataset B
+/enrichment_analysis	EA panel 6	6. Analysis description
+/enrichment_analysis	EA example link	Try with example
+/enrichment_analysis	EA run-time estimate	Estimated run time
+/target_genes	antigen list box container	id="antigen-list"
+/target_genes	TSS distance labels	±1k
+/search	result counter	id="search-count"
+/view?id=SRX019491	experiment page title icon	chip-atlas.svg#file-alt
+/view?id=SRX019491	comparative profile section	Experiment Comparative Profile
+/view?id=SRX019491	distribution image	distribution/png/
