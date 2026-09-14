@@ -184,4 +184,30 @@ class ApiTest < Minitest::Test
     end
   end
 
+  def test_remote_url_status_does_not_cache_the_error_path
+    original = Net::HTTP.instance_method(:request_head)
+    Net::HTTP.define_method(:request_head) { |*| raise Errno::ECONNREFUSED, 'simulated' }
+    begin
+      get '/api/remote_url_status', url: 'https://chip-atlas.dbcls.jp/data/probe.png'
+      assert_equal '500', last_response.body
+      refute_match(/public/, last_response.headers['Cache-Control'].to_s,
+                   'a transient upstream failure must not be cached publicly for an hour')
+    ensure
+      Net::HTTP.define_method(:request_head, original)
+    end
+  end
+
+  def test_remote_url_status_caches_a_genuine_upstream_response
+    original = Net::HTTP.instance_method(:request_head)
+    fake_response = Net::HTTPOK.new('1.1', '200', 'OK')
+    Net::HTTP.define_method(:request_head) { |*| fake_response }
+    begin
+      get '/api/remote_url_status', url: 'https://chip-atlas.dbcls.jp/data/probe.png'
+      assert_equal '200', last_response.body
+      assert_match(/public/, last_response.headers['Cache-Control'].to_s)
+      assert_match(/max-age=3600/, last_response.headers['Cache-Control'].to_s)
+    ensure
+      Net::HTTP.define_method(:request_head, original)
+    end
+  end
 end

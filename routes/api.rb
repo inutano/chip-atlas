@@ -208,7 +208,6 @@ module ChipAtlas
         # === Internal endpoints (not in OpenAPI) ===
 
         app.get '/api/remote_url_status' do
-          cache_control :public, max_age: 3600
           url = params[:url]
           unless url && ChipAtlas::Routes::Api.allowed_remote_url?(url)
             halt 400, 'Invalid or disallowed URL'
@@ -220,6 +219,12 @@ module ChipAtlas
             http.open_timeout = 5
             http.read_timeout = 10
             response = http.request_head(uri.request_uri)
+            # Only a genuine upstream response is safe to cache publicly for
+            # an hour. A rescued exception below returns a synthetic '500'
+            # that must not be cached - a transient blip would otherwise
+            # hide the Comparative Profile section from every viewer for
+            # that hour.
+            cache_control :public, max_age: 3600
             response.code
           rescue SocketError, Timeout::Error, Errno::ECONNREFUSED, Net::HTTPError,
                  Net::OpenTimeout, OpenSSL::SSL::SSLError, Errno::ECONNRESET, Errno::EHOSTUNREACH
