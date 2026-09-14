@@ -1078,15 +1078,17 @@ Expected: FAIL — no sprite references on the page.
 
 In `views/experiment.erb`, prefix each heading with the partial:
 
+This map was read directly off production's `/view` markup — use it verbatim, do not substitute similar glyphs:
+
 | Heading | Icon |
 |---|---|
 | page title (`h1`, the SRX id) | `file-alt` |
-| Sample Information Curated by ChIP-Atlas | `flask` |
+| Sample Information Curated by ChIP-Atlas | `dna` |
 | Antigen Information | `tag` |
 | Cell Type Information | `microscope` |
 | Original Experimental Metadata | `user-edit` |
 | Sample Attributes | `flask` |
-| Sequenced DNA Library | `file-alt` |
+| Sequenced DNA Library | `book` |
 | Sequencing Platform | `server` |
 | Read Processing Pipeline | `cogs` |
 | per-genome sub-heading (e.g. `hg38`) | `dna` |
@@ -1667,7 +1669,7 @@ git commit -m "Convert Diff Analysis, Target Genes and Colo to panel layout with
 
 ```ruby
   def test_analysis_pages_have_a_tutorial_dropdown
-    %w[/peak_browser /enrichment_analysis /diff_analysis /target_genes /colo].each do |path|
+    %w[/peak_browser /enrichment_analysis /diff_analysis /target_genes /colo /search].each do |path|
       get path
       assert_includes last_response.body, 'Tutorial', "#{path} has no Tutorial button"
       assert_includes last_response.body, 'chip-atlas.svg#question-circle'
@@ -1719,7 +1721,7 @@ Append to `public/css/style.css`:
 
 - [ ] **Step 4: Add it to each page**
 
-Immediately after the page header on each analysis page:
+Immediately after the page header on each of the six pages that has one in production — `peak_browser`, `enrichment_analysis`, `diff_analysis`, `target_genes`, `colo` and `search` (all six verified against production):
 
 ```erb
 <%== erb :_tutorial, locals: {
@@ -1842,9 +1844,9 @@ and add the method:
 
 Note the `rank` column is absent here — `ORDER BY rank` is only valid on an FTS `MATCH` query, so `list_all` must not select it.
 
-- [ ] **Step 4: Allow a blank q on the route**
+- [ ] **Step 4: Add the route-level regression test**
 
-In `routes/api.rb`, remove the guard that rejects a missing `q` on `/api/search`, so a bare `GET /api/search?limit=10` lists. Add to `test/routes/api_test.rb`:
+`routes/api.rb:94` has **no** `q` guard — it already passes a blank `q` straight to the model, so the model fix in Step 3 is sufficient and no route edit is needed. Do not invent one. Add this regression test to `test/routes/api_test.rb` to lock the behaviour in:
 
 ```ruby
   def test_search_without_query_lists_experiments
