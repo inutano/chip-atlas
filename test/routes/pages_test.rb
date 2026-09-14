@@ -93,4 +93,24 @@ class PagesTest < Minitest::Test
     assert_includes css, '.navbar-dark .navbar-nav .nav-link,', 'non-active navbar links must be forced to pure white, matching production'
     assert_includes css, '.navbar-right-stack .nav-link:hover,', 'navbar hover/focus state must stay pure white, not the dim Bootstrap default'
   end
+
+  FEATURE_ICONS = {
+    '/peak_browser'        => 'glasses',
+    '/enrichment_analysis' => 'hand-holding-heart',
+    '/diff_analysis'       => 'balance-scale-left',
+    '/target_genes'        => 'bullseye',
+    '/colo'                => 'compress-arrows-alt',
+    '/search'              => 'search'
+  }.freeze
+
+  def test_homepage_cards_use_glyphs_not_emoji
+    get '/'
+    body = last_response.body
+    FEATURE_ICONS.each_value do |icon|
+      assert_includes body, "chip-atlas.svg##{icon}"
+    end
+    refute_includes body, '&#x1F50D;', 'magnifier emoji must be gone'
+    refute_includes body, '&#x2764;',  'heart emoji must be gone'
+    assert_includes body, 'class="jumbotron"'
+  end
 end

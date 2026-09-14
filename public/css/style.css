@@ -61,40 +61,6 @@ body {
   width: 8em;
 }
 
-/* ===== Homepage feature cards ===== */
-.feature-card {
-  text-decoration: none !important;
-  color: #333 !important;
-}
-
-.feature-card .card {
-  height: 100%;
-  transition: box-shadow 0.2s;
-}
-
-.feature-card:hover .card {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-}
-
-.feature-card .card-body {
-  display: flex;
-  align-items: center;
-  padding: 1.5rem;
-}
-
-.feature-card .feature-icon {
-  font-size: 3.5rem;
-  color: var(--ca-primary);
-  min-width: 80px;
-  text-align: center;
-}
-
-.feature-card .badge {
-  font-size: 0.75rem;
-  padding: 0.4em 0.6em;
-  margin-left: 3px;
-}
-
 /* ===== Footer ===== */
 footer {
   margin-top: 10em;
@@ -328,4 +294,61 @@ h1 .icon, h3 .icon, h4 .icon { margin-right: 8px; }
 .page-header .main-desc {
   line-height: 150%;
   margin-bottom: 0;
+}
+
+/* ===== Homepage feature tiles (Bootstrap 3 .jumbotron, dropped in BS5) ===== */
+.align-height {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.jumbotron-link {
+  color: #333 !important;
+  text-decoration: none !important;
+  display: block;
+  height: 100%;
+}
+
+.jumbotron {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 100%;
+  padding: 30px 30px 30px 40px;
+  margin-bottom: 30px;
+  color: inherit;
+  background-color: var(--ca-jumbotron-bg);
+  border-radius: 6px;
+}
+
+.jumbotron .col-icon { padding-right: 5px; }
+.jumbotron .col-labels { padding-left: 10px; text-align: left; }
+.jumbotron h3 { margin: 0 0 10px; font-size: 24px; }
+
+.labels span {
+  display: inline-block;
+  text-align: center;
+  margin-left: 3px;
+  padding: 0.4em;
+}
+
+/* Bootstrap 3 .label, dropped in BS5 */
+.label {
+  display: inline;
+  padding: .2em .6em .3em;
+  font-size: 75%;
+  font-weight: 700;
+  line-height: 1;
+  color: #fff;
+  text-align: center;
+  white-space: nowrap;
+  vertical-align: baseline;
+  border-radius: .25em;
+}
+
+.label-primary { background-color: var(--ca-primary); }
+
+@media (max-width: 767px) {
+  .jumbotron { flex-direction: column; text-align: center; }
+  .jumbotron .col-labels { text-align: center; }
 }

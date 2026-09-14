@@ -10,53 +10,53 @@
         "ChIP-seq, ATAC-seq and Bisulfite-seq experiments."
 } %>
 
-<div class="row g-3 mb-3">
+<div class="row align-height">
   <div class="col-md-4">
-    <a href="/peak_browser" class="feature-card">
-      <div class="card">
-        <div class="card-body">
-          <div class="feature-icon" aria-hidden="true">&#x1F50D;</div>
-          <div class="ms-3">
-            <h5 class="card-title mb-1">Peak Browser</h5>
-            <div>
-              <span class="badge bg-primary">ChIP</span>
-              <span class="badge bg-primary">ATAC</span>
-              <span class="badge bg-primary">Bisulfite</span>
-            </div>
+    <a href="/peak_browser" class="jumbotron-link">
+      <div class="jumbotron">
+        <div class="col-icon">
+          <%== erb :_icon, locals: { name: 'glasses', size: 'lg' } %>
+        </div>
+        <div class="col-labels">
+          <h3>Peak Browser</h3>
+          <div class="labels">
+            <span class="label label-primary">ChIP</span>
+            <span class="label label-primary">ATAC</span>
+            <span class="label label-primary">Bisulfite</span>
           </div>
         </div>
       </div>
     </a>
   </div>
   <div class="col-md-4">
-    <a href="/enrichment_analysis" class="feature-card">
-      <div class="card">
-        <div class="card-body">
-          <div class="feature-icon" aria-hidden="true">&#x2764;</div>
-          <div class="ms-3">
-            <h5 class="card-title mb-1">Enrichment Analysis</h5>
-            <div>
-              <span class="badge bg-primary">ChIP</span>
-              <span class="badge bg-primary">ATAC</span>
-              <span class="badge bg-primary">Bisulfite</span>
-            </div>
+    <a href="/enrichment_analysis" class="jumbotron-link">
+      <div class="jumbotron">
+        <div class="col-icon">
+          <%== erb :_icon, locals: { name: 'hand-holding-heart', size: 'lg' } %>
+        </div>
+        <div class="col-labels">
+          <h3>Enrichment Analysis</h3>
+          <div class="labels">
+            <span class="label label-primary">ChIP</span>
+            <span class="label label-primary">ATAC</span>
+            <span class="label label-primary">Bisulfite</span>
           </div>
         </div>
       </div>
     </a>
   </div>
   <div class="col-md-4">
-    <a href="/diff_analysis" class="feature-card">
-      <div class="card">
-        <div class="card-body">
-          <div class="feature-icon" aria-hidden="true">&#x2696;</div>
-          <div class="ms-3">
-            <h5 class="card-title mb-1">Diff Analysis</h5>
-            <div>
-              <span class="badge bg-primary">ChIP</span>
-              <span class="badge bg-primary">ATAC</span>
-              <span class="badge bg-primary">Bisulfite</span>
-            </div>
+    <a href="/diff_analysis" class="jumbotron-link">
+      <div class="jumbotron">
+        <div class="col-icon">
+          <%== erb :_icon, locals: { name: 'balance-scale-left', size: 'lg' } %>
+        </div>
+        <div class="col-labels">
+          <h3>Diff Analysis</h3>
+          <div class="labels">
+            <span class="label label-primary">ChIP</span>
+            <span class="label label-primary">ATAC</span>
+            <span class="label label-primary">Bisulfite</span>
           </div>
         </div>
       </div>
@@ -64,49 +64,49 @@
   </div>
 </div>
 
-<div class="row g-3 mb-4">
+<div class="row align-height">
   <div class="col-md-4">
-    <a href="/target_genes" class="feature-card">
-      <div class="card">
-        <div class="card-body">
-          <div class="feature-icon" aria-hidden="true">&#x1F3AF;</div>
-          <div class="ms-3">
-            <h5 class="card-title mb-1">Target Genes</h5>
-            <div>
-              <span class="badge bg-primary">ChIP</span>
-            </div>
+    <a href="/target_genes" class="jumbotron-link">
+      <div class="jumbotron">
+        <div class="col-icon">
+          <%== erb :_icon, locals: { name: 'bullseye', size: 'lg' } %>
+        </div>
+        <div class="col-labels">
+          <h3>Target Genes</h3>
+          <div class="labels">
+            <span class="label label-primary">ChIP</span>
           </div>
         </div>
       </div>
     </a>
   </div>
   <div class="col-md-4">
-    <a href="/colo" class="feature-card">
-      <div class="card">
-        <div class="card-body">
-          <div class="feature-icon" aria-hidden="true">&#x1F517;</div>
-          <div class="ms-3">
-            <h5 class="card-title mb-1">Colocalization</h5>
-            <div>
-              <span class="badge bg-primary">ChIP</span>
-            </div>
+    <a href="/colo" class="jumbotron-link">
+      <div class="jumbotron">
+        <div class="col-icon">
+          <%== erb :_icon, locals: { name: 'compress-arrows-alt', size: 'lg' } %>
+        </div>
+        <div class="col-labels">
+          <h3>Colocalization</h3>
+          <div class="labels">
+            <span class="label label-primary">ChIP</span>
           </div>
         </div>
       </div>
     </a>
   </div>
   <div class="col-md-4">
-    <a href="/search" class="feature-card">
-      <div class="card">
-        <div class="card-body">
-          <div class="feature-icon" aria-hidden="true">&#x1F50E;</div>
-          <div class="ms-3">
-            <h5 class="card-title mb-1">Dataset Search</h5>
-            <div>
-              <span class="badge bg-primary">ChIP</span>
-              <span class="badge bg-primary">ATAC</span>
-              <span class="badge bg-primary">Bisulfite</span>
-            </div>
+    <a href="/search" class="jumbotron-link">
+      <div class="jumbotron">
+        <div class="col-icon">
+          <%== erb :_icon, locals: { name: 'search', size: 'lg' } %>
+        </div>
+        <div class="col-labels">
+          <h3>Dataset Search</h3>
+          <div class="labels">
+            <span class="label label-primary">ChIP</span>
+            <span class="label label-primary">ATAC</span>
+            <span class="label label-primary">Bisulfite</span>
           </div>
         </div>
       </div>
