@@ -123,7 +123,10 @@ class PagesTest < Minitest::Test
     assert_includes body, 'btn-block'
   end
 
-  VIEW_ICONS = %w[file-alt tag microscope user-edit flask server cogs dna].freeze
+  VIEW_ICONS = %w[
+    file-alt tag microscope user-edit flask server cogs dna book
+    eye chart-line download external-link-alt
+  ].freeze
 
   def test_experiment_page_headings_carry_icons
     seed_experiments
