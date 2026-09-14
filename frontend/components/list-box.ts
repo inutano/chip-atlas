@@ -41,6 +41,7 @@ export class ListBox {
 
   setOptions(options: ListBoxOption[], selected?: string): void {
     this.select.innerHTML = ''
+    let matched = false
     for (const opt of options) {
       const el = document.createElement('option')
       el.value = opt.id
@@ -48,8 +49,19 @@ export class ListBox {
         opt.count === null || opt.count === undefined
           ? opt.label
           : `${opt.label} (${opt.count.toLocaleString()})`
-      if (opt.id === selected) el.selected = true
+      if (opt.id === selected) {
+        el.selected = true
+        matched = true
+      }
       this.select.appendChild(el)
+    }
+    // A <select size> greater than 1 does not auto-select an option the way
+    // a plain dropdown (size 1) does natively. Mirror that native default
+    // explicitly so a facet with no prior/matching selection still starts on
+    // its first row instead of sitting fully unselected — this is what lets
+    // a cascading facet (e.g. FacetFilter) seed its dependents on first load.
+    if (!matched && this.select.options.length > 0) {
+      this.select.options[0].selected = true
     }
   }
 

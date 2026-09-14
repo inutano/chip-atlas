@@ -14,15 +14,45 @@
 <div id="genome-tabs"></div>
 
 <div class="row">
-  <div class="col-md-9">
-    <div class="card mb-3">
-      <div class="card-header"><h5 class="mb-0">Filter</h5></div>
-      <div class="card-body">
-        <div id="facet-filter"></div>
+  <div class="col-md-4">
+    <div class="panel panel-default">
+      <div class="panel-heading"><h4 class="panel-title">1. Track type class</h4></div>
+      <div class="panel-body"><div id="facet-track-class"></div></div>
+    </div>
+    <div class="panel panel-default">
+      <div class="panel-heading"><h4 class="panel-title">Track type (optional)</h4></div>
+      <div class="panel-body">
+        <input class="form-control" id="track-subclass-input" type="text" placeholder="type to search">
+        <div id="facet-track-subclass" class="mt-2"></div>
       </div>
     </div>
   </div>
-  <div class="col-md-3">
+
+  <div class="col-md-4">
+    <div class="panel panel-default">
+      <div class="panel-heading"><h4 class="panel-title">2. Cell type Class</h4></div>
+      <div class="panel-body"><div id="facet-cell-type-class"></div></div>
+    </div>
+    <div class="panel panel-default">
+      <div class="panel-heading"><h4 class="panel-title">Cell type (optional)</h4></div>
+      <div class="panel-body">
+        <input class="form-control" id="cell-type-subclass-input" type="text" placeholder="type to search">
+        <div id="facet-cell-type-subclass" class="mt-2"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-4">
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h4 class="panel-title">
+          3. Threshold for Significance
+          <a class="info-btn" href="#" data-info="threshold" role="button" aria-label="About the significance threshold">&#x24D8;</a>
+        </h4>
+      </div>
+      <div class="panel-body"><div id="facet-qval"></div></div>
+    </div>
+
     <div class="button-submit">
       <button type="button" id="view-igv" class="btn btn-primary btn-lg btn-block">View on IGV</button>
       <a class="igv-help" href="https://github.com/inutano/chip-atlas/wiki#igv_doc"

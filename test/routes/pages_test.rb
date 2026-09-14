@@ -138,4 +138,15 @@ class PagesTest < Minitest::Test
                        "experiment page is missing the #{icon} icon"
     end
   end
+
+  def test_peak_browser_has_five_numbered_panels
+    get '/peak_browser'
+    body = last_response.body
+    assert_includes body, '1. Track type class'
+    assert_includes body, '2. Cell type Class'
+    assert_includes body, '3. Threshold for Significance'
+    assert_includes body, 'Track type (optional)'
+    assert_includes body, 'Cell type (optional)'
+    assert_includes body, 'class="panel panel-default"'
+  end
 end

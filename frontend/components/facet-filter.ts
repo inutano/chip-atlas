@@ -188,10 +188,15 @@ async function loadQvalRange(inst: Instance): Promise<void> {
 }
 
 async function initialLoad(inst: Instance): Promise<void> {
-  // Sequential: cell_type_classes requires a non-empty track_class. On init both
-  // selects start empty, so we must seed track_class first, then load the rest.
+  // Sequential: cell_type_classes requires a non-empty track_class, and the two
+  // subclass facets need a *resolved* cell_type_class before they fetch — an
+  // empty cell_type_class value is not treated as "any" server-side, it's
+  // treated as "no cell type" and returns an empty result. On init all three
+  // selects start empty, so track_class must seed first, then cell_type_class
+  // must resolve, and only then can both subclass facets load (in parallel).
   await loadTrackClasses(inst)
-  await Promise.all([loadCellTypeClasses(inst), loadTrackSubclasses(inst), loadCellTypeSubclasses(inst)])
+  await loadCellTypeClasses(inst)
+  await Promise.all([loadTrackSubclasses(inst), loadCellTypeSubclasses(inst)])
 }
 
 async function reloadOnTrackChange(inst: Instance): Promise<void> {
