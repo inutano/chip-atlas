@@ -21,10 +21,17 @@
 import { GenomeTabs } from '../components/genome-tabs'
 import { FacetFilter } from '../components/facet-filter'
 import { Autocomplete } from '../components/autocomplete'
+import { initInfoPopovers } from '../components/info-popover'
 import { getIgvUrl, getDownloadUrl, type UrlCondition } from '../api/client'
 
 interface PageData {
   genomes: Record<string, string>
+}
+
+// Copy lifted verbatim from production's js/pj/peak_browser.js helpText object.
+const HELP_TEXT: Record<string, string> = {
+  threshold:
+    'Set the threshold for statistical significance values calculated by peak-caller MACS2 (-10*Log10[MACS2 Q-value]). If 50 is set here, peaks with Q value < 1E-05 are shown on genome browser IGV. Colors shown in IGV indicate the statistical significance values as follows: blue (50), cyan (250), green (500), yellow (750), and red (> 1,000).',
 }
 
 function $(id: string): HTMLElement {
@@ -141,6 +148,7 @@ async function init(): Promise<void> {
   })
 
   GenomeTabs.init(tabs, data.genomes)
+  initInfoPopovers(document, HELP_TEXT)
 
   $('view-igv').addEventListener('click', async () => {
     const condition = buildCondition(facet)

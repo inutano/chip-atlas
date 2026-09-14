@@ -418,3 +418,14 @@ select.list-box option {
 
 .panel-title { margin: 0; font-size: 16px; }
 .panel-body { padding: 15px; }
+
+/* ===== Tutorial dropdown + ⓘ info buttons (Task 16) ===== */
+.dropdown-help { margin-top: 2em; }
+.dropdown-menu { min-width: 250px; }
+
+.info-btn {
+  color: var(--ca-primary);
+  text-decoration: none;
+  margin-left: 4px;
+  cursor: pointer;
+}

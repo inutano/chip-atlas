@@ -182,4 +182,12 @@ class PagesTest < Minitest::Test
     get '/diff_analysis'
     assert_includes last_response.body, 'class="panel panel-default"'
   end
+
+  def test_analysis_pages_have_a_tutorial_dropdown
+    %w[/peak_browser /enrichment_analysis /diff_analysis /target_genes /colo /search].each do |path|
+      get path
+      assert_includes last_response.body, 'Tutorial', "#{path} has no Tutorial button"
+      assert_includes last_response.body, 'chip-atlas.svg#question-circle'
+    end
+  end
 end

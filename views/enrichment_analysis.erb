@@ -18,6 +18,12 @@
   lead: 'Identify common epigenetic features of a given set of genomic loci and genes.'
 } %>
 
+<%== erb :_tutorial, locals: {
+  pdf: 'https://chip-atlas.dbcls.jp/data/manual/Enrichment_Analysis/Enrichment_Analysis.pdf',
+  movie: 'https://youtu.be/JBOB2PX5_-0',
+  togotv: 'http://doi.org/10.7875/togotv.2019.005'
+} %>
+
 <div id="genome-tabs"></div>
 
 <div class="row">
@@ -67,9 +73,9 @@
     <div class="panel panel-default">
       <div class="panel-heading"><h4 class="panel-title">4. Enter dataset A</h4></div>
       <div class="panel-body">
-        <div class="form-check"><input class="form-check-input" type="radio" name="dataA-type" id="dataA-bed" value="bed" checked><label class="form-check-label" for="dataA-bed">Genomic regions (BED)</label></div>
-        <div class="form-check"><input class="form-check-input" type="radio" name="dataA-type" id="dataA-genes" value="gene"><label class="form-check-label" for="dataA-genes">Gene list (symbols or IDs)</label></div>
-        <div class="form-check mb-2"><input class="form-check-input" type="radio" name="dataA-type" id="dataA-count" value="count"><label class="form-check-label" for="dataA-count">Gene count table (CSV/TSV)</label></div>
+        <div class="form-check"><input class="form-check-input" type="radio" name="dataA-type" id="dataA-bed" value="bed" checked><label class="form-check-label" for="dataA-bed">Genomic regions (BED)</label><a class="info-btn" href="#" data-info="genomic-regions" role="button" aria-label="About genomic regions (BED)">&#x24D8;</a></div>
+        <div class="form-check"><input class="form-check-input" type="radio" name="dataA-type" id="dataA-genes" value="gene"><label class="form-check-label" for="dataA-genes">Gene list (symbols or IDs)</label><a class="info-btn" href="#" data-info="gene-list" role="button" aria-label="About gene list">&#x24D8;</a></div>
+        <div class="form-check mb-2"><input class="form-check-input" type="radio" name="dataA-type" id="dataA-count" value="count"><label class="form-check-label" for="dataA-count">Gene count table (CSV/TSV)</label><a class="info-btn" href="#" data-info="gene-count-table" role="button" aria-label="About gene count table">&#x24D8;</a></div>
         <textarea class="form-control mb-2" id="dataA-text" rows="6" placeholder="Paste content or use the file picker below."></textarea>
         <input type="file" id="dataA-file" class="form-control form-control-sm">
         <div class="mt-2">
@@ -84,13 +90,13 @@
     <div class="panel panel-default">
       <div class="panel-heading"><h4 class="panel-title">5. Enter dataset B</h4></div>
       <div class="panel-body">
-        <div class="form-check"><input class="form-check-input" type="radio" name="dataB-type" id="dataB-rnd" value="rnd" checked><label class="form-check-label" for="dataB-rnd">Random permutation of dataset A</label></div>
+        <div class="form-check"><input class="form-check-input" type="radio" name="dataB-type" id="dataB-rnd" value="rnd" checked><label class="form-check-label" for="dataB-rnd">Random permutation of dataset A</label><a class="info-btn" href="#" data-info="permutation" role="button" aria-label="About random permutation">&#x24D8;</a></div>
         <div id="permutation-row" class="ms-4 mb-2">
           <span class="form-check form-check-inline"><input class="form-check-input" type="radio" name="dataB-perm" id="perm-1" value="1" checked><label class="form-check-label" for="perm-1">×1</label></span>
           <span class="form-check form-check-inline"><input class="form-check-input" type="radio" name="dataB-perm" id="perm-10" value="10"><label class="form-check-label" for="perm-10">×10</label></span>
           <span class="form-check form-check-inline"><input class="form-check-input" type="radio" name="dataB-perm" id="perm-100" value="100"><label class="form-check-label" for="perm-100">×100</label></span>
         </div>
-        <div class="form-check"><input class="form-check-input" type="radio" name="dataB-type" id="dataB-bed" value="bed"><label class="form-check-label" for="dataB-bed">Genomic regions (BED)</label></div>
+        <div class="form-check"><input class="form-check-input" type="radio" name="dataB-type" id="dataB-bed" value="bed"><label class="form-check-label" for="dataB-bed">Genomic regions (BED)</label><a class="info-btn" href="#" data-info="dataset-b-bed" role="button" aria-label="About genomic regions (BED) for dataset B">&#x24D8;</a></div>
         <div class="form-check"><input class="form-check-input" type="radio" name="dataB-type" id="dataB-refseq" value="refseq" disabled><label class="form-check-label" for="dataB-refseq">Refseq coding genes (gene-list mode only)</label></div>
         <div class="form-check mb-2"><input class="form-check-input" type="radio" name="dataB-type" id="dataB-userlist" value="userlist" disabled><label class="form-check-label" for="dataB-userlist">Gene list (gene-list mode only)</label></div>
         <textarea class="form-control mb-2" id="dataB-text" rows="6" placeholder="Paste content or use the file picker below." hidden></textarea>
@@ -106,6 +112,7 @@
       <div class="panel-body">
         <div class="mb-2">
           <label for="title" class="form-label small text-muted">Analysis title</label>
+          <a class="info-btn" href="#" data-info="analysis-title" role="button" aria-label="About analysis title">&#x24D8;</a>
           <input type="text" id="title" class="form-control form-control-sm" value="My project">
         </div>
         <div class="mb-2">

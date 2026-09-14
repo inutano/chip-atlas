@@ -10,6 +10,10 @@
         '<a href="https://github.com/inutano/chip-atlas/wiki#tables-summarizing-metadata-and-files" target="_blank" rel="noopener noreferrer">metadata table</a>.'
 } %>
 
+<%== erb :_tutorial, locals: {
+  pdf: 'https://chip-atlas.dbcls.jp/data/manual/Dataset_Search/Dataset_Search.pdf'
+} %>
+
 <form id="search-form" class="row g-2 mb-3" role="search" autocomplete="off">
   <div class="col-md-7">
     <input type="search" id="search-query" class="form-control" placeholder="e.g. K562 H3K4me3" aria-label="Search query">
