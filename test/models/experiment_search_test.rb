@@ -70,6 +70,28 @@ class ExperimentSearchTest < Minitest::Test
     assert result[:experiments].all? { |e| e[:genome] == 'hg38' }
   end
 
+  def test_blank_query_total_is_memoized_across_calls
+    # list_all's total row count is cached (see reset_total_count_cache!)
+    # instead of recomputed via COUNT(*) OVER() on every call - it must
+    # still reflect the current data and stay correct across repeated
+    # calls within the same process.
+    first = ChipAtlas::ExperimentSearch.search('', limit: 1)
+    second = ChipAtlas::ExperimentSearch.search('', limit: 1, offset: 2)
+    assert_equal first[:total], second[:total]
+    assert_equal 3, first[:total]
+  end
+
+  def test_total_count_cache_is_reset_after_data_reload
+    ChipAtlas::ExperimentSearch.search('', limit: 1) # warm the cache at 3 rows
+    DB.run <<-SQL
+      INSERT INTO experiments_fts (experiment_id, sra_id, geo_id, genome, track_class, track_subclass, cell_type_class, cell_type_subclass, title, attributes)
+      VALUES ('SRX999999', 'SRA999', 'GSM999', 'hg38', 'Histone', 'H3K4me3', 'Blood', 'K-562', 'extra row', 'extra');
+    SQL
+    ChipAtlas::ExperimentSearch.reset_total_count_cache!
+    result = ChipAtlas::ExperimentSearch.search('', limit: 1)
+    assert_equal 4, result[:total]
+  end
+
   def test_sra_cache_set_and_get
     metadata = { experiment_id: 'SRX018625', platform: 'ILLUMINA' }
     ChipAtlas::SraCache.set('SRX018625', metadata)

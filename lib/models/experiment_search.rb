@@ -9,6 +9,29 @@ module ChipAtlas
 
     module_function
 
+    # Memoized row counts for the blank-query listing path (list_all).
+    # The total is a constant between data loads, so there is no need to pay
+    # for a fresh COUNT(*) OVER() scan across all ~432k FTS5 rows (plus every
+    # SELECTed column, materialized for the whole table before LIMIT/OFFSET
+    # trims it down to 20) on every /search page load and every genome
+    # change. Keyed by genome ("" for no filter); reset on load_from_json.
+    def total_count_cache
+      @total_count_cache ||= {}
+    end
+
+    def reset_total_count_cache!
+      @total_count_cache = {}
+    end
+
+    def total_count(genome = nil)
+      key = (genome && !genome.empty?) ? genome : ''
+      total_count_cache[key] ||= if key.empty?
+        DB["SELECT COUNT(*) AS c FROM experiments_fts"].first[:c]
+      else
+        DB["SELECT COUNT(*) AS c FROM experiments_fts WHERE genome = ?", key].first[:c]
+      end
+    end
+
     def gsm_to_srx(gsm_id)
       row = DB["SELECT experiment_id FROM experiments_fts WHERE geo_id = ?", gsm_id].first
       row&.[](:experiment_id)
@@ -47,9 +70,10 @@ module ChipAtlas
     end
 
     def list_all(genome: nil, limit: 20, offset: 0)
+      total = total_count(genome)
       if genome && !genome.empty?
         sql = <<~SQL
-          SELECT #{COLUMNS.join(', ')}, COUNT(*) OVER() AS total_count
+          SELECT #{COLUMNS.join(', ')}
           FROM experiments_fts
           WHERE genome = ?
           ORDER BY experiment_id
@@ -58,7 +82,7 @@ module ChipAtlas
         rows = DB[sql, genome, limit.to_i, offset.to_i].all
       else
         sql = <<~SQL
-          SELECT #{COLUMNS.join(', ')}, COUNT(*) OVER() AS total_count
+          SELECT #{COLUMNS.join(', ')}
           FROM experiments_fts
           ORDER BY experiment_id
           LIMIT ? OFFSET ?
@@ -66,10 +90,7 @@ module ChipAtlas
         rows = DB[sql, limit.to_i, offset.to_i].all
       end
 
-      total = rows.first&.[](:total_count) || 0
-      experiments = rows.map { |row| row.except(:total_count) }
-
-      { total: total, returned: experiments.size, experiments: experiments }
+      { total: total, returned: rows.size, experiments: rows }
     end
 
     def load_from_json(json_data)
@@ -103,6 +124,7 @@ module ChipAtlas
         end
       end
 
+      reset_total_count_cache!
       warn "ExperimentSearch: loaded #{rows.size} rows into FTS5 table"
     end
 

@@ -105,5 +105,11 @@ module TestHelper
     DB[:analyses].delete
     DB[:sra_cache].delete
     DB.run("DELETE FROM experiments_fts")
+    # ExperimentSearch.list_all memoizes total row counts in-process (see
+    # lib/models/experiment_search.rb) to avoid a full-table COUNT(*) OVER()
+    # scan on every /search page load. Tests insert into experiments_fts
+    # directly (bypassing load_from_json, which is the cache's normal
+    # invalidation hook), so reset it here to keep tests isolated.
+    ChipAtlas::ExperimentSearch.reset_total_count_cache!
   end
 end
