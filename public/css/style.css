@@ -300,6 +300,7 @@ h1 .icon, h3 .icon, h4 .icon { margin-right: 8px; }
 .align-height {
   display: flex;
   flex-wrap: wrap;
+  margin-bottom: 30px;
 }
 
 .jumbotron-link {
@@ -315,7 +316,6 @@ h1 .icon, h3 .icon, h4 .icon { margin-right: 8px; }
   gap: 10px;
   height: 100%;
   padding: 30px 30px 30px 40px;
-  margin-bottom: 30px;
   color: inherit;
   background-color: var(--ca-jumbotron-bg);
   border-radius: 6px;
