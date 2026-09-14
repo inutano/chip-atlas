@@ -194,6 +194,18 @@ class PagesTest < Minitest::Test
     assert_includes last_response.body, 'class="panel panel-default"'
   end
 
+  def test_colo_has_paired_list_boxes_and_three_column_panels
+    get '/colo'
+    body = last_response.body
+    assert_includes body, '1. Search mode'
+    assert_includes body, 'id="primary-input"'
+    assert_includes body, 'id="primary-list"'
+    assert_includes body, 'id="secondary-input"'
+    assert_includes body, 'id="secondary-list"'
+    assert_includes body, 'col-md-3'
+    refute_includes body, 'col-md-4', '/colo panels must match production col-md-3, not col-md-4'
+  end
+
   def test_analysis_pages_have_a_tutorial_dropdown
     %w[/peak_browser /enrichment_analysis /diff_analysis /target_genes /colo /search].each do |path|
       get path

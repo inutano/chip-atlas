@@ -19,7 +19,7 @@
 <div id="genome-tabs"></div>
 
 <div class="row">
-  <div class="col-md-4">
+  <div class="col-md-3">
     <div class="panel panel-default">
       <div class="panel-heading"><h4 class="panel-title">1. Search mode</h4></div>
       <div class="panel-body">
@@ -34,19 +34,21 @@
       </div>
     </div>
   </div>
-  <div class="col-md-4">
+  <div class="col-md-3">
     <div class="panel panel-default">
-      <div class="panel-heading"><h4 class="panel-title">2. Choose Primary Type</h4></div>
+      <div class="panel-heading"><h4 class="panel-title" id="primary-panel-title">2. Choose Primary Type</h4></div>
       <div class="panel-body">
         <input type="text" id="primary-input" class="form-control" placeholder="type to search" autocomplete="off">
+        <div id="primary-list" class="mt-2"></div>
       </div>
     </div>
   </div>
-  <div class="col-md-4">
+  <div class="col-md-3">
     <div class="panel panel-default">
-      <div class="panel-heading"><h4 class="panel-title">3. Choose Secondary Type</h4></div>
+      <div class="panel-heading"><h4 class="panel-title" id="secondary-panel-title">3. Choose Secondary Type</h4></div>
       <div class="panel-body">
         <input type="text" id="secondary-input" class="form-control" placeholder="type to search" autocomplete="off">
+        <div id="secondary-list" class="mt-2"></div>
       </div>
     </div>
   </div>

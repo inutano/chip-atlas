@@ -31,6 +31,21 @@ function getDirection(): 'track' | 'cell_type' {
   return r?.value === 'cell_type' ? 'cell_type' : 'track'
 }
 
+// Mirrors production's colo.js changePanelTitle(): the primary/secondary
+// panel headings name whichever facet they currently hold, which flips with
+// the search-mode radio.
+function updatePanelTitles(): void {
+  const primaryTitle = $('primary-panel-title')
+  const secondaryTitle = $('secondary-panel-title')
+  if (getDirection() === 'track') {
+    primaryTitle.textContent = '2. Choose Antigen'
+    secondaryTitle.textContent = '3. Choose Cell Type Class'
+  } else {
+    primaryTitle.textContent = '2. Choose Cell Type Class'
+    secondaryTitle.textContent = '3. Choose Antigen'
+  }
+}
+
 async function loadGenomeIndex(genome: string): Promise<void> {
   if (coloIndex[genome]) return
   try {
@@ -80,10 +95,10 @@ async function init(): Promise<void> {
   Autocomplete.init(pInput, [], (value) => {
     currentPrimary = value
     refresh()
-  })
+  }, { pairedList: $('primary-list') })
   Autocomplete.init(sInput, [], (value) => {
     currentSecondary = value
-  })
+  }, { pairedList: $('secondary-list') })
 
   document.querySelectorAll<HTMLInputElement>('input[name="direction"]').forEach((r) => {
     r.addEventListener('change', () => {
@@ -91,9 +106,12 @@ async function init(): Promise<void> {
       currentSecondary = ''
       pInput.value = ''
       sInput.value = ''
+      updatePanelTitles()
       refresh()
     })
   })
+
+  updatePanelTitles()
 
   const tabs = $('genome-tabs')
   tabs.addEventListener('genome-change', async (e: Event) => {
