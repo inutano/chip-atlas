@@ -149,4 +149,23 @@ class PagesTest < Minitest::Test
     assert_includes body, 'Cell type (optional)'
     assert_includes body, 'class="panel panel-default"'
   end
+
+  EA_PANELS = [
+    '1. Experiment type', '2. Cell type Class', '3. Threshold for Significance',
+    '4. Enter dataset A', '5. Enter dataset B', '6. Analysis description'
+  ].freeze
+
+  def test_enrichment_analysis_has_six_numbered_panels
+    get '/enrichment_analysis'
+    EA_PANELS.each { |h| assert_includes last_response.body, h }
+  end
+
+  def test_enrichment_analysis_seeds_title_placeholders
+    get '/enrichment_analysis'
+    body = last_response.body
+    assert_includes body, 'value="My project"'
+    assert_includes body, 'value="Dataset A"'
+    assert_includes body, 'value="Dataset B"'
+    assert_includes body, 'Try with example'
+  end
 end

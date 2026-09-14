@@ -1,8 +1,16 @@
 // frontend/pages/enrichment-analysis.ts
-// GenomeTabs + FacetFilter + dataset A/B inputs (BED/genes/count, file upload) + job submit.
+// GenomeTabs + FacetFilter (list-box mode, six-panel grid) + dataset A/B inputs
+// (BED/genes/count, file upload, "Try with example") + estimated run time + job submit.
+//
+// The "Track type (optional)" and "Cell type (optional)" panels use the same
+// "type to search" + ListBox pairing as frontend/pages/peak-browser.ts, for
+// the same reason documented there: Autocomplete drives the *same* <select>
+// FacetFilter owns (via a native `change` event) instead of building a second,
+// competing ListBox, so the cascade and FacetFilter.getCondition() stay correct.
 
 import { GenomeTabs } from '../components/genome-tabs'
 import { FacetFilter } from '../components/facet-filter'
+import { Autocomplete } from '../components/autocomplete'
 import { submitJob } from '../api/client'
 
 interface PageData {
@@ -14,6 +22,8 @@ interface PageData {
     genesetB?: string
   }
 }
+
+let currentGenome = ''
 
 function $(id: string): HTMLElement {
   const el = document.getElementById(id)
@@ -69,18 +79,132 @@ function syncDatasetBVisibility(): void {
   else note.textContent = ''
 }
 
+// ===== "type to search" wiring for the two optional subclass list boxes =====
+// (mirrors frontend/pages/peak-browser.ts — see its header comment for why)
+
+interface SubclassSearch {
+  input: HTMLInputElement
+  mount: HTMLElement
+  idByLabel: Map<string, string>
+}
+
+function subclassSelect(mount: HTMLElement): HTMLSelectElement | null {
+  return mount.querySelector('select')
+}
+
+function refreshSubclassSearch(s: SubclassSearch): void {
+  const select = subclassSelect(s.mount)
+  if (!select) return
+  const items: string[] = []
+  s.idByLabel.clear()
+  for (const opt of Array.from(select.options)) {
+    const text = opt.textContent ?? opt.value
+    items.push(text)
+    s.idByLabel.set(text, opt.value)
+  }
+  Autocomplete.setItems(s.input, items)
+}
+
+function wireSubclassSearch(input: HTMLInputElement, mount: HTMLElement): SubclassSearch {
+  const s: SubclassSearch = { input, mount, idByLabel: new Map() }
+
+  Autocomplete.init(input, [], (label) => {
+    const select = subclassSelect(mount)
+    const id = s.idByLabel.get(label)
+    if (!select || id === undefined) return
+    select.value = id
+    select.dispatchEvent(new Event('change', { bubbles: true }))
+  })
+
+  input.addEventListener('input', () => {
+    const select = subclassSelect(mount)
+    if (!select) return
+    const q = input.value.trim().toLowerCase()
+    for (const opt of Array.from(select.options)) {
+      opt.hidden = q !== '' && !(opt.textContent ?? '').toLowerCase().includes(q)
+    }
+  })
+
+  return s
+}
+
+// ===== Estimated run time =====
+// Reuses the shared POST /jobs/estimated_time endpoint (see routes/jobs.rb and
+// frontend/pages/diff-analysis.ts). That endpoint only models runtime for the
+// diff-analysis 'dmr'/'diffbind' formulas — enrichment-analysis jobs have no
+// modeled formula server-side yet, so this always resolves to the same
+// em-dash placeholder the panel starts with. Wiring it here (rather than
+// leaving the placeholder static) keeps the affordance ready for the day a
+// server-side estimate is added, without touching job-submission logic.
+async function refreshEstimate(): Promise<void> {
+  const out = document.getElementById('estimated-run-time')
+  if (!out) return
+  try {
+    const res = await fetch('/jobs/estimated_time', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ids: [], analysis: 'enrichment' }),
+    })
+    if (!res.ok) throw new Error(`estimated_time: ${res.status}`)
+    const data = (await res.json()) as { minutes: number | null }
+    out.textContent = data.minutes != null ? `${data.minutes} min` : '—'
+  } catch (err) {
+    console.error(err)
+    out.textContent = '—'
+  }
+}
+
+// ===== Try with example =====
+async function loadExample(): Promise<void> {
+  if (!currentGenome) return
+  const status = $('submit-status')
+  try {
+    const res = await fetch(`/examples/${encodeURIComponent(currentGenome)}/bedA.txt`)
+    if (!res.ok) throw new Error(`example fetch: ${res.status}`)
+    const text = await res.text()
+    ;(document.getElementById('dataA-bed') as HTMLInputElement).checked = true
+    ;($('dataA-text') as HTMLTextAreaElement).value = text
+    syncDatasetBVisibility()
+  } catch (err) {
+    console.error(err)
+    status.textContent = 'Failed to load example data.'
+  }
+}
+
 async function init(): Promise<void> {
   const data = readPageData()
   const tabs = $('genome-tabs')
-  const facet = $('facet-filter')
   const status = $('submit-status')
+
+  // Anchor element for FacetFilter's internal registry / facet-change event.
+  // In list-box mode the five facets render into their own mount points
+  // (below), so this container never enters the document.
+  const facet = document.createElement('div')
+
+  const mount: Record<'track_class' | 'track_subclass' | 'cell_type_class' | 'cell_type_subclass' | 'qval', HTMLElement> = {
+    track_class:        $('facet-track-class'),
+    track_subclass:     $('facet-track-subclass'),
+    cell_type_class:    $('facet-cell-type-class'),
+    cell_type_subclass: $('facet-cell-type-subclass'),
+    qval:               $('facet-qval'),
+  }
+
+  const trackSearch = wireSubclassSearch($('track-subclass-input') as HTMLInputElement, mount.track_subclass)
+  const cellSearch = wireSubclassSearch($('cell-type-subclass-input') as HTMLInputElement, mount.cell_type_subclass)
+
+  facet.addEventListener('facet-change', () => {
+    refreshSubclassSearch(trackSearch)
+    refreshSubclassSearch(cellSearch)
+    void refreshEstimate()
+  })
 
   tabs.addEventListener('genome-change', async (e: Event) => {
     const detail = (e as CustomEvent<{ genome: string }>).detail
+    currentGenome = detail.genome
     if (FacetFilter.getCondition(facet)) {
       await FacetFilter.setGenome(facet, detail.genome)
     } else {
-      await FacetFilter.init(facet, detail.genome)
+      await FacetFilter.init(facet, detail.genome, { render: 'listbox', mount })
     }
   })
 
@@ -104,6 +228,13 @@ async function init(): Promise<void> {
     $('dataB-file') as HTMLInputElement,
     $('dataB-text') as HTMLTextAreaElement,
   )
+
+  $('try-example').addEventListener('click', (e) => {
+    e.preventDefault()
+    void loadExample()
+  })
+
+  void refreshEstimate()
 
   $('submit-job').addEventListener('click', async () => {
     const condition = FacetFilter.getCondition(facet)
