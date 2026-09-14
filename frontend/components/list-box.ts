@@ -24,9 +24,13 @@ export class ListBox {
   constructor(opts: ListBoxOptions) {
     this.onChange = opts.onChange
 
+    // Suffix the id: callers (e.g. FacetFilter's list-box mode) commonly pass
+    // the same id as the mount <div> itself, which produced two elements
+    // sharing one id - invalid HTML, and getElementById(id) silently
+    // returned the div instead of this <select>.
     const select = document.createElement('select')
     select.className = 'form-control list-box'
-    select.id = opts.id
+    select.id = `${opts.id}-select`
     select.size = opts.size ?? 8
     select.addEventListener('change', () => {
       if (this.onChange && select.value) this.onChange(select.value)
