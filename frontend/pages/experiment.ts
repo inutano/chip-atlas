@@ -2,7 +2,7 @@
 // Builds the four action dropdowns (Visualize, Analyze, Download, Link Out)
 // for the experiment detail page. Reads experiment records from a JSON island.
 
-import type { ExperimentRecord } from '../api/client'
+import { checkRemoteUrlStatus, type ExperimentRecord } from '../api/client'
 
 interface PageData {
   expid: string
@@ -196,6 +196,57 @@ function fill(menuId: string, children: HTMLElement[]): void {
   ul.replaceChildren(...children)
 }
 
+async function revealProfile(section: HTMLElement): Promise<void> {
+  const distUrl = section.dataset.distributionUrl
+  const corUrl = section.dataset.correlationUrl
+  const tsvUrl = section.dataset.correlationTsv
+
+  const distImg = section.querySelector<HTMLImageElement>('.distribution-img')
+  const corImg = section.querySelector<HTMLImageElement>('.correlation-img')
+  const tsvLink = section.querySelector<HTMLAnchorElement>('.download-tsv')
+
+  let revealed = false
+
+  if (distUrl && distImg) {
+    const status = await checkRemoteUrlStatus(distUrl)
+    if (status === '200') {
+      distImg.src = distUrl
+      distImg.hidden = false
+      revealed = true
+    }
+  }
+
+  if (corUrl && corImg) {
+    const status = await checkRemoteUrlStatus(corUrl)
+    if (status === '200') {
+      corImg.src = corUrl
+      corImg.hidden = false
+      revealed = true
+    }
+  }
+
+  if (tsvUrl && tsvLink) {
+    const status = await checkRemoteUrlStatus(tsvUrl)
+    if (status === '200') {
+      tsvLink.href = tsvUrl
+      tsvLink.hidden = false
+    }
+  }
+
+  if (revealed) {
+    section.hidden = false
+    const panel = document.getElementById('statistics-panel')
+    if (panel) panel.hidden = false
+  }
+}
+
+function initComparativeProfile(): void {
+  const sections = document.querySelectorAll<HTMLElement>('.statistics-section')
+  sections.forEach((section) => {
+    void revealProfile(section)
+  })
+}
+
 function init(): void {
   const data = readData()
   if (!data || data.records.length === 0) return
@@ -203,6 +254,7 @@ function init(): void {
   fill('analyze-menu', buildAnalyzeMenu(data))
   fill('download-menu', buildDownloadMenu(data))
   fill('linkout-menu', buildLinkOutMenu(data))
+  initComparativeProfile()
 }
 
 document.addEventListener('DOMContentLoaded', init)

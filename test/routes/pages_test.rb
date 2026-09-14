@@ -139,6 +139,17 @@ class PagesTest < Minitest::Test
     end
   end
 
+  def test_experiment_page_has_a_comparative_profile_section
+    seed_experiments
+    seed_sra_cache
+    get '/view?id=SRX018625'
+    body = last_response.body
+    assert_includes body, 'Experiment Comparative Profile'
+    assert_includes body, 'distribution/png/SRX018625.dist.png'
+    assert_includes body, 'correlation/png/SRX018625.cor.png'
+    assert_includes body, 'id="statistics-panel"'
+  end
+
   def test_peak_browser_has_five_numbered_panels
     get '/peak_browser'
     body = last_response.body

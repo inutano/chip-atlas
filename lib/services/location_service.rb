@@ -52,6 +52,21 @@ module ChipAtlas
       "#{target_genes_base}/#{encoded_track}.#{@condition[:distance]}.tsv"
     end
 
+    # Comparative profile URLs
+    def distribution_png_url
+      "#{ARCHIVE_BASE}/#{@genome}/distribution/png/#{@condition[:experiment_id]}.dist.png"
+    end
+
+    def correlation_png_url
+      "#{ARCHIVE_BASE}/#{@genome}/correlation/png/#{@condition[:experiment_id]}.cor.png"
+    end
+
+    def correlation_tsv_url
+      track = @condition[:track_subclass].to_s.tr(' ', '_')
+      cell  = @condition[:cell_type_subclass].to_s.tr(' ', '_')
+      "#{ARCHIVE_BASE}/#{@genome}/correlation/tsv/#{@genome}__x__#{track}__x__#{cell}.tsv"
+    end
+
     private
 
     def encoded_track

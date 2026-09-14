@@ -35,6 +35,20 @@ module ChipAtlas
           log_activity('view_experiment', { expid: @expid })
           @records = ChipAtlas::Experiment.record_by_experiment_id(@expid)
           @ncbi = ChipAtlas::SraService.new(@expid).fetch
+          @profiles = @records.map do |rec|
+            svc = ChipAtlas::LocationService.new('condition' => {
+              'genome' => rec[:genome],
+              'experiment_id' => @expid,
+              'track_subclass' => rec[:track_subclass],
+              'cell_type_subclass' => rec[:cell_type_subclass]
+            })
+            {
+              genome: rec[:genome],
+              distribution: svc.distribution_png_url,
+              correlation: svc.correlation_png_url,
+              tsv: svc.correlation_tsv_url
+            }
+          end
           @page_js = 'experiment'
           erb :experiment
         end

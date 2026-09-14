@@ -208,6 +208,7 @@ module ChipAtlas
         # === Internal endpoints (not in OpenAPI) ===
 
         app.get '/api/remote_url_status' do
+          cache_control :public, max_age: 3600
           url = params[:url]
           unless url && ChipAtlas::Routes::Api.allowed_remote_url?(url)
             halt 400, 'Invalid or disallowed URL'

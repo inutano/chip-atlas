@@ -56,4 +56,33 @@ class LocationServiceTest < Minitest::Test
     svc = ChipAtlas::LocationService.new(data)
     assert_nil svc.archive_url
   end
+
+  def test_distribution_png_url
+    svc = ChipAtlas::LocationService.new(
+      'condition' => { 'genome' => 'hg38', 'experiment_id' => 'SRX019491' }
+    )
+    assert_equal 'https://chip-atlas.dbcls.jp/data/hg38/distribution/png/SRX019491.dist.png',
+                 svc.distribution_png_url
+  end
+
+  def test_correlation_png_url
+    svc = ChipAtlas::LocationService.new(
+      'condition' => { 'genome' => 'hg38', 'experiment_id' => 'SRX019491' }
+    )
+    assert_equal 'https://chip-atlas.dbcls.jp/data/hg38/correlation/png/SRX019491.cor.png',
+                 svc.correlation_png_url
+  end
+
+  def test_correlation_tsv_url_underscores_spaces
+    svc = ChipAtlas::LocationService.new(
+      'condition' => {
+        'genome' => 'hg38',
+        'track_subclass' => 'Input control',
+        'cell_type_subclass' => 'Adipose stromal cell'
+      }
+    )
+    assert_equal 'https://chip-atlas.dbcls.jp/data/hg38/correlation/tsv/' \
+                 'hg38__x__Input_control__x__Adipose_stromal_cell.tsv',
+                 svc.correlation_tsv_url
+  end
 end

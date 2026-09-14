@@ -153,3 +153,47 @@
     </div>
   </div>
 </div>
+
+<% if @profiles && !@profiles.empty? %>
+  <div class="panel panel-default" id="statistics-panel" hidden>
+    <div class="panel-heading">
+      <h4 class="panel-title">
+        <%== erb :_icon, locals: { name: 'chart-bar' } %>
+        Experiment Comparative Profile
+      </h4>
+    </div>
+    <div class="panel-body">
+      <% @profiles.each do |p| %>
+        <div class="statistics-section"
+             data-genome="<%= p[:genome] %>"
+             data-distribution-url="<%= p[:distribution] %>"
+             data-correlation-url="<%= p[:correlation] %>"
+             data-correlation-tsv="<%= p[:tsv] %>" hidden>
+          <div class="row">
+            <div class="col-md-6">
+              <h4>
+                <%== erb :_icon, locals: { name: 'chart-line' } %>
+                Read and Peak Distribution
+              </h4>
+              <div class="text-center">
+                <img class="profile-img distribution-img" alt="Read and peak distribution for <%= @expid %>" hidden>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <h4>
+                <%== erb :_icon, locals: { name: 'project-diagram' } %>
+                Correlation-Based Clustering
+              </h4>
+              <div class="text-center">
+                <img class="profile-img correlation-img" alt="Correlation clustering for <%= @expid %>" hidden>
+              </div>
+              <div class="text-center mt-2">
+                <a class="btn btn-sm btn-light download-tsv" href="#" hidden><%== erb :_icon, locals: { name: 'download' } %> Download correlation TSV</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  </div>
+<% end %>
