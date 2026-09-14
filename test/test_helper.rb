@@ -56,6 +56,32 @@ module TestHelper
     ])
   end
 
+  def seed_sra_cache
+    DB[:sra_cache].multi_insert([
+      { experiment_id: 'SRX018625',
+        metadata_json: JSON.generate(
+          experiment_id: 'SRX018625',
+          library_description: {
+            library_name: 'H3K4me3 ChIP-seq library',
+            library_strategy: 'ChIP-Seq',
+            library_source: 'GENOMIC',
+            library_selection: 'ChIP',
+            library_construction_protocol: 'Standard Illumina library construction protocol',
+          },
+          platform_information: {
+            instrument_model: 'Illumina HiSeq 2000',
+            cycle_sequence: '', cycle_count: '', flow_sequence: '', flow_count: '', key_sequence: '',
+          },
+          platform: 'ILLUMINA',
+          library_layout: 'SINGLE',
+          library_orientation: '',
+          library_nominal_length: '',
+          library_nominal_sdev: '',
+        ),
+        fetched_at: Time.now, created_at: Time.now },
+    ])
+  end
+
   def seed_bedsizes
     DB[:bedsizes].multi_insert([
       { genome: 'hg38', track_class: 'Histone', cell_type_class: 'Blood',

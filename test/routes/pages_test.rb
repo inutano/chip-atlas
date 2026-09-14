@@ -4,6 +4,7 @@ require 'test_helper'
 
 class PagesTest < Minitest::Test
   include Rack::Test::Methods
+  include TestHelper
 
   def app
     ChipAtlasApp
@@ -120,5 +121,18 @@ class PagesTest < Minitest::Test
     assert_includes body, 'Download BED file'
     refute_includes body, 'btn-outline-primary'
     assert_includes body, 'btn-block'
+  end
+
+  VIEW_ICONS = %w[file-alt tag microscope user-edit flask server cogs dna].freeze
+
+  def test_experiment_page_headings_carry_icons
+    seed_experiments
+    seed_sra_cache
+    get '/view?id=SRX018625'
+    assert_equal 200, last_response.status
+    VIEW_ICONS.each do |icon|
+      assert_includes last_response.body, "chip-atlas.svg##{icon}",
+                       "experiment page is missing the #{icon} icon"
+    end
   end
 end
