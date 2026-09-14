@@ -54,7 +54,9 @@ export const GenomeTabs = {
       button.setAttribute('role', 'tab')
       button.setAttribute('aria-selected', code === initial ? 'true' : 'false')
       button.dataset.genome = code
-      button.textContent = code
+      // `genomes` already maps code -> full species label (see @list_of_genome /
+      // GET /api/genomes); fall back to the bare code if a label is ever missing.
+      button.textContent = genomes[code] ?? code
       button.title = genomes[code]
 
       button.addEventListener('click', () => {
