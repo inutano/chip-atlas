@@ -5,12 +5,10 @@
 %>
 <script id="page-data" type="application/json"><%== { genomes: @list_of_genome }.to_json.gsub('</', '<\/') %></script>
 
-<div class="row mb-3">
-  <div class="col-md-12">
-    <h1>ChIP-Atlas: Colocalization</h1>
-    <p>Predict potential partner proteins that form complexes with given TFs.</p>
-  </div>
-</div>
+<%== erb :_page_header, locals: {
+  title: 'ChIP-Atlas: Colocalization',
+  lead: 'Predict potential partner proteins that form complexes with given TFs.'
+} %>
 
 <div id="genome-tabs"></div>
 

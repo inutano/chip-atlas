@@ -3,14 +3,12 @@
   @page_description = 'Browse and analyse the public ChIP-Seq/DNase-Seq/ATAC-Seq/Bisulfite-Seq data on your browser.'
   @active_menu = nil
 %>
-<div class="page-header mb-4">
-  <h1>ChIP-Atlas</h1>
-  <p class="lead">
-    A data-mining suite for exploring epigenomic landscapes by fully integrating
-    <span id="experiment-count"><%= @number_of_experiments %></span>
-    ChIP-seq, ATAC-seq and Bisulfite-seq experiments.
-  </p>
-</div>
+<%== erb :_page_header, locals: {
+  title: 'ChIP-Atlas',
+  lead: "A data-mining suite for exploring epigenomic landscapes by fully integrating " \
+        "<span id=\"experiment-count\">#{@number_of_experiments}</span> " \
+        "ChIP-seq, ATAC-seq and Bisulfite-seq experiments."
+} %>
 
 <div class="row g-3 mb-3">
   <div class="col-md-4">

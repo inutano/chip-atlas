@@ -13,12 +13,10 @@
   }
 }.to_json.gsub('</', '<\/') %></script>
 
-<div class="row mb-3">
-  <div class="col-md-12">
-    <h1>ChIP-Atlas: Enrichment Analysis</h1>
-    <p>Identify common epigenetic features of a given set of genomic loci and genes.</p>
-  </div>
-</div>
+<%== erb :_page_header, locals: {
+  title: 'ChIP-Atlas: Enrichment Analysis',
+  lead: 'Identify common epigenetic features of a given set of genomic loci and genes.'
+} %>
 
 <div id="genome-tabs"></div>
 

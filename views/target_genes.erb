@@ -5,12 +5,10 @@
 %>
 <script id="page-data" type="application/json"><%== { genomes: @list_of_genome }.to_json.gsub('</', '<\/') %></script>
 
-<div class="row mb-3">
-  <div class="col-md-12">
-    <h1>ChIP-Atlas: Target Genes</h1>
-    <p>Search for genes bound by given transcription factors.</p>
-  </div>
-</div>
+<%== erb :_page_header, locals: {
+  title: 'ChIP-Atlas: Target Genes',
+  lead: 'Search for genes bound by given transcription factors.'
+} %>
 
 <div id="genome-tabs"></div>
 

@@ -1,0 +1,9 @@
+<div class="page-header">
+  <h1>
+    <%== erb :_icon, locals: { name: 'mountain' } %>
+    <%= title %>
+  </h1>
+  <% if defined?(lead) && lead %>
+    <p class="main-desc"><%== lead %></p>
+  <% end %>
+</div>

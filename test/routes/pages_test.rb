@@ -78,4 +78,13 @@ class PagesTest < Minitest::Test
     assert_includes last_response.body, 'chip-atlas.svg#mountain'
     refute_includes last_response.body, 'M8 1l2 5h5l-4 3 1.5 5L8 11 3.5 14 5 9 1 6h5z'
   end
+
+  def test_pages_have_a_page_header_with_the_mountain
+    %w[/ /peak_browser /search /colo /target_genes
+       /enrichment_analysis /diff_analysis].each do |path|
+      get path
+      assert_includes last_response.body, 'class="page-header"', "#{path} has no page header"
+      assert_includes last_response.body, 'chip-atlas.svg#mountain', "#{path} h1 has no mountain"
+    end
+  end
 end

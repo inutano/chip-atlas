@@ -5,12 +5,10 @@
 %>
 <script id="page-data" type="application/json"><%== { genomes: @list_of_genome }.to_json.gsub('</', '<\/') %></script>
 
-<div class="row mb-3">
-  <div class="col-md-12">
-    <h1>ChIP-Atlas: Diff Analysis</h1>
-    <p>Detect differential peaks or differentially methylated regions.</p>
-  </div>
-</div>
+<%== erb :_page_header, locals: {
+  title: 'ChIP-Atlas: Diff Analysis',
+  lead: 'Detect differential peaks or differentially methylated regions.'
+} %>
 
 <div id="genome-tabs"></div>
 
