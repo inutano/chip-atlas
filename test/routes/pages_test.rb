@@ -87,4 +87,10 @@ class PagesTest < Minitest::Test
       assert_includes last_response.body, 'chip-atlas.svg#mountain', "#{path} h1 has no mountain"
     end
   end
+
+  def test_stylesheet_forces_navbar_links_white
+    css = File.read(File.join(__dir__, '..', '..', 'public', 'css', 'style.css'))
+    assert_includes css, '.navbar-dark .navbar-nav .nav-link,', 'non-active navbar links must be forced to pure white, matching production'
+    assert_includes css, '.navbar-right-stack .nav-link:hover,', 'navbar hover/focus state must stay pure white, not the dim Bootstrap default'
+  end
 end
