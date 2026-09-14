@@ -6,8 +6,8 @@
   <meta name="description" content="<%= @page_description || 'Browse and analyse public ChIP-Seq/DNase-Seq/ATAC-Seq/Bisulfite-Seq data.' %>">
   <meta name="author" content="Shinya Oki, Tazro Ohta">
   <title><%= @page_title ? "ChIP-Atlas: #{@page_title}" : "ChIP-Atlas" %></title>
-  <link rel="stylesheet" href="/css/bootstrap5.min.css">
-  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="<%= asset_path('/css/bootstrap5.min.css') %>">
+  <link rel="stylesheet" href="<%= asset_path('/css/style.css') %>">
 </head>
 <body>
   <%== erb :_navbar %>
@@ -15,9 +15,9 @@
     <%== yield %>
   </div>
   <%== erb :_footer %>
-  <script src="/js/bootstrap.bundle.min.js"></script>
+  <script src="<%= asset_path('/js/bootstrap.bundle.min.js') %>"></script>
   <% if @page_js %>
-    <script type="module" src="/js/<%= @page_js %>.js"></script>
+    <script type="module" src="<%= asset_path("/js/#{@page_js}.js") %>"></script>
   <% end %>
 </body>
 </html>

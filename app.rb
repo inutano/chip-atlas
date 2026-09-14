@@ -32,6 +32,15 @@ class ChipAtlasApp < Sinatra::Base
   register ChipAtlas::Routes::Pages
 
   helpers do
+    # Append the file's mtime so browsers cannot serve a stale copy after a
+    # deploy. nginx sets `expires 1d` on /css/ and /js/, so without this a
+    # returning visitor can run new HTML against yesterday's stylesheet.
+    def asset_path(path)
+      full = File.join(settings.public_folder, path)
+      stamp = File.exist?(full) ? File.mtime(full).to_i : nil
+      stamp ? "#{path}?v=#{stamp}" : path
+    end
+
     def json_response(data)
       content_type 'application/json'
       JSON.generate(data)
