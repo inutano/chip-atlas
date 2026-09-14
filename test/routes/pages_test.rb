@@ -33,4 +33,23 @@ class PagesTest < Minitest::Test
     assert_includes css, '#428bca', 'primary colour must match Bootstrap 3.2'
     refute_includes css, '#337ab7', 'Bootstrap 3.3 primary must not be used'
   end
+
+  SPRITE_SYMBOLS = %w[
+    mountain glasses hand-holding-heart balance-scale-left bullseye
+    compress-arrows-alt book robot github search info-circle question-circle
+    spinner download dna chart-line chart-bar project-diagram
+    external-link-alt user-edit tag server microscope flask file-alt eye cogs
+  ].freeze
+
+  def test_sprite_defines_every_symbol
+    sprite = File.read(File.join(__dir__, '..', '..', 'public', 'icons', 'chip-atlas.svg'))
+    SPRITE_SYMBOLS.each do |name|
+      assert_includes sprite, %(id="#{name}"), "sprite is missing symbol #{name}"
+    end
+  end
+
+  def test_sprite_is_served
+    get '/icons/chip-atlas.svg'
+    assert_equal 200, last_response.status
+  end
 end

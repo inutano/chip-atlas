@@ -260,3 +260,19 @@ footer .acknowledgement {
     max-width: 1170px;
   }
 }
+
+/* ===== Icons ===== */
+.icon {
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  fill: currentColor;
+  vertical-align: -0.125em;
+}
+
+.icon-lg { width: 70px; height: 70px; vertical-align: middle; }
+
+.navbar .nav-link .icon,
+.navbar .navbar-brand .icon { margin-right: 5px; }
+
+h1 .icon, h3 .icon, h4 .icon { margin-right: 8px; }
