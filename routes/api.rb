@@ -221,7 +221,8 @@ module ChipAtlas
             http.read_timeout = 10
             response = http.request_head(uri.request_uri)
             response.code
-          rescue SocketError, Timeout::Error, Errno::ECONNREFUSED, Net::HTTPError
+          rescue SocketError, Timeout::Error, Errno::ECONNREFUSED, Net::HTTPError,
+                 Net::OpenTimeout, OpenSSL::SSL::SSLError, Errno::ECONNRESET, Errno::EHOSTUNREACH
             '500'
           end
         end

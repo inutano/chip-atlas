@@ -164,4 +164,24 @@ class ApiTest < Minitest::Test
       assert item.key?('label'), "Expected key 'label' in distance option"
     end
   end
+
+  # /api/remote_url_status must rescue the fuller set of transient upstream
+  # failures (matching lib/services/service_monitor.rb, plus ECONNRESET and
+  # EHOSTUNREACH) rather than let them escape as an uncaught Sinatra 500 -
+  # which would also mean the response is never cache_control'd publicly for
+  # an hour (see the cache_control-ordering fix in the same endpoint).
+  [OpenSSL::SSL::SSLError, Net::OpenTimeout, Errno::ECONNRESET, Errno::EHOSTUNREACH].each do |error_class|
+    define_method("test_remote_url_status_rescues_#{error_class.name.gsub('::', '_')}") do
+      original = Net::HTTP.instance_method(:request_head)
+      Net::HTTP.define_method(:request_head) { |*| raise error_class, 'simulated upstream failure' }
+      begin
+        get '/api/remote_url_status', url: 'https://chip-atlas.dbcls.jp/data/probe.png'
+        assert last_response.ok?, "expected a handled 200 response, got #{last_response.status}"
+        assert_equal '500', last_response.body
+      ensure
+        Net::HTTP.define_method(:request_head, original)
+      end
+    end
+  end
+
 end

@@ -196,6 +196,13 @@ function fill(menuId: string, children: HTMLElement[]): void {
   ul.replaceChildren(...children)
 }
 
+// Probe the three remote assets concurrently via Promise.allSettled rather
+// than sequential awaits. Sequential awaits with no try/catch meant a throw
+// on the distribution probe (e.g. a widened-but-still-possible upstream
+// error, or a genuine 5xx from our own /api/remote_url_status) silently
+// skipped the correlation and TSV probes entirely — the three assets are
+// independent and one's failure must not hide the others. This also cuts
+// the worst-case latency roughly 3x since the probes no longer serialize.
 async function revealProfile(section: HTMLElement): Promise<void> {
   const distUrl = section.dataset.distributionUrl
   const corUrl = section.dataset.correlationUrl
@@ -207,30 +214,39 @@ async function revealProfile(section: HTMLElement): Promise<void> {
 
   let revealed = false
 
-  if (distUrl && distImg) {
-    const status = await checkRemoteUrlStatus(distUrl)
-    if (status === '200') {
+  const [distResult, corResult, tsvResult] = await Promise.allSettled([
+    distUrl && distImg ? checkRemoteUrlStatus(distUrl) : Promise.resolve(null),
+    corUrl && corImg ? checkRemoteUrlStatus(corUrl) : Promise.resolve(null),
+    tsvUrl && tsvLink ? checkRemoteUrlStatus(tsvUrl) : Promise.resolve(null),
+  ])
+
+  if (distResult.status === 'fulfilled') {
+    if (distResult.value === '200' && distImg && distUrl) {
       distImg.src = distUrl
       distImg.hidden = false
       revealed = true
     }
+  } else {
+    console.error('Comparative Profile: distribution probe failed', distResult.reason)
   }
 
-  if (corUrl && corImg) {
-    const status = await checkRemoteUrlStatus(corUrl)
-    if (status === '200') {
+  if (corResult.status === 'fulfilled') {
+    if (corResult.value === '200' && corImg && corUrl) {
       corImg.src = corUrl
       corImg.hidden = false
       revealed = true
     }
+  } else {
+    console.error('Comparative Profile: correlation probe failed', corResult.reason)
   }
 
-  if (tsvUrl && tsvLink) {
-    const status = await checkRemoteUrlStatus(tsvUrl)
-    if (status === '200') {
+  if (tsvResult.status === 'fulfilled') {
+    if (tsvResult.value === '200' && tsvLink && tsvUrl) {
       tsvLink.href = tsvUrl
       tsvLink.hidden = false
     }
+  } else {
+    console.error('Comparative Profile: correlation TSV probe failed', tsvResult.reason)
   }
 
   if (revealed) {
@@ -243,7 +259,7 @@ async function revealProfile(section: HTMLElement): Promise<void> {
 function initComparativeProfile(): void {
   const sections = document.querySelectorAll<HTMLElement>('.statistics-section')
   sections.forEach((section) => {
-    void revealProfile(section)
+    revealProfile(section).catch((err) => console.error('Comparative Profile: revealProfile failed', err))
   })
 }
 
