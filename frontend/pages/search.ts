@@ -66,10 +66,6 @@ function renderResults(result: SearchResult): void {
   const tbody = $('search-tbody')
   tbody.replaceChildren(...result.experiments.map(renderRow))
 
-  const start = result.total === 0 ? 0 : state.offset + 1
-  const end = state.offset + result.returned
-  $('search-summary').textContent = `${result.total.toLocaleString()} results · showing ${start}–${end}`
-
   const label = result.total === 0
     ? 'No entries found'
     : `Showing ${state.offset + 1} to ${state.offset + result.returned} of ${result.total.toLocaleString()} entries`
