@@ -35,7 +35,9 @@ ui-checklist    34/34
 
 ## Decisions taken on the owner's behalf
 
-Full reasoning and cost-if-wrong for each is in the ledger.
+Full reasoning and cost-if-wrong for each is in the ledger. The three that were
+put to the owner (18, 20, 22) were all confirmed as shipped on 2026-09-19; no
+rulings were overturned.
 
 | # | Ruling | Why it may want review |
 |---|---|---|
@@ -51,10 +53,10 @@ Full reasoning and cost-if-wrong for each is in the ledger.
 | 11, 15 | Hardened two inferred data contracts into verified ones | |
 | 13 | One re-review across two fix rounds | |
 | 16, 17 | Two more defects in my own brief text, corrected mid-flight | |
-| 18 | 502 = backend rejected, 503 = no backend serves this type | **owner sign-off wanted** |
-| 20 | Clearing datasets on experiment-type change, beyond D13's literal option | **owner veto wanted** |
+| 18 | 502 = backend rejected, 503 = no backend serves this type | **confirmed by owner 2026-09-19** |
+| 20 | Clearing datasets on experiment-type change, beyond D13's literal option | **confirmed by owner 2026-09-19** |
 | 21 | Final review scoped to this plan, not the whole branch | |
-| 22 | Gate `/colo` behind the honest-unavailable state until B4 | **owner veto wanted** |
+| 22 | Gate `/colo` behind the honest-unavailable state until B4 | **confirmed by owner 2026-09-19** |
 
 ## What B4 needs when Q2 is answered
 
