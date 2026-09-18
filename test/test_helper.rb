@@ -49,7 +49,7 @@ module TestHelper
 
   def seed_analyses
     DB[:analyses].multi_insert([
-      { track: 'CTCF', cell_list: 'K-562,HeLa-S3,GM12878',
+      { track: 'CTCF', cell_list: 'K-562,HeLa-S3,GM12878', distance: '1',
         target_genes: true, genome: 'hg38', created_at: Time.now },
       { track: 'H3K4me3', cell_list: 'K-562,Neuron',
         target_genes: false, genome: 'hg38', created_at: Time.now },

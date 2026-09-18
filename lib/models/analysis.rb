@@ -103,9 +103,13 @@ module ChipAtlas
     # `track` is already bare (see #load_from_file) so this just dedupes the
     # per-distance rows down to one entry per antigen, then backfills any
     # genome the tab has no rows for at all - see the stopgap comment above.
+    # Rows #load_from_file could not resolve to a known distance (distance
+    # IS NULL) are excluded: no valid <track>.<distance>.tsv can exist for
+    # them, so offering them in the picker would just reproduce the original
+    # bug (an antigen name the archive can never match).
     def target_genes_result
       result = {}
-      dataset.where(target_genes: true).each do |row|
+      dataset.where(target_genes: true).exclude(distance: nil).each do |row|
         genome = row[:genome]
         result[genome] ||= []
         result[genome] << row[:track]
@@ -124,22 +128,42 @@ module ChipAtlas
 
     # Splits a raw analysisList.tab track field ("Acaa2.10") into its bare
     # antigen name and TSS distance in kb ("Acaa2", "10"). Distance is
-    # always the last dot-separated segment, so this splits on the LAST dot
-    # only - antigen names that themselves contain a dot (e.g. "wdr-5.1",
-    # which appears in the file as "wdr-5.1.1", "wdr-5.1.5", "wdr-5.1.10")
-    # would be corrupted by a naive `split('.')`. A raw value with no dot at
-    # all (not expected in practice) is kept whole as the track with a nil
-    # distance, rather than raising.
+    # always the last dot-separated segment IF that segment is one of the
+    # known distance ids (see TARGET_GENES_DISTANCES, the one source for
+    # that set in this file) - so this splits on the LAST dot only, and
+    # only when the trailing piece is actually a distance. That guard
+    # matters for two reasons at once: antigen names that themselves
+    # contain a dot (e.g. "wdr-5.1", which appears in the file as
+    # "wdr-5.1.1", "wdr-5.1.5", "wdr-5.1.10") must not be corrupted by a
+    # naive `split('.')`, and a row whose trailing component ISN'T a
+    # distance at all (a future feed-shape change, not seen in the file
+    # today) must not be silently mangled into a wrong track/distance pair
+    # either - it stays whole. A raw value with no dot, or whose trailing
+    # segment doesn't match a known distance id, is kept whole as `track`
+    # with a nil `distance` rather than guessed at.
     def split_track_and_distance(raw)
       return [raw, nil] unless raw.include?('.')
 
       track, _sep, distance = raw.rpartition('.')
+      return [raw, nil] unless TARGET_GENES_DISTANCES.any? { |d| d[:id] == distance }
+
       [track, distance]
     end
 
+    # Returns { total:, unrecognized_shape: } - unrecognized_shape counts
+    # rows whose track field #split_track_and_distance could not resolve to
+    # a known distance (see there). Those rows are still stored (distance
+    # NULL) so nothing about the source file is silently thrown away, but
+    # #target_genes_result excludes them from the picker index. Expected to
+    # be 0 against today's analysisList.tab; the point of counting and
+    # reporting it (see lib/tasks/metadata.rake's load_analysis task) is
+    # that a feed-shape change shows up in the load output instead of
+    # silently mangling data one layer down - the same failure mode task A3
+    # closed for experiments/experiments_fts.
     def load_from_file(table_path)
       timestamp = Time.now
       total = 0
+      unrecognized_shape = 0
       batch_size = 5_000
 
       DB.transaction do
@@ -151,6 +175,7 @@ module ChipAtlas
           next unless ChipAtlas::Experiment.genomes.key?(genome)
 
           track, distance = split_track_and_distance(cols[0])
+          unrecognized_shape += 1 if distance.nil?
 
           records << {
             track:        track,
@@ -173,7 +198,7 @@ module ChipAtlas
           total += records.size
         end
       end
-      total
+      { total: total, unrecognized_shape: unrecognized_shape }
     end
   end
 end

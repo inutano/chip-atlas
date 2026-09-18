@@ -110,8 +110,10 @@ namespace :metadata do
     puts '[3/4] Loading analysis data...'
     start = Time.now
     DB[:analyses].delete
-    count = ChipAtlas::Analysis.load_from_file(analysis_table_fpath)
-    puts "   #{count} analyses loaded (#{sprintf('%.2f', Time.now - start)}s)"
+    stats = ChipAtlas::Analysis.load_from_file(analysis_table_fpath)
+    puts "   #{stats[:total]} analyses loaded (#{sprintf('%.2f', Time.now - start)}s)"
+    puts "   #{stats[:unrecognized_shape]} row(s) with an unrecognized track.distance shape " \
+         '(kept with distance NULL, excluded from the Target Genes index - expected to be 0)'
   end
 
   task :load_bedsize => bedsize_table_fpath do

@@ -48,16 +48,19 @@ class AnalysisTest < Minitest::Test
     DB[:analyses].delete
     fixture = File.join(__dir__, '..', 'fixtures', 'analysis_list_sample.tab')
 
-    count = ChipAtlas::Analysis.load_from_file(fixture)
+    stats = ChipAtlas::Analysis.load_from_file(fixture)
 
-    # Ahr.1/ce10 is dropped: ce10 is not in config/genomes.yml.
-    assert_equal 4, count
+    # Ahr.1/ce10 is dropped: ce10 is not in config/genomes.yml. The other 5
+    # fixture rows are all for supported genomes and all get stored,
+    # including the one with an unrecognized track.distance shape below.
+    assert_equal 5, stats[:total]
+    assert_equal 1, stats[:unrecognized_shape]
 
     tair12 = DB[:analyses].where(genome: 'TAIR12').first
     assert_equal 'AGL20', tair12[:track]
     assert_equal '1', tair12[:distance]
 
-    mm10 = DB[:analyses].where(genome: 'mm10').first
+    mm10 = DB[:analyses].where(genome: 'mm10', track: 'Acaa2').first
     assert_equal 'Acaa2', mm10[:track]
     assert_equal '10', mm10[:distance]
 
@@ -70,12 +73,47 @@ class AnalysisTest < Minitest::Test
     assert_equal %w[1 5], ce11.map { |row| row[:distance] }
 
     refute DB[:analyses].where(genome: 'ce10').any?, 'ce10 is not in config/genomes.yml and must be dropped'
+
+    # "Weird.Track.Name": trailing component "Name" is not one of the known
+    # distance ids, so the guard must refuse to split it - the whole string
+    # is kept as track with distance left nil, not guessed at.
+    weird = DB[:analyses].where(genome: 'mm10', track: 'Weird.Track.Name').first
+    refute_nil weird, 'a row with an unrecognized track.distance shape must still be stored (distance NULL)'
+    assert_nil weird[:distance]
   end
 
   def test_split_track_and_distance_handles_dotted_antigen_names
     assert_equal %w[Acaa2 10], ChipAtlas::Analysis.split_track_and_distance('Acaa2.10')
     assert_equal ['wdr-5.1', '1'], ChipAtlas::Analysis.split_track_and_distance('wdr-5.1.1')
     assert_equal ['wdr-5.1', '10'], ChipAtlas::Analysis.split_track_and_distance('wdr-5.1.10')
+  end
+
+  def test_split_track_and_distance_refuses_to_guess_at_an_unrecognized_trailing_segment
+    # "Bar" is not a valid distance id (TARGET_GENES_DISTANCES is '1'/'5'/
+    # '10' only) - the whole string must be kept as track, not chopped at
+    # the last dot regardless of what follows it.
+    assert_equal ['Foo.Bar', nil], ChipAtlas::Analysis.split_track_and_distance('Foo.Bar')
+
+    # No dot at all: same outcome, for the same reason.
+    assert_equal ['NoDotHere', nil], ChipAtlas::Analysis.split_track_and_distance('NoDotHere')
+
+    # Still splits real dotted antigen names correctly - the guard must not
+    # become over-strict and start rejecting valid rows too.
+    assert_equal ['wdr-5.1', '1'], ChipAtlas::Analysis.split_track_and_distance('wdr-5.1.1')
+  end
+
+  def test_target_genes_result_excludes_rows_with_unrecognized_track_distance_shape
+    DB[:analyses].delete
+    fixture = File.join(__dir__, '..', 'fixtures', 'analysis_list_sample.tab')
+    ChipAtlas::Analysis.load_from_file(fixture)
+
+    result = ChipAtlas::Analysis.target_genes_result
+
+    # No valid <track>.<distance>.tsv can exist for a row the loader could
+    # not resolve to a known distance, so it must never reach the picker
+    # index - even though it was stored in the DB (see the load test above).
+    refute_includes result['mm10'], 'Weird.Track.Name'
+    assert_includes result['mm10'], 'Acaa2', 'the well-formed mm10 row must still make it through'
   end
 
   def test_target_genes_result_falls_back_to_human_snapshot_for_genomes_the_tab_does_not_cover
