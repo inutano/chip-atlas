@@ -60,7 +60,6 @@ class LocationServiceTest < Minitest::Test
     }}
     svc = ChipAtlas::LocationService.new(data)
 
-    assert_match %r{/hg38/colo/CTCF\.K-562\.json$}, svc.colo_data_url
     assert_match %r{/hg38/colo/CTCF\.K-562\.tsv$}, svc.colo_tsv_url
     assert_match %r{/hg38/colo/K-562\.gml$}, svc.colo_gml_url
   end
@@ -71,7 +70,6 @@ class LocationServiceTest < Minitest::Test
     }}
     svc = ChipAtlas::LocationService.new(data)
 
-    assert_match %r{/hg38/target/CTCF\.5000\.json$}, svc.target_genes_data_url
     assert_match %r{/hg38/target/CTCF\.5000\.tsv$}, svc.target_genes_tsv_url
   end
 

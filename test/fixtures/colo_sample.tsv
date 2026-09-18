@@ -1,0 +1,5 @@
+Experiment	Cell_subclass	Protein	Stat3|Average	SRX111111|CellA	SRX222222|CellB	STRING
+SRX100002	CellB	Stat3	3	0	9	0
+SRX100003	CellC	Stat3	5	4	6	500
+SRX111111	CellA	Stat3	8	10	3	250
+SRX100001	CellD	Stat3	7.5	9	4	900

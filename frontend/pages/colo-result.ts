@@ -1,30 +1,47 @@
 // frontend/pages/colo-result.ts
-// Fetches /api/colo and renders the colocalization partners table.
+// Fetches /api/colo once and renders ChIP-Atlas's Colocalization result as
+// a partner x reference-experiment peak-intensity concordance matrix,
+// matching production's layout (verified live against
+// hg38/colo/STAT3.Blood.html and its paired .tsv - see task B5's brief)
+// rather than the Rank/Score/Shared-Bins ranked list this file used to
+// render.
+//
+// Unlike Target Genes (frontend/pages/target-genes-result.ts), the whole
+// result is small enough (263 KB / ~3,862 rows for STAT3/Blood) to fetch
+// and hold in memory in one response: there is no offset/limit paging on
+// /api/colo and no per-click network round trip for sorting - every header
+// click re-sorts the array already in memory and re-renders. This module
+// duplicates a few small pieces of target-genes-result.ts (the sortable
+// header helper, the score-cell color math) rather than importing them,
+// because esbuild.config.mjs bundles every frontend/pages/*.ts file as its
+// own independent entry point - importing across pages would pull that
+// other page's whole module (including its own DOMContentLoaded listener)
+// into this one's bundle for no benefit.
 
-import { getColoData } from '../api/client'
+import { getColoData, type ColoResult } from '../api/client'
 
-interface Partner {
-  experiment_id: string
-  track: string
-  cell_type: string
-  cell_type_class: string
-  score: number
-  shared_bins: number
-}
+const AVERAGE_SUFFIX = '|Average'
+const STRING_COLUMN = 'STRING'
+const LEADING_TEXT_COLUMNS = 3 // Experiment, Cell_subclass, Protein
 
-interface ResultData {
+interface Params {
   genome: string
   track: string
   cell_type: string
-  partners: Partner[]
 }
 
 interface State {
-  data: ResultData | null
-  filter: string
+  genome: string
+  track: string
+  cell_type: string
+  sort: string | null    // exact column header to sort by; null = default (the Average column)
+  order: 'asc' | 'desc'
+  data: ColoResult | null
 }
 
-const state: State = { data: null, filter: '' }
+const state: State = {
+  genome: '', track: '', cell_type: '', sort: null, order: 'desc', data: null,
+}
 
 function $(id: string): HTMLElement {
   const el = document.getElementById(id)
@@ -32,7 +49,7 @@ function $(id: string): HTMLElement {
   return el
 }
 
-function readQueryParams(): { genome: string; track: string; cell_type: string } | null {
+function readQueryParams(): Params | null {
   const p = new URLSearchParams(window.location.search)
   const genome = p.get('genome')
   const track = p.get('track')
@@ -41,95 +58,420 @@ function readQueryParams(): { genome: string; track: string; cell_type: string }
   return { genome, track, cell_type }
 }
 
-function renderRows(data: ResultData): void {
-  const filter = state.filter.toLowerCase()
-  const filtered = filter
-    ? data.partners.filter((p) =>
-        p.track.toLowerCase().includes(filter) || p.cell_type.toLowerCase().includes(filter))
-    : data.partners
+// ===== Column bookkeeping =====
+
+function averageColumnIndex(columns: string[]): number {
+  const idx = columns.findIndex((c) => c.endsWith(AVERAGE_SUFFIX))
+  return idx === -1 ? LEADING_TEXT_COLUMNS : idx
+}
+
+function stringColumnIndex(columns: string[]): number {
+  const idx = columns.indexOf(STRING_COLUMN)
+  return idx === -1 ? columns.length - 1 : idx
+}
+
+// Splits a reference-experiment column header ("SRX150636|GM12878") into
+// its experiment id and cell type, the same way target-genes-result.ts
+// does for its experiment columns. Falls back to treating the whole header
+// as the id if it doesn't contain the separator.
+function splitExperimentHeader(header: string): { experimentId: string; cellType: string } {
+  const sep = header.indexOf('|')
+  if (sep === -1) return { experimentId: header, cellType: '' }
+  return { experimentId: header.slice(0, sep), cellType: header.slice(sep + 1) }
+}
+
+// ===== Peak-intensity concordance -> color + label =====
+//
+// Production computes these scores as products of H/M/L "binding-level"
+// weights (H=3, M=2, L=1) for the query's reference experiment and this
+// row's partner experiment: the only values that can occur are therefore
+// {1,2,3,4,6,9} (H-H=9, H-M=M-H=6, H-L=L-H=3, M-M=4, M-L=L-M=2, L-L=1). 0
+// means no shared-bin data at all ("N.D."). Verified live against
+// hg38/colo/STAT3.Blood.tsv + the paired .html: a raw value of 10 appears
+// exactly and only at a row's own reference-experiment column (a row
+// comparing an experiment against itself) and is always rendered
+// black/"Same" there, regardless of the 1-9 scale below - 10 can never
+// arise from the H/M/L product formula, so it's an unambiguous
+// self-comparison sentinel, not a 10th real score. Colors themselves are
+// production's exact legend swatches (see views/colo_result.erb).
+const CONCORDANCE_COLORS: Record<number, { rgb: [number, number, number]; label: string }> = {
+  0: { rgb: [128, 128, 128], label: 'N.D.' },
+  1: { rgb: [0, 113, 255], label: 'L-L' },
+  2: { rgb: [0, 226, 255], label: 'M-L' },
+  3: { rgb: [0, 255, 170], label: 'H-L' },
+  4: { rgb: [0, 255, 56], label: 'M-M' },
+  6: { rgb: [170, 255, 0], label: 'H-M' },
+  9: { rgb: [255, 0, 0], label: 'H-H' },
+  10: { rgb: [0, 0, 0], label: 'Same' },
+}
+const UNKNOWN_CONCORDANCE: { rgb: [number, number, number]; label: string } = { rgb: [128, 128, 128], label: '?' }
+
+export function concordanceColor(value: number): { hex: string; rgb: [number, number, number]; label: string } {
+  const entry = CONCORDANCE_COLORS[Math.round(value)] ?? UNKNOWN_CONCORDANCE
+  return { hex: rgbToHex(entry.rgb), rgb: entry.rgb, label: entry.label }
+}
+
+// ===== STRING score -> color =====
+// Identical domain/scale to Target Genes' STRING legend (see
+// target-genes-result.ts's scoreToRgb) and to production's own colo STRING
+// legend (0=blue .. 1000=red, gray for no data) - duplicated here rather
+// than imported, see this file's header comment for why.
+const COLOR_STOPS: Array<[number, [number, number, number]]> = [
+  [1, [0, 0, 255]],
+  [250, [0, 255, 255]],
+  [500, [0, 255, 0]],
+  [750, [255, 255, 0]],
+  [1000, [255, 0, 0]],
+]
+
+function scoreToRgb(value: number): [number, number, number] {
+  if (value <= 0) return [128, 128, 128]
+  if (value >= 1000) return [255, 0, 0]
+  for (let i = 0; i < COLOR_STOPS.length - 1; i++) {
+    const [v0, c0] = COLOR_STOPS[i]
+    const [v1, c1] = COLOR_STOPS[i + 1]
+    if (value >= v0 && value <= v1) {
+      const t = (value - v0) / (v1 - v0)
+      return [
+        Math.round(c0[0] + (c1[0] - c0[0]) * t),
+        Math.round(c0[1] + (c1[1] - c0[1]) * t),
+        Math.round(c0[2] + (c1[2] - c0[2]) * t),
+      ]
+    }
+  }
+  return [128, 128, 128]
+}
+
+function rgbToHex([r, g, b]: [number, number, number]): string {
+  return `#${[r, g, b].map((x) => x.toString(16).padStart(2, '0')).join('')}`
+}
+
+function readableTextColor([r, g, b]: [number, number, number]): string {
+  const luminance = 0.299 * r + 0.587 * g + 0.114 * b
+  return luminance > 140 ? '#000' : '#fff'
+}
+
+function formatScore(value: number): string {
+  return Number.isInteger(value) ? String(value) : value.toFixed(2)
+}
+
+// ===== Sort state transitions (pure - mirrors target-genes-result.ts's
+// computeNextSort/computeAriaSort; duplicated rather than imported, see
+// this file's header comment) =====
+
+export interface SortState {
+  sort: string | null
+  order: 'asc' | 'desc'
+}
+
+export function computeNextSort(current: SortState, column: string): SortState {
+  if (current.sort === column) {
+    return { sort: column, order: current.order === 'desc' ? 'asc' : 'desc' }
+  }
+  return { sort: column, order: 'desc' }
+}
+
+export function computeAriaSort(current: SortState, column: string): 'ascending' | 'descending' | 'none' {
+  if (current.sort !== column) return 'none'
+  return current.order === 'desc' ? 'descending' : 'ascending'
+}
+
+// Sorts a *copy* of `rows` by the column at `colIndex`, comparing
+// numerically when both values are numbers (every data column except the
+// leading Experiment/Cell_subclass/Protein triplet) and lexicographically
+// otherwise. Never mutates the input - callers always re-derive the
+// displayed rows from the original state.data.rows plus state.sort/order
+// on every render, so switching sort column or order can never compound
+// onto a previous sort's order.
+export function sortRows(
+  rows: Array<Array<string | number>>,
+  colIndex: number,
+  order: 'asc' | 'desc'
+): Array<Array<string | number>> {
+  const copy = rows.slice()
+  copy.sort((a, b) => {
+    const av = a[colIndex]
+    const bv = b[colIndex]
+    const cmp = typeof av === 'number' && typeof bv === 'number'
+      ? av - bv
+      : String(av).localeCompare(String(bv))
+    return order === 'desc' ? -cmp : cmp
+  })
+  return copy
+}
+
+// ===== Rendering =====
+
+function sortArrowGlyph(column: string): string {
+  if (state.sort !== column) return ''
+  return state.order === 'desc' ? '↓' : '↑'
+}
+
+function sortStateHint(column: string): string {
+  if (state.sort !== column) return ''
+  return state.order === 'desc' ? ' (sorted descending)' : ' (sorted ascending)'
+}
+
+function handleSortClick(column: string): void {
+  const next = computeNextSort(state, column)
+  state.sort = next.sort
+  state.order = next.order
+  renderTable()
+}
+
+// Builds a sortable <th> containing a real <button>, identical idiom to
+// target-genes-result.ts's makeSortableHeader (see that file's comment for
+// why a <button> rather than a click-on-<th> handler is required for
+// keyboard operability).
+function makeSortableHeader(label: string, sortColumn: string, extraClass?: string): HTMLTableCellElement {
+  const th = document.createElement('th')
+  th.scope = 'col'
+  if (extraClass) th.className = extraClass
+  th.classList.add('tg-sortable')
+  th.setAttribute('aria-sort', computeAriaSort(state, sortColumn))
+
+  const btn = document.createElement('button')
+  btn.type = 'button'
+  btn.className = 'tg-sort-btn'
+  btn.appendChild(document.createTextNode(label))
+
+  const arrow = document.createElement('span')
+  arrow.className = 'tg-sort-indicator'
+  arrow.setAttribute('aria-hidden', 'true')
+  arrow.textContent = sortArrowGlyph(sortColumn) ? ` ${sortArrowGlyph(sortColumn)}` : ''
+  btn.appendChild(arrow)
+
+  const hint = document.createElement('span')
+  hint.className = 'visually-hidden'
+  hint.textContent = sortStateHint(sortColumn)
+  btn.appendChild(hint)
+
+  btn.addEventListener('click', () => handleSortClick(sortColumn))
+  th.appendChild(btn)
+  return th
+}
+
+function renderHeader(data: ColoResult): void {
+  const row = $('result-thead-row')
+  const avgIdx = averageColumnIndex(data.columns)
+  const strIdx = stringColumnIndex(data.columns)
+
+  const cells: HTMLTableCellElement[] = []
+
+  data.columns.forEach((col, i) => {
+    if (i === 0) {
+      cells.push(makeSortableHeader('Experiment', col))
+      return
+    }
+    if (i === 1) {
+      cells.push(makeSortableHeader('Cell type', col))
+      return
+    }
+    if (i === 2) {
+      cells.push(makeSortableHeader('Protein', col))
+      return
+    }
+    if (i === avgIdx) {
+      const th = makeSortableHeader('Average', col)
+      th.title = col.replace('|', ' | ')
+      cells.push(th)
+      return
+    }
+    if (i === strIdx) {
+      cells.push(makeSortableHeader('STRING', col))
+      return
+    }
+
+    // A reference-experiment column, hidden until "Show reference-experiment
+    // columns" is expanded (same collapse-by-default idiom as Target
+    // Genes' experiment columns).
+    const { experimentId, cellType } = splitExperimentHeader(col)
+    const label = cellType ? `${experimentId}: ${cellType}` : experimentId
+    const th = makeSortableHeader(label, col, 'tg-exp-col')
+    th.title = label
+
+    const link = document.createElement('a')
+    link.className = 'tg-exp-link'
+    link.href = `/view?id=${encodeURIComponent(experimentId)}`
+    link.textContent = '↗'
+    link.setAttribute('aria-label', `View experiment ${experimentId}`)
+    th.appendChild(link)
+
+    cells.push(th)
+  })
+
+  row.replaceChildren(...cells)
+}
+
+function concordanceCell(value: number): HTMLTableCellElement {
+  const td = document.createElement('td')
+  td.className = 'tg-score-cell tg-exp-col'
+  const { hex, rgb, label } = concordanceColor(value)
+  td.style.backgroundColor = hex
+  td.style.color = readableTextColor(rgb)
+  td.textContent = label
+  td.title = `raw concordance score: ${formatScore(value)}`
+  return td
+}
+
+function stringCell(value: number): HTMLTableCellElement {
+  const td = document.createElement('td')
+  td.className = 'tg-score-cell'
+  const rgb = scoreToRgb(value)
+  td.style.backgroundColor = rgbToHex(rgb)
+  td.style.color = readableTextColor(rgb)
+  td.textContent = formatScore(value)
+  return td
+}
+
+function renderRows(data: ColoResult, rows: Array<Array<string | number>>): void {
+  const avgIdx = averageColumnIndex(data.columns)
+  const strIdx = stringColumnIndex(data.columns)
 
   const tbody = $('result-tbody')
-  tbody.replaceChildren(...filtered.map((p, i) => {
+  tbody.replaceChildren(...rows.map((row) => {
     const tr = document.createElement('tr')
 
-    const rankTd = document.createElement('td')
-    rankTd.textContent = String(i + 1)
-    tr.appendChild(rankTd)
+    row.forEach((value, i) => {
+      if (i === 0) {
+        const td = document.createElement('td')
+        const link = document.createElement('a')
+        link.href = `/view?id=${encodeURIComponent(String(value))}`
+        link.textContent = String(value)
+        td.appendChild(link)
+        tr.appendChild(td)
+        return
+      }
+      if (i === 1 || i === 2) {
+        const td = document.createElement('td')
+        td.textContent = String(value)
+        tr.appendChild(td)
+        return
+      }
 
-    const trackTd = document.createElement('td')
-    trackTd.textContent = p.track
-    tr.appendChild(trackTd)
-
-    const cellTd = document.createElement('td')
-    cellTd.textContent = p.cell_type
-    tr.appendChild(cellTd)
-
-    const classTd = document.createElement('td')
-    classTd.textContent = p.cell_type_class
-    tr.appendChild(classTd)
-
-    const scoreTd = document.createElement('td')
-    scoreTd.textContent = p.score.toFixed(2)
-    tr.appendChild(scoreTd)
-
-    const binsTd = document.createElement('td')
-    binsTd.textContent = p.shared_bins.toLocaleString()
-    tr.appendChild(binsTd)
-
-    const expTd = document.createElement('td')
-    const link = document.createElement('a')
-    link.href = `/view?id=${encodeURIComponent(p.experiment_id)}`
-    link.textContent = p.experiment_id
-    expTd.appendChild(link)
-    tr.appendChild(expTd)
+      const numeric = typeof value === 'number' ? value : Number(value)
+      if (i === avgIdx) {
+        const td = document.createElement('td')
+        td.className = 'tg-score-cell'
+        td.textContent = formatScore(numeric)
+        tr.appendChild(td)
+        return
+      }
+      if (i === strIdx) {
+        tr.appendChild(stringCell(numeric))
+        return
+      }
+      tr.appendChild(concordanceCell(numeric))
+    })
 
     return tr
   }))
-
-  $('row-count').textContent = `${filtered.length.toLocaleString()} partners shown (of ${data.partners.length.toLocaleString()} total)`
 }
 
-function downloadFile(format: 'tsv' | 'gml'): void {
-  const params = readQueryParams()
-  if (!params) return
-  const search = new URLSearchParams({ ...params, format })
-  window.location.href = `/api/colo/download?${search.toString()}`
+// Recomputes the sorted row order from state.data + state.sort/order and
+// re-renders the header and body. The only place either is rendered, so
+// header sort indicators and row order can never drift apart.
+function renderTable(): void {
+  const data = state.data
+  if (!data) return
+
+  const avgIdx = averageColumnIndex(data.columns)
+  const sortColumn = state.sort ?? data.columns[avgIdx]
+  const colIndex = data.columns.indexOf(sortColumn)
+  const rows = sortRows(data.rows, colIndex === -1 ? avgIdx : colIndex, state.order)
+
+  renderHeader(data)
+  renderRows(data, rows)
+
+  $('row-count').textContent = data.total === 0
+    ? 'No colocalization partners found'
+    : `${rows.length.toLocaleString()} colocalization partners`
 }
 
-async function init(): Promise<void> {
-  const params = readQueryParams()
-  if (!params) {
-    ;($('loading-state') as HTMLElement).hidden = true
-    const e = $('error-state') as HTMLElement
-    e.textContent = 'Missing genome, track, or cell_type parameter in URL.'
-    e.hidden = false
-    return
-  }
+function updateExperimentsToggleLabel(data: ColoResult): void {
+  // Every column except Experiment/Cell_subclass/Protein/Average/STRING is
+  // a reference-experiment column.
+  const experimentCount = data.columns.length - LEADING_TEXT_COLUMNS - 2
+  const summary = $('experiments-toggle-summary')
+  const details = $('experiments-toggle') as HTMLDetailsElement
+  summary.textContent = details.open
+    ? `Hide reference-experiment columns (${experimentCount.toLocaleString()})`
+    : `Show reference-experiment columns (${experimentCount.toLocaleString()})`
+}
 
-  $('result-summary').textContent = `${params.track} (${params.cell_type}) on ${params.genome}`
+function updateDownloadLinks(): void {
+  const params = new URLSearchParams({ genome: state.genome, track: state.track, cell_type: state.cell_type })
+  const tsv = $('download-tsv') as HTMLAnchorElement
+  tsv.href = `/api/colo/download?${params.toString()}&format=tsv`
+  tsv.hidden = false
+  const gml = $('download-gml') as HTMLAnchorElement
+  gml.href = `/api/colo/download?${params.toString()}&format=gml`
+  gml.hidden = false
+}
+
+function setSummary(): void {
+  $('result-summary').textContent = `${state.track} (${state.cell_type}) on ${state.genome}`
+}
+
+async function load(): Promise<void> {
+  ;($('loading-state') as HTMLElement).hidden = false
+  ;($('error-state') as HTMLElement).hidden = true
+
+  setSummary()
 
   try {
-    const data = await getColoData(params.genome, params.track, params.cell_type) as unknown as ResultData
+    const data = await getColoData(state.genome, state.track, state.cell_type)
     state.data = data
     ;($('loading-state') as HTMLElement).hidden = true
     ;($('result-wrap') as HTMLElement).hidden = false
-    renderRows(data)
+
+    renderTable()
+    updateExperimentsToggleLabel(data)
+    updateDownloadLinks()
   } catch (err) {
     console.error(err)
+    state.data = null
     ;($('loading-state') as HTMLElement).hidden = true
+    ;($('result-wrap') as HTMLElement).hidden = true
+    ;($('download-tsv') as HTMLAnchorElement).hidden = true
+    ;($('download-gml') as HTMLAnchorElement).hidden = true
     const e = $('error-state') as HTMLElement
-    e.textContent = 'Failed to load colocalization data.'
+    e.textContent = 'Failed to load colocalization data. This antigen/genome/cell-type combination may not have precomputed data.'
     e.hidden = false
+  }
+}
+
+function wireExperimentsToggle(): void {
+  const details = $('experiments-toggle') as HTMLDetailsElement
+  const wrap = $('result-table-wrap')
+  details.addEventListener('toggle', () => {
+    wrap.classList.toggle('tg-experiments-expanded', details.open)
+    if (state.data) updateExperimentsToggleLabel(state.data)
+  })
+}
+
+function init(): void {
+  const params = readQueryParams()
+  if (!params) {
+    ;($('loading-state') as HTMLElement).hidden = true
+    const err = $('error-state') as HTMLElement
+    err.textContent = 'Missing genome, track, or cell_type parameter in URL.'
+    err.hidden = false
     return
   }
 
-  ;($('partner-search') as HTMLInputElement).addEventListener('input', (e) => {
-    state.filter = (e.target as HTMLInputElement).value
-    if (state.data) renderRows(state.data)
-  })
+  state.genome = params.genome
+  state.track = params.track
+  state.cell_type = params.cell_type
 
-  $('download-tsv').addEventListener('click', () => downloadFile('tsv'))
-  $('download-gml').addEventListener('click', () => downloadFile('gml'))
+  wireExperimentsToggle()
+
+  void load()
 }
 
-document.addEventListener('DOMContentLoaded', init)
+// Guarded so the pure functions above (concordanceColor, computeNextSort,
+// computeAriaSort, sortRows) can be imported and unit-tested under plain
+// Node, which has no `document` - see colo-result.test.ts.
+if (typeof document !== 'undefined') {
+  document.addEventListener('DOMContentLoaded', init)
+}

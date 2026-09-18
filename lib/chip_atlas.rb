@@ -14,6 +14,7 @@ require_relative 'services/sapporo_service'
 require_relative 'services/compute_router'
 require_relative 'services/data_proxy'
 require_relative 'services/target_genes_tsv'
+require_relative 'services/colo_tsv'
 require_relative 'services/service_monitor'
 require_relative 'services/sra_service'
 

@@ -444,7 +444,12 @@ select.list-box option {
   border-radius: 4px;
 }
 
-/* ===== Target Genes Result (Task B3) ===== */
+/* ===== Result matrix (Target Genes: Task B3; Colocalization: Task B5) =====
+   Shared by views/target_genes_result.erb + frontend/pages/target-genes-
+   result.ts and views/colo_result.erb + frontend/pages/colo-result.ts -
+   both render the same shape of problem (a ranked, score-colored matrix
+   with a collapsible block of per-experiment columns), so they share one
+   set of classes/IDs rather than each defining its own. */
 .tg-legend {
   display: flex;
   flex-wrap: wrap;

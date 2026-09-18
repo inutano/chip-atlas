@@ -152,15 +152,22 @@ module ChipAtlas
           json_response({ url: url })
         end
 
-        # Colocalization data (proxied from data server)
+        # Colocalization result data: parsed and sorted server-side from the
+        # precomputed TSV (there is no JSON file on the data server for this
+        # analysis, and never has been - see ChipAtlas::ColoTsv).
         app.get '/api/colo' do
           halt 400, json_response({ error: 'genome, track, and cell_type required' }) unless params[:genome] && params[:track] && params[:cell_type]
           svc = ChipAtlas::LocationService.new(condition_from_params)
-          body = ChipAtlas::DataProxy.fetch(svc.colo_data_url)
-          halt 404, json_response({ error: 'Colocalization data not found' }) unless body
+
+          result = begin
+            ChipAtlas::ColoTsv.result(tsv_url: svc.colo_tsv_url)
+          rescue ChipAtlas::ColoTsv::ParseError => e
+            halt 502, json_response({ error: "Colocalization data could not be parsed: #{e.message}" })
+          end
+          halt 404, json_response({ error: 'Colocalization data not found' }) unless result
+
           log_activity('colo', { genome: params[:genome], track: params[:track], cell_type: params[:cell_type] })
-          content_type 'application/json'
-          body
+          json_response(result.merge(genome: params[:genome], track: params[:track], cell_type: params[:cell_type]))
         end
 
         # Colocalization file download (proxied from data server)

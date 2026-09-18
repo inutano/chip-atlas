@@ -270,6 +270,64 @@ class ApiTest < Minitest::Test
     assert_equal 400, last_response.status
   end
 
+  # /api/colo proxies ChipAtlas::ColoTsv, which fetches and parses the
+  # precomputed TSV (there is no JSON file on the data server for this
+  # analysis, and never has been - see task B5's brief and
+  # lib/services/colo_tsv.rb). Stub its fetcher so this suite never touches
+  # the network; ColoTsv itself raises LiveFetchNotStubbed if a test forgets
+  # to.
+  COLO_FIXTURE = File.read(File.join(__dir__, '..', 'fixtures', 'colo_sample.tsv'))
+
+  def test_colo_returns_columns_rows_sorted_by_average_descending
+    ChipAtlas::ColoTsv.fetcher = ->(_url) { COLO_FIXTURE }
+
+    get '/api/colo', genome: 'hg38', track: 'Stat3', cell_type: 'CellA'
+
+    assert last_response.ok?
+    assert_equal 'application/json', last_response.content_type.split(';').first
+    data = JSON.parse(last_response.body)
+    assert_equal %w[Experiment Cell_subclass Protein Stat3|Average SRX111111|CellA SRX222222|CellB STRING],
+                 data['columns']
+    assert_equal %w[SRX111111 SRX100001 SRX100003 SRX100002], data['rows'].map(&:first)
+    assert_equal 4, data['total']
+    assert_equal 'hg38', data['genome']
+    assert_equal 'Stat3', data['track']
+    assert_equal 'CellA', data['cell_type']
+  ensure
+    ChipAtlas::ColoTsv.fetcher = nil
+  end
+
+  def test_colo_missing_combination_returns_404
+    ChipAtlas::ColoTsv.fetcher = ->(_url) { nil }
+
+    get '/api/colo', genome: 'hg38', track: 'NoSuchTrack', cell_type: 'NoSuchCellType'
+
+    assert_equal 404, last_response.status
+    assert_equal 'application/json', last_response.content_type.to_s.split(';').first
+    data = JSON.parse(last_response.body)
+    assert_equal 'Colocalization data not found', data['error']
+  ensure
+    ChipAtlas::ColoTsv.fetcher = nil
+  end
+
+  def test_colo_malformed_body_returns_502_distinguishable_from_404
+    ChipAtlas::ColoTsv.fetcher = ->(_url) { "Experiment\tCell_subclass\tProtein\n" }
+
+    get '/api/colo', genome: 'hg38', track: 'Stat3', cell_type: 'CellA'
+
+    assert_equal 502, last_response.status
+    data = JSON.parse(last_response.body)
+    refute_equal 'Colocalization data not found', data['error']
+    assert_match(/could not be parsed/, data['error'])
+  ensure
+    ChipAtlas::ColoTsv.fetcher = nil
+  end
+
+  def test_colo_missing_params_returns_400
+    get '/api/colo', genome: 'hg38', track: 'Stat3'
+    assert_equal 400, last_response.status
+  end
+
   # --- download routes: 404 body now carries a JSON error, not bare text ---
   #
   # /api/colo/download and /api/target_genes/download call

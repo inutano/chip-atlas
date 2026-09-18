@@ -31,10 +31,6 @@ module ChipAtlas
     end
 
     # Colocalization result URLs
-    def colo_data_url
-      "#{colo_base}/#{encoded_track}.#{encoded_cell_type}.json"
-    end
-
     def colo_tsv_url
       "#{colo_base}/#{encoded_track}.#{encoded_cell_type}.tsv"
     end
@@ -44,10 +40,6 @@ module ChipAtlas
     end
 
     # Target genes result URLs
-    def target_genes_data_url
-      "#{target_genes_base}/#{encoded_track}.#{@condition[:distance]}.json"
-    end
-
     def target_genes_tsv_url
       "#{target_genes_base}/#{encoded_track}.#{@condition[:distance]}.tsv"
     end

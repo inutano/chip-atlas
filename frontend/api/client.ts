@@ -84,8 +84,20 @@ export interface DownloadUrlResponse {
   url: string
 }
 
-export interface ColoData {
-  [key: string]: unknown
+// Shape returned by GET /api/colo (see lib/services/colo_tsv.rb#result).
+// `rows[i][0..2]` are the partner's Experiment id / Cell_subclass / Protein
+// (strings); every other cell is a number - the Average column, one
+// per-reference-experiment peak-intensity concordance score, and the
+// STRING score. `columns.length` and the exact header text vary by
+// antigen/genome, so nothing here hardcodes a column count or header name
+// beyond the leading Experiment/Cell_subclass/Protein triplet.
+export interface ColoResult {
+  genome: string
+  track: string
+  cell_type: string
+  columns: string[]
+  rows: Array<Array<string | number>>
+  total: number
 }
 
 export interface TargetGenesData {
@@ -339,8 +351,8 @@ export async function getColoData(
   genome: string,
   track: string,
   cellType: string
-): Promise<ColoData> {
-  return request<ColoData>(
+): Promise<ColoResult> {
+  return request<ColoResult>(
     '/api/colo' + qs({ genome, track, cell_type: cellType })
   )
 }
