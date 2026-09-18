@@ -92,6 +92,25 @@ export interface TargetGenesData {
   [key: string]: unknown
 }
 
+// Shape returned by GET /api/target_genes (see lib/services/target_genes_tsv.rb#result).
+// `rows[i][0]` is the gene symbol (string); every other cell is a score (number).
+// `columns.length` and the exact header text vary by antigen/genome, so nothing
+// here hardcodes a column count or header name beyond "Target_genes" (col 0).
+export interface TargetGenesResult {
+  columns: string[]
+  rows: Array<Array<string | number>>
+  total: number
+  offset: number
+  limit: number
+}
+
+export interface TargetGenesQuery {
+  sort?: string
+  order?: 'asc' | 'desc'
+  offset?: number
+  limit?: number
+}
+
 export interface UrlCondition {
   genome: string
   track_class: string
@@ -342,10 +361,14 @@ export async function downloadColoFile(
 export async function getTargetGenesData(
   genome: string,
   track: string,
-  distance: string
-): Promise<TargetGenesData> {
-  return request<TargetGenesData>(
-    '/api/target_genes' + qs({ genome, track, distance })
+  distance: string,
+  query: TargetGenesQuery = {}
+): Promise<TargetGenesResult> {
+  return request<TargetGenesResult>(
+    '/api/target_genes' + qs({
+      genome, track, distance,
+      sort: query.sort, order: query.order, offset: query.offset, limit: query.limit,
+    })
   )
 }
 

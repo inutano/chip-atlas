@@ -11,7 +11,7 @@ class PagesTest < Minitest::Test
   end
 
   PAGES = %w[
-    / /peak_browser /search /colo /target_genes
+    / /peak_browser /search /colo /target_genes /target_genes_result
     /enrichment_analysis /diff_analysis /publications /agents /demo
   ].freeze
 
@@ -186,6 +186,32 @@ class PagesTest < Minitest::Test
     assert_includes body, '2. Choose Distance from TSS'
     assert_includes body, 'id="antigen-list"'
     assert_includes body, 'class="panel panel-default"'
+  end
+
+  def test_target_genes_result_has_distance_switch_legend_and_download_link
+    get '/target_genes_result'
+    body = last_response.body
+    assert_includes body, 'id="distance-switch"'
+    assert_includes body, 'data-distance="1"'
+    assert_includes body, 'data-distance="5"'
+    assert_includes body, 'data-distance="10"'
+    assert_includes body, 'class="tg-legend"'
+    assert_includes body, 'id="download-tsv"'
+    assert_includes body, 'chip-atlas.svg#download'
+  end
+
+  def test_target_genes_result_has_a_paginated_expandable_result_table
+    get '/target_genes_result'
+    body = last_response.body
+    assert_includes body, 'id="result-table-wrap"'
+    assert_includes body, 'id="result-thead-row"'
+    assert_includes body, 'id="result-tbody"'
+    assert_includes body, 'id="experiments-toggle"'
+    assert_includes body, '<summary'
+    assert_includes body, 'id="page-prev"'
+    assert_includes body, 'id="page-next"'
+    assert_includes body, 'id="page-indicator"'
+    assert_includes body, 'id="row-count"'
   end
 
   def test_diff_analysis_uses_panels

@@ -1,36 +1,42 @@
 // frontend/pages/target-genes-result.ts
-// Fetches /api/target_genes and renders the gene x experiment score matrix.
+// Fetches /api/target_genes and renders it as a gene x experiment score
+// matrix, paginated over rows (genes) the way B2's server already slices
+// them. Columns (experiments) are never paginated — the server always
+// returns every column for the requested page of rows — so "genome/track"
+// query row 0 through N is the only trip to the network; showing or hiding
+// experiment columns is a pure display toggle over data already in memory.
+//
+// The result set can be 13,459 rows x 134+ columns (mm10/Stat3.1), so this
+// module never asks for more than one page of rows (PAGE_SIZE, capped by
+// the server's own MAX_LIMIT) and never renders the full 13,459-row matrix
+// at once.
 
-import { getTargetGenesData } from '../api/client'
+import { getTargetGenesData, type TargetGenesResult } from '../api/client'
 
-interface ExperimentRow {
-  experiment_id: string
-  cell_type: string
-  cell_type_class: string
-}
+const PAGE_SIZE = 100
+const AVERAGE_SUFFIX = '|Average'
+const STRING_COLUMN = 'STRING'
+const GENE_COLUMN = 'Target_genes'
 
-interface GeneRow {
-  symbol: string
-  avg_score: number
-  scores: number[]
-}
-
-interface ResultData {
+interface Params {
   genome: string
   track: string
   distance: string
-  experiments: ExperimentRow[]
-  genes: GeneRow[]
 }
 
 interface State {
-  data: ResultData | null
-  filter: string
-  sortColumn: number  // -1 = avg, 0..N = experiment index
-  sortDescending: boolean
+  genome: string
+  track: string
+  distance: string
+  sort: string | null    // exact column header to sort by; null = server default (the Average column)
+  order: 'asc' | 'desc'
+  offset: number
+  data: TargetGenesResult | null
 }
 
-const state: State = { data: null, filter: '', sortColumn: -1, sortDescending: true }
+const state: State = {
+  genome: '', track: '', distance: '1', sort: null, order: 'desc', offset: 0, data: null,
+}
 
 function $(id: string): HTMLElement {
   const el = document.getElementById(id)
@@ -38,131 +44,367 @@ function $(id: string): HTMLElement {
   return el
 }
 
-function readQueryParams(): { genome: string; track: string; distance: string } | null {
+function readQueryParams(): Params | null {
   const p = new URLSearchParams(window.location.search)
   const genome = p.get('genome')
   const track = p.get('track')
-  const distance = p.get('distance')
-  if (!genome || !track || !distance) return null
+  if (!genome || !track) return null
+  const distance = p.get('distance') || '1'
   return { genome, track, distance }
 }
 
-function renderHeader(data: ResultData): void {
-  const thead = $('result-thead')
-  const tr = document.createElement('tr')
+function updateUrl(): void {
+  const params = new URLSearchParams({ genome: state.genome, track: state.track, distance: state.distance })
+  const url = `${window.location.pathname}?${params.toString()}`
+  window.history.replaceState(null, '', url)
+}
 
-  const symbolTh = document.createElement('th')
-  symbolTh.scope = 'col'
-  symbolTh.textContent = 'Gene'
-  tr.appendChild(symbolTh)
+// ===== Score -> color (matches production's MACS2/STRING legend) =====
+// 0 is a distinct gray (no signal); 1..1000 interpolates blue -> cyan ->
+// green -> yellow -> red; anything above 1000 clamps to red.
+const COLOR_STOPS: Array<[number, [number, number, number]]> = [
+  [1, [0, 0, 255]],
+  [250, [0, 255, 255]],
+  [500, [0, 255, 0]],
+  [750, [255, 255, 0]],
+  [1000, [255, 0, 0]],
+]
 
-  const avgTh = document.createElement('th')
-  avgTh.scope = 'col'
-  avgTh.style.cursor = 'pointer'
-  avgTh.textContent = `Avg ${state.sortColumn === -1 ? (state.sortDescending ? '↓' : '↑') : ''}`
-  avgTh.addEventListener('click', () => toggleSort(-1))
-  tr.appendChild(avgTh)
+function scoreToRgb(value: number): [number, number, number] {
+  if (value <= 0) return [128, 128, 128]
+  if (value >= 1000) return [255, 0, 0]
+  for (let i = 0; i < COLOR_STOPS.length - 1; i++) {
+    const [v0, c0] = COLOR_STOPS[i]
+    const [v1, c1] = COLOR_STOPS[i + 1]
+    if (value >= v0 && value <= v1) {
+      const t = (value - v0) / (v1 - v0)
+      return [
+        Math.round(c0[0] + (c1[0] - c0[0]) * t),
+        Math.round(c0[1] + (c1[1] - c0[1]) * t),
+        Math.round(c0[2] + (c1[2] - c0[2]) * t),
+      ]
+    }
+  }
+  return [128, 128, 128]
+}
 
-  data.experiments.forEach((exp, i) => {
+function rgbToHex([r, g, b]: [number, number, number]): string {
+  return `#${[r, g, b].map((x) => x.toString(16).padStart(2, '0')).join('')}`
+}
+
+function readableTextColor([r, g, b]: [number, number, number]): string {
+  const luminance = 0.299 * r + 0.587 * g + 0.114 * b
+  return luminance > 140 ? '#000' : '#fff'
+}
+
+function formatScore(value: number): string {
+  return Number.isInteger(value) ? String(value) : value.toFixed(2)
+}
+
+// ===== Column bookkeeping =====
+
+function averageColumnIndex(columns: string[]): number {
+  const idx = columns.findIndex((c) => c.endsWith(AVERAGE_SUFFIX))
+  return idx === -1 ? 1 : idx
+}
+
+function stringColumnIndex(columns: string[]): number {
+  const idx = columns.indexOf(STRING_COLUMN)
+  return idx === -1 ? columns.length - 1 : idx
+}
+
+// Splits an experiment column header ("SRX361677|Astrocytes") into its
+// experiment id and cell type. Falls back to treating the whole header as
+// the id if it doesn't contain the separator (defensive — headers are
+// server data, not guaranteed to match the usual shape forever).
+function splitExperimentHeader(header: string): { experimentId: string; cellType: string } {
+  const sep = header.indexOf('|')
+  if (sep === -1) return { experimentId: header, cellType: '' }
+  return { experimentId: header.slice(0, sep), cellType: header.slice(sep + 1) }
+}
+
+// ===== Rendering =====
+
+function sortIndicator(column: string): string {
+  if (state.sort !== column) return ''
+  return state.order === 'desc' ? ' ↓' : ' ↑'
+}
+
+function makeSortableHeader(label: string, sortColumn: string, extraClass?: string): HTMLTableCellElement {
+  const th = document.createElement('th')
+  th.scope = 'col'
+  if (extraClass) th.className = extraClass
+  th.classList.add('tg-sortable')
+  th.textContent = label + sortIndicator(sortColumn)
+  th.addEventListener('click', () => {
+    if (state.sort === sortColumn) {
+      state.order = state.order === 'desc' ? 'asc' : 'desc'
+    } else {
+      state.sort = sortColumn
+      state.order = 'desc'
+    }
+    state.offset = 0
+    void load()
+  })
+  return th
+}
+
+function renderHeader(data: TargetGenesResult): void {
+  const row = $('result-thead-row')
+  const avgIdx = averageColumnIndex(data.columns)
+  const strIdx = stringColumnIndex(data.columns)
+
+  const cells: HTMLTableCellElement[] = []
+
+  data.columns.forEach((col, i) => {
+    if (i === 0) {
+      cells.push(makeSortableHeader('Gene', col))
+      return
+    }
+    if (i === avgIdx) {
+      const th = makeSortableHeader('Average', col)
+      th.title = col.replace('|', ' | ')
+      cells.push(th)
+      return
+    }
+    if (i === strIdx) {
+      cells.push(makeSortableHeader('STRING', col))
+      return
+    }
+
+    // An experiment column, grouped under the Average column and hidden
+    // until "Show experiment columns" is expanded.
+    const { experimentId, cellType } = splitExperimentHeader(col)
     const th = document.createElement('th')
     th.scope = 'col'
-    th.style.cursor = 'pointer'
-    th.title = `${exp.cell_type} (${exp.cell_type_class})`
-    th.textContent = `${exp.experiment_id} ${state.sortColumn === i ? (state.sortDescending ? '↓' : '↑') : ''}`
-    th.addEventListener('click', () => toggleSort(i))
-    tr.appendChild(th)
+    th.className = 'tg-exp-col tg-sortable'
+    th.title = `${experimentId}: ${cellType}`
+
+    const link = document.createElement('a')
+    link.href = `/view?id=${encodeURIComponent(experimentId)}`
+    link.textContent = experimentId
+    link.addEventListener('click', (e) => e.stopPropagation())
+    th.appendChild(link)
+
+    const cellTypeSpan = document.createElement('span')
+    cellTypeSpan.className = 'tg-exp-celltype'
+    cellTypeSpan.textContent = cellType ? `: ${cellType}` : ''
+    th.appendChild(cellTypeSpan)
+
+    const arrow = document.createElement('span')
+    arrow.className = 'tg-sort-indicator'
+    arrow.textContent = sortIndicator(col)
+    th.appendChild(arrow)
+
+    th.addEventListener('click', () => {
+      if (state.sort === col) {
+        state.order = state.order === 'desc' ? 'asc' : 'desc'
+      } else {
+        state.sort = col
+        state.order = 'desc'
+      }
+      state.offset = 0
+      void load()
+    })
+
+    cells.push(th)
   })
 
-  thead.replaceChildren(tr)
+  row.replaceChildren(...cells)
 }
 
-function toggleSort(column: number): void {
-  if (state.sortColumn === column) {
-    state.sortDescending = !state.sortDescending
-  } else {
-    state.sortColumn = column
-    state.sortDescending = true
-  }
-  if (state.data) renderRows(state.data)
-  if (state.data) renderHeader(state.data)
+function scoreCell(value: number, extraClass?: string): HTMLTableCellElement {
+  const td = document.createElement('td')
+  td.className = extraClass ? `tg-score-cell ${extraClass}` : 'tg-score-cell'
+  const rgb = scoreToRgb(value)
+  td.style.backgroundColor = rgbToHex(rgb)
+  td.style.color = readableTextColor(rgb)
+  td.textContent = formatScore(value)
+  return td
 }
 
-function renderRows(data: ResultData): void {
-  const filter = state.filter.toLowerCase()
-  const filtered = filter
-    ? data.genes.filter((g) => g.symbol.toLowerCase().includes(filter))
-    : data.genes.slice()
-
-  const sorted = filtered.sort((a, b) => {
-    const av = state.sortColumn === -1 ? a.avg_score : (a.scores[state.sortColumn] ?? 0)
-    const bv = state.sortColumn === -1 ? b.avg_score : (b.scores[state.sortColumn] ?? 0)
-    return state.sortDescending ? bv - av : av - bv
-  })
+function renderRows(data: TargetGenesResult): void {
+  const avgIdx = averageColumnIndex(data.columns)
+  const strIdx = stringColumnIndex(data.columns)
 
   const tbody = $('result-tbody')
-  tbody.replaceChildren(...sorted.map((g) => {
+  tbody.replaceChildren(...data.rows.map((row) => {
     const tr = document.createElement('tr')
 
-    const symbolTd = document.createElement('td')
-    symbolTd.textContent = g.symbol
-    tr.appendChild(symbolTd)
-
-    const avgTd = document.createElement('td')
-    avgTd.textContent = g.avg_score.toFixed(2)
-    tr.appendChild(avgTd)
-
-    g.scores.forEach((s) => {
-      const td = document.createElement('td')
-      td.textContent = s.toFixed(2)
-      tr.appendChild(td)
+    row.forEach((value, i) => {
+      if (i === 0) {
+        const td = document.createElement('td')
+        td.textContent = String(value)
+        tr.appendChild(td)
+        return
+      }
+      const numeric = typeof value === 'number' ? value : Number(value)
+      if (i === avgIdx || i === strIdx) {
+        tr.appendChild(scoreCell(numeric))
+        return
+      }
+      tr.appendChild(scoreCell(numeric, 'tg-exp-col'))
     })
+
     return tr
   }))
-
-  $('row-count').textContent = `${sorted.length.toLocaleString()} genes shown (of ${data.genes.length.toLocaleString()} total)`
 }
 
-function downloadTsv(): void {
-  const params = readQueryParams()
-  if (!params) return
-  const url = `/api/target_genes/download?${new URLSearchParams({ ...params, format: 'tsv' }).toString()}`
-  window.location.href = url
+function renderPagination(data: TargetGenesResult): void {
+  const shown = data.rows.length
+  $('row-count').textContent = data.total === 0
+    ? 'No target genes found'
+    : `Showing ${data.offset + 1} to ${data.offset + shown} of ${data.total.toLocaleString()} genes`
+
+  const totalPages = Math.max(1, Math.ceil(data.total / PAGE_SIZE))
+  const currentPage = Math.floor(data.offset / PAGE_SIZE) + 1
+  $('page-indicator').textContent = `Page ${currentPage} of ${totalPages}`
+
+  const prevDisabled = data.offset === 0
+  const nextDisabled = data.offset + shown >= data.total
+
+  $('page-prev').classList.toggle('disabled', prevDisabled)
+  $('page-next').classList.toggle('disabled', nextDisabled)
+
+  const prevAnchor = $('page-prev').querySelector('a')
+  const nextAnchor = $('page-next').querySelector('a')
+  if (prevAnchor) {
+    prevAnchor.setAttribute('aria-disabled', String(prevDisabled))
+    prevAnchor.tabIndex = prevDisabled ? -1 : 0
+  }
+  if (nextAnchor) {
+    nextAnchor.setAttribute('aria-disabled', String(nextDisabled))
+    nextAnchor.tabIndex = nextDisabled ? -1 : 0
+  }
 }
 
-async function init(): Promise<void> {
+function updateExperimentsToggleLabel(data: TargetGenesResult): void {
+  const experimentCount = data.columns.length - 3 // Target_genes, Average, STRING are never counted as experiments
+  const summary = $('experiments-toggle-summary')
+  const details = $('experiments-toggle') as HTMLDetailsElement
+  summary.textContent = details.open
+    ? `Hide experiment columns (${experimentCount.toLocaleString()})`
+    : `Show experiment columns (${experimentCount.toLocaleString()})`
+}
+
+function updateDistanceButtons(): void {
+  document.querySelectorAll<HTMLButtonElement>('#distance-switch button[data-distance]').forEach((btn) => {
+    const active = btn.dataset.distance === state.distance
+    btn.classList.toggle('active', active)
+    btn.setAttribute('aria-pressed', String(active))
+  })
+}
+
+function updateDownloadLink(): void {
+  const link = $('download-tsv') as HTMLAnchorElement
+  const params = new URLSearchParams({
+    genome: state.genome, track: state.track, distance: state.distance, format: 'tsv',
+  })
+  link.href = `/api/target_genes/download?${params.toString()}`
+  link.hidden = false
+}
+
+function setSummary(): void {
+  $('result-summary').textContent = `${state.track} on ${state.genome} — TSS ± ${state.distance} kb`
+}
+
+let loadGeneration = 0
+
+async function load(): Promise<void> {
+  const gen = ++loadGeneration
+  ;($('loading-state') as HTMLElement).hidden = false
+  ;($('error-state') as HTMLElement).hidden = true
+
+  setSummary()
+  updateDistanceButtons()
+  updateUrl()
+
+  try {
+    const data = await getTargetGenesData(state.genome, state.track, state.distance, {
+      sort: state.sort || undefined,
+      order: state.order,
+      offset: state.offset,
+      limit: PAGE_SIZE,
+    })
+    if (gen !== loadGeneration) return // a newer request (distance/sort/page change) already landed
+
+    state.data = data
+    ;($('loading-state') as HTMLElement).hidden = true
+    ;($('result-wrap') as HTMLElement).hidden = false
+
+    renderHeader(data)
+    renderRows(data)
+    renderPagination(data)
+    updateExperimentsToggleLabel(data)
+    updateDownloadLink()
+  } catch (err) {
+    if (gen !== loadGeneration) return
+    console.error(err)
+    state.data = null
+    ;($('loading-state') as HTMLElement).hidden = true
+    ;($('result-wrap') as HTMLElement).hidden = true
+    ;($('download-tsv') as HTMLAnchorElement).hidden = true
+    const e = $('error-state') as HTMLElement
+    e.textContent = 'Failed to load target genes. This antigen/genome/distance combination may not have precomputed data.'
+    e.hidden = false
+  }
+}
+
+function wireDistanceSwitch(): void {
+  document.querySelectorAll<HTMLButtonElement>('#distance-switch button[data-distance]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const distance = btn.dataset.distance
+      if (!distance || distance === state.distance) return
+      state.distance = distance
+      state.offset = 0
+      void load()
+    })
+  })
+}
+
+function wirePagination(): void {
+  $('page-prev').addEventListener('click', (e) => {
+    e.preventDefault()
+    if ($('page-prev').classList.contains('disabled')) return
+    state.offset = Math.max(0, state.offset - PAGE_SIZE)
+    void load()
+  })
+  $('page-next').addEventListener('click', (e) => {
+    e.preventDefault()
+    if ($('page-next').classList.contains('disabled')) return
+    state.offset += PAGE_SIZE
+    void load()
+  })
+}
+
+function wireExperimentsToggle(): void {
+  const details = $('experiments-toggle') as HTMLDetailsElement
+  const wrap = $('result-table-wrap')
+  details.addEventListener('toggle', () => {
+    wrap.classList.toggle('tg-experiments-expanded', details.open)
+    if (state.data) updateExperimentsToggleLabel(state.data)
+  })
+}
+
+function init(): void {
   const params = readQueryParams()
   if (!params) {
     ;($('loading-state') as HTMLElement).hidden = true
     const err = $('error-state') as HTMLElement
-    err.textContent = 'Missing genome, track, or distance parameter in URL.'
+    err.textContent = 'Missing genome or track parameter in URL.'
     err.hidden = false
     return
   }
 
-  $('result-summary').textContent = `${params.track} on ${params.genome} (TSS ± ${params.distance} kb)`
+  state.genome = params.genome
+  state.track = params.track
+  state.distance = params.distance
 
-  try {
-    const data = await getTargetGenesData(params.genome, params.track, params.distance) as unknown as ResultData
-    state.data = data
-    ;($('loading-state') as HTMLElement).hidden = true
-    ;($('result-wrap') as HTMLElement).hidden = false
-    renderHeader(data)
-    renderRows(data)
-  } catch (err) {
-    console.error(err)
-    ;($('loading-state') as HTMLElement).hidden = true
-    const e = $('error-state') as HTMLElement
-    e.textContent = 'Failed to load results. The data may not exist yet for this combination.'
-    e.hidden = false
-    return
-  }
+  wireDistanceSwitch()
+  wirePagination()
+  wireExperimentsToggle()
 
-  ;($('gene-search') as HTMLInputElement).addEventListener('input', (e) => {
-    state.filter = (e.target as HTMLInputElement).value
-    if (state.data) renderRows(state.data)
-  })
-
-  $('download-tsv').addEventListener('click', downloadTsv)
+  void load()
 }
 
 document.addEventListener('DOMContentLoaded', init)

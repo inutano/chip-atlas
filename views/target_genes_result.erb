@@ -6,27 +6,66 @@
 <div class="row mb-3">
   <div class="col-md-12">
     <h1>ChIP-Atlas: Target Genes Result</h1>
-    <div id="result-summary" class="text-muted small"></div>
+    <div id="result-summary" class="text-muted small mb-2"></div>
+
+    <div class="d-flex align-items-center flex-wrap gap-2">
+      <span class="small text-muted me-1">Distance from TSS:</span>
+      <div class="btn-group btn-group-sm" role="group" aria-label="Switch TSS distance" id="distance-switch">
+        <button type="button" class="btn btn-outline-primary" data-distance="1">&plusmn; 1 kb</button>
+        <button type="button" class="btn btn-outline-primary" data-distance="5">&plusmn; 5 kb</button>
+        <button type="button" class="btn btn-outline-primary" data-distance="10">&plusmn; 10 kb</button>
+      </div>
+      <a href="#" id="download-tsv" class="btn btn-sm btn-outline-secondary ms-auto" hidden>
+        <%== erb :_icon, locals: { name: 'download' } %> Download TSV
+      </a>
+    </div>
   </div>
 </div>
 
-<div id="loading-state" class="text-muted">Loading…</div>
+<div class="row mb-3">
+  <div class="col-md-12">
+    <div class="small text-muted mb-1"><b>Color legend</b> (binding scores of MACS2 and STRING)</div>
+    <div class="tg-legend" role="img" aria-label="Score color legend from 0 (gray) to 1000 or higher (red)">
+      <span class="tg-legend-swatch" style="background-color:#808080">0</span>
+      <span class="tg-legend-swatch" style="background-color:#0000ff">1</span>
+      <span class="tg-legend-swatch" style="background-color:#00ffff">250</span>
+      <span class="tg-legend-swatch" style="background-color:#00ff00">500</span>
+      <span class="tg-legend-swatch" style="background-color:#ffff00">750</span>
+      <span class="tg-legend-swatch" style="background-color:#ff0000">1000+</span>
+    </div>
+  </div>
+</div>
+
+<div id="loading-state" class="text-muted">Loading&hellip;</div>
 <div id="error-state" class="alert alert-danger" hidden></div>
 
 <div id="result-wrap" hidden>
-  <div class="row mb-2">
-    <div class="col-md-6">
-      <input type="search" id="gene-search" class="form-control form-control-sm" placeholder="Filter by gene symbol" aria-label="Filter genes">
-    </div>
-    <div class="col-md-6 text-end">
-      <button type="button" id="download-tsv" class="btn btn-sm btn-outline-secondary">Download TSV</button>
-    </div>
-  </div>
-  <div class="table-responsive">
-    <table class="table table-striped table-sm">
-      <thead id="result-thead"></thead>
+  <details id="experiments-toggle" class="mb-2">
+    <summary id="experiments-toggle-summary">Show experiment columns</summary>
+    <p class="small text-muted mt-1 mb-0">
+      Individual experiments are grouped under the query antigen's Average column above.
+      Expanding adds one column per experiment, already loaded with this page of genes &mdash;
+      no extra request is made.
+    </p>
+  </details>
+
+  <div class="table-responsive" id="result-table-wrap">
+    <table class="table table-striped table-sm align-middle" id="result-table">
+      <thead>
+        <tr id="result-thead-row"></tr>
+      </thead>
       <tbody id="result-tbody"></tbody>
     </table>
   </div>
-  <div id="row-count" class="text-muted small mt-2"></div>
+
+  <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+    <div id="row-count" class="text-muted small"></div>
+    <nav aria-label="Target genes pagination">
+      <ul class="pagination pagination-sm justify-content-center mb-0">
+        <li class="page-item" id="page-prev"><a class="page-link" href="#" role="button">Previous</a></li>
+        <li class="page-item disabled"><span class="page-link" id="page-indicator">&mdash;</span></li>
+        <li class="page-item" id="page-next"><a class="page-link" href="#" role="button">Next</a></li>
+      </ul>
+    </nav>
+  </div>
 </div>

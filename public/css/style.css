@@ -443,3 +443,58 @@ select.list-box option {
   border: 1px solid #ddd;
   border-radius: 4px;
 }
+
+/* ===== Target Genes Result (Task B3) ===== */
+.tg-legend {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.tg-legend-swatch {
+  display: inline-block;
+  min-width: 50px;
+  height: 25px;
+  line-height: 25px;
+  text-align: center;
+  font-size: 12px;
+  color: #000;
+  border: 1px solid rgba(0, 0, 0, .15);
+  margin-right: 2px;
+}
+
+#result-table th.tg-sortable {
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+}
+
+#result-table th.tg-sortable:hover {
+  background-color: var(--ca-panel-head);
+}
+
+.tg-exp-celltype {
+  color: #666;
+}
+
+.tg-score-cell {
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+  min-width: 3.5em;
+}
+
+/* Experiment columns (one per SRX) are hidden until the "Show experiment
+   columns" <details> is expanded — see target-genes-result.ts. They are
+   fully removed from layout (not just visually hidden), so the collapsed
+   table (Gene / Average / STRING) never triggers the horizontal scroll on
+   #result-table-wrap below. */
+.tg-exp-col {
+  display: none;
+}
+
+#result-table-wrap.tg-experiments-expanded .tg-exp-col {
+  display: table-cell;
+}
+
+#result-table-wrap {
+  overflow-x: auto;
+}
