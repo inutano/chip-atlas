@@ -1,0 +1,113 @@
+# Post-parity fixes — outcome and handoff
+
+Execution record for `docs/superpowers/plans/2026-09-18-post-parity-fixes.md`.
+Range `0c66277..HEAD` on `sengu`. The full ledger, including every dispatch and
+review, is in `2026-09-18-post-parity-fixes-ledger.md` beside this file.
+
+**Not pushed, not merged.** The branch is local.
+
+## State
+
+15 of 16 tasks done. B4 (the Colocalization index) was held back by the project
+owner because it is blocked on a question out with a collaborator.
+
+```
+Ruby suite      215 runs / 0 failures   (was 104 at 0c66277)
+Frontend suite   74 runs / 0 failures   (did not exist at 0c66277)
+tsc --noEmit    exit 0, base + test configs
+ui-checklist    34/34
+```
+
+## What the four faults turned out to be
+
+1. **Result endpoints requested a file format that has never existed.** The app
+   asked for `.json`; the data server publishes `.tsv` and `.html` only. Fixed by
+   parsing the TSV that exists (owner's choice, D4).
+2. **`analysisList.tab` was misread as a Colo index.** It is a **Target Genes**
+   index: each row is a (TF, distance) pair and the `.1`/`.5`/`.10` suffix matches
+   real filenames exactly. Colocalization has no index source in the pipeline at
+   all — that is what B4 must supply.
+3. **The job payload used field names WABI does not know.** No translation layer
+   existed. The frontend now emits WABI's own vocabulary; the server adds the
+   operational fields.
+4. **`TAIR10` should have been `TAIR12`.** 21,836 A. thaliana experiments were
+   dropped at load.
+
+## Decisions taken on the owner's behalf
+
+Full reasoning and cost-if-wrong for each is in the ledger.
+
+| # | Ruling | Why it may want review |
+|---|---|---|
+| 1 | B5 ships without B4; verified via the API | **Was factually wrong** — see Ruling 22 |
+| 2 | TAIR12 kept off `/colo` by an allowlist + TODO | replaced by B4's derived check |
+| 3 | C2 proceeds: server supplies the operational fields | technically a thin translation layer, against D7's letter |
+| 4 | Per-job-type availability is a constant in `ComputeRouter`, not config | |
+| 5 | A2 verifies TAIR12 on a slice, not a full rebuild | |
+| 6, 9, 12, 14, 19 | Folded specific Minors into fix rounds instead of deferring | each overrides the default that Minors wait |
+| 7 | Pin `--network none` in `test.sh` | **half-executed** — CI had no isolation until the final wave |
+| 8 | "One row set, not one file" — corrected my own plan defect | also silently changed A3's stated Verify criterion |
+| 10 | Vendored `target_genes_analysis.json` snapshot as the interim human index | delete when upstream lands |
+| 11, 15 | Hardened two inferred data contracts into verified ones | |
+| 13 | One re-review across two fix rounds | |
+| 16, 17 | Two more defects in my own brief text, corrected mid-flight | |
+| 18 | 502 = backend rejected, 503 = no backend serves this type | **owner sign-off wanted** |
+| 20 | Clearing datasets on experiment-type change, beyond D13's literal option | **owner veto wanted** |
+| 21 | Final review scoped to this plan, not the whole branch | |
+| 22 | Gate `/colo` behind the honest-unavailable state until B4 | **owner veto wanted** |
+
+## What B4 needs when Q2 is answered
+
+- **Colocalization has no index source.** `analysisList.tab` cannot supply one
+  (fault 2 above). Production serves `/data/colo_analysis.json?genome=…` in the
+  right shape; whether that endpoint or a regenerated upstream file becomes the
+  source is the open question.
+- **`Analysis.colo_result_by_genome` (`lib/models/analysis.rb`) still splits a
+  `cell_list` of `"-"` into `["-"]` rather than `[]`.** This is why the picker
+  offered a literal `-`. The `/colo` gate (Ruling 22) hides the human-facing
+  symptom but **`/api/colo_index` still returns the bogus entry to direct API
+  consumers.** B4 owns the real fix.
+- `Analysis.genomes_with_colo` is a hardcoded allowlist with a TODO pointing here.
+- Re-enabling the `/colo` picker is one line: `COLO_PICKER_UNAVAILABLE` in
+  `frontend/pages/colo.ts`.
+- `database.sqlite.rebuild` was generated before the `distance` migration —
+  **regenerate any rebuilt database after all migrations**, do not reuse it.
+
+## Deferred, with reasons
+
+- `BedExtensionResolver` cache/prober not synchronised under threaded Puma —
+  worst case is a duplicate probe against an idempotent cache.
+- Six byte-identical helpers duplicated across the two matrix pages — deliberate
+  (per-page esbuild entry points); extract when a third matrix page appears.
+- Colo's Average column uncoloured — production's gradient could not be
+  reverse-engineered from one dataset, and a wrong gradient is worse than none.
+- No row pagination on the colo matrix — measured fine at 3,862 rows
+  (forced layout 1 ms, 2 MB heap).
+- No server-side gene search on Target Genes — a client-side filter over one
+  loaded page of 13,459 rows was removed as actively misleading. **Product
+  question:** should a real server-side search replace it?
+- `measure-target-genes-overflow.mjs` needs a live server and hardcodes
+  `mm10/Stat3/1` — it now asserts its own precondition, which was the part
+  that mattered.
+- The rake orphan assertion in `clean_old_genomes.rake` runs after commit and
+  VACUUM: it detects, it does not prevent.
+- No jsdom anywhere, so DOM wiring is covered by pure-function tests plus manual
+  verification — a project-wide convention, not introduced here.
+
+## Six "passes while testing nothing" defects found during this run
+
+Recorded because the pattern recurred far more than expected:
+
+1. Adding a probe to `bed_url` made three **pre-existing** tests call the
+   production data server; they passed because their assertions never looked at
+   the extension.
+2. The overflow regression script had no precondition, so it would have passed if
+   the table stopped being wide enough to overflow.
+3. `test-frontend.sh`'s glob matched zero files once a test lived outside
+   `frontend/pages/` — green while running nothing.
+4. …and after that was "fixed", an empty match still exited 0, because
+   `node --test` with no arguments reports success.
+5. `tsconfig.json` silently stopped type-checking ~1,100 lines of test code.
+6. `--network none` was pinned locally but never in CI, and `DataProxy` had no
+   test guard — so two tests really did reach `chip-atlas.dbcls.jp` on every CI
+   run, passing only because upstream returns 404.
