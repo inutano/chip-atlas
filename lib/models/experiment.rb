@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 require 'yaml'
+require 'json'
+require 'set'
 
 module ChipAtlas
   module Experiment
@@ -222,20 +224,61 @@ module ChipAtlas
       result
     end
 
-    # Loads experimentList.tab into the `experiments` table AND the
-    # `experiments_fts` search index in a single pass, so the two stores
-    # can never drift apart the way they used to (one loaded from this
-    # file, the other from a separately-downloaded, separately-stale
-    # ExperimentList_adv.json). Both stores get the exact same genome
-    # filter and the exact same per-row fields; the only difference is
-    # that Annotation tracks are excluded from the FTS index (see
-    # ChipAtlas::ExperimentSearch::NOT_INDEXED_TRACK_CLASSES) and that the
-    # FTS index gets a best-effort geo_id pulled out of the title.
+    # Loads the `experiments` table and the `experiments_fts` search index
+    # from ONE RECONCILED ROW SET, so the two stores can never drift apart
+    # the way they used to. That set does not come from a single file -
+    # experimentList.tab and ExperimentList_adv.json each carry data the
+    # other doesn't:
     #
-    # Returns the number of experiments-table rows loaded.
-    def load_from_file(table_path)
+    #   experimentList.tab       - per-(experiment_id, genome) rows, with
+    #                               real QC stats (read_info). No sra_id or
+    #                               geo_id column at all.
+    #   ExperimentList_adv.json  - one row per experiment_id, with a real
+    #                               sra_id and geo_id. No QC stats. Its
+    #                               genome field lists every assembly the
+    #                               experiment's species has ever used
+    #                               (comma-joined, e.g. "hg19, hg38"), NOT
+    #                               necessarily what this specific
+    #                               experiment was aligned against - that's
+    #                               what produced the 219-row orphan bug
+    #                               this task exists to close (see
+    #                               task-A3-report.md).
+    #
+    # Reconciliation rule (tab wins for membership, JSON wins for content
+    # it alone has):
+    #   - `experiments` = every (experiment_id, genome) pair that survives
+    #     experimentList.tab's genome filter, full stop. The tab file is
+    #     the only source with genuine per-genome evidence (QC numbers), so
+    #     it alone decides what counts as a real, view-able experiment row.
+    #     Each row is additionally joined (by experiment_id only - the JSON
+    #     has no per-genome granularity to join on) with ExperimentList_adv.json
+    #     for sra_id/geo_id; a tab row whose id isn't in the JSON at all
+    #     (e.g. every "Annotation tracks" id - see below) simply gets '' for
+    #     both.
+    #   - `experiments_fts` = the INTERSECTION: only (experiment_id, genome)
+    #     pairs that BOTH experimentList.tab has (after its genome filter)
+    #     AND ExperimentList_adv.json's own (comma-split, genome-filtered)
+    #     genome list confirms for that id, minus Annotation tracks (see
+    #     ChipAtlas::ExperimentSearch::NOT_INDEXED_TRACK_CLASSES). This is
+    #     what makes the orphan bug structurally impossible: a search hit
+    #     can only exist for a pair the tab file also vouches for, so it can
+    #     never point at a /view page that doesn't exist. Every FTS row's
+    #     other fields (title, attributes, track_class, track_subclass,
+    #     cell_type_class, cell_type_subclass, sra_id, geo_id) come from the
+    #     JSON, not the tab - per the coordinator's explicit instruction,
+    #     since experiments_fts is what actually surfaces those fields.
+    #
+    # Rows on either side of that intersection are exactly the drift this
+    # task exists to kill - dropped, not silently discarded: the returned
+    # stats hash reports how many fall in each direction so a load can be
+    # audited instead of trusted blindly.
+    #
+    # Returns { experiments:, indexed:, tab_only:, json_only: } - see above.
+    def load_from_files(table_path, json_path)
       timestamp = Time.now
-      total = 0
+      json_index = load_json_index(json_path)
+      stats = { experiments: 0, indexed: 0, tab_only: 0, json_only: 0 }
+      seen_pairs = Set.new
       batch_size = 5_000
 
       DB.transaction do
@@ -246,12 +289,13 @@ module ChipAtlas
           cols = line_n.chomp.split("\t")
 
           # The genome field is a single id in experimentList.tab, but the
-          # loader this replaced was bitten hard by a source (the old
-          # ExperimentList_adv.json) that sometimes packed multiple genomes
-          # into one comma-joined field ("hg19, hg38") - matching that
-          # against the id registry directly silently dropped ~95% of the
-          # index. Splitting defensively costs nothing today and keeps that
-          # failure mode closed if a future source format regresses to it.
+          # loader this replaced was bitten hard by a source that sometimes
+          # packed multiple genomes into one comma-joined field - matching
+          # that against the id registry directly silently dropped ~95% of
+          # the index (see load_json_index below, where that source really
+          # does do this). Splitting defensively here costs nothing today
+          # and keeps that failure mode closed if experimentList.tab's
+          # format ever regresses toward it.
           genome = cols[1].to_s.split(/,\s*/).first
           next unless genomes.key?(genome)
 
@@ -265,6 +309,8 @@ module ChipAtlas
           title                    = cols[8]
           attributes               = cols[9..].to_a.join("\t")
 
+          json_row = json_index[experiment_id]
+
           records << {
             experiment_id:           experiment_id,
             genome:                  genome,
@@ -276,58 +322,120 @@ module ChipAtlas
             read_info:               read_info,
             title:                   title,
             attributes:              attributes,
+            sra_id:                  json_row ? json_row[:sra_id] : '',
+            geo_id:                  json_row ? json_row[:geo_id] : '',
             created_at:              timestamp,
           }
+          seen_pairs << [experiment_id, genome]
 
-          # Annotation tracks stay out of the search index - see
-          # ChipAtlas::ExperimentSearch::NOT_INDEXED_TRACK_CLASSES for why.
-          if ChipAtlas::ExperimentSearch.indexable?(track_class)
-            # experimentList.tab has no SRA study accession (sra_id) or GEO
-            # sample id (geo_id) columns; geo_id is recoverable often enough
-            # to be worth it, because ChIP-Atlas titles are conventionally
-            # "GSM123456: <description>" - extract it so /view?id=GSM123456
-            # (ChipAtlas::ExperimentSearch.gsm_to_srx) keeps working. sra_id
-            # has no equivalent source in this file, so it is left blank.
-            geo_id = title.to_s[/\AGSM\d+/] || ''
-
-            fts_records << {
-              experiment_id:      experiment_id,
-              sra_id:              '',
-              geo_id:              geo_id,
-              genome:              genome,
-              track_class:         track_class,
-              track_subclass:      track_subclass,
-              cell_type_class:     cell_type_class,
-              cell_type_subclass:  cell_type_subclass,
-              title:               title,
-              attributes:          attributes,
-            }
+          confirmed = json_row && json_row[:genomes].include?(genome)
+          if confirmed
+            # Annotation tracks stay out of the search index - see
+            # ChipAtlas::ExperimentSearch::NOT_INDEXED_TRACK_CLASSES. In
+            # the current data this is moot (Annotation-tracks ids never
+            # appear in the JSON at all, so they never reach `confirmed`),
+            # but the check stays as the explicit rule rather than an
+            # accident of that absence.
+            if ChipAtlas::ExperimentSearch.indexable?(json_row[:track_class])
+              fts_records << {
+                experiment_id:      experiment_id,
+                sra_id:             json_row[:sra_id],
+                geo_id:             json_row[:geo_id],
+                genome:             genome,
+                track_class:        json_row[:track_class],
+                track_subclass:     json_row[:track_subclass],
+                cell_type_class:    json_row[:cell_type_class],
+                cell_type_subclass: json_row[:cell_type_subclass],
+                title:              json_row[:title],
+                attributes:         json_row[:attributes],
+              }
+            end
+          else
+            # In the tab file, confirmed by no genome the JSON claims for
+            # this id (or the id isn't in the JSON at all) - kept in
+            # `experiments` (the tab is still authoritative for that), but
+            # correctly excluded from the search index instead of trusting
+            # an unconfirmed JSON genome claim.
+            stats[:tab_only] += 1
           end
 
           if records.size >= batch_size
             dataset.multi_insert(records)
-            total += records.size
+            stats[:experiments] += records.size
             records.clear
           end
 
           if fts_records.size >= batch_size
             ChipAtlas::ExperimentSearch.dataset.multi_insert(fts_records)
+            stats[:indexed] += fts_records.size
             fts_records.clear
           end
         end
 
         if records.any?
           dataset.multi_insert(records)
-          total += records.size
+          stats[:experiments] += records.size
         end
 
         if fts_records.any?
           ChipAtlas::ExperimentSearch.dataset.multi_insert(fts_records)
+          stats[:indexed] += fts_records.size
+        end
+      end
+
+      # The other direction of drift: (experiment_id, genome) pairs the
+      # JSON claims that the tab file never backs up - exactly the shape of
+      # the 219-row orphan bug this task closes. Never silently dropped:
+      # counted and reported, not indexed.
+      json_index.each do |experiment_id, row|
+        row[:genomes].each do |genome|
+          stats[:json_only] += 1 unless seen_pairs.include?([experiment_id, genome])
         end
       end
 
       ChipAtlas::ExperimentSearch.reset_total_count_cache!
-      total
+      stats
+    end
+
+    # Parses ExperimentList_adv.json into { experiment_id => {...} }. One
+    # row per experiment_id in the source (confirmed: 454,151 rows, 454,151
+    # unique ids in the 2026-09-13 snapshot) - no per-genome duplication to
+    # reconcile here, only per-experiment fields (sra_id, geo_id, and the
+    # rest of the search-index content) plus the genome list load_from_files
+    # checks each tab row's genome against.
+    def load_json_index(json_path)
+      rows = JSON.parse(File.read(json_path))['data'] || []
+      index = {}
+
+      rows.each do |row|
+        experiment_id = row[0]
+
+        # The genome field here is a comma-joined string like "hg19, hg38"
+        # (sometimes truly an Array, depending on source revision) - NOT
+        # one bare id. This is the exact field that, matched directly
+        # against the genome registry instead of split first, silently
+        # dropped ~95% of the search index the last time this codebase
+        # touched it. Split, trim, and filter through the same
+        # config/genomes.yml-backed registry as everything else.
+        genome_field = row[3]
+        genome_list = genome_field.is_a?(Array) ? genome_field : genome_field.to_s.split(/,\s*/)
+        kept_genomes = genome_list.map(&:strip).reject(&:empty?).select { |g| genomes.key?(g) }
+        next if kept_genomes.empty?
+
+        index[experiment_id] = {
+          sra_id:             row[1].to_s,
+          geo_id:             row[2].to_s,
+          genomes:            kept_genomes.to_set,
+          track_class:        row[4].to_s,
+          track_subclass:     row[5].to_s,
+          cell_type_class:    row[6].to_s,
+          cell_type_subclass: row[7].to_s,
+          title:              row[8].to_s,
+          attributes:         row[9].to_s,
+        }
+      end
+
+      index
     end
   end
 end

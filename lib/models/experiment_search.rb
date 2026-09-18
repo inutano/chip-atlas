@@ -14,7 +14,7 @@ module ChipAtlas
     # from experimentList.tab (which includes them) while `experiments_fts`
     # loaded from a separate, stale ExperimentList_adv.json (which happened
     # not to). Now that both stores load from the same file in the same pass
-    # (see ChipAtlas::Experiment.load_from_file), the exclusion has to be
+    # (see ChipAtlas::Experiment.load_from_files), the exclusion has to be
     # written down explicitly - this is that rule.
     NOT_INDEXED_TRACK_CLASSES = ['Annotation tracks'].freeze
 
@@ -68,7 +68,7 @@ module ChipAtlas
     # SELECTed column, materialized for the whole table before LIMIT/OFFSET
     # trims it down to 20) on every /search page load and every genome
     # change. Keyed by genome ("" for no filter); reset by
-    # ChipAtlas::Experiment.load_from_file after each fresh load.
+    # ChipAtlas::Experiment.load_from_files after each fresh load.
     def total_count_cache
       @total_count_cache ||= {}
     end

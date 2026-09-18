@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 require_relative '../test_helper'
+require 'tempfile'
+require 'set'
 
 class ExperimentTest < Minitest::Test
   include TestHelper
@@ -110,66 +112,160 @@ class ExperimentTest < Minitest::Test
     assert index['hg38'][:track].key?('Histone')
   end
 
-  # --- load_from_file: one source feeding both experiments and experiments_fts ---
+  # --- load_from_files: one reconciled row set feeding both stores ---
   #
-  # Fixture (test/fixtures/experimentList_sample.tab) has 4 rows:
-  #   SRXTEST001  hg38  Histone            - title starts "GSM100001: ..."
-  #   SRXTEST002  hg38  Annotation tracks   - excluded from the search index
-  #   SRXTEST003  mm10  ATAC-Seq            - title has no GSM prefix
-  #   SRXTEST004  xx99  Histone             - xx99 is not in config/genomes.yml
+  # Fixtures:
+  #   test/fixtures/experimentList_sample.tab (experimentList.tab shape):
+  #     SRXTEST001  hg38  Histone             - confirmed by the JSON fixture
+  #     SRXTEST002  hg38  Annotation tracks    - not in the JSON fixture at all
+  #     SRXTEST003  mm10  ATAC-Seq             - confirmed by the JSON fixture
+  #     SRXTEST004  xx99  Histone              - xx99 isn't in config/genomes.yml
+  #     SRXTEST005  hg38  Histone              - IS in the JSON fixture, but the
+  #                                              JSON claims dm6, not hg38, for it
+  #   test/fixtures/experiment_adv_sample.json (ExperimentList_adv.json shape):
+  #     SRXTEST001  genome "hg38"        sra_id/geo_id populated
+  #     SRXTEST003  genome "mm10, mm9"   comma-joined; mm9 isn't supported
+  #     SRXTEST005  genome "dm6"         doesn't match the tab row's hg38
+  #     SRXTEST999  genome "hg38"        not in the tab fixture at all
 
-  def test_load_from_file_loads_experiments_and_search_index_together
+  def load_reconciled_fixtures
+    tab = File.join(__dir__, '..', 'fixtures', 'experimentList_sample.tab')
+    json = File.join(__dir__, '..', 'fixtures', 'experiment_adv_sample.json')
+    ChipAtlas::Experiment.load_from_files(tab, json)
+  end
+
+  def test_load_from_files_builds_experiments_from_tab_and_search_index_from_json
     DB[:experiments].delete
     DB[:experiments_fts].delete
 
-    fixture = File.join(__dir__, '..', 'fixtures', 'experimentList_sample.tab')
-    count = ChipAtlas::Experiment.load_from_file(fixture)
+    stats = load_reconciled_fixtures
 
-    # The unsupported genome (xx99) is dropped by the same filter for both
-    # stores - only 3 of the 4 fixture rows are loadable at all.
-    assert_equal 3, count
-    assert_equal 3, DB[:experiments].count
+    # experiments = every tab row that passes the genome filter, full stop -
+    # xx99 (SRXTEST004) is the only one dropped; JSON confirmation is NOT
+    # required for a row to exist in experiments.
+    assert_equal 4, stats[:experiments]
+    assert_equal 4, DB[:experiments].count
     refute ChipAtlas::Experiment.id_valid?('SRXTEST004')
+    assert ChipAtlas::Experiment.id_valid?('SRXTEST002') # Annotation tracks: still viewable
+    assert ChipAtlas::Experiment.id_valid?('SRXTEST005') # unconfirmed by JSON: still viewable
 
-    # Annotation tracks load into experiments (so /view still works for
-    # them) but are excluded from the search index on purpose.
-    assert ChipAtlas::Experiment.id_valid?('SRXTEST002')
+    # experiments_fts = only the pairs BOTH sources agree on, minus
+    # Annotation tracks: SRXTEST001 (hg38) and SRXTEST003 (mm10).
+    assert_equal 2, stats[:indexed]
     assert_equal 2, DB[:experiments_fts].count
-    refute DB[:experiments_fts].where(experiment_id: 'SRXTEST002').first
-
-    # geo_id is recovered from the "GSM######: ..." title convention so
-    # /view?id=GSM... redirects keep working even without a dedicated
-    # geo_id column in experimentList.tab.
-    with_gsm = DB[:experiments_fts].where(experiment_id: 'SRXTEST001').first
-    assert_equal 'GSM100001', with_gsm[:geo_id]
-
-    # A title with no GSM prefix gets a blank geo_id, not a crash or a
-    # bogus partial match.
-    without_gsm = DB[:experiments_fts].where(experiment_id: 'SRXTEST003').first
-    assert_equal '', without_gsm[:geo_id]
-
-    # experimentList.tab has no SRA study accession column - sra_id is
-    # left blank rather than fabricated.
-    assert_equal '', with_gsm[:sra_id]
+    assert DB[:experiments_fts].where(experiment_id: 'SRXTEST001').first
+    assert DB[:experiments_fts].where(experiment_id: 'SRXTEST003').first
+    refute DB[:experiments_fts].where(experiment_id: 'SRXTEST002').first # Annotation tracks
+    refute DB[:experiments_fts].where(experiment_id: 'SRXTEST005').first # genome mismatch
 
     # The structural guarantee this task is about: every experiments_fts
     # row has a matching experiments row.
     assert_equal 0, ChipAtlas::ExperimentSearch.orphaned_count
   end
 
+  def test_load_from_files_reports_both_directions_of_drift
+    DB[:experiments].delete
+    DB[:experiments_fts].delete
+
+    stats = load_reconciled_fixtures
+
+    # tab_only: in experiments, excluded from the index - SRXTEST002 (no
+    # JSON row at all) and SRXTEST005 (JSON row exists but claims a
+    # different genome). Proves the exclusion isn't only about Annotation
+    # tracks - an ordinary track_class with an unconfirmed genome is
+    # excluded too.
+    assert_equal 2, stats[:tab_only]
+
+    # json_only: JSON (experiment_id, genome) pairs the tab file never
+    # backs up, dropped from both stores entirely rather than silently
+    # trusted - SRXTEST999/hg38 (id not in the tab fixture) and
+    # SRXTEST005/dm6 (the other side of the tab_only mismatch above).
+    assert_equal 2, stats[:json_only]
+    refute ChipAtlas::Experiment.id_valid?('SRXTEST999')
+  end
+
+  def test_load_from_files_joins_sra_id_and_geo_id_onto_experiments_by_id
+    DB[:experiments].delete
+    DB[:experiments_fts].delete
+    load_reconciled_fixtures
+
+    # experiments gains sra_id/geo_id via a join on experiment_id (not
+    # (experiment_id, genome) - the JSON has no per-genome granularity).
+    confirmed = DB[:experiments].where(experiment_id: 'SRXTEST001').first
+    assert_equal 'SRA100001', confirmed[:sra_id]
+    assert_equal 'GSM100001', confirmed[:geo_id]
+
+    # The JSON's own placeholder ("-" for a genuinely missing geo_id) is
+    # passed through as-is, not fabricated or blanked.
+    placeholder = DB[:experiments].where(experiment_id: 'SRXTEST003').first
+    assert_equal 'SRA100003', placeholder[:sra_id]
+    assert_equal '-', placeholder[:geo_id]
+
+    # A row with no JSON entry at all (Annotation tracks) gets '' for
+    # both, not a crash and not a fabricated value.
+    no_json = DB[:experiments].where(experiment_id: 'SRXTEST002').first
+    assert_equal '', no_json[:sra_id]
+    assert_equal '', no_json[:geo_id]
+
+    # experiments_fts also carries the JSON's real sra_id/geo_id (dropped
+    # the GSM-prefix-from-title heuristic entirely - the JSON has the
+    # actual column).
+    fts_row = DB[:experiments_fts].where(experiment_id: 'SRXTEST001').first
+    assert_equal 'SRA100001', fts_row[:sra_id]
+    assert_equal 'GSM100001', fts_row[:geo_id]
+  end
+
+  def test_load_json_index_handles_comma_joined_genome_field
+    json = File.join(__dir__, '..', 'fixtures', 'experiment_adv_sample.json')
+    index = ChipAtlas::Experiment.load_json_index(json)
+
+    # "mm10, mm9" - split, trimmed, and filtered through config/genomes.yml
+    # (mm9 isn't in it). Matching the raw comma-joined string against the
+    # registry instead of splitting it first is the exact bug that used to
+    # drop ~95% of the index - this proves the unified loader still splits.
+    assert_equal Set['mm10'], index['SRXTEST003'][:genomes]
+    assert_equal Set['hg38'], index['SRXTEST001'][:genomes]
+  end
+
+  # Isolated from the shared fixtures above on purpose: those exercise a
+  # tab_only row that is NOT an Annotation track (the genome-mismatch case),
+  # which is exactly what makes "totals differ by the annotation-track
+  # count" not hold in general - see task-A3-report.md for why, on the real
+  # production snapshot, every tab_only row IS an Annotation track and the
+  # two counts do coincide there. This test builds a minimal pair where
+  # that's true by construction, to assert the relationship the brief asks
+  # for cleanly instead of muddying it with the mismatch scenario above.
   def test_experiments_and_search_totals_differ_by_annotation_track_count
     DB[:experiments].delete
     DB[:experiments_fts].delete
 
-    fixture = File.join(__dir__, '..', 'fixtures', 'experimentList_sample.tab')
-    ChipAtlas::Experiment.load_from_file(fixture)
+    tab = Tempfile.new('experimentList')
+    tab.write([
+      "SRXA\thg38\tHistone\tH3K4me3\tBlood\tK-562\tNA\t1,1\tHistone row\tk=v\n",
+      "SRXB\thg38\tAnnotation tracks\tAnnotation tracks\t-\t-\tNA\t-\tAnnotation row\tk=v\n",
+    ].join)
+    tab.close
 
-    annotation_track_count =
-      DB[:experiments].where(track_class: 'Annotation tracks').count
+    json = Tempfile.new(['ExperimentList_adv', '.json'])
+    json.write(JSON.generate({
+      'data' => [
+        ['SRXA', 'SRA1', 'GSM1', 'hg38', 'Histone', 'H3K4me3', 'Blood', 'K-562', 'Histone row', 'k=v'],
+        # SRXB (the Annotation track) deliberately has no JSON row - matches
+        # production, where Annotation-tracks ids never appear in the JSON.
+      ],
+    }))
+    json.close
+
+    ChipAtlas::Experiment.load_from_files(tab.path, json.path)
+
+    annotation_track_count = DB[:experiments].where(track_class: 'Annotation tracks').count
     assert_equal 1, annotation_track_count
 
     total_experiments = ChipAtlas::Experiment.number_of_experiments
     search_total = ChipAtlas::ExperimentSearch.total_count
     assert_equal total_experiments - annotation_track_count, search_total
+  ensure
+    tab&.unlink
+    json&.unlink
   end
 end

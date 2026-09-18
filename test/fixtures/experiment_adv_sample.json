@@ -1,0 +1,8 @@
+{
+  "data": [
+    ["SRXTEST001", "SRA100001", "GSM100001", "hg38", "Histone", "H3K4me3", "Blood", "K-562", "Histone ChIP-seq in K-562 (json title)", "sample_name=test1__TAB__extra=json"],
+    ["SRXTEST003", "SRA100003", "-", "mm10, mm9", "ATAC-Seq", "-", "Liver", "Hepatocyte", "ATAC-seq test (json title)", "sample_name=test3__TAB__extra=json"],
+    ["SRXTEST005", "SRA100005", "GSM100005", "dm6", "Histone", "H3K27ac", "Blood", "K-562", "Mismatched genome claim (json title)", "sample_name=test5__TAB__extra=json"],
+    ["SRXTEST999", "SRA999999", "GSM999999", "hg38", "Histone", "H3K4me3", "Brain", "Neuron", "JSON-only phantom experiment", "sample_name=test999"]
+  ]
+}

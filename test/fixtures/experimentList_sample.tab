@@ -1,4 +1,5 @@
-SRXTEST001	hg38	Histone	H3K4me3	Blood	K-562	NA	15000000,50	GSM100001: Test histone experiment	sample_name=test1
+SRXTEST001	hg38	Histone	H3K4me3	Blood	K-562	NA	15000000,50	Histone ChIP-seq in K-562	sample_name=test1
 SRXTEST002	hg38	Annotation tracks	Annotation tracks	-	-	NA	-	Annotation track hg38	source=refGene
 SRXTEST003	mm10	ATAC-Seq	-	Liver	Hepatocyte	NA	8000000,60	ATAC-seq test	sample_name=test3
 SRXTEST004	xx99	Histone	H3K4me3	Blood	K-562	NA	1000000,50	Unsupported genome row	sample_name=test4
+SRXTEST005	hg38	Histone	H3K27ac	Blood	K-562	NA	5000000,40	Mismatched genome claim	sample_name=test5
