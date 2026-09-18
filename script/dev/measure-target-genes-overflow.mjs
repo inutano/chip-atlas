@@ -36,6 +36,14 @@ const CDP_PORT = process.argv[3] || '9333'
 const CDP_HOST = `http://localhost:${CDP_PORT}`
 const TARGET_URL = `${BASE_URL}/target_genes_result?genome=mm10&track=Stat3&distance=1`
 
+// Minimum px by which the expanded #result-table-wrap's own scrollWidth
+// must exceed the viewport for an "expanded" case to be trusted at all -
+// see the precondition check in main() below. The real mm10/Stat3.1
+// fixture measures 13,000-24,000px of overflow at a 390px viewport, so
+// 2,000px leaves ample margin for legitimate data drift while still
+// catching the fixture becoming too narrow to mean anything.
+const MIN_EXPANDED_OVERFLOW_PX = 2000
+
 async function newTab() {
   const res = await fetch(`${CDP_HOST}/json/new?about:blank`, { method: 'PUT' })
   if (!res.ok) {
@@ -158,6 +166,37 @@ async function main() {
   let allPass = true
   for (const [label, width, mobile, expand] of cases) {
     const m = await measure(ws, width, mobile, expand)
+
+    // Precondition: an "expanded" case only exercises the regression this
+    // script exists to catch if the expanded table is actually wide enough
+    // to overflow the viewport in the first place. Without this check, a
+    // pass condition of docScrollWidth <= docClientWidth is vacuous the
+    // moment mm10/Stat3.1's column count (currently 134, ~13,000-24,000px
+    // wide at 390px per the comment above) ever shrinks below what it
+    // takes to overflow 390px - the script would report PASS while no
+    // longer testing anything. MIN_EXPANDED_OVERFLOW_PX is set two orders
+    // of magnitude below the actual observed overflow, so real fixture
+    // shrinkage that still leaves a meaningful regression test trips this
+    // long before it silently goes vacuous.
+    if (expand) {
+      const overflowPx = m.wrapScrollWidth - m.viewportWidth
+      if (overflowPx < MIN_EXPANDED_OVERFLOW_PX) {
+        throw new Error(
+          `PRECONDITION FAILED for "${label}": the expanded #result-table-wrap is only ` +
+          `${overflowPx}px wider than the ${m.viewportWidth}px viewport (wrapScrollWidth=` +
+          `${m.wrapScrollWidth}), short of the ${MIN_EXPANDED_OVERFLOW_PX}px this script requires ` +
+          'to trust a PASS here. That means the fixture (mm10/Stat3.1, or whichever antigen ' +
+          'TARGET_URL now points at) no longer has enough experiment columns to genuinely ' +
+          "overflow the viewport when expanded, so a PASS below would not prove the document-" +
+          'level overflow-containment fix (contain: layout paint on #result-table-wrap, see ' +
+          "public/css/style.css) still works - it would just mean there's nothing to contain. " +
+          'Point TARGET_URL at an antigen/genome with more experiment columns, or lower ' +
+          'MIN_EXPANDED_OVERFLOW_PX only if you have confirmed by other means that this case ' +
+          'still exercises the regression.'
+        )
+      }
+    }
+
     const pass = m.docScrollWidth <= m.docClientWidth
     allPass = allPass && pass
     console.log(`${pass ? 'PASS' : 'FAIL'}  ${label}`)
