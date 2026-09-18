@@ -5,6 +5,7 @@
     "watch": "node esbuild.config.mjs --watch"
   },
   "devDependencies": {
+    "@types/node": "26.6.1",
     "esbuild": "^0.21.0",
     "typescript": "^5.4.0"
   }
