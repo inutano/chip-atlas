@@ -98,6 +98,41 @@ module TestHelper
     seed_bedsizes
   end
 
+  # Minimal, dependency-free stand-in for Minitest::Mock's Object#stub (not
+  # vendored by the `minitest` gem in this Ruby/Gemfile). Temporarily
+  # replaces `mod`'s singleton method `name` for the duration of the block,
+  # then restores the original -- used to fake ServiceMonitor's network
+  # checks (:wabi / :wes reachability) without ever making a real HTTP call.
+  #
+  # `value_or_callable` is either a fixed return value, or an object that
+  # responds to #call and is invoked with whatever args the stubbed method
+  # received (e.g. a lambda keying its answer off the `:wabi`/`:wes` arg).
+  def stub_module_method(mod, name, value_or_callable)
+    original = mod.method(name)
+    mod.define_singleton_method(name) do |*args|
+      value_or_callable.respond_to?(:call) ? value_or_callable.call(*args) : value_or_callable
+    end
+    yield
+  ensure
+    mod.define_singleton_method(name, original)
+  end
+
+  # Temporarily replaces a constant (e.g. ComputeRouter::JOB_TYPE_BACKENDS)
+  # for the duration of the block. Reassigning a constant logs Ruby's
+  # "already initialized constant" warning on both the stub and the
+  # restore -- script/dev/test.sh already filters that specific warning
+  # (and its companion "previous definition of") out of test output, so
+  # this is the accepted pattern here rather than a new wart.
+  def stub_const(mod, name, value)
+    original = mod.const_get(name)
+    mod.send(:remove_const, name)
+    mod.const_set(name, value)
+    yield
+  ensure
+    mod.send(:remove_const, name)
+    mod.const_set(name, original)
+  end
+
   def teardown
     DB[:experiments].delete
     DB[:bedfiles].delete

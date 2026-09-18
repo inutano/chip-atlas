@@ -40,11 +40,14 @@ module ChipAtlas
           job_type = data['type'] || 'enrichment_analysis'
 
           result = ChipAtlas::ComputeRouter.submit(job_type, data['params'] || data)
-          if result
+          case result[:error]
+          when nil
             log_activity('job_submit', { type: job_type, backend: result[:backend], job_id: result[:job_id] })
             json_response(result)
-          else
+          when :backend_unavailable
             halt 503, json_response({ error: 'No compute backend available', retry: false })
+          when :submission_rejected
+            halt 502, json_response({ error: 'Compute backend rejected the submission', retry: false })
           end
         end
 

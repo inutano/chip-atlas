@@ -6,36 +6,57 @@ module ChipAtlas
   # Enrichment analysis: WABI (primary) → Sapporo/WES (fallback) → unavailable
   # Diff analysis:       WABI (primary) → unavailable
   module ComputeRouter
+    # Which backends can serve each job type, in priority order. This is
+    # deliberately code, not config (per the project owner, task C3/D12):
+    # backend routing changes when the app is deployed, not at runtime.
+    #
+    # A job type mapped to no backends is unavailable regardless of any
+    # backend's health check — this is how "WABI does not currently serve
+    # diff analysis" (a fact about what WABI accepts, independent of whether
+    # WABI itself is reachable) gets modelled. Before this map existed,
+    # #available_backend ignored job_type entirely and routed every job type
+    # to WABI whenever WABI was merely reachable, so /status reported
+    # "diff_analysis":"ok" and /jobs/available offered a live backend while
+    # every diff-analysis submission actually failed.
+    JOB_TYPE_BACKENDS = {
+      'enrichment_analysis' => %w[wabi wes].freeze,
+      'diff_analysis'       => [].freeze,
+    }.freeze
+
     module_function
 
     # Returns { backend:, available: } or { backend: nil, available: false }
     def available_backend(job_type)
-      if ChipAtlas::ServiceMonitor.status(:wabi)
-        { backend: 'wabi', available: true }
-      elsif job_type == 'enrichment_analysis' && ChipAtlas::ServiceMonitor.status(:wes)
-        { backend: 'wes', available: true }
-      else
-        { backend: nil, available: false }
+      (JOB_TYPE_BACKENDS[job_type] || []).each do |backend|
+        case backend
+        when 'wabi'
+          return { backend: 'wabi', available: true } if ChipAtlas::ServiceMonitor.status(:wabi)
+        when 'wes'
+          return { backend: 'wes', available: true } if ChipAtlas::ServiceMonitor.status(:wes)
+        end
       end
+      { backend: nil, available: false }
     end
 
-    # Submit a job. Returns { backend:, job_id: } or nil.
+    # Submit a job. Returns one of:
+    #   { backend:, job_id: }            success
+    #   { error: :backend_unavailable }  no backend serves this job type / is up
+    #   { error: :submission_rejected }  a backend was reached but rejected the job
+    #                                     (e.g. WabiService couldn't parse a
+    #                                     requestId out of the response)
+    # These two error cases used to both collapse into a bare nil, making
+    # "the backend is down" indistinguishable from "the backend rejected
+    # this job" to both the caller and whoever is debugging it.
     def submit(job_type, params)
       route = available_backend(job_type)
-      return nil unless route[:available]
+      return { error: :backend_unavailable } unless route[:available]
 
-      case route[:backend]
-      when 'wabi'
-        # job_type is threaded through so WabiService can merge in the
-        # operational fields for the right job type (task C2) — the merge
-        # differs between enrichment_analysis and diff_analysis and cannot
-        # be decided from params alone.
-        job_id = ChipAtlas::WabiService.submit_job(job_type, params)
-        job_id ? { backend: 'wabi', job_id: job_id } : nil
-      when 'wes'
-        job_id = ChipAtlas::SapporoService.submit_job(params)
-        job_id ? { backend: 'wes', job_id: job_id } : nil
-      end
+      job_id = case route[:backend]
+               when 'wabi' then ChipAtlas::WabiService.submit_job(job_type, params)
+               when 'wes'  then ChipAtlas::SapporoService.submit_job(params)
+               end
+
+      job_id ? { backend: route[:backend], job_id: job_id } : { error: :submission_rejected }
     end
 
     # Check job status. Returns "finished", "running", "error", or nil.
