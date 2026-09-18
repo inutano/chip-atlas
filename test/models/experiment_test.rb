@@ -184,35 +184,30 @@ class ExperimentTest < Minitest::Test
     refute ChipAtlas::Experiment.id_valid?('SRXTEST999')
   end
 
-  def test_load_from_files_joins_sra_id_and_geo_id_onto_experiments_by_id
+  def test_load_from_files_gives_experiments_fts_real_sra_id_and_geo_id
     DB[:experiments].delete
     DB[:experiments_fts].delete
     load_reconciled_fixtures
 
-    # experiments gains sra_id/geo_id via a join on experiment_id (not
-    # (experiment_id, genome) - the JSON has no per-genome granularity).
-    confirmed = DB[:experiments].where(experiment_id: 'SRXTEST001').first
-    assert_equal 'SRA100001', confirmed[:sra_id]
-    assert_equal 'GSM100001', confirmed[:geo_id]
-
-    # The JSON's own placeholder ("-" for a genuinely missing geo_id) is
-    # passed through as-is, not fabricated or blanked.
-    placeholder = DB[:experiments].where(experiment_id: 'SRXTEST003').first
-    assert_equal 'SRA100003', placeholder[:sra_id]
-    assert_equal '-', placeholder[:geo_id]
-
-    # A row with no JSON entry at all (Annotation tracks) gets '' for
-    # both, not a crash and not a fabricated value.
-    no_json = DB[:experiments].where(experiment_id: 'SRXTEST002').first
-    assert_equal '', no_json[:sra_id]
-    assert_equal '', no_json[:geo_id]
-
-    # experiments_fts also carries the JSON's real sra_id/geo_id (dropped
-    # the GSM-prefix-from-title heuristic entirely - the JSON has the
-    # actual column).
+    # experiments_fts carries the JSON's real sra_id/geo_id (dropped the
+    # GSM-prefix-from-title heuristic entirely - the JSON has the actual
+    # column). This is the whole point of joining the JSON in at all:
+    # nothing reads experiments.sra_id/geo_id (no route selects them, and
+    # ExperimentSearch.gsm_to_srx reads experiments_fts' copy), so the
+    # join's only output is here, not duplicated onto `experiments`.
     fts_row = DB[:experiments_fts].where(experiment_id: 'SRXTEST001').first
     assert_equal 'SRA100001', fts_row[:sra_id]
     assert_equal 'GSM100001', fts_row[:geo_id]
+
+    # The JSON's own placeholder ("-" for a genuinely missing geo_id) is
+    # passed through as-is, not fabricated or blanked.
+    placeholder = DB[:experiments_fts].where(experiment_id: 'SRXTEST003').first
+    assert_equal 'SRA100003', placeholder[:sra_id]
+    assert_equal '-', placeholder[:geo_id]
+
+    # experiments itself does not carry sra_id/geo_id at all.
+    refute_includes DB[:experiments].columns, :sra_id
+    refute_includes DB[:experiments].columns, :geo_id
   end
 
   def test_load_json_index_handles_comma_joined_genome_field

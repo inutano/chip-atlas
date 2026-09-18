@@ -247,14 +247,15 @@ module ChipAtlas
     # Reconciliation rule (tab wins for membership, JSON wins for content
     # it alone has):
     #   - `experiments` = every (experiment_id, genome) pair that survives
-    #     experimentList.tab's genome filter, full stop. The tab file is
-    #     the only source with genuine per-genome evidence (QC numbers), so
-    #     it alone decides what counts as a real, view-able experiment row.
-    #     Each row is additionally joined (by experiment_id only - the JSON
-    #     has no per-genome granularity to join on) with ExperimentList_adv.json
-    #     for sra_id/geo_id; a tab row whose id isn't in the JSON at all
-    #     (e.g. every "Annotation tracks" id - see below) simply gets '' for
-    #     both.
+    #     experimentList.tab's genome filter, full stop, with the tab's own
+    #     fields (QC stats included). The tab file is the only source with
+    #     genuine per-genome evidence (QC numbers), so it alone decides
+    #     what counts as a real, view-able experiment row. `experiments`
+    #     does NOT carry sra_id/geo_id - nothing reads them from there
+    #     (record_by_experiment_id doesn't select them, no route touches
+    #     them, and ExperimentSearch.gsm_to_srx reads experiments_fts'
+    #     copy). The JSON lookup below exists to feed experiments_fts, not
+    #     to duplicate data onto a table nothing queries it from.
     #   - `experiments_fts` = the INTERSECTION: only (experiment_id, genome)
     #     pairs that BOTH experimentList.tab has (after its genome filter)
     #     AND ExperimentList_adv.json's own (comma-split, genome-filtered)
@@ -263,10 +264,10 @@ module ChipAtlas
     #     what makes the orphan bug structurally impossible: a search hit
     #     can only exist for a pair the tab file also vouches for, so it can
     #     never point at a /view page that doesn't exist. Every FTS row's
-    #     other fields (title, attributes, track_class, track_subclass,
+    #     fields (title, attributes, track_class, track_subclass,
     #     cell_type_class, cell_type_subclass, sra_id, geo_id) come from the
-    #     JSON, not the tab - per the coordinator's explicit instruction,
-    #     since experiments_fts is what actually surfaces those fields.
+    #     JSON, not the tab, since experiments_fts is what actually
+    #     surfaces those fields (search results, /view?id=GSM... redirects).
     #
     # Rows on either side of that intersection are exactly the drift this
     # task exists to kill - dropped, not silently discarded: the returned
@@ -309,6 +310,10 @@ module ChipAtlas
           title                    = cols[8]
           attributes               = cols[9..].to_a.join("\t")
 
+          # Looked up (by experiment_id - the JSON has no per-genome
+          # granularity) only to decide FTS inclusion and to supply
+          # experiments_fts' fields below. experiments itself does not
+          # carry sra_id/geo_id - see the method comment for why.
           json_row = json_index[experiment_id]
 
           records << {
@@ -322,8 +327,6 @@ module ChipAtlas
             read_info:               read_info,
             title:                   title,
             attributes:              attributes,
-            sra_id:                  json_row ? json_row[:sra_id] : '',
-            geo_id:                  json_row ? json_row[:geo_id] : '',
             created_at:              timestamp,
           }
           seen_pairs << [experiment_id, genome]
