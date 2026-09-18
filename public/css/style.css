@@ -200,6 +200,36 @@ footer .acknowledgement {
   text-decoration: underline;
 }
 
+/* Title and Attributes (D1): both hold third-party metadata strings that can
+   run long. Title just wraps in place; Attributes additionally gets a
+   <details>/<summary> expand affordance (see renderAttributesCell in
+   search.ts) so a long value doesn't force #result-table-wrap's horizontal
+   scroll to kick in on an otherwise-narrow viewport. */
+#search-tbody td.search-title-cell,
+#search-tbody td.search-attrs-cell {
+  max-width: 320px;
+  overflow-wrap: break-word;
+}
+
+#search-tbody td.search-attrs-cell summary {
+  cursor: pointer;
+  color: var(--ca-primary);
+  list-style: none;
+}
+
+#search-tbody td.search-attrs-cell summary::-webkit-details-marker {
+  display: none;
+}
+
+#search-tbody td.search-attrs-cell summary::marker {
+  content: none;
+}
+
+#search-tbody td.search-attrs-cell .search-attrs-full {
+  margin-top: 4px;
+  white-space: normal;
+}
+
 /* ===== Experiment detail page ===== */
 .dropdown-menu .dropdown-header {
   font-weight: 600;

@@ -5,7 +5,24 @@ import { listGenomes, searchExperiments, type SearchExperiment, type SearchResul
 
 const PAGE_SIZE = 20
 
-const HEADERS = ['SRX', 'SRA', 'GEO', 'Genome', 'Track class', 'Track type', 'Cell type class', 'Cell type'] as const
+const HEADERS = [
+  'SRX', 'SRA', 'GEO', 'Genome', 'Track class', 'Track type', 'Cell type class', 'Cell type',
+  'Title', 'Attributes',
+] as const
+
+// Attributes strings (a single string of key=value pairs joined by
+// "__TAB__" — see the SearchExperiment.attributes doc comment in
+// api/client.ts) can run long. Truncate the on-page display and let the
+// row's own <details> expand it, rather than letting a single wide cell
+// force #result-table-wrap's horizontal scroll on an otherwise-narrow page.
+const ATTRIBUTES_TRUNCATE_LENGTH = 100
+
+// D1: attributes are third-party metadata joined with a literal "__TAB__"
+// marker for storage — replace it with a reader-facing separator for
+// display. TSV export (toTsv below) keeps the raw value untouched.
+export function formatAttributes(attributes: string): string {
+  return attributes.split('__TAB__').join(' · ')
+}
 
 interface State {
   query: string
@@ -37,6 +54,29 @@ async function populateGenomeOptions(): Promise<void> {
   }
 }
 
+function renderAttributesCell(attributes: string): HTMLTableCellElement {
+  const td = document.createElement('td')
+  td.className = 'search-attrs-cell'
+  const formatted = formatAttributes(attributes)
+  if (formatted.length <= ATTRIBUTES_TRUNCATE_LENGTH) {
+    td.textContent = formatted
+    return td
+  }
+
+  const details = document.createElement('details')
+  const summary = document.createElement('summary')
+  summary.textContent = formatted.slice(0, ATTRIBUTES_TRUNCATE_LENGTH) + '…'
+  details.appendChild(summary)
+
+  const full = document.createElement('div')
+  full.className = 'search-attrs-full'
+  full.textContent = formatted
+  details.appendChild(full)
+
+  td.appendChild(details)
+  return td
+}
+
 function renderRow(row: SearchExperiment): HTMLTableRowElement {
   const tr = document.createElement('tr')
 
@@ -57,6 +97,14 @@ function renderRow(row: SearchExperiment): HTMLTableRowElement {
     td.textContent = row[f] || ''
     tr.appendChild(td)
   }
+
+  const titleCell = document.createElement('td')
+  titleCell.className = 'search-title-cell'
+  titleCell.textContent = row.title || ''
+  tr.appendChild(titleCell)
+
+  tr.appendChild(renderAttributesCell(row.attributes || ''))
+
   return tr
 }
 
@@ -117,6 +165,7 @@ function toTsv(rows: SearchExperiment[]): string {
     lines.push([
       r.experiment_id, r.sra_id, r.geo_id, r.genome,
       r.track_class, r.track_subclass, r.cell_type_class, r.cell_type_subclass,
+      r.title, r.attributes,
     ].join('\t'))
   }
   return lines.join('\n') + '\n'
@@ -194,4 +243,10 @@ function init(): void {
   $('download-tsv').addEventListener('click', downloadTsv)
 }
 
-document.addEventListener('DOMContentLoaded', init)
+// Guarded so the pure functions above (formatAttributes) can be imported
+// and unit-tested under plain Node, which has no `document` — see
+// search.test.ts, and colo-result.ts / target-genes-result.ts / peak-browser.ts
+// for the same pattern.
+if (typeof document !== 'undefined') {
+  document.addEventListener('DOMContentLoaded', init)
+}
