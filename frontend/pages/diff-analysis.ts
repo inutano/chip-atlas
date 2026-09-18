@@ -64,7 +64,14 @@ export function createGenomeDatasetStore(): {
   const store = new Map<string, GenomeDatasetState>()
   return {
     get(genome: string): GenomeDatasetState {
-      return store.get(genome) ?? BLANK_DATASET_STATE
+      // Return a copy, not the shared BLANK_DATASET_STATE reference: no
+      // caller mutates the returned object today, but handing out the same
+      // constant to every unvisited genome would make an in-place edit by
+      // one genome's caller silently visible to every other unvisited
+      // genome too, defeating the per-genome isolation this store exists
+      // to guarantee.
+      const existing = store.get(genome)
+      return existing ? existing : { ...BLANK_DATASET_STATE }
     },
     set(genome: string, state: GenomeDatasetState): void {
       store.set(genome, state)
