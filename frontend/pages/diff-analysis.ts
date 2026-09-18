@@ -157,14 +157,18 @@ async function init(): Promise<void> {
       return
     }
 
+    // D7 (Task C1): dataA_title/dataB_title -> descriptionA/descriptionB are
+    // WABI's own field names, per the rename table shared with
+    // enrichment-analysis.ts's buildEnrichmentParams. genome/analysis/
+    // dataA_ids/dataB_ids are out of that table's scope and unchanged here.
     const params = {
       genome: currentGenome,
       analysis: getAnalysisType(),
       dataA_ids: idsA,
       dataB_ids: idsB,
       title: ($('title') as HTMLInputElement).value,
-      dataA_title: ($('dataA-title') as HTMLInputElement).value,
-      dataB_title: ($('dataB-title') as HTMLInputElement).value,
+      descriptionA: ($('dataA-title') as HTMLInputElement).value,
+      descriptionB: ($('dataB-title') as HTMLInputElement).value,
     }
 
     status.textContent = 'Submitting…'

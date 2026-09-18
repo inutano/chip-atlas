@@ -109,6 +109,19 @@
           <label for="dataB-title" class="form-label small text-muted">Dataset B title</label>
           <input type="text" id="dataB-title" class="form-control form-control-sm" value="Dataset B">
         </div>
+        <div class="mb-3" id="distance-tss-row" hidden>
+          <label class="form-label small text-muted mb-1">
+            Distance range from TSS
+            <a class="info-btn" href="#" data-info="disttss" role="button" aria-label="About distance range from TSS">&#x24D8;</a>
+          </label>
+          <div class="d-flex align-items-center gap-1 flex-wrap">
+            <span>-</span>
+            <input type="number" id="distance-up" class="form-control form-control-sm" style="width:6rem" value="5000" min="0">
+            <span>bp &le; TSS &le; +</span>
+            <input type="number" id="distance-down" class="form-control form-control-sm" style="width:6rem" value="5000" min="0">
+            <span>bp</span>
+          </div>
+        </div>
         <div class="d-grid">
           <button type="button" id="submit-job" class="btn btn-primary btn-lg">Submit</button>
         </div>

@@ -221,8 +221,137 @@ components:
             - enrichment_analysis
             - diff_analysis
         params:
-          type: object
-          description: Analysis-specific parameters
+          description: >-
+            Analysis-specific parameters. Unlike the rest of this API,
+            these are WABI's own field names (camelCase, e.g. antigenClass
+            rather than track_class) passed through to the compute backend
+            with no translation layer - see EnrichmentAnalysisParams /
+            DiffAnalysisParams.
+          oneOf:
+            - $ref: "#/components/schemas/EnrichmentAnalysisParams"
+            - $ref: "#/components/schemas/DiffAnalysisParams"
+
+    EnrichmentAnalysisParams:
+      type: object
+      description: params for type=enrichment_analysis.
+      properties:
+        genome:
+          $ref: "#/components/schemas/GenomeAssembly"
+        antigenClass:
+          type: string
+          description: Experiment / track class (WABI's name for track_class)
+          example: Histone
+        cellClass:
+          type: string
+          description: Cell type class (WABI's name for cell_type_class)
+          example: Blood
+        threshold:
+          type: string
+          description: >-
+            Significance threshold, as WABI's -10*Log10[Q-value] label: 50,
+            100, 200, or 500. This is NOT the 05/10/20/50 file-suffix code
+            /api/qval_range returns (those name
+            allPeaks_light.<genome>.{05,10,20,50}.bed.gz) - the two
+            encodings share digits but mean opposite ends of the range
+            (threshold=50 is the strictest setting; qval code "50" names the
+            loosest file). The frontend converts qval-range codes to this
+            label before submitting.
+          enum: ["50", "100", "200", "500"]
+          example: "50"
+        typeA:
+          type: string
+          description: Dataset A's input kind
+          enum: [bed, gene, count]
+        bedAFile:
+          type: string
+          description: >-
+            Dataset A content: BED text (typeA=bed), a newline-separated
+            gene list (typeA=gene), or a gene count table (typeA=count).
+        typeB:
+          type: string
+          description: Dataset B's comparison kind
+          enum: [rnd, bed, refseq, userlist]
+        bedBFile:
+          type: string
+          description: >-
+            Dataset B content, present when typeB is bed or userlist.
+        permTime:
+          type: string
+          description: Permutation multiplier, present when typeB is rnd.
+          enum: ["1", "10", "100"]
+        title:
+          type: string
+          description: Analysis title
+        descriptionA:
+          type: string
+          description: Dataset A title (WABI's name for dataA_title)
+        descriptionB:
+          type: string
+          description: Dataset B title (WABI's name for dataB_title)
+        distanceUp:
+          type: string
+          description: >-
+            Upstream distance from the TSS, in bp. Shown (editable, default
+            5000) only in gene-list / gene-count-table modes, but sent on
+            every submission.
+          example: "5000"
+        distanceDown:
+          type: string
+          description: >-
+            Downstream distance from the TSS, in bp. Shown (editable,
+            default 5000) only in gene-list / gene-count-table modes, but
+            sent on every submission.
+          example: "5000"
+      required:
+        - genome
+        - antigenClass
+        - cellClass
+        - threshold
+        - typeA
+        - bedAFile
+        - typeB
+        - title
+        - descriptionA
+        - descriptionB
+        - distanceUp
+        - distanceDown
+
+    DiffAnalysisParams:
+      type: object
+      description: params for type=diff_analysis.
+      properties:
+        genome:
+          $ref: "#/components/schemas/GenomeAssembly"
+        analysis:
+          type: string
+          enum: [dmr, diffbind]
+        dataA_ids:
+          type: array
+          items:
+            type: string
+          description: Dataset A experiment IDs (SRX/GSM)
+        dataB_ids:
+          type: array
+          items:
+            type: string
+          description: Dataset B experiment IDs (SRX/GSM)
+        title:
+          type: string
+          description: Analysis title
+        descriptionA:
+          type: string
+          description: Dataset A title (WABI's name for dataA_title)
+        descriptionB:
+          type: string
+          description: Dataset B title (WABI's name for dataB_title)
+      required:
+        - genome
+        - analysis
+        - dataA_ids
+        - dataB_ids
+        - title
+        - descriptionA
+        - descriptionB
 
     JobStatus:
       type: object
