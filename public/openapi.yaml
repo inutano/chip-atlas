@@ -884,9 +884,14 @@ paths:
       tags: [Analysis]
       summary: Get colocalization result data
       description: >-
-        Returns pre-computed colocalization result data (JSON) for a given
-        genome, track, and cell type, proxied from the data backend. Check
-        /api/colo_index first to verify the combination has data.
+        Parses the pre-computed colocalization result TSV (there is no JSON
+        file on the data backend for this analysis) for a given genome,
+        track, and cell type, and returns the full parsed matrix sorted
+        descending by the "<track>|Average" column. Unlike Target Genes
+        there is no pagination or server-side cache here - the source file
+        is small enough (tens to a few hundred KB) to parse and send whole
+        on every request. Check /api/colo_index first to verify the
+        combination has data.
       parameters:
         - $ref: "#/components/parameters/Genome"
         - name: track
@@ -905,13 +910,58 @@ paths:
           example: K-562
       responses:
         "200":
-          description: Colocalization result data
+          description: Colocalization result data, sorted descending by average score
           content:
             application/json:
               schema:
                 type: object
+                properties:
+                  columns:
+                    type: array
+                    items:
+                      type: string
+                    description: >-
+                      Column headers, in file order: Experiment, Cell_subclass,
+                      Protein, the query track's average score
+                      ("<track>|Average"), one column per reference
+                      experiment (SRX id | cell type), then the STRING
+                      interaction score.
+                  rows:
+                    type: array
+                    items:
+                      type: array
+                      items: {}
+                    description: >-
+                      One array per candidate partner experiment, aligned
+                      with `columns`; the first three elements
+                      (Experiment/Cell_subclass/Protein) are strings, the
+                      rest are numeric scores.
+                  total:
+                    type: integer
+                    description: Total rows in the result (there is no paging).
+                  genome:
+                    type: string
+                  track:
+                    type: string
+                  cell_type:
+                    type: string
+              example:
+                columns: ["Experiment", "Cell_subclass", "Protein", "STAT3|Average", "SRX018626|Blood", "STRING"]
+                rows:
+                  - ["SRX018626", "Blood", "STAT3", 9.5, 10, 950]
+                total: 3862
+                genome: hg38
+                track: STAT3
+                cell_type: Blood
+        "400":
+          description: Missing required parameters
         "404":
           description: No pre-computed colocalization data for this combination
+        "502":
+          description: >-
+            Colocalization data exists upstream but could not be parsed as
+            a valid Colocalization TSV - distinct from 404 (no data) so a
+            client can tell the two apart.
 
   /api/colo/download:
     get:
