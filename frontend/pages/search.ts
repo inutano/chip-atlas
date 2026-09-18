@@ -24,6 +24,13 @@ export function formatAttributes(attributes: string): string {
   return attributes.split('__TAB__').join(' · ')
 }
 
+// D3: any non-"-" GEO id links out to NCBI GEO; "-" (or empty) means "no
+// GEO record for this experiment" and stays plain text.
+export function geoAccUrl(geoId: string): string | null {
+  if (!geoId || geoId === '-') return null
+  return `https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=${encodeURIComponent(geoId)}`
+}
+
 interface State {
   query: string
   genome: string
@@ -52,6 +59,22 @@ async function populateGenomeOptions(): Promise<void> {
   } catch (err) {
     console.warn('Failed to load genomes:', err)
   }
+}
+
+function renderGeoCell(geoId: string): HTMLTableCellElement {
+  const td = document.createElement('td')
+  const url = geoAccUrl(geoId)
+  if (url) {
+    const link = document.createElement('a')
+    link.href = url
+    link.textContent = geoId
+    link.target = '_blank'
+    link.rel = 'noopener noreferrer'
+    td.appendChild(link)
+  } else {
+    td.textContent = geoId || ''
+  }
+  return td
 }
 
 function renderAttributesCell(attributes: string): HTMLTableCellElement {
@@ -85,12 +108,19 @@ function renderRow(row: SearchExperiment): HTMLTableRowElement {
   link.href = `/view?id=${encodeURIComponent(row.experiment_id)}`
   link.textContent = row.experiment_id
   link.className = 'expid-link'
+  link.target = '_blank'
+  link.rel = 'noopener noreferrer'
   srxCell.appendChild(link)
   tr.appendChild(srxCell)
 
+  const sraCell = document.createElement('td')
+  sraCell.textContent = row.sra_id || ''
+  tr.appendChild(sraCell)
+
+  tr.appendChild(renderGeoCell(row.geo_id))
+
   const fields: Array<keyof SearchExperiment> = [
-    'sra_id', 'geo_id', 'genome', 'track_class', 'track_subclass',
-    'cell_type_class', 'cell_type_subclass',
+    'genome', 'track_class', 'track_subclass', 'cell_type_class', 'cell_type_subclass',
   ]
   for (const f of fields) {
     const td = document.createElement('td')
@@ -243,8 +273,8 @@ function init(): void {
   $('download-tsv').addEventListener('click', downloadTsv)
 }
 
-// Guarded so the pure functions above (formatAttributes) can be imported
-// and unit-tested under plain Node, which has no `document` — see
+// Guarded so the pure functions above (formatAttributes, geoAccUrl) can be
+// imported and unit-tested under plain Node, which has no `document` — see
 // search.test.ts, and colo-result.ts / target-genes-result.ts / peak-browser.ts
 // for the same pattern.
 if (typeof document !== 'undefined') {
