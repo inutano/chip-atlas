@@ -19,7 +19,7 @@
 // narrows live, matching the paired-list-box affordance visually.
 
 import { GenomeTabs } from '../components/genome-tabs'
-import { FacetFilter } from '../components/facet-filter'
+import { FacetFilter, type FacetFilterOptions } from '../components/facet-filter'
 import { Autocomplete } from '../components/autocomplete'
 import { initInfoPopovers } from '../components/info-popover'
 import { getIgvUrl, getDownloadUrl, type UrlCondition } from '../api/client'
@@ -109,6 +109,18 @@ function wireSubclassSearch(input: HTMLInputElement, mount: HTMLElement): Subcla
   return s
 }
 
+// Task D2: the FacetFilterOptions this page's genome-change handler passes
+// to FacetFilter.init, pulled out into its own exported function (mirroring
+// enrichmentFacetFilterOptions in enrichment-analysis.ts) so it can be
+// asserted directly — see peak-browser.test.ts. Deliberately passes no
+// `excludeTrackClassIds`: unlike Enrichment Analysis, Peak Browser must keep
+// every track class FacetFilter is handed, Annotation tracks included.
+export function peakBrowserFacetFilterOptions(
+  mount: Record<'track_class' | 'track_subclass' | 'cell_type_class' | 'cell_type_subclass' | 'qval', HTMLElement>,
+): FacetFilterOptions {
+  return { render: 'listbox', mount }
+}
+
 async function init(): Promise<void> {
   const data = readPageData()
   const tabs = $('genome-tabs')
@@ -143,7 +155,7 @@ async function init(): Promise<void> {
     if (FacetFilter.getCondition(facet)) {
       await FacetFilter.setGenome(facet, detail.genome)
     } else {
-      await FacetFilter.init(facet, detail.genome, { render: 'listbox', mount })
+      await FacetFilter.init(facet, detail.genome, peakBrowserFacetFilterOptions(mount))
     }
   })
 
@@ -179,4 +191,10 @@ async function init(): Promise<void> {
   })
 }
 
-document.addEventListener('DOMContentLoaded', init)
+// Guarded (rather than a bare top-level call) so peakBrowserFacetFilterOptions
+// can be imported and unit-tested under plain Node, which has no `document`
+// — see peak-browser.test.ts, and enrichment-analysis.ts / colo-result.ts /
+// target-genes-result.ts for the same pattern.
+if (typeof document !== 'undefined') {
+  document.addEventListener('DOMContentLoaded', init)
+}

@@ -9,7 +9,7 @@
 // competing ListBox, so the cascade and FacetFilter.getCondition() stay correct.
 
 import { GenomeTabs } from '../components/genome-tabs'
-import { FacetFilter, type FacetCondition } from '../components/facet-filter'
+import { FacetFilter, type FacetCondition, type FacetFilterOptions } from '../components/facet-filter'
 import { Autocomplete } from '../components/autocomplete'
 import { initInfoPopovers } from '../components/info-popover'
 import { submitJob, getEstimatedTime } from '../api/client'
@@ -298,6 +298,28 @@ async function loadExample(): Promise<void> {
   }
 }
 
+// Task D2: the FacetFilterOptions this page's genome-change handler passes
+// to FacetFilter.init, pulled out into its own exported function rather than
+// inlined there. Production's generateExperimentTypeOptions() explicitly
+// drops "Annotation tracks" from Enrichment Analysis's experiment-type list
+// (`if (label != "Annotation tracks")`); Peak Browser (see
+// peakBrowserFacetFilterOptions in peak-browser.ts) passes no such
+// exclusion, since annotation tracks are a legitimate track type there.
+// Extracting this — instead of just commenting the inline object literal —
+// is what lets enrichment-analysis.test.ts assert against the *actual*
+// options this call site builds, so an edit that drops the exclusion here
+// (or accidentally adds it in peak-browser.ts) fails the suite instead of
+// only a live manual check.
+export function enrichmentFacetFilterOptions(
+  mount: Record<'track_class' | 'cell_type_class' | 'qval', HTMLElement>,
+): FacetFilterOptions {
+  return {
+    render: 'listbox',
+    mount,
+    excludeTrackClassIds: ['Annotation tracks'],
+  }
+}
+
 async function init(): Promise<void> {
   const data = readPageData()
   const tabs = $('genome-tabs')
@@ -327,16 +349,7 @@ async function init(): Promise<void> {
     if (FacetFilter.getCondition(facet)) {
       await FacetFilter.setGenome(facet, detail.genome)
     } else {
-      await FacetFilter.init(facet, detail.genome, {
-        render: 'listbox',
-        mount,
-        // D2: production's generateExperimentTypeOptions() explicitly drops
-        // "Annotation tracks" from Enrichment Analysis's experiment-type
-        // list (`if (label != "Annotation tracks")`) — Peak Browser (see
-        // peak-browser.ts) keeps it, since annotation tracks are a
-        // legitimate track type there.
-        excludeTrackClassIds: ['Annotation tracks'],
-      })
+      await FacetFilter.init(facet, detail.genome, enrichmentFacetFilterOptions(mount))
     }
   })
 

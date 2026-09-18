@@ -19,6 +19,7 @@ if [ -z "$TEST_FILES" ]; then
   echo "No frontend *.test.ts files found."
   exit 0
 fi
+TEST_FILE_COUNT=$(printf '%s\n' "$TEST_FILES" | grep -c .)
 
 OUT_DIR="$(mktemp -d)"
 trap 'rm -rf "$OUT_DIR"' EXIT
@@ -35,4 +36,21 @@ node_modules/.bin/esbuild $TEST_FILES \
 # "$OUT_DIR"/*.js, which would silently match nothing and report a false
 # "0 tests" pass.
 mapfile -t COMPILED_TESTS < <(find "$OUT_DIR" -name '*.js')
+
+# `node --test` with zero targets (an empty "${COMPILED_TESTS[@]}" expansion)
+# reports "tests 0 / pass 0 / fail 0" and exits 0 — a runner that claims
+# success while running nothing is exactly the false-green defect the
+# recursive find above was meant to fix, just one layer up. We already know
+# $TEST_FILE_COUNT source test files exist (checked above), so an empty or
+# short compiled list here is a real build failure, not "no tests to run" —
+# fail loudly instead of silently reporting green.
+if [ "${#COMPILED_TESTS[@]}" -eq 0 ]; then
+  echo "ERROR: found $TEST_FILE_COUNT frontend test source file(s) but 0 compiled .js files under $OUT_DIR — the esbuild step produced nothing to run. Refusing to report a false green." >&2
+  exit 1
+fi
+if [ "${#COMPILED_TESTS[@]}" -ne "$TEST_FILE_COUNT" ]; then
+  echo "ERROR: expected $TEST_FILE_COUNT compiled test file(s) (one per frontend/**/*.test.ts), found ${#COMPILED_TESTS[@]} under $OUT_DIR." >&2
+  exit 1
+fi
+
 node --test "${COMPILED_TESTS[@]}"

@@ -187,6 +187,14 @@ function requireMount(mount: Record<string, HTMLElement>, key: FacetKey): HTMLEl
 // Pure filter step (Task D2), kept separate from the async fetch in
 // loadTrackClasses so it can be unit-tested without a DOM or network —
 // see facet-filter.test.ts.
+//
+// Filters on `it.id`, not `it.label`, even though production's own rule is
+// written against the label (`if (label != "Annotation tracks")`). This is
+// deliberate, not an oversight: EXPERIMENT_TYPES gives "Annotation tracks"
+// the same string for both id and label today, so the two reads agree. If
+// they ever diverge, callers pass ids (see enrichmentFacetFilterOptions in
+// enrichment-analysis.ts), so this must keep matching on id — don't "fix"
+// this to match on label instead.
 export function excludeTrackClasses(items: ClassificationItem[], excludeIds: string[]): ClassificationItem[] {
   return excludeIds.length === 0 ? items : items.filter((it) => !excludeIds.includes(it.id))
 }

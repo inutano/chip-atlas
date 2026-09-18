@@ -19,7 +19,13 @@
 
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { applyDatasetBGateTransition, buildEnrichmentParams, qvalCodeToThreshold, type EnrichmentFormState } from './enrichment-analysis'
+import {
+  applyDatasetBGateTransition,
+  buildEnrichmentParams,
+  enrichmentFacetFilterOptions,
+  qvalCodeToThreshold,
+  type EnrichmentFormState,
+} from './enrichment-analysis'
 
 // ===== qvalCodeToThreshold — the two-encodings hazard =====
 
@@ -232,4 +238,23 @@ test('applyDatasetBGateTransition: closing supersedes (does not merge with) a st
   // the stash is replaced or cleared, never merged.
   const r = applyDatasetBGateTransition(true, false, 'bed', 'refseq')
   assert.deepEqual(r, { bType: 'bed', stashed: null })
+})
+
+// ===== enrichmentFacetFilterOptions — Task D2, call-site coverage =====
+//
+// This is the exact function the genome-change handler in init() calls to
+// build FacetFilter.init's options (`FacetFilter.init(facet, detail.genome,
+// enrichmentFacetFilterOptions(mount))`), not a duplicate of its logic — so
+// this test fails if a future edit drops the exclusion at the real call
+// site, not just if a standalone helper regresses. See
+// frontend/components/facet-filter.test.ts for the underlying
+// excludeTrackClasses filter, and peak-browser.test.ts for the mirror-image
+// assertion that Peak Browser passes no exclusion at all.
+
+test('enrichmentFacetFilterOptions: excludes Annotation tracks from Enrichment Analysis', () => {
+  const mount = {} as Record<'track_class' | 'cell_type_class' | 'qval', HTMLElement>
+  const opts = enrichmentFacetFilterOptions(mount)
+  assert.deepEqual(opts.excludeTrackClassIds, ['Annotation tracks'])
+  assert.equal(opts.render, 'listbox')
+  assert.equal(opts.mount, mount)
 })
