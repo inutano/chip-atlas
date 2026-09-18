@@ -7,6 +7,15 @@ class LocationServiceTest < Minitest::Test
 
   def setup
     seed_bedfiles
+    # Stub the network HEAD probe so extension resolution never touches the
+    # real archive in tests. Default: only bare `.bed` URLs are "live",
+    # matching hg38's current state on the data server.
+    ChipAtlas::BedExtensionResolver.prober = ->(url) { url.end_with?('.bed') }
+  end
+
+  def teardown
+    ChipAtlas::BedExtensionResolver.prober = nil
+    super
   end
 
   def test_archive_url
@@ -15,7 +24,25 @@ class LocationServiceTest < Minitest::Test
       'cell_type_class' => 'Blood', 'cell_type_subclass' => '-', 'qval' => '05'
     }}
     svc = ChipAtlas::LocationService.new(data)
-    assert_match %r{https://chip-atlas\.dbcls\.jp/data/hg38/assembled/H3K4me3\.Blood\.05\.bed}, svc.archive_url
+    assert_equal 'https://chip-atlas.dbcls.jp/data/hg38/assembled/H3K4me3.Blood.05.bed', svc.archive_url
+  end
+
+  def test_archive_url_falls_back_to_bed_gz_for_tair12
+    DB[:bedfiles].insert(
+      filename: 'His.ALL.05.H3K4me3.AllCell', genome: 'TAIR12', track_class: 'Histone',
+      track_subclass: 'H3K4me3', cell_type_class: 'All cell types', cell_type_subclass: '-',
+      qval: '05', experiments: 'SRX000001', created_at: Time.now
+    )
+    # TAIR12 only serves the gzipped form right now.
+    ChipAtlas::BedExtensionResolver.prober = ->(url) { url.end_with?('.bed.gz') }
+
+    data = { 'condition' => {
+      'genome' => 'TAIR12', 'track_class' => 'Histone', 'track_subclass' => 'H3K4me3',
+      'cell_type_class' => 'All cell types', 'cell_type_subclass' => '-', 'qval' => '05'
+    }}
+    svc = ChipAtlas::LocationService.new(data)
+    assert_equal 'https://chip-atlas.dbcls.jp/data/TAIR12/assembled/His.ALL.05.H3K4me3.AllCell.bed.gz',
+                 svc.archive_url
   end
 
   def test_igv_browsing_url

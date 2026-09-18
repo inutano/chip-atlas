@@ -87,7 +87,8 @@ module ChipAtlas
 
     def bed_url
       filename = ChipAtlas::Bedfile.get_filename(@condition)
-      "#{ARCHIVE_BASE}/#{@genome}/assembled/#{filename}.bed"
+      extension = ChipAtlas::BedExtensionResolver.resolve(@genome, filename, ARCHIVE_BASE)
+      "#{ARCHIVE_BASE}/#{@genome}/assembled/#{filename}#{extension}"
     rescue ChipAtlas::Bedfile::NotFound
       nil
     end

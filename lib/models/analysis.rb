@@ -8,10 +8,24 @@ module ChipAtlas
       { id: '10', label: '10 kb' },
     ].freeze
 
+    # TODO(B4): once the colo index build exists, replace this explicit
+    # allowlist with a check derived from which genomes actually have a colo
+    # index (the archive has no `colo/` directory at all under TAIR12 today,
+    # and there is no reliable signal for "has colo data" in this table yet —
+    # see task A2's report for why an allowlist was used instead of deriving
+    # this from the `analyses` table).
+    GENOMES_WITH_COLO = %w[hg38 mm10 rn6 dm6 ce11 sacCer3].freeze
+
     module_function
 
     def target_genes_distances
       TARGET_GENES_DISTANCES
+    end
+
+    # Genome tab strip for /colo: the full registry, filtered down to genomes
+    # known to have colocalization data. Preserves config/genomes.yml order.
+    def genomes_with_colo
+      ChipAtlas::Experiment.genomes.select { |id, _| GENOMES_WITH_COLO.include?(id) }
     end
 
     def dataset

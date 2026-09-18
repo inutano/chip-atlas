@@ -54,7 +54,7 @@ module ChipAtlas
         end
 
         app.get '/colo' do
-          @list_of_genome = ChipAtlas::Experiment.list_of_genome
+          @list_of_genome = ChipAtlas::Analysis.genomes_with_colo
           @page_js = 'colo'
           erb :colo
         end

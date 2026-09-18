@@ -44,6 +44,15 @@ class AnalysisTest < Minitest::Test
     refute_includes result['hg38'], 'H3K4me3'
   end
 
+  def test_genomes_with_colo_excludes_tair12
+    genomes = ChipAtlas::Analysis.genomes_with_colo
+
+    assert genomes.key?('hg38')
+    refute genomes.key?('TAIR12'), 'TAIR12 has no colo/ directory on the archive and must not offer Colo'
+    assert_equal 'A. thaliana (TAIR12)', ChipAtlas::Experiment.genomes['TAIR12'],
+                 'sanity check: TAIR12 is still in the full genome registry, just not in the colo one'
+  end
+
   def test_target_genes_distances
     distances = ChipAtlas::Analysis.target_genes_distances
 
