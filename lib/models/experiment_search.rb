@@ -5,12 +5,61 @@ module ChipAtlas
     COLUMNS = %w[experiment_id sra_id geo_id genome track_class track_subclass
                  cell_type_class cell_type_subclass title attributes].freeze
 
+    # Track classes deliberately excluded from the search index.
+    #
+    # Annotation tracks are synthetic per-genome rows (gene models etc.), not
+    # real sequencing experiments - nobody free-text searches for them, and
+    # indexing them would surface ~500 hits that all look like duplicates of
+    # each other. This used to be an accident: the `experiments` table loaded
+    # from experimentList.tab (which includes them) while `experiments_fts`
+    # loaded from a separate, stale ExperimentList_adv.json (which happened
+    # not to). Now that both stores load from the same file in the same pass
+    # (see ChipAtlas::Experiment.load_from_file), the exclusion has to be
+    # written down explicitly - this is that rule.
+    NOT_INDEXED_TRACK_CLASSES = ['Annotation tracks'].freeze
+
     module_function
 
-    # Genome ids the FTS5 loader will keep, read from config/genomes.yml via
+    # Genome ids the loader will keep, read from config/genomes.yml via
     # ChipAtlas::Experiment (memoized there, not re-derived on every call).
     def supported_genomes
       ChipAtlas::Experiment.genomes.keys
+    end
+
+    # The experiments_fts table, for loaders/consistency checks that need
+    # direct access (mirrors ChipAtlas::Experiment.dataset).
+    def dataset
+      DB[:experiments_fts]
+    end
+
+    # Whether a row with this track_class belongs in the search index.
+    # See NOT_INDEXED_TRACK_CLASSES above for why Annotation tracks don't.
+    def indexable?(track_class)
+      !NOT_INDEXED_TRACK_CLASSES.include?(track_class)
+    end
+
+    # Every experiments_fts row is supposed to have a matching experiments
+    # row (same experiment_id) - the search index must never point at a
+    # dead /view link. Returns the number of rows that violate that.
+    def orphaned_count
+      DB[<<~SQL].first[:c]
+        SELECT COUNT(*) AS c
+        FROM experiments_fts f
+        LEFT JOIN experiments e ON e.experiment_id = f.experiment_id
+        WHERE e.experiment_id IS NULL
+      SQL
+    end
+
+    # Post-load consistency gate. Called by lib/tasks/metadata.rake after a
+    # fresh load; raises (failing the rake task loudly) instead of quietly
+    # shipping search results that 404 on /view. See task-A3-report.md for
+    # the 219-row orphan bug this closes.
+    def assert_no_orphaned_fts_rows!
+      orphans = orphaned_count
+      return if orphans.zero?
+
+      raise "experiments_fts has #{orphans} orphaned row(s) with no matching " \
+            'experiments row - the search index is inconsistent with the experiments table'
     end
 
     # Memoized row counts for the blank-query listing path (list_all).
@@ -18,7 +67,8 @@ module ChipAtlas
     # for a fresh COUNT(*) OVER() scan across all ~432k FTS5 rows (plus every
     # SELECTed column, materialized for the whole table before LIMIT/OFFSET
     # trims it down to 20) on every /search page load and every genome
-    # change. Keyed by genome ("" for no filter); reset on load_from_json.
+    # change. Keyed by genome ("" for no filter); reset by
+    # ChipAtlas::Experiment.load_from_file after each fresh load.
     def total_count_cache
       @total_count_cache ||= {}
     end
@@ -95,41 +145,6 @@ module ChipAtlas
       end
 
       { total: total, returned: rows.size, experiments: rows }
-    end
-
-    def load_from_json(json_data)
-      rows = json_data['data']
-      return if rows.nil? || rows.empty?
-
-      DB.transaction do
-        DB.run("DELETE FROM experiments_fts")
-
-        rows.each_slice(500) do |batch|
-          batch = batch.reject do |row|
-            # The genome field may be an array or a comma-separated string like "hg19, hg38"
-            genomes = row[3]
-            genomes = genomes.to_s.split(/,\s*/) unless genomes.is_a?(Array)
-            kept = genomes.map(&:strip).reject(&:empty?).select { |g| supported_genomes.include?(g) }
-            row[3] = kept.first  # store single genome
-            kept.empty?
-          end
-          next if batch.empty?
-
-          values_sql = batch.map do |row|
-            vals = COLUMNS.each_with_index.map do |_, i|
-              v = row[i]
-              v = v.join(', ') if v.is_a?(Array)
-              DB.literal((v || '').to_s)
-            end
-            "(#{vals.join(', ')})"
-          end.join(', ')
-
-          DB.run("INSERT INTO experiments_fts (#{COLUMNS.join(', ')}) VALUES #{values_sql}")
-        end
-      end
-
-      reset_total_count_cache!
-      warn "ExperimentSearch: loaded #{rows.size} rows into FTS5 table"
     end
 
     def fts5_sanitize(query)

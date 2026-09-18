@@ -222,6 +222,17 @@ module ChipAtlas
       result
     end
 
+    # Loads experimentList.tab into the `experiments` table AND the
+    # `experiments_fts` search index in a single pass, so the two stores
+    # can never drift apart the way they used to (one loaded from this
+    # file, the other from a separately-downloaded, separately-stale
+    # ExperimentList_adv.json). Both stores get the exact same genome
+    # filter and the exact same per-row fields; the only difference is
+    # that Annotation tracks are excluded from the FTS index (see
+    # ChipAtlas::ExperimentSearch::NOT_INDEXED_TRACK_CLASSES) and that the
+    # FTS index gets a best-effort geo_id pulled out of the title.
+    #
+    # Returns the number of experiments-table rows loaded.
     def load_from_file(table_path)
       timestamp = Time.now
       total = 0
@@ -229,30 +240,79 @@ module ChipAtlas
 
       DB.transaction do
         records = []
+        fts_records = []
 
         File.foreach(table_path, encoding: 'UTF-8') do |line_n|
           cols = line_n.chomp.split("\t")
-          genome = cols[1]
+
+          # The genome field is a single id in experimentList.tab, but the
+          # loader this replaced was bitten hard by a source (the old
+          # ExperimentList_adv.json) that sometimes packed multiple genomes
+          # into one comma-joined field ("hg19, hg38") - matching that
+          # against the id registry directly silently dropped ~95% of the
+          # index. Splitting defensively costs nothing today and keeps that
+          # failure mode closed if a future source format regresses to it.
+          genome = cols[1].to_s.split(/,\s*/).first
           next unless genomes.key?(genome)
 
+          experiment_id           = cols[0]
+          track_class              = cols[2]
+          track_subclass           = cols[3]
+          cell_type_class          = cols[4]
+          cell_type_subclass       = cols[5]
+          cell_type_subclass_info  = cols[6]
+          read_info                = cols[7]
+          title                    = cols[8]
+          attributes               = cols[9..].to_a.join("\t")
+
           records << {
-            experiment_id:                 cols[0],
-            genome:                 cols[1],
-            track_class:            cols[2],
-            track_subclass:         cols[3],
-            cell_type_class:        cols[4],
-            cell_type_subclass:     cols[5],
-            cell_type_subclass_info: cols[6],
-            read_info:              cols[7],
-            title:                  cols[8],
-            attributes:             cols[9..].to_a.join("\t"),
-            created_at:             timestamp,
+            experiment_id:           experiment_id,
+            genome:                  genome,
+            track_class:             track_class,
+            track_subclass:          track_subclass,
+            cell_type_class:         cell_type_class,
+            cell_type_subclass:      cell_type_subclass,
+            cell_type_subclass_info: cell_type_subclass_info,
+            read_info:               read_info,
+            title:                   title,
+            attributes:              attributes,
+            created_at:              timestamp,
           }
+
+          # Annotation tracks stay out of the search index - see
+          # ChipAtlas::ExperimentSearch::NOT_INDEXED_TRACK_CLASSES for why.
+          if ChipAtlas::ExperimentSearch.indexable?(track_class)
+            # experimentList.tab has no SRA study accession (sra_id) or GEO
+            # sample id (geo_id) columns; geo_id is recoverable often enough
+            # to be worth it, because ChIP-Atlas titles are conventionally
+            # "GSM123456: <description>" - extract it so /view?id=GSM123456
+            # (ChipAtlas::ExperimentSearch.gsm_to_srx) keeps working. sra_id
+            # has no equivalent source in this file, so it is left blank.
+            geo_id = title.to_s[/\AGSM\d+/] || ''
+
+            fts_records << {
+              experiment_id:      experiment_id,
+              sra_id:              '',
+              geo_id:              geo_id,
+              genome:              genome,
+              track_class:         track_class,
+              track_subclass:      track_subclass,
+              cell_type_class:     cell_type_class,
+              cell_type_subclass:  cell_type_subclass,
+              title:               title,
+              attributes:          attributes,
+            }
+          end
 
           if records.size >= batch_size
             dataset.multi_insert(records)
             total += records.size
             records.clear
+          end
+
+          if fts_records.size >= batch_size
+            ChipAtlas::ExperimentSearch.dataset.multi_insert(fts_records)
+            fts_records.clear
           end
         end
 
@@ -260,7 +320,13 @@ module ChipAtlas
           dataset.multi_insert(records)
           total += records.size
         end
+
+        if fts_records.any?
+          ChipAtlas::ExperimentSearch.dataset.multi_insert(fts_records)
+        end
       end
+
+      ChipAtlas::ExperimentSearch.reset_total_count_cache!
       total
     end
   end

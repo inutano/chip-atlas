@@ -109,4 +109,67 @@ class ExperimentTest < Minitest::Test
     assert index['hg38'].key?(:cell_type)
     assert index['hg38'][:track].key?('Histone')
   end
+
+  # --- load_from_file: one source feeding both experiments and experiments_fts ---
+  #
+  # Fixture (test/fixtures/experimentList_sample.tab) has 4 rows:
+  #   SRXTEST001  hg38  Histone            - title starts "GSM100001: ..."
+  #   SRXTEST002  hg38  Annotation tracks   - excluded from the search index
+  #   SRXTEST003  mm10  ATAC-Seq            - title has no GSM prefix
+  #   SRXTEST004  xx99  Histone             - xx99 is not in config/genomes.yml
+
+  def test_load_from_file_loads_experiments_and_search_index_together
+    DB[:experiments].delete
+    DB[:experiments_fts].delete
+
+    fixture = File.join(__dir__, '..', 'fixtures', 'experimentList_sample.tab')
+    count = ChipAtlas::Experiment.load_from_file(fixture)
+
+    # The unsupported genome (xx99) is dropped by the same filter for both
+    # stores - only 3 of the 4 fixture rows are loadable at all.
+    assert_equal 3, count
+    assert_equal 3, DB[:experiments].count
+    refute ChipAtlas::Experiment.id_valid?('SRXTEST004')
+
+    # Annotation tracks load into experiments (so /view still works for
+    # them) but are excluded from the search index on purpose.
+    assert ChipAtlas::Experiment.id_valid?('SRXTEST002')
+    assert_equal 2, DB[:experiments_fts].count
+    refute DB[:experiments_fts].where(experiment_id: 'SRXTEST002').first
+
+    # geo_id is recovered from the "GSM######: ..." title convention so
+    # /view?id=GSM... redirects keep working even without a dedicated
+    # geo_id column in experimentList.tab.
+    with_gsm = DB[:experiments_fts].where(experiment_id: 'SRXTEST001').first
+    assert_equal 'GSM100001', with_gsm[:geo_id]
+
+    # A title with no GSM prefix gets a blank geo_id, not a crash or a
+    # bogus partial match.
+    without_gsm = DB[:experiments_fts].where(experiment_id: 'SRXTEST003').first
+    assert_equal '', without_gsm[:geo_id]
+
+    # experimentList.tab has no SRA study accession column - sra_id is
+    # left blank rather than fabricated.
+    assert_equal '', with_gsm[:sra_id]
+
+    # The structural guarantee this task is about: every experiments_fts
+    # row has a matching experiments row.
+    assert_equal 0, ChipAtlas::ExperimentSearch.orphaned_count
+  end
+
+  def test_experiments_and_search_totals_differ_by_annotation_track_count
+    DB[:experiments].delete
+    DB[:experiments_fts].delete
+
+    fixture = File.join(__dir__, '..', 'fixtures', 'experimentList_sample.tab')
+    ChipAtlas::Experiment.load_from_file(fixture)
+
+    annotation_track_count =
+      DB[:experiments].where(track_class: 'Annotation tracks').count
+    assert_equal 1, annotation_track_count
+
+    total_experiments = ChipAtlas::Experiment.number_of_experiments
+    search_total = ChipAtlas::ExperimentSearch.total_count
+    assert_equal total_experiments - annotation_track_count, search_total
+  end
 end

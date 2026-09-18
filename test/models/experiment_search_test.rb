@@ -92,6 +92,45 @@ class ExperimentSearchTest < Minitest::Test
     assert_equal 4, result[:total]
   end
 
+  # --- Annotation tracks: explicit, tested exclusion from the index ---
+
+  def test_indexable_excludes_annotation_tracks
+    refute ChipAtlas::ExperimentSearch.indexable?('Annotation tracks')
+    assert ChipAtlas::ExperimentSearch.indexable?('Histone')
+    assert ChipAtlas::ExperimentSearch.indexable?('ATAC-Seq')
+  end
+
+  # --- Consistency gate: every experiments_fts row needs an experiments row ---
+
+  def test_orphaned_count_is_zero_once_every_fts_row_has_a_match
+    # setup already seeded 3 experiments_fts rows (SRX018625, SRX018626,
+    # SRX100002) with nothing in `experiments` yet - give each a matching
+    # experiments row so none is orphaned.
+    DB[:experiments].multi_insert([
+      { experiment_id: 'SRX018625', genome: 'hg38', track_class: 'Histone', created_at: Time.now },
+      { experiment_id: 'SRX018626', genome: 'hg38', track_class: 'TFs and others', created_at: Time.now },
+      { experiment_id: 'SRX100002', genome: 'mm10', track_class: 'ATAC-Seq', created_at: Time.now },
+    ])
+
+    assert_equal 0, ChipAtlas::ExperimentSearch.orphaned_count
+    ChipAtlas::ExperimentSearch.assert_no_orphaned_fts_rows! # must not raise
+  end
+
+  # This is the "the gate actually fails" test: nothing has ever seen
+  # assert_no_orphaned_fts_rows! raise until this test proves it does, on
+  # data shaped exactly like the production bug (a search hit with no
+  # matching experiments row, so /view 404s on click).
+  def test_assert_no_orphaned_fts_rows_raises_on_an_inconsistent_pair
+    # setup's 3 experiments_fts rows have no matching experiments rows
+    # here (the experiments table is untouched/empty in this test).
+    assert_equal 3, ChipAtlas::ExperimentSearch.orphaned_count
+
+    error = assert_raises(RuntimeError) do
+      ChipAtlas::ExperimentSearch.assert_no_orphaned_fts_rows!
+    end
+    assert_match(/orphaned/, error.message)
+  end
+
   def test_sra_cache_set_and_get
     metadata = { experiment_id: 'SRX018625', platform: 'ILLUMINA' }
     ChipAtlas::SraCache.set('SRX018625', metadata)

@@ -55,20 +55,32 @@ namespace :metadata do
     puts "   Downloaded lineNum.tsv (#{sprintf('%.2f', Time.now - start)}s)"
   end
 
-  task :load => [:load_experiment, :load_bedfile, :load_analysis, :load_bedsize, :load_fts] do
+  task :load => [:load_experiment, :load_bedfile, :load_analysis, :load_bedsize] do
     puts 'All metadata loading completed successfully!'
   end
 
+  # Loads experimentList.tab into BOTH the experiments table and the
+  # experiments_fts search index in one pass (ChipAtlas::Experiment.load_from_file
+  # owns that; see its comment for why). There is no separate load_fts task
+  # any more - the old one loaded a separately-downloaded, separately-stale
+  # ExperimentList_adv.json, which is exactly what let the two stores drift
+  # apart (219 ids searchable but 404ing on /view, 541 Annotation tracks
+  # rows in the table but silently unsearchable). The consistency assertion
+  # below fails the build loudly if that ever happens again.
   task :load_experiment => experiment_table_fpath do
-    puts '[1/5] Loading experiments data...'
+    puts '[1/4] Loading experiments and search index...'
     start = Time.now
     DB[:experiments].delete
+    DB[:experiments_fts].delete
     count = ChipAtlas::Experiment.load_from_file(experiment_table_fpath)
-    puts "   #{count} experiments loaded (#{sprintf('%.2f', Time.now - start)}s)"
+    ChipAtlas::ExperimentSearch.assert_no_orphaned_fts_rows!
+    fts_count = ChipAtlas::ExperimentSearch.total_count
+    puts "   #{count} experiments loaded, #{fts_count} indexed for search " \
+         "(#{sprintf('%.2f', Time.now - start)}s)"
   end
 
   task :load_bedfile => bedfile_table_fpath do
-    puts '[2/5] Loading bedfiles data...'
+    puts '[2/4] Loading bedfiles data...'
     start = Time.now
     DB[:bedfiles].delete
     count = ChipAtlas::Bedfile.load_from_file(bedfile_table_fpath)
@@ -76,7 +88,7 @@ namespace :metadata do
   end
 
   task :load_analysis => analysis_table_fpath do
-    puts '[3/5] Loading analysis data...'
+    puts '[3/4] Loading analysis data...'
     start = Time.now
     DB[:analyses].delete
     count = ChipAtlas::Analysis.load_from_file(analysis_table_fpath)
@@ -84,23 +96,10 @@ namespace :metadata do
   end
 
   task :load_bedsize => bedsize_table_fpath do
-    puts '[4/5] Loading bedsize data...'
+    puts '[4/4] Loading bedsize data...'
     start = Time.now
     DB[:bedsizes].delete
     count = ChipAtlas::Bedsize.load_from_file(bedsize_table_fpath)
     puts "   #{count} bedsizes loaded (#{sprintf('%.2f', Time.now - start)}s)"
-  end
-
-  task :load_fts do
-    puts '[5/5] Loading FTS5 search index...'
-    start = Time.now
-    json_path = File.join(PROJ_ROOT, 'public', 'ExperimentList_adv.json')
-    if File.exist?(json_path)
-      json_data = JSON.parse(File.read(json_path))
-      ChipAtlas::ExperimentSearch.load_from_json(json_data)
-      puts "   FTS5 index loaded (#{sprintf('%.2f', Time.now - start)}s)"
-    else
-      puts '   Skipping FTS5: ExperimentList_adv.json not found'
-    end
   end
 end
