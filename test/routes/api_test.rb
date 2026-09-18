@@ -55,7 +55,10 @@ class ApiTest < Minitest::Test
     get '/api/track_classes'
     assert last_response.ok?
     data = JSON.parse(last_response.body)
-    assert data.any? { |t| t['id'] == 'CUT&Tag' }
+    assert data.any? { |t| t['id'] == 'Histone' }
+    # Task D2 (Q1): CUT&Tag/CUT&RUN have no menu entry of their own.
+    refute data.any? { |t| t['id'] == 'CUT&Tag' }
+    refute data.any? { |t| t['id'] == 'CUT&RUN' }
   end
 
   def test_track_classes_with_counts

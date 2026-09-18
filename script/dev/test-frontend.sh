@@ -28,4 +28,11 @@ node_modules/.bin/esbuild $TEST_FILES \
   --bundle --platform=node --format=esm --target=node18 \
   --outdir="$OUT_DIR" >/dev/null
 
-node --test "$OUT_DIR"/*.js
+# esbuild preserves each test file's path below the lowest common ancestor
+# of all entry points (e.g. pages/*.js, components/*.js once tests exist in
+# more than one frontend/ subdirectory), so the compiled files are not all
+# directly under $OUT_DIR. Enumerate them recursively rather than globbing
+# "$OUT_DIR"/*.js, which would silently match nothing and report a false
+# "0 tests" pass.
+mapfile -t COMPILED_TESTS < <(find "$OUT_DIR" -name '*.js')
+node --test "${COMPILED_TESTS[@]}"

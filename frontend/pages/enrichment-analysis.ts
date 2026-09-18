@@ -327,7 +327,16 @@ async function init(): Promise<void> {
     if (FacetFilter.getCondition(facet)) {
       await FacetFilter.setGenome(facet, detail.genome)
     } else {
-      await FacetFilter.init(facet, detail.genome, { render: 'listbox', mount })
+      await FacetFilter.init(facet, detail.genome, {
+        render: 'listbox',
+        mount,
+        // D2: production's generateExperimentTypeOptions() explicitly drops
+        // "Annotation tracks" from Enrichment Analysis's experiment-type
+        // list (`if (label != "Annotation tracks")`) — Peak Browser (see
+        // peak-browser.ts) keeps it, since annotation tracks are a
+        // legitimate track type there.
+        excludeTrackClassIds: ['Annotation tracks'],
+      })
     }
   })
 

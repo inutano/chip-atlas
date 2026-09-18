@@ -38,8 +38,15 @@ class ExperimentTest < Minitest::Test
   def test_list_of_experiment_types
     types = ChipAtlas::Experiment.list_of_experiment_types
     assert types.any? { |t| t[:id] == 'Histone' }
-    assert types.any? { |t| t[:id] == 'CUT&Tag' }
-    assert types.any? { |t| t[:id] == 'CUT&RUN' }
+    assert types.any? { |t| t[:id] == 'Annotation tracks' }
+  end
+
+  # Task D2 (Q1): CUT&Tag and CUT&RUN have no menu entry of their own —
+  # CUT&Tag is folded into ChIP for menu purposes, CUT&RUN is not present.
+  def test_list_of_experiment_types_excludes_cut_and_tag_and_cut_and_run
+    ids = ChipAtlas::Experiment.list_of_experiment_types.map { |t| t[:id] }
+    refute_includes ids, 'CUT&Tag'
+    refute_includes ids, 'CUT&RUN'
   end
 
   def test_experiment_types_with_counts

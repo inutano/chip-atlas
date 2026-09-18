@@ -11,6 +11,13 @@ module ChipAtlas
     # strip (see frontend/components/genome-tabs.ts).
     DEFAULT_GENOMES_CONFIG_PATH = File.expand_path(File.join('..', '..', 'config', 'genomes.yml'), __dir__).freeze
 
+    # Task D2 (Q1): CUT&Tag and CUT&RUN have no menu entry of their own.
+    # CUT&Tag is analysed upstream but folded into ChIP (Histone / TFs and
+    # others) for menu purposes; CUT&RUN is not present in the data. Neither
+    # label exists anywhere in track_class today, so this is a pure
+    # deletion with no data migration. Do not re-add a zero-count hiding
+    # rule instead of this list — that was considered and rejected, since
+    # it would also hide legitimately-empty categories for a given genome.
     EXPERIMENT_TYPES = [
       { id: 'Histone',          label: 'ChIP: Histone' },
       { id: 'RNA polymerase',   label: 'ChIP: RNA polymerase' },
@@ -19,8 +26,6 @@ module ChipAtlas
       { id: 'ATAC-Seq',         label: 'ATAC-Seq' },
       { id: 'DNase-seq',        label: 'DNase-seq' },
       { id: 'Bisulfite-Seq',    label: 'Bisulfite-Seq' },
-      { id: 'CUT&Tag',          label: 'CUT&Tag' },
-      { id: 'CUT&RUN',          label: 'CUT&RUN' },
       { id: 'Annotation tracks', label: 'Annotation tracks' },
     ].freeze
 

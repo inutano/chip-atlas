@@ -44,6 +44,14 @@ type FacetKey = 'track_class' | 'track_subclass' | 'cell_type_class' | 'cell_typ
 export interface FacetFilterOptions {
   render?: FacetRenderMode
   mount?: Record<string, HTMLElement>
+  // Task D2: Enrichment Analysis excludes "Annotation tracks" from its
+  // experiment-type list (production's generateExperimentTypeOptions() does
+  // this with an explicit `if (label != "Annotation tracks")`), while Peak
+  // Browser keeps it — annotation tracks are a legitimate track type there.
+  // Both pages share this one FacetFilter, so the exclusion is a per-call
+  // option rather than baked into loadTrackClasses, and it filters the
+  // track_class list only — cell/subclass facets are unaffected.
+  excludeTrackClassIds?: string[]
 }
 
 // Abstracts over a single facet's control so the cascade logic below doesn't
@@ -63,6 +71,7 @@ interface Instance {
   trackSubclass: FacetControl
   cellTypeSubclass: FacetControl
   qval: FacetControl
+  excludeTrackClassIds: string[]
 }
 
 const registry = new WeakMap<HTMLElement, Instance>()
@@ -175,10 +184,17 @@ function requireMount(mount: Record<string, HTMLElement>, key: FacetKey): HTMLEl
   return el
 }
 
+// Pure filter step (Task D2), kept separate from the async fetch in
+// loadTrackClasses so it can be unit-tested without a DOM or network —
+// see facet-filter.test.ts.
+export function excludeTrackClasses(items: ClassificationItem[], excludeIds: string[]): ClassificationItem[] {
+  return excludeIds.length === 0 ? items : items.filter((it) => !excludeIds.includes(it.id))
+}
+
 async function loadTrackClasses(inst: Instance): Promise<void> {
   const cell = inst.cellTypeClass.value || undefined
   const items = await listTrackClasses(inst.genome, cell)
-  inst.trackClass.setLabeledItems(items)
+  inst.trackClass.setLabeledItems(excludeTrackClasses(items, inst.excludeTrackClassIds))
 }
 
 async function loadCellTypeClasses(inst: Instance): Promise<void> {
@@ -313,6 +329,7 @@ export const FacetFilter = {
       trackSubclass: controls.trackSubclass,
       cellTypeSubclass: controls.cellTypeSubclass,
       qval: controls.qval,
+      excludeTrackClassIds: options.excludeTrackClassIds ?? [],
     }
     registry.set(container, inst)
 
