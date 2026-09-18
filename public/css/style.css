@@ -463,17 +463,47 @@ select.list-box option {
 }
 
 #result-table th.tg-sortable {
-  cursor: pointer;
-  user-select: none;
   white-space: nowrap;
+  padding: 0;
 }
 
-#result-table th.tg-sortable:hover {
+/* The clickable/keyboard-operable control is a real <button> filling the
+   header cell (not the <th> itself — a <th> can't take focus), so a
+   sighted user can still click "anywhere" on the header the way the old
+   click-on-<th> version behaved, while a keyboard user can Tab to it and
+   activate it with Enter or Space like any other button. */
+.tg-sort-btn {
+  display: block;
+  width: 100%;
+  padding: 8px;
+  background: none;
+  border: none;
+  margin: 0;
+  font: inherit;
+  color: inherit;
+  text-align: inherit;
+  cursor: pointer;
+  user-select: none;
+}
+
+.tg-sort-btn:hover {
   background-color: var(--ca-panel-head);
 }
 
-.tg-exp-celltype {
-  color: #666;
+.tg-sort-btn:focus-visible {
+  outline: 2px solid var(--ca-primary);
+  outline-offset: -2px;
+}
+
+.tg-sort-indicator {
+  margin-left: 2px;
+}
+
+.tg-exp-link {
+  display: block;
+  text-align: center;
+  text-decoration: none;
+  padding: 2px 0 4px;
 }
 
 .tg-score-cell {

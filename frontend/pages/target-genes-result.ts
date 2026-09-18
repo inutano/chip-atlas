@@ -11,12 +11,11 @@
 // the server's own MAX_LIMIT) and never renders the full 13,459-row matrix
 // at once.
 
-import { getTargetGenesData, type TargetGenesResult } from '../api/client'
+import { ApiError, getTargetGenesData, type TargetGenesResult } from '../api/client'
 
 const PAGE_SIZE = 100
 const AVERAGE_SUFFIX = '|Average'
 const STRING_COLUMN = 'STRING'
-const GENE_COLUMN = 'Target_genes'
 
 interface Params {
   genome: string
@@ -123,29 +122,105 @@ function splitExperimentHeader(header: string): { experimentId: string; cellType
   return { experimentId: header.slice(0, sep), cellType: header.slice(sep + 1) }
 }
 
-// ===== Rendering =====
+// ===== Sort state transitions (pure — unit-tested directly, see
+// target-genes-result.test.ts) =====
+//
+// Both the mouse click handler and a keyboard Enter/Space activation of a
+// header's <button> fire the exact same DOM "click" event (that equivalence
+// is guaranteed by the HTML spec for <button> elements, not something this
+// module implements itself), so a single click handler correctly covers
+// both input methods as long as the header is a real, focusable <button>
+// rather than a plain <th> with a click listener (a <th> is not natively
+// focusable or keyboard-operable — that was the bug).
 
-function sortIndicator(column: string): string {
-  if (state.sort !== column) return ''
-  return state.order === 'desc' ? ' ↓' : ' ↑'
+export interface SortState {
+  sort: string | null
+  order: 'asc' | 'desc'
 }
 
+// Clicking (by mouse or keyboard) the currently-sorted column's header
+// flips direction; clicking a different column switches to it, descending
+// first — matching the server's own default when no sort/order is given.
+export function computeNextSort(current: SortState, column: string): SortState {
+  if (current.sort === column) {
+    return { sort: column, order: current.order === 'desc' ? 'asc' : 'desc' }
+  }
+  return { sort: column, order: 'desc' }
+}
+
+// aria-sort for a given column header, per the WAI-ARIA APG sortable-table
+// pattern: "ascending"/"descending" on the currently-sorted column, "none"
+// on every other sortable column.
+export function computeAriaSort(current: SortState, column: string): 'ascending' | 'descending' | 'none' {
+  if (current.sort !== column) return 'none'
+  return current.order === 'desc' ? 'descending' : 'ascending'
+}
+
+// True when `err` is the 400 TargetGenesTsv::UnknownSortColumn response
+// (routes/api.rb) — i.e. the retained sort column doesn't exist in the
+// column set that was just fetched (this happens across a distance switch:
+// see the fallback in `load()`). Only meaningful when a sort is actually
+// set; a 400 with no active sort would indicate a different bug.
+export function isUnknownSortColumnError(err: unknown): boolean {
+  return err instanceof ApiError && err.status === 400
+}
+
+// ===== Rendering =====
+
+function sortArrowGlyph(column: string): string {
+  if (state.sort !== column) return ''
+  return state.order === 'desc' ? '↓' : '↑'
+}
+
+function sortStateHint(column: string): string {
+  if (state.sort !== column) return ''
+  return state.order === 'desc' ? ' (sorted descending)' : ' (sorted ascending)'
+}
+
+function handleSortClick(column: string): void {
+  const next = computeNextSort(state, column)
+  state.sort = next.sort
+  state.order = next.order
+  state.offset = 0
+  void load()
+}
+
+// Builds a sortable <th> containing a real <button> — focusable, the
+// correct implicit role, and Enter/Space already work because that's how
+// every <button> behaves. `label` is the button's visible + accessible
+// text; callers needing extra markup (the experiment columns' outbound
+// /view link) append it to the returned <th> afterwards, as a sibling of
+// the button rather than nested inside it (a link nested inside a button
+// is invalid HTML and unreachable by keyboard).
 function makeSortableHeader(label: string, sortColumn: string, extraClass?: string): HTMLTableCellElement {
   const th = document.createElement('th')
   th.scope = 'col'
   if (extraClass) th.className = extraClass
   th.classList.add('tg-sortable')
-  th.textContent = label + sortIndicator(sortColumn)
-  th.addEventListener('click', () => {
-    if (state.sort === sortColumn) {
-      state.order = state.order === 'desc' ? 'asc' : 'desc'
-    } else {
-      state.sort = sortColumn
-      state.order = 'desc'
-    }
-    state.offset = 0
-    void load()
-  })
+  th.setAttribute('aria-sort', computeAriaSort(state, sortColumn))
+
+  const btn = document.createElement('button')
+  btn.type = 'button'
+  btn.className = 'tg-sort-btn'
+  btn.appendChild(document.createTextNode(label))
+
+  const arrow = document.createElement('span')
+  arrow.className = 'tg-sort-indicator'
+  arrow.setAttribute('aria-hidden', 'true')
+  arrow.textContent = sortArrowGlyph(sortColumn) ? ` ${sortArrowGlyph(sortColumn)}` : ''
+  btn.appendChild(arrow)
+
+  // Redundant with aria-sort on the <th>, but screen readers vary in
+  // whether they surface an ancestor's aria-sort when focus lands directly
+  // on a nested control (as it does here, via Tab) rather than via table
+  // navigation commands — so also say it plainly, visually hidden.
+  const hint = document.createElement('span')
+  hint.className = 'visually-hidden'
+  hint.textContent = sortStateHint(sortColumn)
+  btn.appendChild(hint)
+
+  btn.addEventListener('click', () => handleSortClick(sortColumn))
+  th.appendChild(btn)
   return th
 }
 
@@ -173,39 +248,21 @@ function renderHeader(data: TargetGenesResult): void {
     }
 
     // An experiment column, grouped under the Average column and hidden
-    // until "Show experiment columns" is expanded.
+    // until "Show experiment columns" is expanded. Built from the same
+    // sortable-header helper as Gene/Average/STRING; the outbound /view
+    // link is appended afterwards as a sibling of the sort button, not
+    // nested inside it (see makeSortableHeader's comment).
     const { experimentId, cellType } = splitExperimentHeader(col)
-    const th = document.createElement('th')
-    th.scope = 'col'
-    th.className = 'tg-exp-col tg-sortable'
-    th.title = `${experimentId}: ${cellType}`
+    const label = cellType ? `${experimentId}: ${cellType}` : experimentId
+    const th = makeSortableHeader(label, col, 'tg-exp-col')
+    th.title = label
 
     const link = document.createElement('a')
+    link.className = 'tg-exp-link'
     link.href = `/view?id=${encodeURIComponent(experimentId)}`
-    link.textContent = experimentId
-    link.addEventListener('click', (e) => e.stopPropagation())
+    link.textContent = '↗'
+    link.setAttribute('aria-label', `View experiment ${experimentId}`)
     th.appendChild(link)
-
-    const cellTypeSpan = document.createElement('span')
-    cellTypeSpan.className = 'tg-exp-celltype'
-    cellTypeSpan.textContent = cellType ? `: ${cellType}` : ''
-    th.appendChild(cellTypeSpan)
-
-    const arrow = document.createElement('span')
-    arrow.className = 'tg-sort-indicator'
-    arrow.textContent = sortIndicator(col)
-    th.appendChild(arrow)
-
-    th.addEventListener('click', () => {
-      if (state.sort === col) {
-        state.order = state.order === 'desc' ? 'asc' : 'desc'
-      } else {
-        state.sort = col
-        state.order = 'desc'
-      }
-      state.offset = 0
-      void load()
-    })
 
     cells.push(th)
   })
@@ -308,12 +365,27 @@ function setSummary(): void {
   $('result-summary').textContent = `${state.track} on ${state.genome} — TSS ± ${state.distance} kb`
 }
 
+function hideSortFallbackNote(): void {
+  ;($('sort-fallback-note') as HTMLElement).hidden = true
+}
+
+function showSortFallbackNote(previousSort: string): void {
+  const note = $('sort-fallback-note') as HTMLElement
+  note.textContent = `"${previousSort}" isn't a column at this distance — sorted by the default Average column instead.`
+  note.hidden = false
+}
+
 let loadGeneration = 0
 
-async function load(): Promise<void> {
+// `isFallbackRetry` is set only on the one retry triggered below, so a sort
+// column that's *still* unknown after being reset to null (which should be
+// unreachable — null means "let the server pick its own default") can't
+// loop forever.
+async function load(isFallbackRetry = false): Promise<void> {
   const gen = ++loadGeneration
   ;($('loading-state') as HTMLElement).hidden = false
   ;($('error-state') as HTMLElement).hidden = true
+  if (!isFallbackRetry) hideSortFallbackNote()
 
   setSummary()
   updateDistanceButtons()
@@ -339,11 +411,29 @@ async function load(): Promise<void> {
     updateDownloadLink()
   } catch (err) {
     if (gen !== loadGeneration) return
+
+    // The sort column carried over from a different distance (a different
+    // precomputed file, which isn't guaranteed to have the same experiment
+    // columns) can 400 as TargetGenesTsv::UnknownSortColumn. That's not
+    // "this combination has no data" — it's "the old sort doesn't apply
+    // here" — so fall back to the default sort and retry once instead of
+    // showing the generic not-found message for a condition that isn't one.
+    if (!isFallbackRetry && state.sort && isUnknownSortColumnError(err)) {
+      const previousSort = state.sort
+      console.warn(`Sort column "${previousSort}" not present at distance ${state.distance}; falling back to the default sort.`, err)
+      state.sort = null
+      state.order = 'desc'
+      showSortFallbackNote(previousSort)
+      void load(true)
+      return
+    }
+
     console.error(err)
     state.data = null
     ;($('loading-state') as HTMLElement).hidden = true
     ;($('result-wrap') as HTMLElement).hidden = true
     ;($('download-tsv') as HTMLAnchorElement).hidden = true
+    hideSortFallbackNote()
     const e = $('error-state') as HTMLElement
     e.textContent = 'Failed to load target genes. This antigen/genome/distance combination may not have precomputed data.'
     e.hidden = false
@@ -407,4 +497,9 @@ function init(): void {
   void load()
 }
 
-document.addEventListener('DOMContentLoaded', init)
+// Guarded so the pure functions above (computeNextSort, computeAriaSort,
+// isUnknownSortColumnError) can be imported and unit-tested under plain
+// Node, which has no `document` — see target-genes-result.test.ts.
+if (typeof document !== 'undefined') {
+  document.addEventListener('DOMContentLoaded', init)
+}

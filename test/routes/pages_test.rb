@@ -212,6 +212,7 @@ class PagesTest < Minitest::Test
     assert_includes body, 'id="page-next"'
     assert_includes body, 'id="page-indicator"'
     assert_includes body, 'id="row-count"'
+    assert_includes body, 'id="sort-fallback-note"'
   end
 
   def test_diff_analysis_uses_panels
