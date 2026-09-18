@@ -16,55 +16,66 @@
   togotv: 'http://doi.org/10.7875/togotv.2018.028'
 } %>
 
-<div id="genome-tabs"></div>
+<!--
+  Honest-unavailable notice (frontend/pages/colo.ts, COLO_PICKER_UNAVAILABLE):
+  the picker below cannot currently produce a valid (genome, track,
+  cell_type) combination -- see that constant's comment for why. Hidden by
+  default so a re-enabled picker (COLO_PICKER_UNAVAILABLE = false) needs no
+  markup change here.
+-->
+<div id="colo-unavailable-notice" class="alert alert-warning" role="alert" hidden></div>
 
-<div class="row">
-  <div class="col-md-3">
-    <div class="panel panel-default">
-      <div class="panel-heading"><h4 class="panel-title">1. Search mode</h4></div>
-      <div class="panel-body">
-        <div class="form-check">
-          <input class="form-check-input" type="radio" name="direction" id="direction-track" value="track" checked>
-          <label class="form-check-label" for="direction-track">Antigens → Cell Type</label>
+<div id="colo-picker">
+  <div id="genome-tabs"></div>
+
+  <div class="row">
+    <div class="col-md-3">
+      <div class="panel panel-default">
+        <div class="panel-heading"><h4 class="panel-title">1. Search mode</h4></div>
+        <div class="panel-body">
+          <div class="form-check">
+            <input class="form-check-input" type="radio" name="direction" id="direction-track" value="track" checked>
+            <label class="form-check-label" for="direction-track">Antigens → Cell Type</label>
+          </div>
+          <div class="form-check">
+            <input class="form-check-input" type="radio" name="direction" id="direction-cell" value="cell_type">
+            <label class="form-check-label" for="direction-cell">Cell Type → Antigen</label>
+          </div>
         </div>
-        <div class="form-check">
-          <input class="form-check-input" type="radio" name="direction" id="direction-cell" value="cell_type">
-          <label class="form-check-label" for="direction-cell">Cell Type → Antigen</label>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="panel panel-default">
+        <div class="panel-heading"><h4 class="panel-title" id="primary-panel-title">2. Choose Primary Type</h4></div>
+        <div class="panel-body">
+          <input type="text" id="primary-input" class="form-control" placeholder="type to search" autocomplete="off">
+          <div id="primary-list" class="mt-2"></div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="panel panel-default">
+        <div class="panel-heading"><h4 class="panel-title" id="secondary-panel-title">3. Choose Secondary Type</h4></div>
+        <div class="panel-body">
+          <input type="text" id="secondary-input" class="form-control" placeholder="type to search" autocomplete="off">
+          <div id="secondary-list" class="mt-2"></div>
         </div>
       </div>
     </div>
   </div>
-  <div class="col-md-3">
-    <div class="panel panel-default">
-      <div class="panel-heading"><h4 class="panel-title" id="primary-panel-title">2. Choose Primary Type</h4></div>
-      <div class="panel-body">
-        <input type="text" id="primary-input" class="form-control" placeholder="type to search" autocomplete="off">
-        <div id="primary-list" class="mt-2"></div>
-      </div>
+
+  <div class="row mb-2">
+    <div class="col-md-6 offset-md-3 d-grid">
+      <button type="button" id="view-colo" class="btn btn-primary btn-lg btn-block">View Colocalization Data</button>
     </div>
   </div>
-  <div class="col-md-3">
-    <div class="panel panel-default">
-      <div class="panel-heading"><h4 class="panel-title" id="secondary-panel-title">3. Choose Secondary Type</h4></div>
-      <div class="panel-body">
-        <input type="text" id="secondary-input" class="form-control" placeholder="type to search" autocomplete="off">
-        <div id="secondary-list" class="mt-2"></div>
-      </div>
+
+  <div class="row mb-4">
+    <div class="col-md-3 offset-md-3 d-grid">
+      <button type="button" id="download-tsv" class="btn btn-primary btn-block">Download (TSV)</button>
     </div>
-  </div>
-</div>
-
-<div class="row mb-2">
-  <div class="col-md-6 offset-md-3 d-grid">
-    <button type="button" id="view-colo" class="btn btn-primary btn-lg btn-block">View Colocalization Data</button>
-  </div>
-</div>
-
-<div class="row mb-4">
-  <div class="col-md-3 offset-md-3 d-grid">
-    <button type="button" id="download-tsv" class="btn btn-primary btn-block">Download (TSV)</button>
-  </div>
-  <div class="col-md-3 d-grid">
-    <button type="button" id="download-gml" class="btn btn-primary btn-block">Download (GML)</button>
+    <div class="col-md-3 d-grid">
+      <button type="button" id="download-gml" class="btn btn-primary btn-block">Download (GML)</button>
+    </div>
   </div>
 </div>

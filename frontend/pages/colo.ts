@@ -9,6 +9,40 @@ interface PageData {
   genomes: Record<string, string>
 }
 
+// === Availability ===
+// The picker cannot currently produce a valid (genome, track, cell_type)
+// combination: ChipAtlas::Analysis.colo_result_by_genome
+// (lib/models/analysis.rb) has no reliable signal for which
+// (antigen, cell-type-class) pairs actually have a precomputed colo result
+// file on the archive -- see Q2 in
+// docs/superpowers/plans/2026-09-18-post-parity-fixes.md ("Who produces the
+// Colocalization index?"), still pending the collaborator as of
+// 2026-09-19. Every entry the picker offers today routes through a
+// `cell_list` of "-" (no known cell types), which the real archive 404s on
+// for every combination -- this is a live navbar entry that fails on every
+// query, not an edge case.
+//
+// Rather than present a full picker that always fails, show an honest
+// "temporarily unavailable" notice and hide the picker -- the same
+// treatment Diff Analysis got in this fix wave for its own defunct compute
+// backend (see frontend/pages/diff-analysis.ts's Availability section).
+// Unlike that page, there is no backend health check to poll here (the
+// picker is unavailable by construction, not intermittently), so this is a
+// static switch rather than a runtime check.
+//
+// /colo_result itself is NOT gated by this -- it renders correctly given
+// real (genome, track, cell_type) query params (see colo-result.ts /
+// ChipAtlas::ColoTsv); only the picker that can no longer produce valid
+// params is disabled here.
+//
+// TO RE-ENABLE: once a real colo index lands (Q2) and
+// Analysis.colo_result_by_genome reflects it, flip this to `false`. That is
+// the only change needed here.
+const COLO_PICKER_UNAVAILABLE = true
+
+const UNAVAILABLE_MESSAGE =
+  'Colocalization search is temporarily unavailable while the colocalization index is rebuilt upstream. Please check back later.'
+
 let currentGenome = ''
 let currentPrimary = ''
 let currentSecondary = ''
@@ -65,6 +99,14 @@ function buildLinkParams(): URLSearchParams | null {
 }
 
 async function init(): Promise<void> {
+  if (COLO_PICKER_UNAVAILABLE) {
+    const notice = $('colo-unavailable-notice')
+    notice.textContent = UNAVAILABLE_MESSAGE
+    notice.hidden = false
+    $('colo-picker').hidden = true
+    return
+  }
+
   const data = readPageData()
   const pInput = $('primary-input') as HTMLInputElement
   const sInput = $('secondary-input') as HTMLInputElement
