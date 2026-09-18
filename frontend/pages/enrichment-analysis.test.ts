@@ -19,7 +19,7 @@
 
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { buildEnrichmentParams, qvalCodeToThreshold, type EnrichmentFormState } from './enrichment-analysis'
+import { applyDatasetBGateTransition, buildEnrichmentParams, qvalCodeToThreshold, type EnrichmentFormState } from './enrichment-analysis'
 
 // ===== qvalCodeToThreshold — the two-encodings hazard =====
 
@@ -133,4 +133,103 @@ test('buildEnrichmentParams: distanceUp/distanceDown are sent on every submissio
     assert.equal(params.distanceUp, '1000')
     assert.equal(params.distanceDown, '2000')
   }
+})
+
+// ===== applyDatasetBGateTransition — Task C5 =====
+//
+// Dataset A gene-list gate: Dataset B's RefSeq/user-gene-list options are
+// only selectable while Dataset A is a gene list. Closing the gate must not
+// silently discard a gene-list-only Dataset B selection — it should be
+// restored when the gate reopens, unless the user deliberately abandoned it
+// while the gate was still open.
+
+test('applyDatasetBGateTransition: no-op on the very first call (prevGeneMode null)', () => {
+  const r = applyDatasetBGateTransition(null, false, 'rnd', null)
+  assert.deepEqual(r, { bType: 'rnd', stashed: null })
+})
+
+test('applyDatasetBGateTransition: no-op when the gate does not transition', () => {
+  // Same mode both sides — e.g. a manual Dataset B change while the gate
+  // stays open, or a Dataset A change that does not cross the gene/non-gene
+  // boundary (bed -> count).
+  const openOpen = applyDatasetBGateTransition(true, true, 'refseq', null)
+  assert.deepEqual(openOpen, { bType: 'refseq', stashed: null })
+
+  const closedClosed = applyDatasetBGateTransition(false, false, 'bed', null)
+  assert.deepEqual(closedClosed, { bType: 'bed', stashed: null })
+})
+
+test('applyDatasetBGateTransition: closing while a gene-only option is selected stashes it and falls back to rnd', () => {
+  const refseq = applyDatasetBGateTransition(true, false, 'refseq', null)
+  assert.deepEqual(refseq, { bType: 'rnd', stashed: 'refseq' })
+
+  const userlist = applyDatasetBGateTransition(true, false, 'userlist', null)
+  assert.deepEqual(userlist, { bType: 'rnd', stashed: 'userlist' })
+})
+
+test('applyDatasetBGateTransition: closing while rnd/bed is selected stashes nothing and leaves the selection alone', () => {
+  const rnd = applyDatasetBGateTransition(true, false, 'rnd', null)
+  assert.deepEqual(rnd, { bType: 'rnd', stashed: null })
+
+  const bed = applyDatasetBGateTransition(true, false, 'bed', null)
+  assert.deepEqual(bed, { bType: 'bed', stashed: null })
+})
+
+test('applyDatasetBGateTransition: reopening restores a pending stash', () => {
+  const r = applyDatasetBGateTransition(false, true, 'rnd', 'userlist')
+  assert.deepEqual(r, { bType: 'userlist', stashed: null })
+})
+
+test('applyDatasetBGateTransition: reopening with no stash leaves the current selection alone', () => {
+  const r = applyDatasetBGateTransition(false, true, 'rnd', null)
+  assert.deepEqual(r, { bType: 'rnd', stashed: null })
+})
+
+test('applyDatasetBGateTransition: full open -> close -> open cycle restores the abandoned selection', () => {
+  // Gate open, user picks 'userlist'.
+  let stashed: string | null = null
+  // Gate closes (Dataset A switches away from gene list): userlist is
+  // gene-only, so it gets stashed and Dataset B falls back to rnd.
+  let step = applyDatasetBGateTransition(true, false, 'userlist', stashed)
+  assert.deepEqual(step, { bType: 'rnd', stashed: 'userlist' })
+  stashed = step.stashed
+
+  // Gate reopens: the stashed 'userlist' comes back.
+  step = applyDatasetBGateTransition(false, true, 'rnd', stashed)
+  assert.deepEqual(step, { bType: 'userlist', stashed: null })
+  stashed = step.stashed
+
+  // A second close/open cycle, starting from the restored 'userlist',
+  // behaves the same way rather than drifting.
+  step = applyDatasetBGateTransition(true, false, 'userlist', stashed)
+  assert.deepEqual(step, { bType: 'rnd', stashed: 'userlist' })
+  stashed = step.stashed
+
+  step = applyDatasetBGateTransition(false, true, 'rnd', stashed)
+  assert.deepEqual(step, { bType: 'userlist', stashed: null })
+})
+
+test('applyDatasetBGateTransition: a selection deliberately abandoned while the gate is open is not resurrected', () => {
+  // Gate open with 'refseq' selected (e.g. just restored from an earlier
+  // close). The user then manually switches Dataset B to 'rnd' while
+  // Dataset A stays a gene list — no gate transition happens at that
+  // moment, so applyDatasetBGateTransition is not even invoked; 'rnd' is
+  // simply what's live going into the next transition.
+  //
+  // Gate closes: the live selection is 'rnd', not the abandoned 'refseq',
+  // so nothing gene-list-only gets stashed.
+  let step = applyDatasetBGateTransition(true, false, 'rnd', null)
+  assert.deepEqual(step, { bType: 'rnd', stashed: null })
+
+  // Gate reopens: no stash pending, so 'refseq' is not wrongly restored.
+  step = applyDatasetBGateTransition(false, true, 'rnd', step.stashed)
+  assert.deepEqual(step, { bType: 'rnd', stashed: null })
+})
+
+test('applyDatasetBGateTransition: closing supersedes (does not merge with) a stale prior stash', () => {
+  // Defensive case: if a stash were somehow still pending going into a
+  // close transition, the live selection at close time wins outright —
+  // the stash is replaced or cleared, never merged.
+  const r = applyDatasetBGateTransition(true, false, 'bed', 'refseq')
+  assert.deepEqual(r, { bType: 'bed', stashed: null })
 })

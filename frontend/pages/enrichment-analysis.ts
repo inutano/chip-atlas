@@ -120,12 +120,77 @@ function getCheckedValue(name: string): string {
   return r?.value || ''
 }
 
+// Task C5: module-level so the gate-transition state survives across calls
+// to syncDatasetBVisibility (one per dataA-type/dataB-type change event).
+// prevDatasetBGateOpen starts null so the very first call — page load,
+// before any user interaction — never counts as a transition.
+let prevDatasetBGateOpen: boolean | null = null
+let stashedDatasetBSelection: string | null = null
+
+// Pure decision logic for Task C5, kept separate from the DOM reads/writes
+// in syncDatasetBVisibility below — the same separation buildEnrichmentParams
+// uses so it can be unit-tested without a DOM (see enrichment-analysis.test.ts).
+//
+// Dataset B's RefSeq/user-gene-list options are gene-list-mode only; when
+// Dataset A stops being a gene list those two get disabled, and whichever of
+// them was selected can no longer stay selected. Forcing Dataset B back to
+// Random permutation at that point is still correct — but doing *only* that
+// throws the user's choice away for good. This stashes the discarded
+// selection instead and restores it the next time gene-list mode reopens.
+//
+// The "did the user abandon it on purpose" case is handled by *what* gets
+// stashed, not by tracking history: only the option live at the instant the
+// gate closes is a candidate for restoring. If the user manually switches
+// Dataset B to Random permutation while the gate is still open (no
+// open/close transition happening at that moment, so this function isn't
+// even called), that is what's live when the gate next closes — so nothing
+// gene-list-only is stashed, and reopening correctly leaves Random
+// permutation in place instead of resurrecting the option they walked away
+// from. Repeated open/close cycles each re-derive the stash from whatever
+// is live at that moment, so they compound correctly instead of drifting.
+export function applyDatasetBGateTransition(
+  prevGeneMode: boolean | null,
+  isGeneMode: boolean,
+  currentBType: string,
+  stashed: string | null,
+): { bType: string; stashed: string | null } {
+  if (prevGeneMode === null || prevGeneMode === isGeneMode) {
+    // No transition: leave the current selection and stash untouched.
+    return { bType: currentBType, stashed }
+  }
+  if (prevGeneMode && !isGeneMode) {
+    // Gate just closed. A gene-list-only selection can't survive; stash it
+    // and fall back to Random permutation. Anything else (rnd/bed) is
+    // already valid with the gate closed, so there's nothing to stash —
+    // and any previously stashed value is now stale (superseded by
+    // whichever selection was actually live) and must be dropped.
+    const isGeneOnly = currentBType === 'refseq' || currentBType === 'userlist'
+    return isGeneOnly ? { bType: 'rnd', stashed: currentBType } : { bType: currentBType, stashed: null }
+  }
+  // Gate just reopened. Restore the stash if one is pending; otherwise
+  // leave the current selection alone.
+  return stashed ? { bType: stashed, stashed: null } : { bType: currentBType, stashed: null }
+}
+
 function syncDatasetBVisibility(): void {
   const aType = getCheckedValue('dataA-type')
-  const bType = getCheckedValue('dataB-type')
+  const isGeneMode = aType === 'gene'
+
+  const transition = applyDatasetBGateTransition(
+    prevDatasetBGateOpen,
+    isGeneMode,
+    getCheckedValue('dataB-type'),
+    stashedDatasetBSelection,
+  )
+  stashedDatasetBSelection = transition.stashed
+  prevDatasetBGateOpen = isGeneMode
+
+  const bType = transition.bType
+  if (getCheckedValue('dataB-type') !== bType) {
+    (document.getElementById(`dataB-${bType}`) as HTMLInputElement).checked = true
+  }
 
   // Refseq + userlist are gene-list-mode only
-  const isGeneMode = aType === 'gene'
   ;(document.getElementById('dataB-refseq') as HTMLInputElement).disabled = !isGeneMode
   ;(document.getElementById('dataB-userlist') as HTMLInputElement).disabled = !isGeneMode
 
