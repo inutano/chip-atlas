@@ -48,6 +48,16 @@ module ChipAtlas
             halt 503, json_response({ error: 'No compute backend available', retry: false })
           when :submission_rejected
             halt 502, json_response({ error: 'Compute backend rejected the submission', retry: false })
+          else
+            # ComputeRouter.submit's contract only ever returns nil,
+            # :backend_unavailable or :submission_rejected (see
+            # lib/services/compute_router.rb) -- this branch should be
+            # unreachable. It exists so that if that contract is ever
+            # violated, this route fails closed with a 500 instead of
+            # falling through Sinatra's `case` with no halt/json_response,
+            # which would otherwise send the client an empty 200 that reads
+            # as "job submitted" for a submission that never happened.
+            halt 500, json_response({ error: 'Unexpected compute router response', retry: false })
           end
         end
 

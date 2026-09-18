@@ -114,6 +114,36 @@ class JobsTest < Minitest::Test
     assert_equal 999, captured['threshold'] # dmr
   end
 
+  # --- review round (D12 minor #1): the `case` in /jobs/submit must fail
+  # closed, not fall through to an empty 200 that reads as "job submitted"
+  # ---
+
+  def test_jobs_submit_fails_closed_with_500_if_compute_router_ever_returns_an_unrecognized_shape
+    stub_module_method(ChipAtlas::ComputeRouter, :submit, { error: :something_new_and_unexpected }) do
+      post_json '/jobs/submit', { type: 'enrichment_analysis', params: { genome: 'hg38' } }
+    end
+    assert_equal 500, last_response.status
+    data = JSON.parse(last_response.body)
+    assert_equal 'Unexpected compute router response', data['error']
+  end
+
+  # --- review round (D12 minor #2): pin what an unrecognized antigenClass
+  # does on the full route, not just inside WabiService (see
+  # wabi_service_test.rb for the unit-level assertions on the message
+  # itself). diff_analysis maps to no backends today, so temporarily give
+  # it one the same way the C2 merge test above does. ---
+
+  def test_jobs_submit_raises_for_diff_analysis_with_an_unrecognized_antigen_class
+    ChipAtlas::WabiService.poster = ->(_params) { flunk 'must not reach the poster -- the raise happens before posting' }
+    stub_const(ChipAtlas::ComputeRouter, :JOB_TYPE_BACKENDS, { 'diff_analysis' => ['wabi'] }) do
+      stub_module_method(ChipAtlas::ServiceMonitor, :status, true) do
+        assert_raises(ChipAtlas::WabiService::UnknownAntigenClass) do
+          post_json '/jobs/submit', { type: 'diff_analysis', params: { genome: 'hg38', antigenClass: 'bogus' } }
+        end
+      end
+    end
+  end
+
   def test_jobs_submit_succeeds_and_the_server_merged_enrichment_analysis_operational_fields_only
     captured = nil
     ChipAtlas::WabiService.poster = lambda { |params|

@@ -1214,6 +1214,18 @@ paths:
                   backend:
                     type: string
                     description: Compute backend handling the job
+        "503":
+          description: >-
+            No compute backend serves this job type right now (either none
+            is configured to, or the one that is is unreachable). Body is
+            `{"error": "No compute backend available", "retry": false}`.
+        "502":
+          description: >-
+            A compute backend was reached but rejected the submission (its
+            response could not be parsed into a job ID) - distinct from 503
+            so a client, or whoever is debugging, can tell "nothing was
+            listening" apart from "something answered and said no". Body is
+            `{"error": "Compute backend rejected the submission", "retry": false}`.
 
   /jobs/{id}/status:
     get:

@@ -100,6 +100,30 @@ class WabiServiceTest < Minitest::Test
     assert_equal 'text', captured['format']
   end
 
+  # --- review round: pin what an unrecognized antigenClass does (D12 minor #2) ---
+  #
+  # A bare KeyError from DIFF_ANALYSIS_THRESHOLD_BY_ANTIGEN_CLASS.fetch would
+  # fail loudly too, but with no context in the message. This is exactly the
+  # kind of thing that must be pinned by a test -- an untested "fails loudly"
+  # path is how the original qval-as-threshold bug shipped in the first
+  # place (see qvalCodeToThreshold's own comment in enrichment-analysis.ts).
+
+  def test_diff_analysis_with_an_unrecognized_antigen_class_raises_a_named_error_instead_of_guessing
+    ChipAtlas::WabiService.poster = ->(_params) { flunk 'must not reach the poster -- the raise happens during merge, before posting' }
+    error = assert_raises(ChipAtlas::WabiService::UnknownAntigenClass) do
+      ChipAtlas::WabiService.submit_job('diff_analysis', { 'antigenClass' => 'not-a-real-experiment-type' })
+    end
+    assert_match(/not-a-real-experiment-type/, error.message)
+    assert_match(/diffbind/, error.message)
+    assert_match(/dmr/, error.message)
+  end
+
+  def test_diff_analysis_with_a_missing_antigen_class_also_raises
+    assert_raises(ChipAtlas::WabiService::UnknownAntigenClass) do
+      ChipAtlas::WabiService.submit_job('diff_analysis', { 'genome' => 'hg38' }) # no antigenClass at all
+    end
+  end
+
   def test_submit_job_extracts_the_request_id_from_the_wabi_response_body
     ChipAtlas::WabiService.poster = ->(_params) { "someOtherField\tvalue\nrequestId\tABC123\n" }
     job_id = ChipAtlas::WabiService.submit_job('enrichment_analysis', { 'genome' => 'hg38' })

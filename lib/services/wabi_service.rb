@@ -54,6 +54,16 @@ module ChipAtlas
     # and BedExtensionResolver's LiveProbeNotStubbed for the same pattern).
     LiveSubmitNotStubbed = Class.new(StandardError)
 
+    # Raised when a diff-analysis submission's antigenClass isn't one of the
+    # keys DIFF_ANALYSIS_THRESHOLD_BY_ANTIGEN_CLASS knows how to map to a
+    # threshold. A bare KeyError from Hash#fetch would say the same thing
+    # but without enough context to debug from a stack trace alone; this
+    # names the failure and says what was expected, same as
+    # qvalCodeToThreshold (frontend/pages/enrichment-analysis.ts) refusing
+    # to guess a threshold for an unparseable qval code rather than
+    # forwarding a wrong-encoding value silently.
+    UnknownAntigenClass = Class.new(StandardError)
+
     TEST_ENV_VALUES = %w[test].freeze
 
     @poster = nil
@@ -113,7 +123,11 @@ module ChipAtlas
       return merged unless job_type == 'diff_analysis'
 
       merged = merged.merge(DIFF_ANALYSIS_OPERATIONAL_PARAMS)
-      merged['threshold'] = DIFF_ANALYSIS_THRESHOLD_BY_ANTIGEN_CLASS.fetch(params['antigenClass'])
+      merged['threshold'] = DIFF_ANALYSIS_THRESHOLD_BY_ANTIGEN_CLASS.fetch(params['antigenClass']) do
+        raise UnknownAntigenClass,
+              "WabiService: diff analysis submitted with antigenClass #{params['antigenClass'].inspect} -- " \
+              "expected one of #{DIFF_ANALYSIS_THRESHOLD_BY_ANTIGEN_CLASS.keys.inspect}. Refusing to guess a threshold."
+      end
       merged
     end
 
