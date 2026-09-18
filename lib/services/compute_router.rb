@@ -26,7 +26,11 @@ module ChipAtlas
 
       case route[:backend]
       when 'wabi'
-        job_id = ChipAtlas::WabiService.submit_job(params)
+        # job_type is threaded through so WabiService can merge in the
+        # operational fields for the right job type (task C2) — the merge
+        # differs between enrichment_analysis and diff_analysis and cannot
+        # be decided from params alone.
+        job_id = ChipAtlas::WabiService.submit_job(job_type, params)
         job_id ? { backend: 'wabi', job_id: job_id } : nil
       when 'wes'
         job_id = ChipAtlas::SapporoService.submit_job(params)
