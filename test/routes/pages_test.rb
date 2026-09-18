@@ -11,7 +11,7 @@ class PagesTest < Minitest::Test
   end
 
   PAGES = %w[
-    / /peak_browser /search /colo /target_genes /target_genes_result
+    / /peak_browser /search /colo /colo_result /target_genes /target_genes_result
     /enrichment_analysis /diff_analysis /publications /agents /demo
   ].freeze
 
@@ -256,6 +256,38 @@ class PagesTest < Minitest::Test
     assert_includes body, 'id="secondary-list"'
     assert_includes body, 'col-md-3'
     refute_includes body, 'col-md-4', '/colo panels must match production col-md-3, not col-md-4'
+  end
+
+  def test_colo_ships_an_honest_unavailable_notice_and_a_hideable_picker
+    # The picker (frontend/pages/colo.ts, COLO_PICKER_UNAVAILABLE) can't
+    # currently produce a valid (genome, track, cell_type) combination --
+    # see item 6 of docs/superpowers/plans/2026-09-18-post-parity-fixes.md's
+    # final fix wave. The server-rendered markup must ship both the notice
+    # (hidden by default; JS un-hides it) and a single wrapper the JS can
+    # hide around the whole picker, so re-enabling the picker later is a
+    # one-line JS change with no markup change required.
+    get '/colo'
+    body = last_response.body
+    assert_includes body, 'id="colo-unavailable-notice"'
+    assert_includes body, 'id="colo-picker"'
+  end
+
+  def test_colo_result_has_legends_download_links_and_a_result_table
+    get '/colo_result'
+    body = last_response.body
+    assert_includes body, 'id="result-summary"'
+    assert_includes body, 'id="download-tsv"'
+    assert_includes body, 'id="download-gml"'
+    assert_includes body, 'class="tg-legend"'
+    assert_includes body, 'id="loading-state"'
+    assert_includes body, 'id="error-state"'
+    assert_includes body, 'id="result-wrap"'
+    assert_includes body, 'id="experiments-toggle"'
+    assert_includes body, '<summary'
+    assert_includes body, 'id="result-table-wrap"'
+    assert_includes body, 'id="result-thead-row"'
+    assert_includes body, 'id="result-tbody"'
+    assert_includes body, 'id="row-count"'
   end
 
   def test_analysis_pages_have_a_tutorial_dropdown

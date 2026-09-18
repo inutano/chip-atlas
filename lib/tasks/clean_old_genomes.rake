@@ -91,6 +91,21 @@ namespace :db do
     DB.run("VACUUM")
     puts "VACUUM complete."
     puts
+
+    # This task deletes from `experiments` by genome and independently
+    # rebuilds `experiments_fts` by filtering each row's (possibly
+    # comma-separated) genome field against SUPPORTED_GENOMES - two
+    # separate passes over two separate keys (genome vs. experiment_id)
+    # that are not guaranteed to agree row-for-row. That is exactly the
+    # orphan shape task A3 closed (see ChipAtlas::ExperimentSearch's
+    # comment on assert_no_orphaned_fts_rows!): an experiments_fts row
+    # with no matching experiments row, which 404s on /view. Fail loudly
+    # here rather than silently reintroducing it.
+    puts "Checking for orphaned experiments_fts rows..."
+    ChipAtlas::ExperimentSearch.assert_no_orphaned_fts_rows!
+    puts "  OK: no orphaned experiments_fts rows"
+    puts
+
     puts "=== Done ==="
   end
 end
