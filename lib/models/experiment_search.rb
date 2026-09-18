@@ -13,9 +13,9 @@ module ChipAtlas
     # each other. This used to be an accident: the `experiments` table loaded
     # from experimentList.tab (which includes them) while `experiments_fts`
     # loaded from a separate, stale ExperimentList_adv.json (which happened
-    # not to). Now that both stores load from the same file in the same pass
-    # (see ChipAtlas::Experiment.load_from_files), the exclusion has to be
-    # written down explicitly - this is that rule.
+    # not to). Now that both stores load from the same two files in the same
+    # pass (see ChipAtlas::Experiment.load_from_files(table_path, json_path)),
+    # the exclusion has to be written down explicitly - this is that rule.
     NOT_INDEXED_TRACK_CLASSES = ['Annotation tracks'].freeze
 
     module_function

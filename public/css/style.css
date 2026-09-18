@@ -562,12 +562,16 @@ select.list-box option {
 
 #result-table-wrap {
   overflow-x: auto;
-  /* Expanded, #result-table can be 130+ columns of unbreakable
-     (white-space:nowrap) header text — tens of thousands of pixels of
-     intrinsic content width. overflow-x:auto here does correctly contain
-     and internally scroll that: this element's own clientWidth/scrollWidth
-     stay bounded to the viewport throughout, confirmed live (see the fix
-     report). But without `contain`, that intrinsic width still reaches
+  /* #result-table-wrap is shared markup: target_genes_result.erb,
+     search.erb, and colo_result.erb all use this same id, so this rule
+     protects all three, not just Target Genes. The worst case stays
+     Target Genes's own: expanded, #result-table there can be 130+ columns
+     of unbreakable (white-space:nowrap) header text — tens of thousands of
+     pixels of intrinsic content width. overflow-x:auto here does correctly
+     contain and internally scroll that: this element's own
+     clientWidth/scrollWidth stay bounded to the viewport throughout,
+     confirmed live (see the fix report). But without `contain`, that
+     intrinsic width still reaches
      document.documentElement (not document.body — this is specifically a
      quirk of the root <html> element's own reported scrollWidth) and, in
      mobile viewport emulation, the browser's viewport-fitting logic widens
