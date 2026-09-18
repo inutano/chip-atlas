@@ -318,23 +318,40 @@ components:
 
     DiffAnalysisParams:
       type: object
-      description: params for type=diff_analysis.
+      description: >-
+        params for type=diff_analysis. Diff Analysis's WABI mapping differs
+        from Enrichment Analysis's: antigenClass here is the diffbind/dmr
+        experiment-type radio, not an antigen, and bedAFile/bedBFile are
+        newline-joined experiment ID strings, not arrays. typeA, typeB,
+        cellClass, permTime and threshold are constants/operational values
+        with no UI control on either site (e.g. threshold is 50 for
+        diffbind or 999 for dmr, keyed on antigenClass, and is unrelated to
+        Enrichment Analysis's user-facing threshold) - they are not sent by
+        the frontend and are not documented here; a later task has
+        WabiService merge them in alongside address/format/result/
+        sbatchOptions.
       properties:
         genome:
           $ref: "#/components/schemas/GenomeAssembly"
-        analysis:
+        antigenClass:
           type: string
+          description: >-
+            The experiment-type radio (dmr or diffbind) - WABI's name for
+            this field is shared with Enrichment Analysis's track_class,
+            but the value it carries here is unrelated.
           enum: [dmr, diffbind]
-        dataA_ids:
-          type: array
-          items:
-            type: string
-          description: Dataset A experiment IDs (SRX/GSM)
-        dataB_ids:
-          type: array
-          items:
-            type: string
-          description: Dataset B experiment IDs (SRX/GSM)
+        bedAFile:
+          type: string
+          description: >-
+            Dataset A experiment IDs (SRX/GSM), newline-joined into a
+            single string - not a JSON array.
+          example: "SRX4099758\nSRX3481056\nSRX3481057"
+        bedBFile:
+          type: string
+          description: >-
+            Dataset B experiment IDs (SRX/GSM), newline-joined into a
+            single string - not a JSON array.
+          example: "SRX3481056\nSRX3481057"
         title:
           type: string
           description: Analysis title
@@ -346,9 +363,9 @@ components:
           description: Dataset B title (WABI's name for dataB_title)
       required:
         - genome
-        - analysis
-        - dataA_ids
-        - dataB_ids
+        - antigenClass
+        - bedAFile
+        - bedBFile
         - title
         - descriptionA
         - descriptionB

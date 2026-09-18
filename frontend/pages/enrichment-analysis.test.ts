@@ -39,6 +39,15 @@ test('qvalCodeToThreshold: "50" (strictest file code) -> "500" (loosest WABI thr
   assert.equal(qvalCodeToThreshold('50'), '500')
 })
 
+test('qvalCodeToThreshold: throws on an unparseable code rather than forwarding it as a threshold', () => {
+  // Submission-time, not display-only (contrast facet-filter.ts's
+  // qvalLabel, which falls back to the raw string): there is no safe guess
+  // to fall back to here, so an unrecognized code must fail loudly rather
+  // than silently reach WABI as `threshold`.
+  assert.throws(() => qvalCodeToThreshold(''), /unparseable qval code/)
+  assert.throws(() => qvalCodeToThreshold('not-a-code'), /unparseable qval code/)
+})
+
 // ===== buildEnrichmentParams — full WABI field-name payload =====
 
 const baseForm: EnrichmentFormState = {

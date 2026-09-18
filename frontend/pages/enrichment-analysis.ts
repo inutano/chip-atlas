@@ -71,9 +71,22 @@ const HELP_TEXT: Record<string, string> = {
 // Conflating the two encodings is the exact hazard this function exists to
 // prevent: sending "50" (the strictest *label*) would land as threshold=50,
 // which is actually the loosest setting under the code encoding.
+//
+// Unlike qvalLabel (display-only — the worst case there is a mislabeled
+// dropdown), this feeds a live submission to WABI. An unparseable code has
+// no safe fallback to guess at, so this throws rather than silently
+// forwarding the raw (wrong-encoding) code as if it were already a
+// threshold — the same trap that put the file-suffix code on the wire as
+// `qval` in the first place. In practice the facet is always populated
+// from /api/qval_range's four fixed codes ("05"/"10"/"20"/"50"), so this is
+// unreachable today; but "unreachable today" is exactly the assumption
+// that let that original bug ship, so this does not rely on it silently.
 export function qvalCodeToThreshold(code: string): string {
   const n = parseInt(code, 10)
-  return Number.isNaN(n) ? code : String(n * 10)
+  if (Number.isNaN(n)) {
+    throw new Error(`qvalCodeToThreshold: unparseable qval code "${code}" — refusing to guess a WABI threshold`)
+  }
+  return String(n * 10)
 }
 
 let currentGenome = ''
@@ -291,21 +304,26 @@ async function init(): Promise<void> {
     const dataAText = ($('dataA-text') as HTMLTextAreaElement).value.trim()
     if (!dataAText) { status.textContent = 'Dataset A is empty.'; return }
 
-    const params = buildEnrichmentParams(condition, {
-      aType,
-      bType,
-      dataAText,
-      dataBText: ($('dataB-text') as HTMLTextAreaElement).value,
-      title: ($('title') as HTMLInputElement).value,
-      dataATitle: ($('dataA-title') as HTMLInputElement).value,
-      dataBTitle: ($('dataB-title') as HTMLInputElement).value,
-      permTime: getCheckedValue('dataB-perm'),
-      distanceUp: ($('distance-up') as HTMLInputElement).value,
-      distanceDown: ($('distance-down') as HTMLInputElement).value,
-    })
-
     status.textContent = 'Submitting…'
     try {
+      // buildEnrichmentParams (and qvalCodeToThreshold inside it) is called
+      // inside this try, not before it: qvalCodeToThreshold throws on an
+      // unparseable qval code rather than guessing, and that throw must
+      // surface as a reported submit failure, not an unhandled promise
+      // rejection that leaves the button silently inert.
+      const params = buildEnrichmentParams(condition, {
+        aType,
+        bType,
+        dataAText,
+        dataBText: ($('dataB-text') as HTMLTextAreaElement).value,
+        title: ($('title') as HTMLInputElement).value,
+        dataATitle: ($('dataA-title') as HTMLInputElement).value,
+        dataBTitle: ($('dataB-title') as HTMLInputElement).value,
+        permTime: getCheckedValue('dataB-perm'),
+        distanceUp: ($('distance-up') as HTMLInputElement).value,
+        distanceDown: ($('distance-down') as HTMLInputElement).value,
+      })
+
       const result = await submitJob({ type: 'enrichment_analysis', params })
       window.location.href = `/enrichment_analysis_result?id=${encodeURIComponent(result.job_id)}&backend=${encodeURIComponent(result.backend)}`
     } catch (err) {
