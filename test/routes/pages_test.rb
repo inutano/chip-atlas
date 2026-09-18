@@ -238,4 +238,33 @@ class PagesTest < Minitest::Test
       assert_includes last_response.body, 'chip-atlas.svg#question-circle'
     end
   end
+
+  # --- the shared not_found handler (routes/pages.rb) ---
+  #
+  # Sinatra re-runs the registered `error 404`/`not_found` handler for ANY
+  # response that ends at status 404 - including a route's own explicit
+  # `halt 404, json_response(...)` - not only a genuine routing miss (see
+  # Sinatra::Base#call!: `invoke { error_block!(response.status) }` runs
+  # unconditionally unless an exception was raised). Left unguarded, that
+  # meant the HTML `not_found.erb` page silently replaced the JSON body of
+  # every `/api/*` 404, while keeping the already-set
+  # `content-type: application/json` header - a client saw a JSON
+  # content-type with an HTML payload. See task B2's report for how this
+  # was found and its blast radius.
+
+  def test_an_unmatched_page_path_still_gets_the_html_not_found_page
+    get '/this_page_definitely_does_not_exist'
+    assert_equal 404, last_response.status
+    assert_includes last_response.body, 'ChIP-Atlas: 404'
+    assert_includes last_response.content_type.to_s, 'text/html'
+  end
+
+  def test_an_unmatched_api_path_gets_a_json_not_found_body_not_html
+    get '/api/this_endpoint_does_not_exist'
+    assert_equal 404, last_response.status
+    assert_equal 'application/json', last_response.content_type.to_s.split(';').first
+    data = JSON.parse(last_response.body)
+    assert_equal 'Not found', data['error']
+    refute_includes last_response.body, '<html', 'an unmatched /api/* path must not fall back to the HTML page'
+  end
 end

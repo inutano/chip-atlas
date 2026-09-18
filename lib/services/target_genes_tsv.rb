@@ -16,8 +16,9 @@ module ChipAtlas
   #   col n        STRING                STRING interaction score
   # Column count and the exact header names vary by antigen/genome, so
   # nothing here hardcodes 134 or "<Track>|Average" — the average column is
-  # found positionally (index 1) with a "|Average" suffix check as a sanity
-  # backstop (see #average_column_index).
+  # found by its "|Average" suffix, falling back to the fixed positional
+  # index (1) only if no header carries that suffix (see
+  # #average_column_index).
   #
   # === Caching strategy ===
   #

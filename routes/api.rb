@@ -173,7 +173,7 @@ module ChipAtlas
                 else halt 400, json_response({ error: "Unknown format: #{params[:format]}. Available: tsv, gml" })
                 end
           body = ChipAtlas::DataProxy.fetch(url)
-          halt 404, 'File not found' unless body
+          halt 404, json_response({ error: 'File not found' }) unless body
           content_type params[:format] == 'tsv' ? 'text/tab-separated-values' : 'application/xml'
           attachment "#{params[:track]}.#{params[:cell_type]}.#{params[:format]}"
           body
@@ -212,7 +212,7 @@ module ChipAtlas
                 else halt 400, json_response({ error: "Unknown format: #{params[:format]}. Available: tsv" })
                 end
           body = ChipAtlas::DataProxy.fetch(url)
-          halt 404, 'File not found' unless body
+          halt 404, json_response({ error: 'File not found' }) unless body
           content_type 'text/tab-separated-values'
           attachment "#{params[:track]}.#{params[:distance]}.tsv"
           body

@@ -221,12 +221,19 @@ class ApiTest < Minitest::Test
     ChipAtlas::TargetGenesTsv.fetcher = nil
   end
 
+  # This also doubles as a regression test for the shared not_found handler
+  # (routes/pages.rb, see test/routes/pages_test.rb for the general case):
+  # asserting the SPECIFIC 'Target genes data not found' message - not just
+  # a 404 status - is what would fail if that handler's JSON-body guard
+  # were ever reverted, since Sinatra would then silently replace this
+  # body with the generic HTML not_found page.
   def test_target_genes_missing_combination_returns_404
     ChipAtlas::TargetGenesTsv.fetcher = ->(_url) { nil }
 
     get '/api/target_genes', genome: 'mm10', track: 'NoSuchTrack', distance: '1'
 
     assert_equal 404, last_response.status
+    assert_equal 'application/json', last_response.content_type.to_s.split(';').first
     data = JSON.parse(last_response.body)
     assert_equal 'Target genes data not found', data['error']
   ensure
@@ -261,6 +268,35 @@ class ApiTest < Minitest::Test
   def test_target_genes_missing_params_returns_400
     get '/api/target_genes', genome: 'mm10', track: 'Stat3'
     assert_equal 400, last_response.status
+  end
+
+  # --- download routes: 404 body now carries a JSON error, not bare text ---
+  #
+  # /api/colo/download and /api/target_genes/download call
+  # ChipAtlas::DataProxy.fetch directly (no fetcher hook - that's B5's/B2's
+  # respective preview endpoints only). Under this suite's --network none,
+  # the real Net::HTTP call fails and DataProxy.fetch rescues it to nil,
+  # exactly like a genuinely missing file would - no stub needed to reach
+  # the 404 path. These also serve as a second, independent regression
+  # check for the shared not_found handler (see pages_test.rb), on routes
+  # that have nothing to do with ChipAtlas::TargetGenesTsv.
+
+  def test_colo_download_missing_file_returns_404_with_json_body
+    get '/api/colo/download', genome: 'mm10', track: 'NoSuchTrack', cell_type: 'NoSuchCellType', format: 'tsv'
+
+    assert_equal 404, last_response.status
+    assert_equal 'application/json', last_response.content_type.to_s.split(';').first
+    data = JSON.parse(last_response.body)
+    assert_equal 'File not found', data['error']
+  end
+
+  def test_target_genes_download_missing_file_returns_404_with_json_body
+    get '/api/target_genes/download', genome: 'mm10', track: 'NoSuchTrack', distance: '1', format: 'tsv'
+
+    assert_equal 404, last_response.status
+    assert_equal 'application/json', last_response.content_type.to_s.split(';').first
+    data = JSON.parse(last_response.body)
+    assert_equal 'File not found', data['error']
   end
 
   # /api/remote_url_status must rescue the fuller set of transient upstream
