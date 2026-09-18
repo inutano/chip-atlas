@@ -3,7 +3,7 @@
 
 import { GenomeTabs } from '../components/genome-tabs'
 import { initInfoPopovers } from '../components/info-popover'
-import { submitJob, getEstimatedTime } from '../api/client'
+import { submitJob, getEstimatedTime, checkJobAvailability, type JobAvailability } from '../api/client'
 
 interface PageData {
   genomes: Record<string, string>
@@ -184,6 +184,69 @@ export function buildDiffAnalysisParams(form: DiffFormState): Record<string, unk
   }
 }
 
+// ===== Availability =====
+// GET /jobs/available?type=diff_analysis (routes/jobs.rb -> ComputeRouter,
+// see lib/services/compute_router.rb, Task C3/D12) is now the honest source
+// of truth: WABI does not currently serve diff analysis at all, so this
+// always comes back { backend: null, available: false } today, independent
+// of WABI's own reachability. Nothing on this page called it, so the user
+// still saw a complete, fillable form that could never actually submit.
+export const UNAVAILABLE_MESSAGE =
+  'Diff analysis is currently unavailable: no compute backend is serving this job type right now. Please check back later.'
+
+export interface AvailabilityUiState {
+  submitDisabled: boolean
+  noticeHidden: boolean
+  noticeText: string
+}
+
+// Pure so it can be unit-tested without a DOM (diff-analysis.test.ts) and so
+// the fail-safe decision below is made in exactly one place.
+//
+// `availability === null` means the availability check itself failed (a
+// network error, a non-2xx response, or a malformed body) -- not that the
+// backend reported itself unavailable. This deliberately fails OPEN: treat
+// a failed check the same as "available" and leave the form usable.
+// Reasoning:
+//   - The task brief requires the page to "still work when the backend *is*
+//     available" by default, i.e. the unavailable state must never be the
+//     thing a working page has to undo. A flaky /jobs/available request is
+//     not evidence the backend can't work; treating it as proof of
+//     unavailability would turn a transient network blip into a hard block.
+//   - Failing open cannot make a submission silently wrong: POST
+//     /jobs/submit independently re-checks ComputeRouter and returns 503
+//     when the backend genuinely isn't available (routes/jobs.rb), and this
+//     page's existing submit handler already turns that into a visible
+//     "Submit failed" message. So the worst case of failing open is a
+//     failed submit attempt the user can see and retry -- not a job that
+//     silently goes to the wrong place or a lost analysis.
+//   - Failing closed (treating a failed check as "unavailable") would be
+//     the safer-looking default on its face, but here it trades a visible,
+//     recoverable failure (a rejected submit) for an invisible, unrecoverable
+//     one (a working feature permanently hidden behind a banner because one
+//     fetch hiccuped), which is worse for this page.
+export function resolveAvailabilityUiState(availability: JobAvailability | null): AvailabilityUiState {
+  if (availability === null || availability.available) {
+    return { submitDisabled: false, noticeHidden: true, noticeText: '' }
+  }
+  return { submitDisabled: true, noticeHidden: false, noticeText: UNAVAILABLE_MESSAGE }
+}
+
+async function applyAvailability(): Promise<void> {
+  let availability: JobAvailability | null = null
+  try {
+    availability = await checkJobAvailability('diff_analysis')
+  } catch (err) {
+    console.error(err)
+    availability = null
+  }
+  const ui = resolveAvailabilityUiState(availability)
+  const notice = $('unavailable-notice')
+  notice.textContent = ui.noticeText
+  notice.hidden = ui.noticeHidden
+  ;($('submit-job') as HTMLButtonElement).disabled = ui.submitDisabled
+}
+
 async function init(): Promise<void> {
   const data = readPageData()
   const tabs = $('genome-tabs')
@@ -269,6 +332,8 @@ async function init(): Promise<void> {
 
   wireExampleLink('try-example-a', 'dataA-text', 'dataSetA')
   wireExampleLink('try-example-b', 'dataB-text', 'dataSetB')
+
+  void applyAvailability()
 
   $('submit-job').addEventListener('click', async () => {
     const idsA = parseIds(($('dataA-text') as HTMLTextAreaElement).value)

@@ -13,7 +13,7 @@
 
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { buildDiffAnalysisParams, createGenomeDatasetStore, type DiffFormState } from './diff-analysis'
+import { buildDiffAnalysisParams, createGenomeDatasetStore, resolveAvailabilityUiState, UNAVAILABLE_MESSAGE, type DiffFormState } from './diff-analysis'
 
 const baseForm: DiffFormState = {
   genome: 'hg38',
@@ -104,4 +104,36 @@ test('createGenomeDatasetStore: clear blanks only the given genome', () => {
   store.clear('hg38')
   assert.deepEqual(store.get('hg38'), { idsA: '', idsB: '' })
   assert.deepEqual(store.get('mm10'), { idsA: 'SRX3', idsB: 'SRX4' })
+})
+
+// ===== Availability UI state (Task C4 part 2, relocated from C3/D12) =====
+// GET /jobs/available?type=diff_analysis is now honest (ComputeRouter maps
+// diff_analysis to no backends), but nothing called it, so the page still
+// showed a complete, fillable form that could never submit. These tests pin
+// resolveAvailabilityUiState's decision table, in particular the fail-safe
+// choice for a failed check (availability === null): fail OPEN (leave the
+// form enabled), because POST /jobs/submit independently re-checks
+// ComputeRouter and fails a genuinely-unavailable submission on its own, so
+// nothing can be silently wrong -- see the function's own comment in
+// diff-analysis.ts for the full reasoning.
+
+test('resolveAvailabilityUiState: available -> submit enabled, notice hidden', () => {
+  const ui = resolveAvailabilityUiState({ backend: 'wabi', available: true })
+  assert.equal(ui.submitDisabled, false)
+  assert.equal(ui.noticeHidden, true)
+  assert.equal(ui.noticeText, '')
+})
+
+test('resolveAvailabilityUiState: unavailable -> submit disabled, notice shown with a message', () => {
+  const ui = resolveAvailabilityUiState({ backend: null, available: false })
+  assert.equal(ui.submitDisabled, true)
+  assert.equal(ui.noticeHidden, false)
+  assert.equal(ui.noticeText, UNAVAILABLE_MESSAGE)
+})
+
+test('resolveAvailabilityUiState: a failed check (null) fails OPEN -- same as available', () => {
+  const ui = resolveAvailabilityUiState(null)
+  assert.equal(ui.submitDisabled, false)
+  assert.equal(ui.noticeHidden, true)
+  assert.equal(ui.noticeText, '')
 })
