@@ -179,15 +179,28 @@ module ChipAtlas
           body
         end
 
-        # Target genes data (proxied from data server)
+        # Target genes result data: parsed, sorted, and paginated server-side
+        # from the precomputed TSV (there is no JSON file on the data
+        # server for this analysis - see ChipAtlas::TargetGenesTsv).
         app.get '/api/target_genes' do
           halt 400, json_response({ error: 'genome, track, and distance required' }) unless params[:genome] && params[:track] && params[:distance]
           svc = ChipAtlas::LocationService.new(condition_from_params)
-          body = ChipAtlas::DataProxy.fetch(svc.target_genes_data_url)
-          halt 404, json_response({ error: 'Target genes data not found' }) unless body
+
+          result = begin
+            ChipAtlas::TargetGenesTsv.result(
+              genome: params[:genome], track: params[:track], distance: params[:distance],
+              tsv_url: svc.target_genes_tsv_url,
+              sort: params[:sort], order: params[:order], offset: params[:offset], limit: params[:limit]
+            )
+          rescue ChipAtlas::TargetGenesTsv::UnknownSortColumn => e
+            halt 400, json_response({ error: e.message })
+          rescue ChipAtlas::TargetGenesTsv::ParseError => e
+            halt 502, json_response({ error: "Target genes data could not be parsed: #{e.message}" })
+          end
+          halt 404, json_response({ error: 'Target genes data not found' }) unless result
+
           log_activity('target_genes', { genome: params[:genome], track: params[:track], distance: params[:distance] })
-          content_type 'application/json'
-          body
+          json_response(result)
         end
 
         # Target genes file download (proxied from data server)

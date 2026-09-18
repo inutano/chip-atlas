@@ -174,6 +174,95 @@ class ApiTest < Minitest::Test
     end
   end
 
+  # /api/target_genes proxies ChipAtlas::TargetGenesTsv, which fetches and
+  # parses the precomputed TSV (there is no JSON file on the data server -
+  # see task B2's brief). Stub its fetcher so this suite never touches the
+  # network; TargetGenesTsv itself raises LiveFetchNotStubbed if a test
+  # forgets to (see lib/services/target_genes_tsv.rb).
+  TARGET_GENES_FIXTURE = File.read(File.join(__dir__, '..', 'fixtures', 'target_genes_sample.tsv'))
+
+  def test_target_genes_returns_columns_rows_and_paging_metadata
+    ChipAtlas::TargetGenesTsv.fetcher = ->(_url) { TARGET_GENES_FIXTURE }
+
+    get '/api/target_genes', genome: 'mm10', track: 'Stat3', distance: '1', limit: 2
+
+    assert last_response.ok?
+    assert_equal 'application/json', last_response.content_type.split(';').first
+    data = JSON.parse(last_response.body)
+    assert_equal %w[Target_genes Stat3|Average SRX361677|Astrocytes SRX400001|Neuron STRING], data['columns']
+    assert_equal %w[Myc Stat3], data['rows'].map(&:first)
+    assert_equal 5, data['total']
+    assert_equal 0, data['offset']
+    assert_equal 2, data['limit']
+  ensure
+    ChipAtlas::TargetGenesTsv.fetcher = nil
+  end
+
+  def test_target_genes_sort_and_order_params_are_honored
+    ChipAtlas::TargetGenesTsv.fetcher = ->(_url) { TARGET_GENES_FIXTURE }
+
+    get '/api/target_genes', genome: 'mm10', track: 'Stat3', distance: '1',
+                              sort: 'SRX361677|Astrocytes', order: 'asc'
+
+    assert last_response.ok?
+    data = JSON.parse(last_response.body)
+    assert_equal %w[Socs3 Il6 Stat3 Bcl2 Myc], data['rows'].map(&:first)
+  ensure
+    ChipAtlas::TargetGenesTsv.fetcher = nil
+  end
+
+  def test_target_genes_unknown_sort_column_returns_400
+    ChipAtlas::TargetGenesTsv.fetcher = ->(_url) { TARGET_GENES_FIXTURE }
+
+    get '/api/target_genes', genome: 'mm10', track: 'Stat3', distance: '1', sort: 'NoSuchColumn'
+
+    assert_equal 400, last_response.status
+  ensure
+    ChipAtlas::TargetGenesTsv.fetcher = nil
+  end
+
+  def test_target_genes_missing_combination_returns_404
+    ChipAtlas::TargetGenesTsv.fetcher = ->(_url) { nil }
+
+    get '/api/target_genes', genome: 'mm10', track: 'NoSuchTrack', distance: '1'
+
+    assert_equal 404, last_response.status
+    data = JSON.parse(last_response.body)
+    assert_equal 'Target genes data not found', data['error']
+  ensure
+    ChipAtlas::TargetGenesTsv.fetcher = nil
+  end
+
+  def test_target_genes_malformed_body_returns_502_distinguishable_from_404
+    ChipAtlas::TargetGenesTsv.fetcher = ->(_url) { 'not a real tsv, one column only' }
+
+    get '/api/target_genes', genome: 'mm10', track: 'Stat3', distance: '1'
+
+    assert_equal 502, last_response.status
+    data = JSON.parse(last_response.body)
+    refute_equal 'Target genes data not found', data['error']
+    assert_match(/could not be parsed/, data['error'])
+  ensure
+    ChipAtlas::TargetGenesTsv.fetcher = nil
+  end
+
+  def test_target_genes_limit_is_capped
+    ChipAtlas::TargetGenesTsv.fetcher = ->(_url) { TARGET_GENES_FIXTURE }
+
+    get '/api/target_genes', genome: 'mm10', track: 'Stat3', distance: '1', limit: 999_999
+
+    assert last_response.ok?
+    data = JSON.parse(last_response.body)
+    assert_equal ChipAtlas::TargetGenesTsv::MAX_LIMIT, data['limit']
+  ensure
+    ChipAtlas::TargetGenesTsv.fetcher = nil
+  end
+
+  def test_target_genes_missing_params_returns_400
+    get '/api/target_genes', genome: 'mm10', track: 'Stat3'
+    assert_equal 400, last_response.status
+  end
+
   # /api/remote_url_status must rescue the fuller set of transient upstream
   # failures (matching lib/services/service_monitor.rb, plus ECONNRESET and
   # EHOSTUNREACH) rather than let them escape as an uncaught Sinatra 500 -

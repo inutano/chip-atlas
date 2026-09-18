@@ -818,9 +818,15 @@ paths:
       tags: [Analysis]
       summary: Get target genes result data
       description: >-
-        Returns pre-computed target gene result data (JSON) for a given
-        genome, track, and distance, proxied from the data backend. Check
-        /api/target_genes_index first to verify the combination has data.
+        Parses the pre-computed target gene result TSV (there is no JSON
+        file on the data backend for this analysis) for a given genome,
+        track, and distance, and returns one sorted, paginated page of it.
+        Column headers are returned separately from the row data so the
+        (large, ~130+ column) matrix isn't repeated per row. The parsed
+        result is cached server-side per (genome, track, distance) for a
+        short TTL, so repeated page/sort requests for the same combination
+        don't re-fetch the ~4 MB source file. Check /api/target_genes_index
+        first to verify the combination has data.
       parameters:
         - $ref: "#/components/parameters/Genome"
         - name: track
@@ -843,15 +849,92 @@ paths:
               - "5"
               - "10"
           example: "5"
+        - name: sort
+          in: query
+          required: false
+          description: >-
+            Column header to sort by (must be one of the names in the
+            response's `columns`). Defaults to the "<track>|Average"
+            column, e.g. "CTCF|Average".
+          schema:
+            type: string
+          example: CTCF|Average
+        - name: order
+          in: query
+          required: false
+          description: Sort direction. Defaults to "desc".
+          schema:
+            type: string
+            enum:
+              - asc
+              - desc
+            default: desc
+        - name: offset
+          in: query
+          required: false
+          description: Number of rows to skip. Defaults to 0.
+          schema:
+            type: integer
+            default: 0
+        - name: limit
+          in: query
+          required: false
+          description: >-
+            Number of rows to return. Defaults to 50, capped at 500
+            server-side regardless of the requested value.
+          schema:
+            type: integer
+            default: 50
+            maximum: 500
       responses:
         "200":
-          description: Target gene result data
+          description: One sorted, paginated page of target gene result data
           content:
             application/json:
               schema:
                 type: object
+                properties:
+                  columns:
+                    type: array
+                    items:
+                      type: string
+                    description: >-
+                      Column headers, in file order: gene symbol, the query
+                      track's average score, one column per experiment
+                      (SRX id | cell type), then the STRING interaction
+                      score.
+                  rows:
+                    type: array
+                    items:
+                      type: array
+                      items: {}
+                    description: >-
+                      One array per gene, aligned with `columns`; the first
+                      element is the gene symbol (string), the rest are
+                      numeric scores.
+                  total:
+                    type: integer
+                    description: Total gene rows for this combination (before paging).
+                  offset:
+                    type: integer
+                  limit:
+                    type: integer
+              example:
+                columns: ["Target_genes", "CTCF|Average", "SRX018626|K-562", "STRING"]
+                rows:
+                  - ["MYC", 950.2, 1021.5, 900]
+                total: 13459
+                offset: 0
+                limit: 50
+        "400":
+          description: Missing required parameters, or `sort` names a column not present in this file
         "404":
           description: No pre-computed target gene data for this combination
+        "502":
+          description: >-
+            Target gene data exists upstream but could not be parsed as a
+            valid Target Genes TSV - distinct from 404 (no data) so a
+            client can tell the two apart.
 
   /api/target_genes/download:
     get:

@@ -125,11 +125,35 @@ module ChipAtlas
           erb :demo
         end
 
+        # Sinatra invokes a registered `error`/`not_found` handler for ANY
+        # response whose status ends at 404 - including an explicit
+        # `halt 404, json_response(...)` from inside a route, not only an
+        # actual routing miss (see Sinatra::Base#call!, which re-runs
+        # `error_block!(response.status)` after dispatch whenever
+        # `env['sinatra.error']` wasn't set by a raised exception). Without
+        # this guard, every `/api/*` route that halts 404 with a JSON body
+        # (colo, target_genes, and their /download variants) has that body
+        # silently replaced by this HTML page - the client sees a 404 with
+        # `content-type: application/json` but an HTML payload. Verified
+        # live against /api/colo and /api/target_genes before this task.
+        #
+        # So: if a route already set a JSON body before halting (detected
+        # via content-type, the one signal `json_response` reliably leaves
+        # behind), leave it alone. Only render the HTML page for an actual
+        # page-routing miss; a genuinely unmatched /api/* path (no route
+        # halted at all) gets a JSON {error:} body instead of the HTML page,
+        # for the same reason every other /api/* error is JSON.
         app.not_found do
-          begin
-            erb :not_found
-          rescue Errno::ENOENT
-            'Not Found'
+          next if response.content_type&.start_with?('application/json')
+
+          if request.path_info.start_with?('/api/')
+            json_response({ error: 'Not found' })
+          else
+            begin
+              erb :not_found
+            rescue Errno::ENOENT
+              'Not Found'
+            end
           end
         end
       end
