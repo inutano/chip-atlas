@@ -13,7 +13,7 @@
 
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { buildDiffAnalysisParams, type DiffFormState } from './diff-analysis'
+import { buildDiffAnalysisParams, createGenomeDatasetStore, type DiffFormState } from './diff-analysis'
 
 const baseForm: DiffFormState = {
   genome: 'hg38',
@@ -65,4 +65,43 @@ test('buildDiffAnalysisParams: a single id has no trailing/leading newline', () 
   const params = buildDiffAnalysisParams({ ...baseForm, idsA: ['SRX000001'], idsB: ['SRX000002'] })
   assert.equal(params.bedAFile, 'SRX000001')
   assert.equal(params.bedBFile, 'SRX000002')
+})
+
+// ===== Per-genome dataset store (Task C4, D13) =====
+// Production holds dataset A/B state per genome tab structurally (genome-
+// prefixed DOM ids). This page shares one pair of textareas across all
+// genome tabs (the same single-DOM-plus-swap pattern GenomeTabs/FacetFilter
+// use elsewhere in this app), so createGenomeDatasetStore is the piece that
+// carries the actual guarantee: an id typed while one genome is selected
+// must never be read back under a different genome.
+
+test('createGenomeDatasetStore: an unvisited genome reads back blank', () => {
+  const store = createGenomeDatasetStore()
+  assert.deepEqual(store.get('hg38'), { idsA: '', idsB: '' })
+})
+
+test('createGenomeDatasetStore: set then get round-trips for that genome', () => {
+  const store = createGenomeDatasetStore()
+  store.set('hg38', { idsA: 'SRX1\nSRX2', idsB: 'SRX3' })
+  assert.deepEqual(store.get('hg38'), { idsA: 'SRX1\nSRX2', idsB: 'SRX3' })
+})
+
+test('createGenomeDatasetStore: values typed under one genome never leak into another', () => {
+  const store = createGenomeDatasetStore()
+  store.set('hg38', { idsA: 'TESTVALUE_HG38_A', idsB: 'TESTVALUE_HG38_B' })
+  // mm10 was never visited/saved - must read back blank, not hg38's values.
+  assert.deepEqual(store.get('mm10'), { idsA: '', idsB: '' })
+  // TAIR12, likewise.
+  assert.deepEqual(store.get('TAIR12'), { idsA: '', idsB: '' })
+  // hg38's own values are unaffected by reading other genomes.
+  assert.deepEqual(store.get('hg38'), { idsA: 'TESTVALUE_HG38_A', idsB: 'TESTVALUE_HG38_B' })
+})
+
+test('createGenomeDatasetStore: clear blanks only the given genome', () => {
+  const store = createGenomeDatasetStore()
+  store.set('hg38', { idsA: 'SRX1', idsB: 'SRX2' })
+  store.set('mm10', { idsA: 'SRX3', idsB: 'SRX4' })
+  store.clear('hg38')
+  assert.deepEqual(store.get('hg38'), { idsA: '', idsB: '' })
+  assert.deepEqual(store.get('mm10'), { idsA: 'SRX3', idsB: 'SRX4' })
 })

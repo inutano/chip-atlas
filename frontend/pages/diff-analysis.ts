@@ -31,6 +31,52 @@ const HELP_TEXT: Record<string, string> = {
 let currentGenome = ''
 let examplesPromise: Promise<DiffAnalysisExamples> | null = null
 
+// ===== Per-genome dataset state =====
+// Production keeps a separate DOM subtree per genome tab (genome-prefixed
+// ids: hg38DataSetA, mm10DataSetA, ...), so an id typed while hg38 is active
+// structurally cannot leak into a submission made under mm10 — it lives in
+// an element that isn't even part of the mm10 tab. This page renders one
+// shared pair of textareas for all genomes (the pattern every page in this
+// app uses via GenomeTabs — see enrichment-analysis.ts's FacetFilter.setGenome
+// for the same single-DOM-plus-swap approach), so the equivalent guarantee is
+// implemented as a small in-memory store keyed by genome code: on every
+// 'genome-change' the outgoing genome's textarea values are saved here and
+// the incoming genome's saved values (blank if never visited) are loaded in.
+// The dataset never survives a tab switch under someone else's genome code,
+// which is the actual bug this task fixes — the DOM topology production uses
+// to get there is not reproduced, only the observable guarantee.
+//
+// Title fields are deliberately NOT part of this store — see the "Do NOT
+// reset the title fields on tab click" note below, where init() seeds them
+// once and this file otherwise leaves them alone.
+export interface GenomeDatasetState {
+  idsA: string
+  idsB: string
+}
+
+const BLANK_DATASET_STATE: GenomeDatasetState = { idsA: '', idsB: '' }
+
+export function createGenomeDatasetStore(): {
+  get(genome: string): GenomeDatasetState
+  set(genome: string, state: GenomeDatasetState): void
+  clear(genome: string): void
+} {
+  const store = new Map<string, GenomeDatasetState>()
+  return {
+    get(genome: string): GenomeDatasetState {
+      return store.get(genome) ?? BLANK_DATASET_STATE
+    },
+    set(genome: string, state: GenomeDatasetState): void {
+      store.set(genome, state)
+    },
+    clear(genome: string): void {
+      store.set(genome, { ...BLANK_DATASET_STATE })
+    },
+  }
+}
+
+const datasetStore = createGenomeDatasetStore()
+
 function $(id: string): HTMLElement {
   const el = document.getElementById(id)
   if (!el) throw new Error(`Missing #${id}`)
@@ -152,7 +198,21 @@ async function init(): Promise<void> {
 
   tabs.addEventListener('genome-change', (e: Event) => {
     const detail = (e as CustomEvent<{ genome: string }>).detail
+    // Save the outgoing genome's dataset values (if any genome was already
+    // selected — the first 'genome-change', fired synchronously by
+    // GenomeTabs.init below, has no outgoing genome to save) before
+    // swapping in the incoming genome's saved (or blank) values.
+    if (currentGenome) {
+      datasetStore.set(currentGenome, {
+        idsA: ($('dataA-text') as HTMLTextAreaElement).value,
+        idsB: ($('dataB-text') as HTMLTextAreaElement).value,
+      })
+    }
     currentGenome = detail.genome
+    const state = datasetStore.get(currentGenome)
+    ;($('dataA-text') as HTMLTextAreaElement).value = state.idsA
+    ;($('dataB-text') as HTMLTextAreaElement).value = state.idsB
+    void refreshEstimate()
   })
 
   GenomeTabs.init(tabs, data.genomes)
@@ -165,8 +225,22 @@ async function init(): Promise<void> {
       timer = window.setTimeout(refreshEstimate, 500)
     })
   })
+  // Production binds eraseTextarea() to both experiment-type radios, so
+  // toggling ChIP/ATAC/DNase-seq <-> Bisulfite-seq blanks both dataset
+  // textareas (and resets the run-time estimate) for the active genome —
+  // production's eraseTextarea() only ever touches genomeSelected()'s own
+  // fields, never other tabs' saved data, which this mirrors by clearing
+  // only currentGenome's entry in datasetStore. Without this, ChIP peak IDs
+  // typed under "ChIP / ATAC / DNase-seq" would silently carry into a
+  // Bisulfite-seq/DMR submission — the same silent-wrong-result risk as the
+  // genome axis this task otherwise fixes.
   document.querySelectorAll<HTMLInputElement>('input[name="analysis-type"]').forEach((r) => {
-    r.addEventListener('change', refreshEstimate)
+    r.addEventListener('change', () => {
+      ;($('dataA-text') as HTMLTextAreaElement).value = ''
+      ;($('dataB-text') as HTMLTextAreaElement).value = ''
+      if (currentGenome) datasetStore.clear(currentGenome)
+      void refreshEstimate()
+    })
   })
 
   function wireExampleLink(linkId: string, textareaId: string, key: 'dataSetA' | 'dataSetB'): void {
