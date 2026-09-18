@@ -249,13 +249,15 @@ components:
           type: string
           description: >-
             Significance threshold, as WABI's -10*Log10[Q-value] label: 50,
-            100, 200, or 500. This is NOT the 05/10/20/50 file-suffix code
-            /api/qval_range returns (those name
-            allPeaks_light.<genome>.{05,10,20,50}.bed.gz) - the two
-            encodings share digits but mean opposite ends of the range
-            (threshold=50 is the strictest setting; qval code "50" names the
-            loosest file). The frontend converts qval-range codes to this
-            label before submitting.
+            100, 200, or 500 (larger = q < 1E-50 = stricter = fewer peaks).
+            This is NOT the 05/10/20/50 file-suffix code /api/qval_range
+            returns (those name allPeaks_light.<genome>.{05,10,20,50}.bed.gz,
+            where the code IS the exponent: "05" = q < 1E-05 = loosest,
+            "50" = q < 1E-50 = strictest) - the two encodings share digits
+            but mean opposite ends of the range under the literal token "50"
+            (threshold=50 is the LOOSEST WABI setting; file code "50" names
+            the STRICTEST file). The frontend converts qval-range codes to
+            this label before submitting.
           enum: ["50", "100", "200", "500"]
           example: "50"
         typeA:

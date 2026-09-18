@@ -5,11 +5,13 @@
 //
 //  - qvalCodeToThreshold: the qval facet (shared with Peak Browser) exposes
 //    the allPeaks_light.<genome>.{05,10,20,50}.bed.gz filename codes as its
-//    option values. WABI's `threshold` field wants the *other* encoding
-//    production displays for the same four choices (50/100/200/500). These
-//    are two different encodings that happen to share the digits "50" for
-//    opposite ends of the range (the file code for the loosest threshold is
-//    the WABI value for the strictest one) — this is exactly the hazard
+//    option values (the code is the exponent: "05" = q < 1E-05 = loosest,
+//    "50" = q < 1E-50 = strictest). WABI's `threshold` field wants the
+//    *other* encoding production displays for the same four choices
+//    (50/100/200/500, larger = stricter). These are two different
+//    encodings that happen to share the literal digits "50" for opposite
+//    ends of the range: file code "50" names the STRICTEST file, but WABI
+//    threshold "50" is the LOOSEST setting — this is exactly the hazard
 //    flagged in the task brief, and the reason every one of the four labels
 //    gets its own assertion below rather than a single spot check.
 //  - buildEnrichmentParams: the full WABI-field-name payload (D7's "no
@@ -29,7 +31,7 @@ import {
 
 // ===== qvalCodeToThreshold — the two-encodings hazard =====
 
-test('qvalCodeToThreshold: "05" (loosest file code) -> "50" (strictest WABI threshold label)', () => {
+test('qvalCodeToThreshold: "05" (loosest file code, q < 1E-05) -> "50" (loosest WABI threshold label)', () => {
   assert.equal(qvalCodeToThreshold('05'), '50')
 })
 
@@ -41,7 +43,7 @@ test('qvalCodeToThreshold: "20" -> "200"', () => {
   assert.equal(qvalCodeToThreshold('20'), '200')
 })
 
-test('qvalCodeToThreshold: "50" (strictest file code) -> "500" (loosest WABI threshold label)', () => {
+test('qvalCodeToThreshold: "50" (strictest file code, q < 1E-50) -> "500" (strictest WABI threshold label)', () => {
   assert.equal(qvalCodeToThreshold('50'), '500')
 })
 

@@ -69,8 +69,9 @@ const HELP_TEXT: Record<string, string> = {
 // imported — see colo-result.ts's header comment on why each frontend/pages
 // entry point duplicates small shared helpers instead of a shared module).
 // Conflating the two encodings is the exact hazard this function exists to
-// prevent: sending "50" (the strictest *label*) would land as threshold=50,
-// which is actually the loosest setting under the code encoding.
+// prevent: sending "50" (the strictest *file code*, q < 1E-50) unconverted
+// would land as threshold=50, which is actually WABI's LOOSEST threshold
+// setting (q < 1E-05) — the opposite end of the range from what was meant.
 //
 // Unlike qvalLabel (display-only — the worst case there is a mislabeled
 // dropdown), this feeds a live submission to WABI. An unparseable code has
