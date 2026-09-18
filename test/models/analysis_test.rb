@@ -44,6 +44,62 @@ class AnalysisTest < Minitest::Test
     refute_includes result['hg38'], 'H3K4me3'
   end
 
+  def test_load_from_file_splits_track_and_distance
+    DB[:analyses].delete
+    fixture = File.join(__dir__, '..', 'fixtures', 'analysis_list_sample.tab')
+
+    count = ChipAtlas::Analysis.load_from_file(fixture)
+
+    # Ahr.1/ce10 is dropped: ce10 is not in config/genomes.yml.
+    assert_equal 4, count
+
+    tair12 = DB[:analyses].where(genome: 'TAIR12').first
+    assert_equal 'AGL20', tair12[:track]
+    assert_equal '1', tair12[:distance]
+
+    mm10 = DB[:analyses].where(genome: 'mm10').first
+    assert_equal 'Acaa2', mm10[:track]
+    assert_equal '10', mm10[:distance]
+
+    # "wdr-5.1.1" / "wdr-5.1.5": the antigen name itself contains a dot
+    # ("wdr-5.1"), so only the LAST dot-separated segment is the distance -
+    # a naive split('.') would corrupt this into track "wdr-5" + distance
+    # "1.1".
+    ce11 = DB[:analyses].where(genome: 'ce11').order(:distance).all
+    assert_equal %w[wdr-5.1 wdr-5.1], ce11.map { |row| row[:track] }
+    assert_equal %w[1 5], ce11.map { |row| row[:distance] }
+
+    refute DB[:analyses].where(genome: 'ce10').any?, 'ce10 is not in config/genomes.yml and must be dropped'
+  end
+
+  def test_split_track_and_distance_handles_dotted_antigen_names
+    assert_equal %w[Acaa2 10], ChipAtlas::Analysis.split_track_and_distance('Acaa2.10')
+    assert_equal ['wdr-5.1', '1'], ChipAtlas::Analysis.split_track_and_distance('wdr-5.1.1')
+    assert_equal ['wdr-5.1', '10'], ChipAtlas::Analysis.split_track_and_distance('wdr-5.1.10')
+  end
+
+  def test_target_genes_result_falls_back_to_human_snapshot_for_genomes_the_tab_does_not_cover
+    fixture = File.join(__dir__, '..', 'fixtures', 'target_genes_human_snapshot_sample.json')
+    ChipAtlas::Analysis.human_snapshot_path = fixture
+
+    result = ChipAtlas::Analysis.target_genes_result
+
+    # rn6 has no rows in the seeded analyses table at all, so it falls back
+    # to the snapshot.
+    assert_equal %w[Ahr Ar], result['rn6']
+
+    # hg38 DOES have rows (seeded above), so the real DB data wins over
+    # whatever the snapshot says - the fallback is only for genomes the tab
+    # has zero rows for.
+    assert_includes result['hg38'], 'CTCF'
+
+    # hg19 is in the snapshot but not in config/genomes.yml (a legacy build
+    # this app deliberately does not support) and must not leak in.
+    refute result.key?('hg19')
+  ensure
+    ChipAtlas::Analysis.reset_human_snapshot_path!
+  end
+
   def test_genomes_with_colo_excludes_tair12
     genomes = ChipAtlas::Analysis.genomes_with_colo
 
