@@ -80,6 +80,23 @@ function splitExperimentHeader(header: string): { experimentId: string; cellType
   return { experimentId: header.slice(0, sep), cellType: header.slice(sep + 1) }
 }
 
+// Is this cell a reference experiment compared against itself? Checked
+// structurally - row's own Experiment id (column 1 of every row) against
+// the id encoded in this column's own header - rather than inferred from
+// the raw score alone (see concordanceColor's comment for why that
+// distinction matters). Exact string equality only: verified live that
+// both sides are the same raw SRX accession spelling (e.g. row Experiment
+// "SRX347427" against column header "SRX347427|SU-DHL-4" - confirmed
+// against hg38/colo/STAT3.Blood.tsv for both SRX347427's and SRX347429's
+// self-columns), so a fuzzy/normalized comparison isn't needed and isn't
+// attempted - if a future TSV ever spells the same id two different ways
+// across columns 1 and 5..n-1, this deliberately stops matching rather
+// than guessing.
+export function isSelfComparison(rowExperimentId: string, columnHeader: string): boolean {
+  const { experimentId } = splitExperimentHeader(columnHeader)
+  return experimentId === rowExperimentId
+}
+
 // ===== Peak-intensity concordance -> color + label =====
 //
 // Production computes these scores as products of H/M/L "binding-level"
@@ -90,10 +107,27 @@ function splitExperimentHeader(header: string): { experimentId: string; cellType
 // hg38/colo/STAT3.Blood.tsv + the paired .html: a raw value of 10 appears
 // exactly and only at a row's own reference-experiment column (a row
 // comparing an experiment against itself) and is always rendered
-// black/"Same" there, regardless of the 1-9 scale below - 10 can never
-// arise from the H/M/L product formula, so it's an unambiguous
-// self-comparison sentinel, not a 10th real score. Colors themselves are
-// production's exact legend swatches (see views/colo_result.erb).
+// black/"Same" there - 10 can never arise from the H/M/L product formula,
+// so as a *value* it's an unambiguous self-comparison sentinel. Colors
+// themselves are production's exact legend swatches (see
+// views/colo_result.erb).
+//
+// The formula guarantees 10 never means anything else *today*, but that's
+// still an inference about an undocumented upstream encoding, and the
+// failure mode of trusting it blindly is bad: a future data-server change
+// that reused 10 for something else would render confidently as "Same" in
+// black, no error, no gray fallback - exactly the kind of wrong-but-
+// confident output a biologist would take as ground truth. The data
+// already carries a second, structural signal that doesn't depend on the
+// formula holding forever: column 1 of every row is that row's own
+// Experiment id, and every reference-experiment column header encodes the
+// id it represents (see isSelfComparison). So "Same" is only ever applied
+// when *both* line up - the value is 10 *and* the row's identity actually
+// matches this column's - checked by the caller (concordanceCell) via
+// `isSelf`, not decided here from the value alone. A 10 that doesn't match
+// (which should be unreachable today, but costs nothing to guard) falls
+// through to the same gray "?" fallback as 5, 7, 8, or any other
+// unrepresentable value.
 const CONCORDANCE_COLORS: Record<number, { rgb: [number, number, number]; label: string }> = {
   0: { rgb: [128, 128, 128], label: 'N.D.' },
   1: { rgb: [0, 113, 255], label: 'L-L' },
@@ -102,12 +136,24 @@ const CONCORDANCE_COLORS: Record<number, { rgb: [number, number, number]; label:
   4: { rgb: [0, 255, 56], label: 'M-M' },
   6: { rgb: [170, 255, 0], label: 'H-M' },
   9: { rgb: [255, 0, 0], label: 'H-H' },
-  10: { rgb: [0, 0, 0], label: 'Same' },
 }
+const SAME_CONCORDANCE: { rgb: [number, number, number]; label: string } = { rgb: [0, 0, 0], label: 'Same' }
 const UNKNOWN_CONCORDANCE: { rgb: [number, number, number]; label: string } = { rgb: [128, 128, 128], label: '?' }
+const SELF_SENTINEL_VALUE = 10
 
-export function concordanceColor(value: number): { hex: string; rgb: [number, number, number]; label: string } {
-  const entry = CONCORDANCE_COLORS[Math.round(value)] ?? UNKNOWN_CONCORDANCE
+// `isSelf` is the structural check from isSelfComparison - this function
+// never infers self-comparison from `value` alone. A value of 10 only
+// renders as "Same" when the caller has already confirmed the row's
+// Experiment id matches this column's; otherwise (including every other
+// unrepresentable value) it falls back to gray "?".
+export function concordanceColor(
+  value: number,
+  isSelf: boolean
+): { hex: string; rgb: [number, number, number]; label: string } {
+  const rounded = Math.round(value)
+  const entry = rounded === SELF_SENTINEL_VALUE
+    ? (isSelf ? SAME_CONCORDANCE : UNKNOWN_CONCORDANCE)
+    : (CONCORDANCE_COLORS[rounded] ?? UNKNOWN_CONCORDANCE)
   return { hex: rgbToHex(entry.rgb), rgb: entry.rgb, label: entry.label }
 }
 
@@ -303,10 +349,10 @@ function renderHeader(data: ColoResult): void {
   row.replaceChildren(...cells)
 }
 
-function concordanceCell(value: number): HTMLTableCellElement {
+function concordanceCell(value: number, isSelf: boolean): HTMLTableCellElement {
   const td = document.createElement('td')
   td.className = 'tg-score-cell tg-exp-col'
-  const { hex, rgb, label } = concordanceColor(value)
+  const { hex, rgb, label } = concordanceColor(value, isSelf)
   td.style.backgroundColor = hex
   td.style.color = readableTextColor(rgb)
   td.textContent = label
@@ -331,6 +377,7 @@ function renderRows(data: ColoResult, rows: Array<Array<string | number>>): void
   const tbody = $('result-tbody')
   tbody.replaceChildren(...rows.map((row) => {
     const tr = document.createElement('tr')
+    const rowExperimentId = String(row[0])
 
     row.forEach((value, i) => {
       if (i === 0) {
@@ -361,7 +408,11 @@ function renderRows(data: ColoResult, rows: Array<Array<string | number>>): void
         tr.appendChild(stringCell(numeric))
         return
       }
-      tr.appendChild(concordanceCell(numeric))
+      // A reference-experiment (concordance) column: whether this
+      // particular cell is a self-comparison is checked structurally
+      // against this column's own header, not inferred from `numeric`
+      // alone (see concordanceColor's comment).
+      tr.appendChild(concordanceCell(numeric, isSelfComparison(rowExperimentId, data.columns[i])))
     })
 
     return tr
@@ -469,9 +520,10 @@ function init(): void {
   void load()
 }
 
-// Guarded so the pure functions above (concordanceColor, computeNextSort,
-// computeAriaSort, sortRows) can be imported and unit-tested under plain
-// Node, which has no `document` - see colo-result.test.ts.
+// Guarded so the pure functions above (concordanceColor, isSelfComparison,
+// computeNextSort, computeAriaSort, sortRows) can be imported and
+// unit-tested under plain Node, which has no `document` - see
+// colo-result.test.ts.
 if (typeof document !== 'undefined') {
   document.addEventListener('DOMContentLoaded', init)
 }

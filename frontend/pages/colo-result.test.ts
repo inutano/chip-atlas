@@ -9,7 +9,7 @@
 
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { computeAriaSort, computeNextSort, concordanceColor, sortRows } from './colo-result'
+import { computeAriaSort, computeNextSort, concordanceColor, isSelfComparison, sortRows } from './colo-result'
 
 // ===== computeNextSort / computeAriaSort — identical contract to
 // target-genes-result.ts's (see that file's tests for the fuller
@@ -93,39 +93,85 @@ test('sortRows: does not mutate the input array', () => {
 // ===== concordanceColor — the peak-intensity legend mapping, verified live
 // against hg38/colo/STAT3.Blood.tsv + .html (see colo-result.ts's
 // CONCORDANCE_COLORS comment for the exact rows this was cross-checked
-// against) =====
+// against). `isSelf` is always passed explicitly - concordanceColor never
+// infers a self-comparison from the value alone, see below. =====
 
 test('concordanceColor: 0 is N.D. (gray)', () => {
-  assert.deepEqual(concordanceColor(0), { hex: '#808080', rgb: [128, 128, 128], label: 'N.D.' })
+  assert.deepEqual(concordanceColor(0, false), { hex: '#808080', rgb: [128, 128, 128], label: 'N.D.' })
 })
 
 test('concordanceColor: 9 is H-H (red)', () => {
-  assert.deepEqual(concordanceColor(9), { hex: '#ff0000', rgb: [255, 0, 0], label: 'H-H' })
+  assert.deepEqual(concordanceColor(9, false), { hex: '#ff0000', rgb: [255, 0, 0], label: 'H-H' })
 })
 
 test('concordanceColor: 4 is M-M (green)', () => {
-  assert.deepEqual(concordanceColor(4), { hex: '#00ff38', rgb: [0, 255, 56], label: 'M-M' })
+  assert.deepEqual(concordanceColor(4, false), { hex: '#00ff38', rgb: [0, 255, 56], label: 'M-M' })
 })
 
 test('concordanceColor: 6 is H-M (yellow-green)', () => {
-  assert.deepEqual(concordanceColor(6), { hex: '#aaff00', rgb: [170, 255, 0], label: 'H-M' })
+  assert.deepEqual(concordanceColor(6, false), { hex: '#aaff00', rgb: [170, 255, 0], label: 'H-M' })
 })
 
 test('concordanceColor: 1 is L-L (blue), 2 is M-L, 3 is H-L', () => {
-  assert.equal(concordanceColor(1).label, 'L-L')
-  assert.equal(concordanceColor(1).hex, '#0071ff')
-  assert.equal(concordanceColor(2).label, 'M-L')
-  assert.equal(concordanceColor(2).hex, '#00e2ff')
-  assert.equal(concordanceColor(3).label, 'H-L')
-  assert.equal(concordanceColor(3).hex, '#00ffaa')
+  assert.equal(concordanceColor(1, false).label, 'L-L')
+  assert.equal(concordanceColor(1, false).hex, '#0071ff')
+  assert.equal(concordanceColor(2, false).label, 'M-L')
+  assert.equal(concordanceColor(2, false).hex, '#00e2ff')
+  assert.equal(concordanceColor(3, false).label, 'H-L')
+  assert.equal(concordanceColor(3, false).hex, '#00ffaa')
 })
 
-test('concordanceColor: 10 is the self-comparison sentinel, Same (black)', () => {
-  assert.deepEqual(concordanceColor(10), { hex: '#000000', rgb: [0, 0, 0], label: 'Same' })
+test('concordanceColor: an unrepresentable value (5, 7, 8, or a stray float) falls back to "?" rather than throwing', () => {
+  assert.equal(concordanceColor(5, false).label, '?')
+  assert.equal(concordanceColor(7, false).label, '?')
+  assert.equal(concordanceColor(-1, false).label, '?')
 })
 
-test('concordanceColor: an unrepresentable value (5, 7, 8, or a stray float) falls back to N.D. rather than throwing', () => {
-  assert.equal(concordanceColor(5).label, '?')
-  assert.equal(concordanceColor(7).label, '?')
-  assert.equal(concordanceColor(-1).label, '?')
+// ===== 10 = "Same": structurally verified, not inferred from the value =====
+//
+// The H/M/L product formula tops out at 9, so a raw 10 can't arise as a
+// real score today - but concordanceColor does not trust that inference on
+// its own. It only renders "Same" when the caller has independently
+// confirmed (via isSelfComparison, checked against the row's own
+// Experiment id and this column's header) that this cell really is an
+// experiment compared against itself. A 10 that isn't backed by that
+// structural check - which should be unreachable given the formula, but
+// costs nothing to guard - takes the same gray "?" fallback as any other
+// unrepresentable value, never a confident, unverified "Same" in black.
+
+test('concordanceColor: 10 with isSelf=true renders Same (black)', () => {
+  assert.deepEqual(concordanceColor(10, true), { hex: '#000000', rgb: [0, 0, 0], label: 'Same' })
+})
+
+test('concordanceColor: 10 with isSelf=false falls back to "?", not Same', () => {
+  const result = concordanceColor(10, false)
+  assert.equal(result.label, '?')
+  assert.notEqual(result.label, 'Same')
+  assert.deepEqual(result, { hex: '#808080', rgb: [128, 128, 128], label: '?' })
+})
+
+// ===== isSelfComparison — the structural check itself =====
+//
+// Verified live that a row's Experiment id (column 1) and the id encoded
+// in that same experiment's own reference-experiment column header
+// (<SRX>|<CellType>) are spelled identically - checked against both
+// SRX347427 (SU-DHL-4) and SRX347429 (U-2932) in hg38/colo/STAT3.Blood.tsv
+// - so exact string equality is sufficient; no normalization/fuzzy match
+// is implemented (see colo-result.ts's isSelfComparison comment).
+
+test('isSelfComparison: true when the row Experiment id matches the column header\'s id', () => {
+  assert.equal(isSelfComparison('SRX347427', 'SRX347427|SU-DHL-4'), true)
+})
+
+test('isSelfComparison: false when the row is a different experiment than the column', () => {
+  assert.equal(isSelfComparison('SRX347427', 'SRX150636|GM12878'), false)
+})
+
+test('isSelfComparison: false for a column header with no matching id anywhere in it', () => {
+  assert.equal(isSelfComparison('SRX347427', 'SRX999999|SomeOtherCell'), false)
+})
+
+test('isSelfComparison: falls back to comparing the whole header when it has no "|" separator', () => {
+  assert.equal(isSelfComparison('SRX1', 'SRX1'), true)
+  assert.equal(isSelfComparison('SRX1', 'SRX2'), false)
 })
