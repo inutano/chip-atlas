@@ -5,9 +5,13 @@ module ChipAtlas
     COLUMNS = %w[experiment_id sra_id geo_id genome track_class track_subclass
                  cell_type_class cell_type_subclass title attributes].freeze
 
-    SUPPORTED_GENOMES = ChipAtlas::Experiment::GENOMES.keys.freeze
-
     module_function
+
+    # Genome ids the FTS5 loader will keep, read from config/genomes.yml via
+    # ChipAtlas::Experiment (memoized there, not re-derived on every call).
+    def supported_genomes
+      ChipAtlas::Experiment.genomes.keys
+    end
 
     # Memoized row counts for the blank-query listing path (list_all).
     # The total is a constant between data loads, so there is no need to pay
@@ -105,7 +109,7 @@ module ChipAtlas
             # The genome field may be an array or a comma-separated string like "hg19, hg38"
             genomes = row[3]
             genomes = genomes.to_s.split(/,\s*/) unless genomes.is_a?(Array)
-            kept = genomes.map(&:strip).reject(&:empty?).select { |g| SUPPORTED_GENOMES.include?(g) }
+            kept = genomes.map(&:strip).reject(&:empty?).select { |g| supported_genomes.include?(g) }
             row[3] = kept.first  # store single genome
             kept.empty?
           end

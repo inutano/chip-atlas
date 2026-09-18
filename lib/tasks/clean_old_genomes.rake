@@ -4,7 +4,7 @@ namespace :db do
   desc "Remove rows for old/unsupported genome assemblies and rebuild FTS index"
   task :clean_old_genomes do
     OLD_GENOMES = %w[hg19 mm9 dm3 ce10].freeze
-    SUPPORTED_GENOMES = %w[hg38 mm10 rn6 dm6 ce11 sacCer3 TAIR10].freeze
+    SUPPORTED_GENOMES = ChipAtlas::Experiment.genomes.keys.freeze
     FTS_COLUMNS = %w[experiment_id sra_id geo_id genome track_class track_subclass
                      cell_type_class cell_type_subclass title attributes].freeze
 

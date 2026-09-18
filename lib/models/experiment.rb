@@ -1,18 +1,13 @@
 # frozen_string_literal: true
 
+require 'yaml'
+
 module ChipAtlas
   module Experiment
-    GENOMES = {
-      'hg38'    => 'H. sapiens (hg38)',
-      'mm10'    => 'M. musculus (mm10)',
-      'rn6'     => 'R. norvegicus (rn6)',
-      'dm6'     => 'D. melanogaster (dm6)',
-      'ce11'    => 'C. elegans (ce11)',
-      'sacCer3' => 'S. cerevisiae (sacCer3)',
-      'TAIR10'  => 'A. thaliana (TAIR10)',
-    }.freeze
-
-    GENOME_ORDER = GENOMES.keys.each_with_index.to_h.freeze
+    # The supported genome set lives in config/genomes.yml so it can change
+    # without a code edit. File order is the order shown in every genome tab
+    # strip (see frontend/components/genome-tabs.ts).
+    DEFAULT_GENOMES_CONFIG_PATH = File.expand_path(File.join('..', '..', 'config', 'genomes.yml'), __dir__).freeze
 
     EXPERIMENT_TYPES = [
       { id: 'Histone',          label: 'ChIP: Histone' },
@@ -31,7 +26,51 @@ module ChipAtlas
     @index_cache_at = nil
     INDEX_CACHE_TTL = 3600  # 1 hour
 
+    @genomes_config_path = DEFAULT_GENOMES_CONFIG_PATH
+    @genomes = nil
+    @genome_order = nil
+
     module_function
+
+    # Test-only hook: point the registry at a different YAML fixture. Resets
+    # the memo so the next #genomes/#genome_order call re-reads the file.
+    def genomes_config_path=(path)
+      @genomes_config_path = path
+      reset_genomes!
+    end
+
+    def genomes_config_path
+      @genomes_config_path
+    end
+
+    # Test-only hook: put the registry back on config/genomes.yml.
+    def reset_genomes_config_path!
+      @genomes_config_path = DEFAULT_GENOMES_CONFIG_PATH
+      reset_genomes!
+    end
+
+    # Clears the memoized genome registry so the next read picks up whatever
+    # is currently at genomes_config_path.
+    def reset_genomes!
+      @genomes = nil
+      @genome_order = nil
+    end
+
+    # id => label, in config file order. Memoized after first read.
+    def genomes
+      @genomes ||= load_genomes_config
+    end
+
+    # id => sort position, derived from #genomes.
+    def genome_order
+      @genome_order ||= genomes.keys.each_with_index.to_h.freeze
+    end
+
+    def load_genomes_config
+      config = YAML.safe_load(File.read(genomes_config_path))
+      entries = config['genomes'] || []
+      entries.each_with_object({}) { |entry, hash| hash[entry['id']] = entry['label'] }.freeze
+    end
 
     def formatted_experiment_count
       count = number_of_experiments
@@ -74,7 +113,7 @@ module ChipAtlas
     end
 
     def list_of_genome
-      GENOMES
+      genomes
     end
 
     def list_of_experiment_types
@@ -141,7 +180,7 @@ module ChipAtlas
         .select(:experiment_id, :genome, :track_class, :track_subclass, :cell_type_class, :cell_type_subclass,
                 :title, :attributes, :read_info, :cell_type_subclass_info)
         .all
-        .sort_by { |r| GENOME_ORDER.fetch(r[:genome], 999) }
+        .sort_by { |r| genome_order.fetch(r[:genome], 999) }
     end
 
     def id_valid?(experiment_id)
@@ -162,7 +201,7 @@ module ChipAtlas
 
     def index_all_genome
       result = {}
-      GENOMES.each_key { |g| result[g] = { track: {}, cell_type: {} } }
+      genomes.each_key { |g| result[g] = { track: {}, cell_type: {} } }
 
       # One query for all track counts across all genomes
       dataset.group_and_count(:genome, :track_class, :track_subclass).each do |row|
@@ -194,7 +233,7 @@ module ChipAtlas
         File.foreach(table_path, encoding: 'UTF-8') do |line_n|
           cols = line_n.chomp.split("\t")
           genome = cols[1]
-          next unless GENOMES.key?(genome)
+          next unless genomes.key?(genome)
 
           records << {
             experiment_id:                 cols[0],

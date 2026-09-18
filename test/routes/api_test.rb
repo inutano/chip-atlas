@@ -25,7 +25,7 @@ class ApiTest < Minitest::Test
     data = JSON.parse(last_response.body)
     assert_kind_of Hash, data
     assert_includes data.keys, 'hg38'
-    assert_includes data.keys, 'TAIR10'
+    assert_includes data.keys, 'TAIR12'
     assert_equal 'H. sapiens (hg38)', data['hg38']
   end
 

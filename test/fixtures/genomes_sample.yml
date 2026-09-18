@@ -1,0 +1,11 @@
+# Test fixture for ChipAtlas::Experiment's config-driven genome registry.
+# Deliberately a different id set, label text, and order than
+# config/genomes.yml, so a test proving the registry reads from YAML (not
+# from Ruby) cannot pass by coincidence.
+genomes:
+  - id: zz99
+    label: "Z. zzyzxus (zz99)"
+  - id: aa11
+    label: "A. aardvarkus (aa11)"
+  - id: mm00
+    label: "M. madeupus (mm00)"

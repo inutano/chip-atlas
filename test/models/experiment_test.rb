@@ -13,8 +13,24 @@ class ExperimentTest < Minitest::Test
     genomes = ChipAtlas::Experiment.list_of_genome
     assert_includes genomes.keys, 'hg38'
     assert_includes genomes.keys, 'mm10'
-    assert_includes genomes.keys, 'TAIR10'
+    assert_includes genomes.keys, 'TAIR12'
     assert_equal 'H. sapiens (hg38)', genomes['hg38']
+  end
+
+  # Proves the registry is config-driven: ids, labels, and their order come
+  # from whatever YAML file genomes_config_path points at, not from a Ruby
+  # constant. Points the registry at a fixture with a different id set and
+  # order than config/genomes.yml and checks the result changes to match.
+  def test_genome_registry_is_config_driven
+    ChipAtlas::Experiment.genomes_config_path =
+      File.join(__dir__, '..', 'fixtures', 'genomes_sample.yml')
+
+    assert_equal %w[zz99 aa11 mm00], ChipAtlas::Experiment.genomes.keys
+    assert_equal 'Z. zzyzxus (zz99)', ChipAtlas::Experiment.genomes['zz99']
+    assert_equal({ 'zz99' => 0, 'aa11' => 1, 'mm00' => 2 }, ChipAtlas::Experiment.genome_order)
+    refute_includes ChipAtlas::Experiment.genomes.keys, 'hg38'
+  ensure
+    ChipAtlas::Experiment.reset_genomes_config_path!
   end
 
   def test_list_of_experiment_types

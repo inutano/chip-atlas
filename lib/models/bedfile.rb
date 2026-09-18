@@ -56,7 +56,7 @@ module ChipAtlas
         File.foreach(table_path, encoding: 'UTF-8') do |line_n|
           cols = line_n.chomp.split("\t")
           genome = cols[1]
-          next unless ChipAtlas::Experiment::GENOMES.key?(genome)
+          next unless ChipAtlas::Experiment.genomes.key?(genome)
 
           records << {
             filename:           cols[0],

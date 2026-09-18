@@ -1,0 +1,16 @@
+# config/genomes.yml — order here is the order shown in every genome tab strip
+genomes:
+  - id: hg38
+    label: "H. sapiens (hg38)"
+  - id: mm10
+    label: "M. musculus (mm10)"
+  - id: rn6
+    label: "R. norvegicus (rn6)"
+  - id: dm6
+    label: "D. melanogaster (dm6)"
+  - id: ce11
+    label: "C. elegans (ce11)"
+  - id: sacCer3
+    label: "S. cerevisiae (sacCer3)"
+  - id: TAIR12
+    label: "A. thaliana (TAIR12)"
