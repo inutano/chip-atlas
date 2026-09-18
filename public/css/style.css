@@ -527,4 +527,24 @@ select.list-box option {
 
 #result-table-wrap {
   overflow-x: auto;
+  /* Expanded, #result-table can be 130+ columns of unbreakable
+     (white-space:nowrap) header text — tens of thousands of pixels of
+     intrinsic content width. overflow-x:auto here does correctly contain
+     and internally scroll that: this element's own clientWidth/scrollWidth
+     stay bounded to the viewport throughout, confirmed live (see the fix
+     report). But without `contain`, that intrinsic width still reaches
+     document.documentElement (not document.body — this is specifically a
+     quirk of the root <html> element's own reported scrollWidth) and, in
+     mobile viewport emulation, the browser's viewport-fitting logic widens
+     the whole layout viewport to avoid "clipping" it — visibly dragging
+     the 100%-wide fixed navbar out past the screen edge along with it.
+     `contain: layout paint` establishes this element as an isolated
+     layout/paint boundary: nothing inside it (however wide) can influence
+     sizing or the reported scroll extent of any ancestor, all the way up
+     to <html>. Verified live over the DevTools Protocol at a 390px mobile
+     viewport with the real 134-column mm10/Stat3 response: without this,
+     document.documentElement.scrollWidth reached 13,375–24,575px
+     (depending on table sizing) against a 390px clientWidth; with it,
+     scrollWidth stays exactly 390. */
+  contain: layout paint;
 }
