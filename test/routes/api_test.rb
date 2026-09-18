@@ -17,6 +17,15 @@ class ApiTest < Minitest::Test
     # (skipped in test via SKIP_APP_CONFIGURE=1)
     ChipAtlasApp.set :list_of_genome, ChipAtlas::Experiment.list_of_genome
     ChipAtlasApp.set :list_of_experiment_types, ChipAtlas::Experiment.list_of_experiment_types
+    # /api/download_url and /api/igv_url route through
+    # LocationService#bed_url -> BedExtensionResolver, which does a live HEAD
+    # probe unless stubbed. Stub it so this suite never touches the network.
+    ChipAtlas::BedExtensionResolver.prober = ->(url) { url.end_with?('.bed') }
+  end
+
+  def teardown
+    ChipAtlas::BedExtensionResolver.prober = nil
+    super
   end
 
   def test_genomes
