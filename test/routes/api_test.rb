@@ -334,30 +334,45 @@ class ApiTest < Minitest::Test
   # --- download routes: 404 body now carries a JSON error, not bare text ---
   #
   # /api/colo/download and /api/target_genes/download call
-  # ChipAtlas::DataProxy.fetch directly (no fetcher hook - that's B5's/B2's
-  # respective preview endpoints only). Under this suite's --network none,
-  # the real Net::HTTP call fails and DataProxy.fetch rescues it to nil,
-  # exactly like a genuinely missing file would - no stub needed to reach
-  # the 404 path. These also serve as a second, independent regression
-  # check for the shared not_found handler (see pages_test.rb), on routes
-  # that have nothing to do with ChipAtlas::TargetGenesTsv.
+  # ChipAtlas::DataProxy.fetch directly (no ColoTsv/TargetGenesTsv fetcher
+  # hook - that's B5's/B2's respective preview endpoints only). DataProxy
+  # itself now carries the same fetcher= seam and
+  # raise_if_unstubbed_under_test! guard as ColoTsv/TargetGenesTsv, so these
+  # stub it directly rather than relying on the sandbox's --network none:
+  # that flag only isolates local runs (this repo's own test.sh), while CI
+  # (.github/workflows/ci.yml) runs the Ruby suite on a GitHub-hosted
+  # runner with no network isolation at all - without a stub, an unstubbed
+  # DataProxy.fetch there would either raise (good - loud failure) or, if
+  # the guard were missing, make a real HTTPS request to
+  # chip-atlas.dbcls.jp that happens to 404 and pass by accident. These
+  # also serve as a second, independent regression check for the shared
+  # not_found handler (see pages_test.rb), on routes that have nothing to
+  # do with ChipAtlas::TargetGenesTsv.
 
   def test_colo_download_missing_file_returns_404_with_json_body
+    ChipAtlas::DataProxy.fetcher = ->(_url) { nil }
+
     get '/api/colo/download', genome: 'mm10', track: 'NoSuchTrack', cell_type: 'NoSuchCellType', format: 'tsv'
 
     assert_equal 404, last_response.status
     assert_equal 'application/json', last_response.content_type.to_s.split(';').first
     data = JSON.parse(last_response.body)
     assert_equal 'File not found', data['error']
+  ensure
+    ChipAtlas::DataProxy.fetcher = nil
   end
 
   def test_target_genes_download_missing_file_returns_404_with_json_body
+    ChipAtlas::DataProxy.fetcher = ->(_url) { nil }
+
     get '/api/target_genes/download', genome: 'mm10', track: 'NoSuchTrack', distance: '1', format: 'tsv'
 
     assert_equal 404, last_response.status
     assert_equal 'application/json', last_response.content_type.to_s.split(';').first
     data = JSON.parse(last_response.body)
     assert_equal 'File not found', data['error']
+  ensure
+    ChipAtlas::DataProxy.fetcher = nil
   end
 
   # /api/remote_url_status must rescue the fuller set of transient upstream

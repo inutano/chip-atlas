@@ -25,13 +25,31 @@ jobs:
       - name: Set up database
         run: bundle exec rake db:migrate
 
+      # The Ruby suite must never make a real outbound request (see
+      # lib/services/data_proxy.rb, colo_tsv.rb, target_genes_tsv.rb,
+      # bed_extension_resolver.rb - all have a raise_if_unstubbed_under_test!
+      # guard for this). Locally that's enforced by running the suite in a
+      # `docker run --network none` container (script/dev/test.sh); this
+      # runner isn't containerized, so block egress at the firewall for the
+      # duration of the test step instead, and restore it unconditionally
+      # afterwards so later steps (npm ci, etc.) still have network access.
+      - name: Isolate network for Ruby test suite
+        run: |
+          sudo iptables -A OUTPUT -o lo -j ACCEPT
+          sudo iptables -A OUTPUT -j DROP
+
       - name: Run test suite
         run: bundle exec ruby -Itest -e 'Dir.glob("./test/**/*_test.rb").sort.each { |f| require f }'
+
+      - name: Restore network
+        if: always()
+        run: sudo iptables -F OUTPUT
 
       - name: Build frontend
         run: |
           npm ci
           npx tsc --noEmit -p frontend/tsconfig.json
+          npx tsc --noEmit -p frontend/tsconfig.test.json
           NODE_ENV=production npm run build
 
       - name: Run frontend unit tests
