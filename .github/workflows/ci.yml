@@ -34,6 +34,9 @@ jobs:
           npx tsc --noEmit -p frontend/tsconfig.json
           NODE_ENV=production npm run build
 
+      - name: Run frontend unit tests
+        run: bash script/dev/test-frontend.sh
+
       - name: Boot app and verify endpoints
         run: |
           bundle exec rackup -p 9292 -D -P tmp/rackup.pid
