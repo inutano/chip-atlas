@@ -505,6 +505,27 @@ select.list-box option {
   max-width: 320px;
 }
 
+/* #row-count (target_genes_result.erb + colo_result.erb, shared id like
+   #result-table-wrap above) can echo the raw gene-search query back
+   verbatim - "No genes match "<query>"." via emptyStateMessage() in
+   target-genes-result.ts - and that query can be up to 200 unbroken
+   characters (see #gene-search's maxlength). #row-count is a flex item
+   (the .d-flex row it sits in alongside the pagination nav), and flex
+   items default to min-width: auto: a flex item never shrinks below its
+   own min-content width no matter how long that content is, so one long
+   unbroken token drags the flex row - and, the same way #result-table-wrap
+   does without `contain` (see that rule's own comment above), the whole
+   document - wider than the viewport. min-width: 0 lets this item actually
+   shrink to the space it's given; overflow-wrap: break-word then wraps the
+   text within that width instead of overflowing it - the identical
+   treatment task D1 established for long free-text values in
+   #search-tbody td.search-title-cell / .search-attrs-cell above, reused
+   here rather than inventing a third approach to the same problem. */
+#row-count {
+  min-width: 0;
+  overflow-wrap: break-word;
+}
+
 #result-table th.tg-sortable {
   white-space: nowrap;
   padding: 0;

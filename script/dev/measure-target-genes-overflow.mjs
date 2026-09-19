@@ -1,19 +1,32 @@
 #!/usr/bin/env node
-// Regression check for the Target Genes result page's "expanded experiment
-// columns must not scroll the document horizontally" constraint.
+// Regression check for the Target Genes result page's "must not scroll the
+// document horizontally" constraint, at 390px — currently two unrelated
+// sources of the same class of bug:
 //
-// #result-table-wrap has overflow-x:auto and does correctly contain/scroll
-// its own content — but that alone wasn't enough: with 130+ columns of
-// unbreakable header text, the wrapper's intrinsic content width (tens of
-// thousands of pixels) still reached document.documentElement's own
-// reported scrollWidth (a real, root-element-specific quirk — see
-// public/css/style.css's #result-table-wrap comment), and in a mobile
-// viewport that visibly widened the whole layout viewport and dragged the
-// 100%-wide fixed navbar out past the screen edge with it. The fix is
-// `contain: layout paint` on #result-table-wrap. This script measures
-// document.documentElement.scrollWidth vs clientWidth the same way that
-// regression was originally found and fixed, so it can be re-run whenever
-// this page changes.
+// 1. Expanded experiment columns. #result-table-wrap has overflow-x:auto
+//    and does correctly contain/scroll its own content — but that alone
+//    wasn't enough: with 130+ columns of unbreakable header text, the
+//    wrapper's intrinsic content width (tens of thousands of pixels) still
+//    reached document.documentElement's own reported scrollWidth (a real,
+//    root-element-specific quirk — see public/css/style.css's
+//    #result-table-wrap comment), and in a mobile viewport that visibly
+//    widened the whole layout viewport and dragged the 100%-wide fixed
+//    navbar out past the screen edge with it. The fix is
+//    `contain: layout paint` on #result-table-wrap.
+//
+// 2. A long, unbroken #gene-search query (task F2). emptyStateMessage() in
+//    frontend/pages/target-genes-result.ts echoes the raw query back into
+//    #row-count verbatim. #row-count is a flex item (in the .d-flex row it
+//    shares with the pagination nav) with the default min-width:auto, so
+//    without help it never shrinks below its own min-content width — one
+//    long unbroken token drags the flex row, and the document with it. The
+//    fix is `min-width: 0; overflow-wrap: break-word;` on #row-count (see
+//    public/css/style.css), the same wrapping treatment task D1 already
+//    established for #search-title-cell / #search-attrs-cell.
+//
+// This script measures document.documentElement.scrollWidth vs
+// clientWidth the same way both regressions were originally found and
+// fixed, so either can be re-checked whenever this page changes.
 //
 // Drives a real headless Chromium directly over the DevTools Protocol
 // (no puppeteer/playwright dependency — Node's built-in fetch + WebSocket
@@ -43,6 +56,17 @@ const TARGET_URL = `${BASE_URL}/target_genes_result?genome=mm10&track=Stat3&dist
 // 2,000px leaves ample margin for legitimate data drift while still
 // catching the fixture becoming too narrow to mean anything.
 const MIN_EXPANDED_OVERFLOW_PX = 2000
+
+// A long, unbroken (no spaces) #gene-search query, for case 2 above. 300
+// chars exceeds ChipAtlas::TargetGenesTsv::MAX_QUERY_LENGTH (200, see
+// lib/services/target_genes_tsv.rb) on purpose — #gene-search's maxlength
+// attribute stops a real user from *typing* past 200, but this script sets
+// .value via the property setter (which maxlength does not constrain,
+// same as any other programmatic write) so the CSS fix is verified on its
+// own, independent of the maxlength mitigation covering the same bug from
+// a different angle.
+const QUERY_LEN = 300
+const LONG_QUERY = 'x'.repeat(QUERY_LEN)
 
 async function newTab() {
   const res = await fetch(`${CDP_HOST}/json/new?about:blank`, { method: 'PUT' })
@@ -132,6 +156,49 @@ async function measure(ws, width, mobile, expand) {
   `)
 }
 
+// Case 2 (see the header comment): types LONG_QUERY into #gene-search at a
+// true 390px mobile viewport, waits past the 300ms debounce plus the
+// response, then measures the same document-level metrics `measure()`
+// does. Collapses the experiments toggle first so this case isolates the
+// #row-count regression from case 1's (both being exercised in the same
+// script/page, they'd otherwise compound and make a failure ambiguous
+// about which fix regressed).
+async function measureQueryOverflow(ws) {
+  await cdp(ws, 'Emulation.setDeviceMetricsOverride', { width: 390, height: 900, deviceScaleFactor: 1, mobile: true })
+  await evaluate(ws, `new Promise(r => setTimeout(r, 150))`)
+  await evaluate(ws, `
+    (() => {
+      const details = document.getElementById('experiments-toggle')
+      if (details.open) document.querySelector('#experiments-toggle summary').click()
+    })()
+  `)
+  await evaluate(ws, `new Promise(r => setTimeout(r, 150))`)
+
+  await evaluate(ws, `
+    (() => {
+      const input = document.getElementById('gene-search')
+      const setter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set
+      setter.call(input, ${JSON.stringify(LONG_QUERY)})
+      input.dispatchEvent(new Event('input', { bubbles: true }))
+    })()
+  `)
+  await evaluate(ws, `new Promise(r => setTimeout(r, 600))`) // past the 300ms debounce + response round trip
+
+  return evaluate(ws, `
+    (() => {
+      const de = document.documentElement
+      const rc = document.getElementById('row-count')
+      return {
+        viewportWidth: window.innerWidth,
+        docScrollWidth: de.scrollWidth,
+        docClientWidth: de.clientWidth,
+        rowCountTextLength: rc ? rc.textContent.length : null,
+        rowCountRight: rc ? rc.getBoundingClientRect().right : null,
+      }
+    })()
+  `)
+}
+
 async function main() {
   const tab = await newTab()
   const ws = await connect(tab.webSocketDebuggerUrl)
@@ -203,6 +270,19 @@ async function main() {
     console.log(`      documentElement.scrollWidth=${m.docScrollWidth} clientWidth=${m.docClientWidth}` +
       ` | wrapper scrollWidth=${m.wrapScrollWidth} clientWidth=${m.wrapClientWidth}` +
       ` | navbar right=${m.navRight} viewportWidth=${m.viewportWidth}`)
+  }
+
+  // Case 2: a long, unbroken #gene-search query at 390px (see the header
+  // comment and QUERY_LEN/LONG_QUERY above).
+  {
+    const label = `long unbroken gene-search query (${QUERY_LEN} chars) at 390px (mobile)`
+    const m = await measureQueryOverflow(ws)
+    const pass = m.docScrollWidth <= m.docClientWidth
+    allPass = allPass && pass
+    console.log(`${pass ? 'PASS' : 'FAIL'}  ${label}`)
+    console.log(`      documentElement.scrollWidth=${m.docScrollWidth} clientWidth=${m.docClientWidth}` +
+      ` | #row-count right edge=${m.rowCountRight} textLength=${m.rowCountTextLength}` +
+      ` | viewportWidth=${m.viewportWidth}`)
   }
 
   await cdp(ws, 'Target.closeTarget', { targetId: tab.id })
