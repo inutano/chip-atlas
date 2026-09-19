@@ -497,6 +497,14 @@ select.list-box option {
   margin-right: 2px;
 }
 
+/* Gene-name filter box above the result table (task F2). Capped so it
+   doesn't stretch full-width on a wide viewport, but never wider than its
+   container - no min-width, so it still shrinks correctly at 390px instead
+   of contributing to #result-table-wrap's own overflow concerns above. */
+.tg-gene-search {
+  max-width: 320px;
+}
+
 #result-table th.tg-sortable {
   white-space: nowrap;
   padding: 0;

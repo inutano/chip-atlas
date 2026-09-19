@@ -121,6 +121,10 @@ export interface TargetGenesQuery {
   order?: 'asc' | 'desc'
   offset?: number
   limit?: number
+  // Case-insensitive substring filter against the gene name column only
+  // (see lib/services/target_genes_tsv.rb#result). Applied server-side
+  // before sort/slice, so `total` in the response already reflects it.
+  q?: string
 }
 
 export interface UrlCondition {
@@ -379,7 +383,7 @@ export async function getTargetGenesData(
   return request<TargetGenesResult>(
     '/api/target_genes' + qs({
       genome, track, distance,
-      sort: query.sort, order: query.order, offset: query.offset, limit: query.limit,
+      sort: query.sort, order: query.order, offset: query.offset, limit: query.limit, q: query.q,
     })
   )
 }

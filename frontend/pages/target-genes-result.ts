@@ -16,6 +16,7 @@ import { ApiError, getTargetGenesData, type TargetGenesResult } from '../api/cli
 const PAGE_SIZE = 100
 const AVERAGE_SUFFIX = '|Average'
 const STRING_COLUMN = 'STRING'
+const QUERY_DEBOUNCE_MS = 300
 
 interface Params {
   genome: string
@@ -30,11 +31,12 @@ interface State {
   sort: string | null    // exact column header to sort by; null = server default (the Average column)
   order: 'asc' | 'desc'
   offset: number
+  query: string          // gene-name filter, sent to the server as `q`; '' = no filter
   data: TargetGenesResult | null
 }
 
 const state: State = {
-  genome: '', track: '', distance: '1', sort: null, order: 'desc', offset: 0, data: null,
+  genome: '', track: '', distance: '1', sort: null, order: 'desc', offset: 0, query: '', data: null,
 }
 
 function $(id: string): HTMLElement {
@@ -307,10 +309,28 @@ function renderRows(data: TargetGenesResult): void {
   }))
 }
 
+// Two distinct empty facts, deliberately worded differently so neither is
+// mistaken for the other (see the module comment on the old client-side
+// filter this replaces): a `total` of 0 while a gene-name filter is active
+// means "no gene matches your text" - the data is there, the query just
+// didn't hit anything - versus (handled entirely in load()'s catch block,
+// not here) "this antigen/genome/distance combination has no precomputed
+// data at all", which is a fetch failure, not a filtered-down zero.
+// Exported (and taking `query` as a plain argument rather than reading
+// module state) so it's unit-testable the same way as computeNextSort /
+// computeAriaSort / isUnknownSortColumnError above - see
+// target-genes-result.test.ts. Callers must assign the result via
+// textContent, never innerHTML: `query` is untrusted user input.
+export function emptyStateMessage(query: string): string {
+  return query
+    ? `No genes match "${query}".`
+    : 'No target genes found'
+}
+
 function renderPagination(data: TargetGenesResult): void {
   const shown = data.rows.length
   $('row-count').textContent = data.total === 0
-    ? 'No target genes found'
+    ? emptyStateMessage(state.query)
     : `Showing ${data.offset + 1} to ${data.offset + shown} of ${data.total.toLocaleString()} genes`
 
   const totalPages = Math.max(1, Math.ceil(data.total / PAGE_SIZE))
@@ -397,6 +417,7 @@ async function load(isFallbackRetry = false): Promise<void> {
       order: state.order,
       offset: state.offset,
       limit: PAGE_SIZE,
+      q: state.query || undefined,
     })
     if (gen !== loadGeneration) return // a newer request (distance/sort/page change) already landed
 
@@ -467,6 +488,28 @@ function wirePagination(): void {
   })
 }
 
+// Debounced so each keystroke doesn't fire its own request against a
+// potentially 13,459-row file; keeps the current sort and resets to page 1
+// (offset 0), matching every other state change on this page (distance
+// switch, sort click, pagination) that starts a fresh load from the top.
+let queryDebounceTimer: ReturnType<typeof setTimeout> | null = null
+
+function wireGeneSearch(): void {
+  const input = $('gene-search') as HTMLInputElement
+  input.addEventListener('input', () => {
+    const value = input.value
+    if (queryDebounceTimer !== null) clearTimeout(queryDebounceTimer)
+    queryDebounceTimer = setTimeout(() => {
+      queryDebounceTimer = null
+      const trimmed = value.trim()
+      if (trimmed === state.query) return
+      state.query = trimmed
+      state.offset = 0
+      void load()
+    }, QUERY_DEBOUNCE_MS)
+  })
+}
+
 function wireExperimentsToggle(): void {
   const details = $('experiments-toggle') as HTMLDetailsElement
   const wrap = $('result-table-wrap')
@@ -493,6 +536,7 @@ function init(): void {
   wireDistanceSwitch()
   wirePagination()
   wireExperimentsToggle()
+  wireGeneSearch()
 
   void load()
 }

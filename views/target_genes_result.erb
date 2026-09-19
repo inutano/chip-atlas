@@ -19,6 +19,12 @@
         <%== erb :_icon, locals: { name: 'download' } %> Download TSV
       </a>
     </div>
+
+    <div class="mt-2">
+      <label for="gene-search" class="visually-hidden">Filter by gene name</label>
+      <input type="search" id="gene-search" class="form-control form-control-sm tg-gene-search"
+             placeholder="Filter by gene name (e.g. Myc)" aria-label="Filter by gene name" autocomplete="off">
+    </div>
   </div>
 </div>
 

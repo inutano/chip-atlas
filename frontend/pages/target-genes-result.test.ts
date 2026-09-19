@@ -15,7 +15,7 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { ApiError } from '../api/client'
-import { computeAriaSort, computeNextSort, isUnknownSortColumnError } from './target-genes-result'
+import { computeAriaSort, computeNextSort, emptyStateMessage, isUnknownSortColumnError } from './target-genes-result'
 
 // ===== computeNextSort — what a header's click handler runs on activation =====
 //
@@ -100,4 +100,27 @@ test('isUnknownSortColumnError: false for a 502 (upstream parse error)', () => {
 
 test('isUnknownSortColumnError: false for a non-ApiError (e.g. a network failure)', () => {
   assert.equal(isUnknownSortColumnError(new TypeError('Failed to fetch')), false)
+})
+
+// ===== emptyStateMessage — the F2 fix: two different empty facts must read
+// differently, or a gene search that matches nothing looks identical to
+// "this antigen/distance has no precomputed data at all" (the bug that got
+// the previous client-side filter removed - see task-F2-brief.md). =====
+
+test('emptyStateMessage: no active gene filter reads as "no target genes found"', () => {
+  assert.equal(emptyStateMessage(''), 'No target genes found')
+})
+
+test('emptyStateMessage: an active gene filter with zero matches names the query, distinctly from the no-filter case', () => {
+  const withQuery = emptyStateMessage('Zzznosuchgene')
+  assert.equal(withQuery, 'No genes match "Zzznosuchgene".')
+  assert.notEqual(withQuery, emptyStateMessage(''))
+})
+
+test('emptyStateMessage: the query text is interpolated as plain text, not treated as markup', () => {
+  // This only proves the *string* has no markup baked in; the actual DOM
+  // safety guarantee is that renderPagination() assigns this via
+  // .textContent (never .innerHTML) - see target-genes-result.ts.
+  const message = emptyStateMessage('<img src=x>')
+  assert.equal(message, 'No genes match "<img src=x>".')
 })
