@@ -66,6 +66,14 @@ module ChipAtlas
     DEFAULT_LIMIT = 50
     MAX_LIMIT = 500
 
+    # `q` (gene-name filter) has no "malformed" shape to reject - any string
+    # is a well-defined substring pattern - so an over-long query is simply
+    # truncated rather than raising a 400, unlike `sort`'s closed set of
+    # valid column names. 200 chars comfortably exceeds any real gene
+    # symbol (HGNC/MGI symbols top out well under 50 chars) while still
+    # bounding a pathological query param.
+    MAX_QUERY_LENGTH = 200
+
     AVERAGE_COLUMN_SUFFIX = '|Average'
     AVERAGE_COLUMN_INDEX = 1 # column 2 (0-based 1): "<Track>|Average"
 
@@ -108,12 +116,24 @@ module ChipAtlas
     end
 
     # Returns { columns:, rows:, total:, offset:, limit: } for the given
-    # condition, sorted/sliced server-side, or nil if the TSV doesn't exist
-    # upstream (a genuinely missing combination). Raises ParseError if the
-    # body exists but isn't a well-formed TSV, and UnknownSortColumn if
-    # `sort` names a column this TSV doesn't have — both distinct from the
-    # nil ("not found") case so callers can respond differently.
-    def result(genome:, track:, distance:, tsv_url:, sort: nil, order: nil, offset: nil, limit: nil)
+    # condition, filtered/sorted/sliced server-side, or nil if the TSV
+    # doesn't exist upstream (a genuinely missing combination). Raises
+    # ParseError if the body exists but isn't a well-formed TSV, and
+    # UnknownSortColumn if `sort` names a column this TSV doesn't have —
+    # both distinct from the nil ("not found") case so callers can respond
+    # differently.
+    #
+    # `q`, when given, is a case-insensitive substring match against column
+    # 0 (Target_genes) only — applied *before* sort and slice, so `total`
+    # reflects the filtered set and offset/limit page over the matches, not
+    # over the full unfiltered file. Filtering after slicing (page the raw
+    # rows, then search only the page in hand) is the bug an earlier
+    # client-side filter shipped with: it silently searched one loaded page
+    # and reported "no results" for genes that existed elsewhere in the
+    # file. Matching this app's other free-text search surfaces
+    # (/api/search, the track/cell-type autocompletes): substring, not
+    # prefix-only.
+    def result(genome:, track:, distance:, tsv_url:, sort: nil, order: nil, offset: nil, limit: nil, q: nil)
       entry = load(genome, track, distance, tsv_url)
       return nil unless entry
 
@@ -122,14 +142,16 @@ module ChipAtlas
       limit_i = clamp_limit(limit)
       offset_i = [offset.to_i, 0].max
 
-      sorted = entry[:rows].sort_by { |row| row[sort_index] }
+      matching_rows = filter_rows(entry[:rows], q)
+
+      sorted = matching_rows.sort_by { |row| row[sort_index] }
       sorted.reverse! if descending
       page = sorted.slice(offset_i, limit_i) || []
 
       {
         columns: entry[:headers],
         rows: page,
-        total: entry[:rows].size,
+        total: matching_rows.size,
         offset: offset_i,
         limit: limit_i,
       }
@@ -139,6 +161,30 @@ module ChipAtlas
       value = limit.nil? || limit.to_s.empty? ? DEFAULT_LIMIT : limit.to_i
       value = DEFAULT_LIMIT if value <= 0
       value.clamp(1, MAX_LIMIT)
+    end
+
+    # Applies the gene-name filter against column 0 only. A nil/blank `q`
+    # (absent, empty string, or whitespace-only) is "no filter" and returns
+    # `rows` unchanged - not a new Array copy - so the common (unfiltered)
+    # request path pays no extra allocation for a 13,460-row matrix.
+    def filter_rows(rows, q)
+      needle = normalize_query(q)
+      return rows if needle.nil?
+
+      rows.select { |row| row[0].to_s.downcase.include?(needle) }
+    end
+
+    # Trims a raw `q` param down to a comparable needle: over-long input is
+    # truncated (see MAX_QUERY_LENGTH), surrounding whitespace is stripped
+    # (so " " behaves like an absent filter, not a filter nobody's gene
+    # name can match), and the result is lowercased once here rather than
+    # on every row. Returns nil for "no filter" (nil, empty, or
+    # whitespace-only), non-nil otherwise.
+    def normalize_query(q)
+      return nil if q.nil?
+
+      trimmed = q.to_s[0, MAX_QUERY_LENGTH].strip
+      trimmed.empty? ? nil : trimmed.downcase
     end
 
     # Loads the parsed matrix for (genome, track, distance), from cache when
@@ -246,6 +292,7 @@ module ChipAtlas
     end
 
     private_class_method :fetch_tsv, :raise_if_unstubbed_under_test!, :parse, :average_column_index,
-                          :resolve_sort_index, :store, :evict_until_fits, :estimate_bytes, :clamp_limit
+                          :resolve_sort_index, :store, :evict_until_fits, :estimate_bytes, :clamp_limit,
+                          :filter_rows, :normalize_query
   end
 end

@@ -256,6 +256,56 @@ class ApiTest < Minitest::Test
     ChipAtlas::TargetGenesTsv.fetcher = nil
   end
 
+  def test_target_genes_q_filters_before_paging_and_reports_the_filtered_total
+    ChipAtlas::TargetGenesTsv.fetcher = ->(_url) { TARGET_GENES_FIXTURE }
+
+    get '/api/target_genes', genome: 'mm10', track: 'Stat3', distance: '1', q: 'oc', limit: 2
+
+    assert last_response.ok?
+    data = JSON.parse(last_response.body)
+    assert_equal %w[Socs3], data['rows'].map(&:first)
+    assert_equal 1, data['total'], '`total` must reflect the filtered set, not the unfiltered file'
+  ensure
+    ChipAtlas::TargetGenesTsv.fetcher = nil
+  end
+
+  def test_target_genes_q_is_case_insensitive_substring
+    ChipAtlas::TargetGenesTsv.fetcher = ->(_url) { TARGET_GENES_FIXTURE }
+
+    get '/api/target_genes', genome: 'mm10', track: 'Stat3', distance: '1', q: 'MYC'
+
+    assert last_response.ok?
+    data = JSON.parse(last_response.body)
+    assert_equal %w[Myc], data['rows'].map(&:first)
+  ensure
+    ChipAtlas::TargetGenesTsv.fetcher = nil
+  end
+
+  def test_target_genes_q_absent_behaves_exactly_as_today
+    ChipAtlas::TargetGenesTsv.fetcher = ->(_url) { TARGET_GENES_FIXTURE }
+
+    get '/api/target_genes', genome: 'mm10', track: 'Stat3', distance: '1'
+
+    assert last_response.ok?
+    data = JSON.parse(last_response.body)
+    assert_equal 5, data['total']
+  ensure
+    ChipAtlas::TargetGenesTsv.fetcher = nil
+  end
+
+  def test_target_genes_q_with_no_matches_returns_200_with_empty_rows_and_zero_total
+    ChipAtlas::TargetGenesTsv.fetcher = ->(_url) { TARGET_GENES_FIXTURE }
+
+    get '/api/target_genes', genome: 'mm10', track: 'Stat3', distance: '1', q: 'NoSuchGene'
+
+    assert last_response.ok?, 'a filter with no matches is not an error - it is a valid, empty result'
+    data = JSON.parse(last_response.body)
+    assert_equal [], data['rows']
+    assert_equal 0, data['total']
+  ensure
+    ChipAtlas::TargetGenesTsv.fetcher = nil
+  end
+
   def test_target_genes_limit_is_capped
     ChipAtlas::TargetGenesTsv.fetcher = ->(_url) { TARGET_GENES_FIXTURE }
 

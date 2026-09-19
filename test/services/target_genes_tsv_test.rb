@@ -119,6 +119,72 @@ class TargetGenesTsvTest < Minitest::Test
     assert_equal ChipAtlas::TargetGenesTsv::DEFAULT_LIMIT, fetch(limit: -5)[:limit]
   end
 
+  # --- gene-name filter (q): case-insensitive substring on column 0,
+  # applied before sort and slice ---
+
+  def test_q_filters_to_rows_whose_gene_name_contains_the_substring
+    stub_fetcher(@fixture)
+    result = fetch(q: 'oc') # only "Socs3" contains "oc"
+    assert_equal %w[Socs3], result[:rows].map(&:first)
+    assert_equal 1, result[:total]
+  end
+
+  def test_q_matching_is_case_insensitive
+    stub_fetcher(@fixture)
+    result = fetch(q: 'MYC')
+    assert_equal %w[Myc], result[:rows].map(&:first)
+  end
+
+  def test_q_matches_a_substring_anywhere_in_the_name_not_only_a_prefix
+    stub_fetcher(@fixture)
+    result = fetch(q: 'cs3') # "Socs3" contains "cs3" mid/end, not as a prefix
+    assert_equal %w[Socs3], result[:rows].map(&:first)
+  end
+
+  def test_q_absent_behaves_exactly_as_today
+    stub_fetcher(@fixture)
+    with_q = fetch
+    assert_equal 5, with_q[:total]
+  end
+
+  def test_q_blank_or_whitespace_only_behaves_as_absent
+    stub_fetcher(@fixture)
+    assert_equal 5, fetch(q: '')[:total]
+    assert_equal 5, fetch(q: '   ')[:total]
+  end
+
+  def test_q_with_no_matches_returns_an_empty_page_with_zero_total_not_an_error
+    stub_fetcher(@fixture)
+    result = fetch(q: 'NoSuchGeneNameAtAll')
+    assert_equal [], result[:rows]
+    assert_equal 0, result[:total]
+  end
+
+  def test_q_over_long_is_truncated_not_rejected
+    stub_fetcher(@fixture)
+    long_query = 'M' + ('y' * 500) # far past MAX_QUERY_LENGTH; must not raise
+    result = fetch(q: long_query)
+    assert_equal [], result[:rows]
+    assert_equal 0, result[:total]
+  end
+
+  # The bug the earlier client-side filter shipped with: filtering *after*
+  # paging finds nothing for a match that exists past the current page,
+  # even though the gene is really there. Build a matrix wide/deep enough
+  # that the match sits well past a small page boundary in unfiltered
+  # order, and assert it still comes back on page 1 with the right total.
+  def test_filter_runs_before_sort_and_slice_a_deep_match_still_returns_on_page_one
+    header = "Target_genes\tStat3|Average\tSTRING"
+    rows = (1..60).map { |i| "Gene#{i}\t#{i}.0\t#{i}" } # ascending average, so descending sort puts Gene60 first
+    rows << "FindMeGene\t1.0\t1" # lowest average -> last in the default (descending) sort order
+    tsv = ([header] + rows).join("\n") + "\n"
+    stub_fetcher(tsv)
+
+    result = fetch(q: 'findme', limit: 10, offset: 0)
+    assert_equal %w[FindMeGene], result[:rows].map(&:first)
+    assert_equal 1, result[:total], 'total must reflect the filtered set, not the full 61-row file'
+  end
+
   # --- missing vs malformed ---
 
   def test_missing_combination_returns_nil

@@ -1084,9 +1084,29 @@ paths:
             type: integer
             default: 50
             maximum: 500
+        - name: q
+          in: query
+          required: false
+          description: >-
+            Case-insensitive substring filter against the gene name column
+            (`Target_genes`, column 0) only - matching this API's other
+            free-text search surfaces (`/api/search` and the track/cell-type
+            autocompletes), which are also substring, not prefix-only.
+            Applied before sorting and paging, so `total`, `offset`, and
+            `limit` all describe the *filtered* set - paging walks the
+            matches, not the full unfiltered file. Omitted, empty, or
+            whitespace-only behaves exactly as if `q` were not given at all
+            (no filtering). There is no "malformed" query to reject - any
+            string is a well-defined substring pattern - so an over-long
+            value is silently truncated to 200 characters rather than
+            causing a 400; a blank result after truncation still just means
+            "no filter".
+          schema:
+            type: string
+          example: myc
       responses:
         "200":
-          description: One sorted, paginated page of target gene result data
+          description: One filtered (if `q` given), sorted, paginated page of target gene result data
           content:
             application/json:
               schema:
@@ -1112,7 +1132,10 @@ paths:
                       numeric scores.
                   total:
                     type: integer
-                    description: Total gene rows for this combination (before paging).
+                    description: >-
+                      Total gene rows matching `q` (or all rows, if `q` is
+                      absent) for this combination - before paging, after
+                      filtering.
                   offset:
                     type: integer
                   limit:

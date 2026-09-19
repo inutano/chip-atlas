@@ -197,7 +197,8 @@ module ChipAtlas
             ChipAtlas::TargetGenesTsv.result(
               genome: params[:genome], track: params[:track], distance: params[:distance],
               tsv_url: svc.target_genes_tsv_url,
-              sort: params[:sort], order: params[:order], offset: params[:offset], limit: params[:limit]
+              sort: params[:sort], order: params[:order], offset: params[:offset], limit: params[:limit],
+              q: params[:q]
             )
           rescue ChipAtlas::TargetGenesTsv::UnknownSortColumn => e
             halt 400, json_response({ error: e.message })
@@ -206,7 +207,7 @@ module ChipAtlas
           end
           halt 404, json_response({ error: 'Target genes data not found' }) unless result
 
-          log_activity('target_genes', { genome: params[:genome], track: params[:track], distance: params[:distance] })
+          log_activity('target_genes', { genome: params[:genome], track: params[:track], distance: params[:distance], q: params[:q] })
           json_response(result)
         end
 
