@@ -81,13 +81,20 @@ rulings were overturned.
   worst case is a duplicate probe against an idempotent cache.
 - Six byte-identical helpers duplicated across the two matrix pages — deliberate
   (per-page esbuild entry points); extract when a third matrix page appears.
-- Colo's Average column uncoloured — production's gradient could not be
-  reverse-engineered from one dataset, and a wrong gradient is worse than none.
+- ~~Colo's Average column uncoloured~~ — **done 2026-09-19**, owner approved.
+  The formula was recovered from production's own rendered HTML: the Average is a
+  mean of 0-9 concordance values, mapped onto the same 0-1000 ramp the STRING
+  column uses, with the ramp starting **blue at 0** (unlike STRING, which reserves
+  0 for "no data"). Verified against the shipped code: 999 of production's 1,000
+  rows exact, all 1,000 within +/-1, the one exception a float artifact at
+  average 2.4. See `2026-09-19-followups-ledger.md`.
 - No row pagination on the colo matrix — measured fine at 3,862 rows
   (forced layout 1 ms, 2 MB heap).
-- No server-side gene search on Target Genes — a client-side filter over one
-  loaded page of 13,459 rows was removed as actively misleading. **Product
-  question:** should a real server-side search replace it?
+- ~~No server-side gene search on Target Genes~~ — **done 2026-09-19**, owner
+  approved. `/api/target_genes` now takes a `q` filter applied before sort and
+  slice, so paging walks the matches and `total` is the filtered count. Verified
+  live: `Zbtb16` sits at unfiltered rank 9000 (page 91 of 135) and comes back on
+  page 1. Production has no equivalent — its own page caps at ~1,000 rows.
 - `measure-target-genes-overflow.mjs` needs a live server and hardcodes
   `mm10/Stat3/1` — it now asserts its own precondition, which was the part
   that mattered.
