@@ -150,15 +150,17 @@ test('concordanceColor: 10 with isSelf=false falls back to "?", not Same', () =>
   assert.deepEqual(result, { hex: '#808080', rgb: [128, 128, 128], label: '?' })
 })
 
-// ===== averageToRgb — the Average column's color, mapped onto the same
-// 0-1000 ramp as STRING (scoreToRgb, already exercised above via
-// stringCell/concordanceColor's shared machinery) scaled by 1000/9. Pins
-// the five worked examples from task F1's brief, cross-checked live
-// against production's own hg38/colo/STAT3.Blood.html (1,000/1,000 rows,
-// zero channel error) - this only asserts the scale factor's effect, since
-// scoreToRgb's own ramp shape already has coverage elsewhere (see this
-// file's header comment: colo-result.ts and target-genes-result.ts keep
-// byte-identical scoreToRgb implementations on purpose). =====
+// ===== averageToRgb — the Average column's color: red/yellow/green/cyan/
+// blue progression scaled by 1000/9, but on its own AVERAGE_COLOR_STOPS
+// (blue starting at value=0), not STRING's COLOR_STOPS (blue starting at
+// value=1, reserved for STRING's own "no data" gray) - see
+// colo-result.ts's comment above averageInterpolate for why the two ramps
+// need different stops. Pins the five worked examples from task F1's
+// brief, cross-checked live against production's own hg38/colo/STAT3.
+// Blood.html: 999 of 1,000 rows match exactly, every row matches within
+// +/-1 per channel, and the one exception is a float-precision artifact in
+// production's own arithmetic (see colo-result.ts's comment) rather than a
+// rule this code is missing. =====
 
 function toHex([r, g, b]: [number, number, number]): string {
   return `#${[r, g, b].map((x) => x.toString(16).padStart(2, '0')).join('')}`
@@ -182,6 +184,20 @@ test('averageToRgb: average 2.125000 -> 236.1 on the ramp -> #00f0ff', () => {
 
 test('averageToRgb: average 0 -> gray #808080 (no data), same as STRING\'s own 0', () => {
   assert.equal(toHex(averageToRgb(0)), '#808080')
+})
+
+// This is the case the stop-set correction actually changes: with
+// STRING's own COLOR_STOPS (blue starting at value=1), a small positive
+// value like this one would either interpolate most of the way from gray
+// toward blue (if scoreToRgb's <=0 short-circuit weren't also copied) or,
+// worse, fall through every segment and hit the gray fallback (since
+// 5.56 is inside [1,250] so it wouldn't actually trigger that second
+// failure mode here, but a genuinely tiny average, e.g. one below
+// 0.009 on the pre-correction stops, would). With AVERAGE_COLOR_STOPS
+// (blue starting at value=0), a small positive average must render as
+// near-blue, not near-gray or gray - exactly what production shows.
+test('averageToRgb: a small positive average is near-blue, not near-gray (the stop-set fix)', () => {
+  assert.equal(toHex(averageToRgb(0.05)), '#0005ff')
 })
 
 // ===== isSelfComparison — the structural check itself =====

@@ -200,38 +200,59 @@ function readableTextColor([r, g, b]: [number, number, number]): string {
 // ===== Average column -> color =====
 // The Average column is the mean of the per-experiment concordance values
 // above (0-9, see CONCORDANCE_COLORS), not a STRING score - but production
-// colors it on the very same 0-1000 domain/stops as STRING above (same
-// COLOR_STOPS, reused rather than re-declared - no new ramp, no new
-// colours), scaled up by 1000/9. Derived from production's own rendered
-// hg38/colo/STAT3.Blood.html and verified against all 1,000 of its rows
-// with zero channel error (see task F1's brief).
+// colors it on the same red/yellow/green/cyan/blue progression as STRING
+// above, scaled up by 1000/9. Brute-forced {stop set} x {round, floor} x
+// {mul-then-div, div-then-mul multiplication order} against all 1,000 rows
+// of production's own rendered hg38/colo/STAT3.Blood.html: 999 of 1,000
+// rows match exactly, and every one of the 1,000 matches within +/-1 on
+// every channel. The single exception (SRX347426, average 2.4 -> value
+// 266.666... -> blue channel computes to 237.99993..., floor 237,
+// production shows 238) is a float-precision artifact of production's own
+// arithmetic, not a rule this code is missing - not worth chasing further.
 //
-// This is deliberately NOT `scoreToRgb(average * (1000 / 9))` even though
-// that's how the brief phrases the formula in prose: scoreToRgb rounds each
-// channel (Math.round), but production truncates - confirmed by working
-// every one of the 5 worked examples in task F1's brief through both, only
-// truncation reproduces all 5 (e.g. average 3.866667 -> value 429.63 ->
-// green=255, blue=71.78 -> production's #00ff47 needs floor(71.78)=71;
-// Math.round would give 72 = #00ff48, which is NOT what's in production's
-// HTML). The multiplication order matters too, for the same
-// floating-point-precision reason: `(average * 1000) / 9`, not
-// `average * (1000 / 9)` - the latter's rounding error is occasionally
-// enough to push an exact-integer channel (e.g. average 3 -> exactly
-// #00ffaa) one unit off after truncation. Both details were found by
-// brute-force checking every rounding-fn x multiplication-order
-// combination against the worked examples; this is the only one that
-// matches all 5 (see colo-result.test.ts).
+// Two details matter, found by that brute force:
 //
-// scoreToRgb itself is left untouched (still Math.round) rather than
-// parameterized, so it stays byte-identical to target-genes-result.ts's
-// copy per this file's header comment - this duplicates COLOR_STOPS'
-// walk rather than generalize scoreToRgb into it.
+// 1. Rounding: this is deliberately NOT `scoreToRgb(average * (1000 / 9))`
+//    even though that's how the brief first phrased the formula in prose.
+//    scoreToRgb rounds each channel (Math.round); production truncates.
+//    E.g. average 3.866667 -> value 429.63 -> blue channel 71.78 ->
+//    production's #00ff47 needs floor(71.78)=71; Math.round would give
+//    72 = #00ff48, not what's in production's HTML. The multiplication
+//    order matters too, for the same floating-point-precision reason:
+//    `(average * 1000) / 9`, not `average * (1000 / 9)` - the latter's
+//    rounding error is occasionally enough to push an exact-integer
+//    channel (e.g. average 3 -> exactly #00ffaa) one unit off after
+//    truncation.
+//
+// 2. Stop set: this is deliberately NOT COLOR_STOPS (STRING's own stops,
+//    which start blue at value=1, reserving 0 for STRING's "no data"
+//    gray). The Average column has no such sentinel needing reservation,
+//    and production's own colours confirm it: the Average ramp starts
+//    blue at value=0. Using COLOR_STOPS's blue-at-1 here was the actual
+//    source of the (very rare - only for a value in (0,1), i.e. an
+//    average below 0.009) systematic mismatch, not the rounding function -
+//    a stop set change, not a rounding change, per the correction on task
+//    F1's brief. AVERAGE_COLOR_STOPS is a separate array from COLOR_STOPS
+//    (not derived from it) so scoreToRgb/COLOR_STOPS stay completely
+//    untouched and byte-identical to target-genes-result.ts's copy.
+const AVERAGE_COLOR_STOPS: Array<[number, [number, number, number]]> = [
+  [0, [0, 0, 255]],
+  [250, [0, 255, 255]],
+  [500, [0, 255, 0]],
+  [750, [255, 255, 0]],
+  [1000, [255, 0, 0]],
+]
+
 function averageInterpolate(value: number): [number, number, number] {
+  // Production shows gray for an average of exactly 0 (the STRING
+  // column's own "no data" gray, reused for "no data" here too) - this
+  // short-circuit stays ahead of AVERAGE_COLOR_STOPS, which itself starts
+  // at blue, not gray, for value=0.
   if (value <= 0) return [128, 128, 128]
   if (value >= 1000) return [255, 0, 0]
-  for (let i = 0; i < COLOR_STOPS.length - 1; i++) {
-    const [v0, c0] = COLOR_STOPS[i]
-    const [v1, c1] = COLOR_STOPS[i + 1]
+  for (let i = 0; i < AVERAGE_COLOR_STOPS.length - 1; i++) {
+    const [v0, c0] = AVERAGE_COLOR_STOPS[i]
+    const [v1, c1] = AVERAGE_COLOR_STOPS[i + 1]
     if (value >= v0 && value <= v1) {
       const t = (value - v0) / (v1 - v0)
       return [
