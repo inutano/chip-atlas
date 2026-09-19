@@ -9,7 +9,7 @@
 
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { computeAriaSort, computeNextSort, concordanceColor, isSelfComparison, sortRows } from './colo-result'
+import { averageToRgb, computeAriaSort, computeNextSort, concordanceColor, isSelfComparison, sortRows } from './colo-result'
 
 // ===== computeNextSort / computeAriaSort — identical contract to
 // target-genes-result.ts's (see that file's tests for the fuller
@@ -148,6 +148,40 @@ test('concordanceColor: 10 with isSelf=false falls back to "?", not Same', () =>
   assert.equal(result.label, '?')
   assert.notEqual(result.label, 'Same')
   assert.deepEqual(result, { hex: '#808080', rgb: [128, 128, 128], label: '?' })
+})
+
+// ===== averageToRgb — the Average column's color, mapped onto the same
+// 0-1000 ramp as STRING (scoreToRgb, already exercised above via
+// stringCell/concordanceColor's shared machinery) scaled by 1000/9. Pins
+// the five worked examples from task F1's brief, cross-checked live
+// against production's own hg38/colo/STAT3.Blood.html (1,000/1,000 rows,
+// zero channel error) - this only asserts the scale factor's effect, since
+// scoreToRgb's own ramp shape already has coverage elsewhere (see this
+// file's header comment: colo-result.ts and target-genes-result.ts keep
+// byte-identical scoreToRgb implementations on purpose). =====
+
+function toHex([r, g, b]: [number, number, number]): string {
+  return `#${[r, g, b].map((x) => x.toString(16).padStart(2, '0')).join('')}`
+}
+
+test('averageToRgb: average 3.866667 -> 429.6 on the ramp -> #00ff47', () => {
+  assert.equal(toHex(averageToRgb(3.866667)), '#00ff47')
+})
+
+test('averageToRgb: average 3.000000 -> 333.3 on the ramp -> #00ffaa', () => {
+  assert.equal(toHex(averageToRgb(3)), '#00ffaa')
+})
+
+test('averageToRgb: average 2.250000 -> 250.0 on the ramp -> exactly cyan #00ffff', () => {
+  assert.equal(toHex(averageToRgb(2.25)), '#00ffff')
+})
+
+test('averageToRgb: average 2.125000 -> 236.1 on the ramp -> #00f0ff', () => {
+  assert.equal(toHex(averageToRgb(2.125)), '#00f0ff')
+})
+
+test('averageToRgb: average 0 -> gray #808080 (no data), same as STRING\'s own 0', () => {
+  assert.equal(toHex(averageToRgb(0)), '#808080')
 })
 
 // ===== isSelfComparison — the structural check itself =====

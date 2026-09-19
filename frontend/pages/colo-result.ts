@@ -197,6 +197,57 @@ function readableTextColor([r, g, b]: [number, number, number]): string {
   return luminance > 140 ? '#000' : '#fff'
 }
 
+// ===== Average column -> color =====
+// The Average column is the mean of the per-experiment concordance values
+// above (0-9, see CONCORDANCE_COLORS), not a STRING score - but production
+// colors it on the very same 0-1000 domain/stops as STRING above (same
+// COLOR_STOPS, reused rather than re-declared - no new ramp, no new
+// colours), scaled up by 1000/9. Derived from production's own rendered
+// hg38/colo/STAT3.Blood.html and verified against all 1,000 of its rows
+// with zero channel error (see task F1's brief).
+//
+// This is deliberately NOT `scoreToRgb(average * (1000 / 9))` even though
+// that's how the brief phrases the formula in prose: scoreToRgb rounds each
+// channel (Math.round), but production truncates - confirmed by working
+// every one of the 5 worked examples in task F1's brief through both, only
+// truncation reproduces all 5 (e.g. average 3.866667 -> value 429.63 ->
+// green=255, blue=71.78 -> production's #00ff47 needs floor(71.78)=71;
+// Math.round would give 72 = #00ff48, which is NOT what's in production's
+// HTML). The multiplication order matters too, for the same
+// floating-point-precision reason: `(average * 1000) / 9`, not
+// `average * (1000 / 9)` - the latter's rounding error is occasionally
+// enough to push an exact-integer channel (e.g. average 3 -> exactly
+// #00ffaa) one unit off after truncation. Both details were found by
+// brute-force checking every rounding-fn x multiplication-order
+// combination against the worked examples; this is the only one that
+// matches all 5 (see colo-result.test.ts).
+//
+// scoreToRgb itself is left untouched (still Math.round) rather than
+// parameterized, so it stays byte-identical to target-genes-result.ts's
+// copy per this file's header comment - this duplicates COLOR_STOPS'
+// walk rather than generalize scoreToRgb into it.
+function averageInterpolate(value: number): [number, number, number] {
+  if (value <= 0) return [128, 128, 128]
+  if (value >= 1000) return [255, 0, 0]
+  for (let i = 0; i < COLOR_STOPS.length - 1; i++) {
+    const [v0, c0] = COLOR_STOPS[i]
+    const [v1, c1] = COLOR_STOPS[i + 1]
+    if (value >= v0 && value <= v1) {
+      const t = (value - v0) / (v1 - v0)
+      return [
+        Math.floor(c0[0] + (c1[0] - c0[0]) * t),
+        Math.floor(c0[1] + (c1[1] - c0[1]) * t),
+        Math.floor(c0[2] + (c1[2] - c0[2]) * t),
+      ]
+    }
+  }
+  return [128, 128, 128]
+}
+
+export function averageToRgb(average: number): [number, number, number] {
+  return averageInterpolate((average * 1000) / 9)
+}
+
 function formatScore(value: number): string {
   return Number.isInteger(value) ? String(value) : value.toFixed(2)
 }
@@ -370,6 +421,17 @@ function stringCell(value: number): HTMLTableCellElement {
   return td
 }
 
+function averageCell(value: number): HTMLTableCellElement {
+  const td = document.createElement('td')
+  td.className = 'tg-score-cell'
+  const rgb = averageToRgb(value)
+  td.style.backgroundColor = rgbToHex(rgb)
+  td.style.color = readableTextColor(rgb)
+  td.textContent = formatScore(value)
+  td.title = 'Average concordance (0-9 scale) shown on the STRING color scale above'
+  return td
+}
+
 function renderRows(data: ColoResult, rows: Array<Array<string | number>>): void {
   const avgIdx = averageColumnIndex(data.columns)
   const strIdx = stringColumnIndex(data.columns)
@@ -398,10 +460,7 @@ function renderRows(data: ColoResult, rows: Array<Array<string | number>>): void
 
       const numeric = typeof value === 'number' ? value : Number(value)
       if (i === avgIdx) {
-        const td = document.createElement('td')
-        td.className = 'tg-score-cell'
-        td.textContent = formatScore(numeric)
-        tr.appendChild(td)
+        tr.appendChild(averageCell(numeric))
         return
       }
       if (i === strIdx) {
