@@ -22,13 +22,16 @@
 
     <div class="mt-2">
       <label for="gene-search" class="visually-hidden">Filter by gene name</label>
-      <!-- maxlength matches ChipAtlas::TargetGenesTsv::MAX_QUERY_LENGTH
-           (lib/services/target_genes_tsv.rb) - the server silently
-           truncates a longer `q` rather than rejecting it, so capping
-           input here keeps what's typed and what's actually matched (and
-           echoed back in the "No genes match ..." message) from ever
-           disagreeing, instead of truncating the two independently. -->
-      <input type="search" id="gene-search" class="form-control form-control-sm tg-gene-search" maxlength="200"
+      <!-- maxlength is rendered from @gene_search_max_length (set in
+           routes/pages.rb from ChipAtlas::TargetGenesTsv::MAX_QUERY_LENGTH,
+           lib/services/target_genes_tsv.rb) rather than a second hardcoded
+           number here, so this can't drift from what the server actually
+           enforces - the server silently truncates a longer `q` rather
+           than rejecting it, so a maxlength that disagreed with it would
+           let a user type more than ever gets matched (and echoed back in
+           the "No genes match ..." message). -->
+      <input type="search" id="gene-search" class="form-control form-control-sm tg-gene-search"
+             maxlength="<%= @gene_search_max_length %>"
              placeholder="Filter by gene name (e.g. Myc)" aria-label="Filter by gene name" autocomplete="off">
     </div>
   </div>

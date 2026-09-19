@@ -515,12 +515,15 @@ select.list-box option {
    own min-content width no matter how long that content is, so one long
    unbroken token drags the flex row - and, the same way #result-table-wrap
    does without `contain` (see that rule's own comment above), the whole
-   document - wider than the viewport. min-width: 0 lets this item actually
-   shrink to the space it's given; overflow-wrap: break-word then wraps the
-   text within that width instead of overflowing it - the identical
-   treatment task D1 established for long free-text values in
-   #search-tbody td.search-title-cell / .search-attrs-cell above, reused
-   here rather than inventing a third approach to the same problem. */
+   document - wider than the viewport. overflow-wrap: break-word applies
+   the same long-text-wrapping principle task D1 used for
+   #search-tbody td.search-title-cell / .search-attrs-cell above (reused
+   here rather than inventing a third approach to the same problem), but
+   this is a flex item, not a table cell, so break-word alone isn't
+   enough: min-width: 0 is what overrides the flex item's default
+   min-width: auto so it can shrink below its content's min-content width
+   in the first place - a rule D1's table cells never needed, since a
+   table cell isn't subject to flex sizing. */
 #row-count {
   min-width: 0;
   overflow-wrap: break-word;

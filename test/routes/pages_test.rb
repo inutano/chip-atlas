@@ -200,6 +200,19 @@ class PagesTest < Minitest::Test
     assert_includes body, 'chip-atlas.svg#download'
   end
 
+  # #gene-search's maxlength is rendered from @gene_search_max_length
+  # (set in routes/pages.rb from ChipAtlas::TargetGenesTsv::MAX_QUERY_LENGTH)
+  # rather than a second literal hardcoded in the ERB - this asserts the two
+  # actually stay equal rather than merely trusting the wiring, the same
+  # kind of two-representations-of-one-choice drift this codebase has
+  # already been bitten by elsewhere (see the significance-threshold /
+  # file-code encoding history).
+  def test_gene_search_maxlength_matches_the_server_side_query_cap
+    get '/target_genes_result'
+    body = last_response.body
+    assert_includes body, "maxlength=\"#{ChipAtlas::TargetGenesTsv::MAX_QUERY_LENGTH}\""
+  end
+
   def test_target_genes_result_has_a_paginated_expandable_result_table
     get '/target_genes_result'
     body = last_response.body

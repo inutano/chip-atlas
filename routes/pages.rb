@@ -71,6 +71,12 @@ module ChipAtlas
         end
 
         app.get '/target_genes_result' do
+          # Single source for the gene-search box's character cap: the view
+          # renders whatever ChipAtlas::TargetGenesTsv actually enforces
+          # server-side (see MAX_QUERY_LENGTH), rather than a second literal
+          # in the ERB that could drift from it - see task F2's review for
+          # why that drift risk is worth closing here, not just documenting.
+          @gene_search_max_length = ChipAtlas::TargetGenesTsv::MAX_QUERY_LENGTH
           @page_js = 'target-genes-result'
           erb :target_genes_result
         end
