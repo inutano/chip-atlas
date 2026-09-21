@@ -12,7 +12,7 @@ import { GenomeTabs } from '../components/genome-tabs'
 import { FacetFilter, type FacetCondition, type FacetFilterOptions } from '../components/facet-filter'
 import { Autocomplete } from '../components/autocomplete'
 import { initInfoPopovers } from '../components/info-popover'
-import { submitJob, getEstimatedTime } from '../api/client'
+import { submitJob, getBedSizes, type BedSizes } from '../api/client'
 
 interface PageData {
   genomes: Record<string, string>
@@ -111,6 +111,9 @@ function readFileToTextarea(input: HTMLInputElement, textarea: HTMLTextAreaEleme
     const reader = new FileReader()
     reader.onload = () => {
       textarea.value = String(reader.result || '')
+      // The file picker's own `change` fired before FileReader finished, so
+      // the estimate listener saw an empty textarea. Announce the contents.
+      textarea.dispatchEvent(new Event('input', { bubbles: true }))
     }
     reader.readAsText(file)
   })
@@ -139,16 +142,24 @@ let stashedDatasetBSelection: string | null = null
 // throws the user's choice away for good. This stashes the discarded
 // selection instead and restores it the next time gene-list mode reopens.
 //
+// With nothing stashed, reopening takes RefSeq rather than leaving whatever
+// BED mode was using. That is production's behaviour — positionGene()
+// force-checks ComparedWithRefseq and unchecks the other three every time
+// Dataset A becomes a gene list — and it is not a neutral difference: gene
+// list + random permutation is a pairing production models no runtime for,
+// so the estimate panel has nothing to show for it (see estimateSeconds),
+// and it is exactly where a user lands by simply picking "Gene list".
+//
 // The "did the user abandon it on purpose" case is handled by *what* gets
 // stashed, not by tracking history: only the option live at the instant the
 // gate closes is a candidate for restoring. If the user manually switches
 // Dataset B to Random permutation while the gate is still open (no
 // open/close transition happening at that moment, so this function isn't
 // even called), that is what's live when the gate next closes — so nothing
-// gene-list-only is stashed, and reopening correctly leaves Random
-// permutation in place instead of resurrecting the option they walked away
-// from. Repeated open/close cycles each re-derive the stash from whatever
-// is live at that moment, so they compound correctly instead of drifting.
+// gene-list-only is stashed, and reopening does not resurrect the option
+// they walked away from — it starts again from the RefSeq default above.
+// Repeated open/close cycles each re-derive the stash from whatever is live
+// at that moment, so they compound correctly instead of drifting.
 export function applyDatasetBGateTransition(
   prevGeneMode: boolean | null,
   isGeneMode: boolean,
@@ -168,9 +179,9 @@ export function applyDatasetBGateTransition(
     const isGeneOnly = currentBType === 'refseq' || currentBType === 'userlist'
     return isGeneOnly ? { bType: 'rnd', stashed: currentBType } : { bType: currentBType, stashed: null }
   }
-  // Gate just reopened. Restore the stash if one is pending; otherwise
-  // leave the current selection alone.
-  return stashed ? { bType: stashed, stashed: null } : { bType: currentBType, stashed: null }
+  // Gate just reopened. Restore the stash if one is pending; otherwise take
+  // production's own gene-list default, RefSeq.
+  return stashed ? { bType: stashed, stashed: null } : { bType: 'refseq', stashed: null }
 }
 
 function syncDatasetBVisibility(): void {
@@ -217,19 +228,242 @@ function syncDatasetBVisibility(): void {
 }
 
 // ===== Estimated run time =====
-// Reuses the shared POST /jobs/estimated_time endpoint (see routes/jobs.rb and
-// frontend/pages/diff-analysis.ts). That endpoint only models runtime for the
-// diff-analysis 'dmr'/'diffbind' formulas — enrichment-analysis jobs have no
-// modeled formula server-side yet, so this always resolves to the same
-// em-dash placeholder the panel starts with. Wiring it here (rather than
-// leaving the placeholder static) keeps the affordance ready for the day a
-// server-side estimate is added, without touching job-submission logic.
-async function refreshEstimate(): Promise<void> {
+// Production computes this entirely in the browser — see its
+// js/pj/enrichment_analysis.js timeCalculate() / estimateTime() / getSeconds().
+// There is no server round trip and no queue introspection: the estimate is a
+// closed-form regression over three numbers (lines in dataset A, lines in
+// dataset B, and how many peak-file lines the chosen genome/antigen/cell/qval
+// combination holds), so it is reproduced here rather than bolted onto
+// POST /jobs/estimated_time. That endpoint models only diff analysis's
+// 'dmr'/'diffbind' formulas (routes/jobs.rb), which production also computes
+// server-side; adding an enrichment branch there would introduce a DB round
+// trip production does not make, for a number it already has in hand.
+//
+// The regression coefficients, the k constants, the 5/7 and 1.8/0.85 factors
+// and both lookup tables below are transcribed verbatim from production. They
+// are fitted constants with no derivation to check them against, so they are
+// copied rather than re-derived, and kept in production's own shape so the two
+// stay diffable.
+
+/**
+ * Genome sizes in bp, verbatim from production's `genomesize` table. Used only
+ * for the sequence-motif case below. Production's table predates this app's
+ * genome list on both ends: it still carries hg19/mm9/dm3/ce10, which the tabs
+ * no longer offer, and it has no entry for TAIR — kept as-is so a diff against
+ * production shows only real drift.
+ */
+const GENOME_SIZE: Record<string, number> = {
+  ce10: 100286070,
+  ce11: 100286070,
+  dm3: 168736537,
+  dm6: 168736537,
+  hg19: 3137161264,
+  hg38: 3137161264,
+  mm9: 2725765481,
+  mm10: 2725765481,
+  sacCer3: 12157105,
+  rn6: 2870182909,
+}
+
+/** RefSeq coding-gene counts, verbatim from production's `numGenes` table. */
+const NUM_GENES: Record<string, number> = {
+  ce10: 17958,
+  ce11: 17958,
+  dm3: 12635,
+  dm6: 12635,
+  hg19: 18622,
+  hg38: 18622,
+  mm9: 19909,
+  mm10: 19909,
+  sacCer3: 5809,
+  rn6: 23425,
+}
+
+/**
+ * Key into /api/bed_sizes, which is this app's equivalent of production's
+ * static /data/number_of_lines.json and uses the identical
+ * `genome,antigenClass,cellClass,qval` composite key.
+ *
+ * Two details production's timeCalculate() handles and this must too:
+ * Bisulfite-Seq rows are keyed with the literal "bs" (the significance
+ * threshold does not apply to methylation data, so there is one row per
+ * genome/cell class instead of four), and the q-value component is the
+ * *file code* ("05"/"10"/"20"/"50"), not the -10*Log10[Q] threshold. Production
+ * divides its own option value by 10 to get there; FacetFilter already carries
+ * the file code, so no conversion happens here. Do not reuse
+ * qvalCodeToThreshold() for this — it converts in the opposite direction, for
+ * the WABI submission field.
+ */
+export function bedSizeKey(
+  condition: Pick<FacetCondition, 'genome' | 'track_class' | 'cell_type_class' | 'qval'>,
+): string {
+  const qval = condition.track_class === 'Bisulfite-Seq' ? 'bs' : condition.qval
+  return [condition.genome, condition.track_class, condition.cell_type_class, qval].join(',')
+}
+
+/**
+ * Production's line count: an empty textarea is 0 lines, and one trailing
+ * newline is ignored so that "chr1\t1\t2\n" counts as one region, not two.
+ */
+export function countLines(text: string): number {
+  if (text.length === 0) return 0
+  return text.replace(/\n$/, '').split('\n').length
+}
+
+/**
+ * A single line with no tab in it is a sequence motif rather than a BED record.
+ * Production estimates the work that implies from how often a motif that long
+ * turns up by chance across the genome.
+ *
+ * `text.length` is production's own expression, and it measures the raw
+ * textarea contents — so a motif typed with a trailing newline counts one
+ * character longer, and the estimate comes out ~4x smaller. That is
+ * reproduced rather than corrected: these are estimates shown side by side
+ * with production's, and a silent arithmetic divergence would be harder to
+ * account for than the quirk.
+ *
+ * Returns null when the genome has no entry in GENOME_SIZE. Production would
+ * divide by `undefined` here and render the string "NaN hr" (NaN < 60 is
+ * false, so it even takes the hours branch); an em dash is the honest answer
+ * for "no published figure for this assembly".
+ */
+function motifLineCount(genome: string, text: string, lines: number): number | null {
+  if (lines !== 1 || text.includes('\t')) return lines
+  const size = GENOME_SIZE[genome]
+  if (size === undefined) return null
+  return size / Math.pow(4, text.length)
+}
+
+/** Production's getSeconds(). "rnd" is its `default` branch. */
+export function getSeconds(
+  numLinesA: number,
+  numLinesB: number,
+  numRef: number,
+  type: 'bed' | 'rnd',
+): number {
+  if (type === 'bed') {
+    const a = numRef * 8.23e-11 + 1.47e-2
+    const b = numRef * 4.72e-11 + 7.24e-3
+    const c = (numLinesA + numLinesB) * 6.75e-11 + 1.02e-6
+    const k = 60
+    return (k + a * numLinesA + b * numLinesB + c * numRef) * (5 / 7)
+  }
+  const a = numRef * 3.02e-12 + 1.13e-4
+  const c = (numLinesA + numLinesA * numLinesB) * 3.02e-12 + 2.06e-6
+  const k = 20
+  return (
+    1.8 *
+    Math.pow(k + a * (Math.pow(0.8 * numLinesA, 1.52) + numLinesA * numLinesB) + c * numRef, 0.85)
+  )
+}
+
+export interface EstimateInput {
+  genome: string
+  aType: string
+  bType: string
+  /** Raw textarea contents, untrimmed — see motifLineCount. */
+  dataAText: string
+  dataBText: string
+  permTime: string
+  /** /api/bed_sizes lookup; undefined when the combination has no peaks. */
+  numRef: number | undefined
+}
+
+/**
+ * Production's estimateTime(), minus its final formatting step.
+ *
+ * Returns null for every combination production leaves `seconds` undefined in
+ * (and therefore renders as "NaN hr"): an unknown genome/antigen/cell/qval
+ * combination, and the dataset A/B pairings its switch has no branch for —
+ * notably gene list + random permutation, which this app's dataset B panel
+ * allows and production's own panel does too. Callers render null as an em
+ * dash. This is the one deliberate behavioural difference from production
+ * here; every reachable combination it does compute is computed identically.
+ */
+export function estimateSeconds(input: EstimateInput): number | null {
+  const numRef = input.numRef
+  if (numRef === undefined || !Number.isFinite(numRef)) return null
+
+  const linesA = countLines(input.dataAText)
+  const linesB = countLines(input.dataBText)
+
+  switch (input.aType) {
+    case 'bed': {
+      const motifA = motifLineCount(input.genome, input.dataAText, linesA)
+      if (motifA === null) return null
+      if (input.bType === 'rnd') {
+        // Dataset B's line count is the permutation multiplier, not any text.
+        return getSeconds(motifA, Number(input.permTime), numRef, 'rnd')
+      }
+      if (input.bType === 'bed') {
+        const motifB = motifLineCount(input.genome, input.dataBText, linesB)
+        if (motifB === null) return null
+        return getSeconds(motifA, motifB, numRef, 'bed')
+      }
+      return null
+    }
+    case 'gene': {
+      if (input.bType === 'refseq') {
+        const total = NUM_GENES[input.genome]
+        if (total === undefined) return null
+        // Dataset B is every coding gene *except* the ones in dataset A.
+        return getSeconds(linesA, total - linesA, numRef, 'bed')
+      }
+      if (input.bType === 'userlist') return getSeconds(linesA, linesB, numRef, 'bed')
+      return null
+    }
+    case 'count':
+      // A gene count table is scored on its own; there is no dataset B.
+      return getSeconds(linesA, 0, numRef, 'bed')
+    default:
+      return null
+  }
+}
+
+/** Production's formatting: whole minutes under an hour, one decimal above. */
+export function formatEstimate(seconds: number | null): string {
+  if (seconds === null || !Number.isFinite(seconds)) return '—'
+  const minutes = Math.round(seconds / 60)
+  return minutes < 60 ? `${minutes} mins` : `${(minutes / 60).toFixed(1)} hr`
+}
+
+// /api/bed_sizes is a ~3,100-entry table that changes only when the database is
+// rebuilt (the route sets max-age=3600). Production re-fetches it on every
+// facet rebuild; fetching it once per page load is the same table with fewer
+// requests. A failed fetch clears the cache so the next keystroke retries
+// rather than leaving the panel stuck on an em dash for the whole session.
+let bedSizesPromise: Promise<BedSizes> | null = null
+
+function loadBedSizes(): Promise<BedSizes> {
+  if (!bedSizesPromise) {
+    bedSizesPromise = getBedSizes().catch((err) => {
+      bedSizesPromise = null
+      throw err
+    })
+  }
+  return bedSizesPromise
+}
+
+async function refreshEstimate(facet: HTMLElement): Promise<void> {
   const out = document.getElementById('estimated-run-time')
   if (!out) return
   try {
-    const res = await getEstimatedTime([], 'enrichment')
-    out.textContent = res.minutes != null ? `${res.minutes} min` : '—'
+    const sizes = await loadBedSizes()
+    // Every input is read *after* the await, so overlapping calls all estimate
+    // from the current form state and agree on the answer they write.
+    const condition = FacetFilter.getCondition(facet)
+    if (!condition) { out.textContent = '—'; return }
+    out.textContent = formatEstimate(
+      estimateSeconds({
+        genome: condition.genome,
+        aType: getCheckedValue('dataA-type'),
+        bType: getCheckedValue('dataB-type'),
+        dataAText: ($('dataA-text') as HTMLTextAreaElement).value,
+        dataBText: ($('dataB-text') as HTMLTextAreaElement).value,
+        permTime: getCheckedValue('dataB-perm'),
+        numRef: sizes[bedSizeKey(condition)],
+      }),
+    )
   } catch (err) {
     console.error(err)
     out.textContent = '—'
@@ -278,8 +512,18 @@ export function buildEnrichmentParams(
     distanceDown: form.distanceDown,
   }
   if (form.bType === 'rnd') params.permTime = form.permTime
-  if (form.bType === 'bed' || form.bType === 'userlist') params.bedBFile = form.dataBText
+  // bedBFile is ALWAYS sent. Production's retrieveInputData() substitutes the
+  // literal string "empty" for a blank textarea, and its own validation then
+  // requires the field to be present unless typeA is "count" - so omitting it
+  // for Random permutation (the default) made WABI reject every submission
+  // from that path.
+  params.bedBFile = orEmpty(form.dataBText)
   return params
+}
+
+/** Production sends the literal "empty" rather than an empty string. */
+function orEmpty(text: string): string {
+  return text.trim() === '' ? 'empty' : text
 }
 
 // ===== Try with example =====
@@ -293,6 +537,7 @@ async function loadExample(): Promise<void> {
     ;(document.getElementById('dataA-bed') as HTMLInputElement).checked = true
     ;($('dataA-text') as HTMLTextAreaElement).value = text
     syncDatasetBVisibility()
+    ;($('dataA-text') as HTMLTextAreaElement).dispatchEvent(new Event('input', { bubbles: true }))
   } catch (err) {
     console.error(err)
     status.textContent = 'Failed to load example data.'
@@ -341,8 +586,17 @@ async function init(): Promise<void> {
 
 
   facet.addEventListener('facet-change', () => {
-    void refreshEstimate()
+    void refreshEstimate(facet)
   })
+
+  // Production rebinds "click keyup paste" over every input/select/textarea on
+  // the page each time it recalculates. Two delegated listeners have the same
+  // reach with none of the rebinding: 'input' catches typing and pasting into
+  // the dataset textareas, 'change' catches the dataset A/B and permutation
+  // radios (and the facet's own <select>s, whose authoritative refresh is the
+  // facet-change above — this one just runs a beat earlier and agrees).
+  document.addEventListener('input', () => { void refreshEstimate(facet) })
+  document.addEventListener('change', () => { void refreshEstimate(facet) })
 
   tabs.addEventListener('genome-change', async (e: Event) => {
     const detail = (e as CustomEvent<{ genome: string }>).detail
@@ -352,6 +606,7 @@ async function init(): Promise<void> {
     } else {
       await FacetFilter.init(facet, detail.genome, enrichmentFacetFilterOptions(mount))
     }
+    void refreshEstimate(facet)
   })
 
   GenomeTabs.init(tabs, data.genomes)
@@ -381,7 +636,7 @@ async function init(): Promise<void> {
     void loadExample()
   })
 
-  void refreshEstimate()
+  void refreshEstimate(facet)
 
   $('submit-job').addEventListener('click', async () => {
     const condition = FacetFilter.getCondition(facet)
