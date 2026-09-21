@@ -130,6 +130,9 @@ function getCheckedValue(name: string): string {
 // before any user interaction — never counts as a transition.
 let prevDatasetBGateOpen: boolean | null = null
 let stashedDatasetBSelection: string | null = null
+// Dataset A's type as of the last syncDatasetBVisibility call — see the
+// distance reset in it for why this is tracked separately from the gate above.
+let prevDataAType: string | null = null
 
 // Pure decision logic for Task C5, kept separate from the DOM reads/writes
 // in syncDatasetBVisibility below — the same separation buildEnrichmentParams
@@ -184,6 +187,52 @@ export function applyDatasetBGateTransition(
   return stashed ? { bType: stashed, stashed: null } : { bType: 'refseq', stashed: null }
 }
 
+/**
+ * What a POST prefill should set the form to, before any DOM is touched.
+ *
+ * Everything arriving this way is a gene list — the senders are Target Genes
+ * and the gene search — so production checks the "Gene list" radio and runs
+ * positionGene() before filling the textarea, rather than dropping gene
+ * symbols into a form still set to BED. positionGene() also force-checks
+ * RefSeq for dataset B; that matters on this path because syncDatasetBVisibility
+ * cannot supply the default itself (its first call sees no gate transition),
+ * and without it a visitor arriving from Target Genes would land on gene list
+ * + random permutation, the one pairing with no estimate.
+ *
+ * `genes` wins over the genesetA/genesetB pair, matching production's
+ * if/else-if.
+ */
+export function prefillSelection(prefill: PageData['prefill']): {
+  aType: string
+  bType: string
+  aText: string
+  bText: string
+} | null {
+  if (prefill.genes) {
+    return { aType: 'gene', bType: 'refseq', aText: prefill.genes, bText: '' }
+  }
+  if (prefill.genesetA && prefill.genesetB) {
+    // Dataset B's "Gene list" option — production's ComparedWithUserlist.
+    return { aType: 'gene', bType: 'userlist', aText: prefill.genesetA, bText: prefill.genesetB }
+  }
+  return null
+}
+
+/**
+ * The TSS distance range production puts in the form for each dataset A type:
+ * positionBed() calls setDistance(0), positionGene() and positionCount() both
+ * call setDistance(5000). Production's page ships with 0 in the markup too,
+ * matching its initial BED mode (views/enrichment_analysis.erb does the same).
+ *
+ * This is not cosmetic. buildEnrichmentParams submits distanceUp/distanceDown
+ * on every job regardless of mode — including BED mode, where the row is
+ * hidden — so a BED submission carrying 5000 is a different analysis request
+ * from production's, not just a different-looking form.
+ */
+export function distanceDefaultFor(aType: string): string {
+  return aType === 'bed' ? '0' : '5000'
+}
+
 function syncDatasetBVisibility(): void {
   const aType = getCheckedValue('dataA-type')
   const isGeneMode = aType === 'gene'
@@ -225,6 +274,18 @@ function syncDatasetBVisibility(): void {
   // (gene list or gene count table) — production shows it in exactly those
   // two modes and hides it for plain BED input.
   ;($('distance-tss-row') as HTMLElement).hidden = aType === 'bed'
+
+  // Reset the range only when dataset A's type actually changed. This
+  // function also runs for dataset B changes, and production's setDistance()
+  // fires only from positionBed/Gene/Count — i.e. only off the bedORGene
+  // radio. Resetting on every call would wipe a range the user had just
+  // typed the moment they touched a dataset B radio.
+  if (prevDataAType !== aType) {
+    prevDataAType = aType
+    const distance = distanceDefaultFor(aType)
+    ;($('distance-up') as HTMLInputElement).value = distance
+    ;($('distance-down') as HTMLInputElement).value = distance
+  }
 }
 
 // ===== Estimated run time =====
@@ -612,10 +673,16 @@ async function init(): Promise<void> {
   GenomeTabs.init(tabs, data.genomes)
   initInfoPopovers(document, HELP_TEXT)
 
-  // Pre-fill from POST body if present
-  if (data.prefill.genesetA) ($('dataA-text') as HTMLTextAreaElement).value = data.prefill.genesetA
-  if (data.prefill.genesetB) ($('dataB-text') as HTMLTextAreaElement).value = data.prefill.genesetB
-  else if (data.prefill.genes) ($('dataA-text') as HTMLTextAreaElement).value = data.prefill.genes
+  // Pre-fill from POST body if present. syncDatasetBVisibility() below is
+  // this app's positionGene(): it runs once, after these radios are set, and
+  // takes care of the panel gating and the TSS distance range.
+  const prefill = prefillSelection(data.prefill)
+  if (prefill) {
+    ;(document.getElementById(prefill.aType === 'gene' ? 'dataA-genes' : 'dataA-bed') as HTMLInputElement).checked = true
+    ;(document.getElementById(`dataB-${prefill.bType}`) as HTMLInputElement).checked = true
+    ;($('dataA-text') as HTMLTextAreaElement).value = prefill.aText
+    ;($('dataB-text') as HTMLTextAreaElement).value = prefill.bText
+  }
 
   document.querySelectorAll<HTMLInputElement>('input[name="dataA-type"], input[name="dataB-type"]').forEach((r) => {
     r.addEventListener('change', syncDatasetBVisibility)

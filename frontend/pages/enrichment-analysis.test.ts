@@ -26,7 +26,9 @@ import {
   bedSizeKey,
   buildEnrichmentParams,
   countLines,
+  distanceDefaultFor,
   enrichmentFacetFilterOptions,
+  prefillSelection,
   estimateSeconds,
   formatEstimate,
   getSeconds,
@@ -154,6 +156,36 @@ test('buildEnrichmentParams: distanceUp/distanceDown are sent on every submissio
     assert.equal(params.distanceUp, '1000')
     assert.equal(params.distanceDown, '2000')
   }
+})
+
+// ===== distanceDefaultFor =====
+//
+// Because the value above is submitted in every mode — including BED mode,
+// where the input row is hidden — the default the form carries into a BED
+// submission is a real analysis parameter, not just what the user sees.
+// Production keys it off dataset A's type: setDistance(0) from positionBed(),
+// setDistance(5000) from positionGene() and positionCount().
+
+test('distanceDefaultFor: BED input gets 0, matching production\'s positionBed()', () => {
+  assert.equal(distanceDefaultFor('bed'), '0')
+})
+
+test('distanceDefaultFor: both gene modes get 5000, matching positionGene()/positionCount()', () => {
+  assert.equal(distanceDefaultFor('gene'), '5000')
+  assert.equal(distanceDefaultFor('count'), '5000')
+})
+
+test('distanceDefaultFor: the value reaches the payload as a string, not a number', () => {
+  // buildEnrichmentParams forwards the input's .value verbatim to WABI, so a
+  // numeric 0 here would put `0` on the wire where production puts "0".
+  const params = buildEnrichmentParams(baseCondition, {
+    ...baseForm,
+    aType: 'bed',
+    distanceUp: distanceDefaultFor('bed'),
+    distanceDown: distanceDefaultFor('bed'),
+  })
+  assert.strictEqual(params.distanceUp, '0')
+  assert.strictEqual(params.distanceDown, '0')
 })
 
 // ===== applyDatasetBGateTransition — Task C5 =====
@@ -500,4 +532,54 @@ test('formatEstimate: an em dash for null and for a non-finite estimate', () => 
   assert.equal(formatEstimate(null), '—')
   assert.equal(formatEstimate(NaN), '—')
   assert.equal(formatEstimate(Infinity), '—')
+})
+
+// ===== prefillSelection =====
+//
+// Target Genes and the gene search hand this page a gene list over POST.
+// Production checks the "Gene list" radio and runs positionGene() before
+// filling the textarea; landing gene symbols in a form still set to BED
+// would submit them as genomic regions.
+
+test('prefillSelection: no prefill leaves the form in its BED default', () => {
+  assert.equal(prefillSelection({}), null)
+  assert.equal(prefillSelection({ genes: '', genesetA: '', genesetB: '' }), null)
+})
+
+test('prefillSelection: a gene list switches dataset A to genes and dataset B to RefSeq', () => {
+  // The RefSeq half is load-bearing: gene list + random permutation is the
+  // pairing production models no runtime for, so leaving dataset B alone
+  // would land every Target Genes visitor on a blank estimate.
+  assert.deepEqual(prefillSelection({ genes: 'POU5F1\nTP53\n' }), {
+    aType: 'gene',
+    bType: 'refseq',
+    aText: 'POU5F1\nTP53\n',
+    bText: '',
+  })
+})
+
+test('prefillSelection: a genesetA/genesetB pair fills both panels as gene lists', () => {
+  assert.deepEqual(prefillSelection({ genesetA: 'POU5F1\n', genesetB: 'SOX2\nNANOG\n' }), {
+    aType: 'gene',
+    bType: 'userlist',
+    aText: 'POU5F1\n',
+    bText: 'SOX2\nNANOG\n',
+  })
+})
+
+test('prefillSelection: `genes` wins when both it and the pair are present', () => {
+  // Production's if/else-if order. An earlier shape here keyed its else-if
+  // off genesetB, which silently dropped `genes` from any request carrying
+  // both.
+  assert.deepEqual(prefillSelection({ genes: 'MYOD1\n', genesetA: 'POU5F1\n', genesetB: 'SOX2\n' }), {
+    aType: 'gene',
+    bType: 'refseq',
+    aText: 'MYOD1\n',
+    bText: '',
+  })
+})
+
+test('prefillSelection: half a pair is not a prefill — both halves are required', () => {
+  assert.equal(prefillSelection({ genesetA: 'POU5F1\n' }), null)
+  assert.equal(prefillSelection({ genesetB: 'SOX2\n' }), null)
 })
