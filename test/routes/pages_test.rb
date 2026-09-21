@@ -157,7 +157,7 @@ class PagesTest < Minitest::Test
     assert_includes body, '3. Threshold for Significance'
     assert_includes body, 'Track type (optional)'
     assert_includes body, 'Cell type (optional)'
-    assert_includes body, 'class="panel panel-default"'
+    assert_includes body, 'class="card"'
   end
 
   EA_PANELS = [
@@ -185,7 +185,7 @@ class PagesTest < Minitest::Test
     assert_includes body, '1. Choose Antigen'
     assert_includes body, '2. Choose Distance from TSS'
     assert_includes body, 'id="antigen-list"'
-    assert_includes body, 'class="panel panel-default"'
+    assert_includes body, 'class="card"'
   end
 
   def test_target_genes_result_has_distance_switch_legend_and_download_link
@@ -228,9 +228,9 @@ class PagesTest < Minitest::Test
     assert_includes body, 'id="sort-fallback-note"'
   end
 
-  def test_diff_analysis_uses_panels
+  def test_diff_analysis_uses_cards
     get '/diff_analysis'
-    assert_includes last_response.body, 'class="panel panel-default"'
+    assert_includes last_response.body, 'class="card"'
   end
 
   def test_diff_analysis_has_info_buttons_examples_and_node_status

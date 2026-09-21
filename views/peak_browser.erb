@@ -8,26 +8,26 @@
 <%== erb :_page_header, locals: {
   title: 'ChIP-Atlas: Peak Browser',
   lead: 'Visualize TF-binding, histone marks, chromatin accessibility, and DNA methylation on ' \
-        '<a href="http://software.broadinstitute.org/software/igv/home" target="_blank" rel="noopener noreferrer">IGV</a>.'
+        '<a href="http://software.broadinstitute.org/software/igv/home" target="_blank" rel="noopener noreferrer">IGV</a>.',
+  tutorial: {
+    pdf: 'https://chip-atlas.dbcls.jp/data/manual/Peak_Browser/Peak_Browser.pdf',
+    movie: 'https://youtu.be/qKNOkK-8hDo',
+    togotv: 'http://doi.org/10.7875/togotv.2018.023'
+  }
 } %>
 
-<%== erb :_tutorial, locals: {
-  pdf: 'https://chip-atlas.dbcls.jp/data/manual/Peak_Browser/Peak_Browser.pdf',
-  movie: 'https://youtu.be/qKNOkK-8hDo',
-  togotv: 'http://doi.org/10.7875/togotv.2018.023'
-} %>
 
 <div id="genome-tabs"></div>
 
 <div class="row">
   <div class="col-md-4">
-    <div class="panel panel-default">
-      <div class="panel-heading"><h4 class="panel-title">1. Track type class</h4></div>
-      <div class="panel-body"><div id="facet-track-class"></div></div>
+    <div class="card">
+      <div class="card-header"><h4 class="card-title">1. Track type class</h4></div>
+      <div class="card-body"><div id="facet-track-class"></div></div>
     </div>
-    <div class="panel panel-default">
-      <div class="panel-heading"><h4 class="panel-title">Track type (optional)</h4></div>
-      <div class="panel-body">
+    <div class="card">
+      <div class="card-header"><h4 class="card-title">Track type (optional)</h4></div>
+      <div class="card-body">
         <input class="form-control" id="track-subclass-input" type="text" placeholder="type to search">
         <div id="facet-track-subclass" class="mt-2"></div>
       </div>
@@ -35,13 +35,13 @@
   </div>
 
   <div class="col-md-4">
-    <div class="panel panel-default">
-      <div class="panel-heading"><h4 class="panel-title">2. Cell type Class</h4></div>
-      <div class="panel-body"><div id="facet-cell-type-class"></div></div>
+    <div class="card">
+      <div class="card-header"><h4 class="card-title">2. Cell type Class</h4></div>
+      <div class="card-body"><div id="facet-cell-type-class"></div></div>
     </div>
-    <div class="panel panel-default">
-      <div class="panel-heading"><h4 class="panel-title">Cell type (optional)</h4></div>
-      <div class="panel-body">
+    <div class="card">
+      <div class="card-header"><h4 class="card-title">Cell type (optional)</h4></div>
+      <div class="card-body">
         <input class="form-control" id="cell-type-subclass-input" type="text" placeholder="type to search">
         <div id="facet-cell-type-subclass" class="mt-2"></div>
       </div>
@@ -49,14 +49,14 @@
   </div>
 
   <div class="col-md-4">
-    <div class="panel panel-default">
-      <div class="panel-heading">
-        <h4 class="panel-title">
+    <div class="card">
+      <div class="card-header">
+        <h4 class="card-title">
           3. Threshold for Significance
           <a class="info-btn" href="#" data-info="threshold" role="button" aria-label="About the significance threshold">&#x24D8;</a>
         </h4>
       </div>
-      <div class="panel-body"><div id="facet-qval"></div></div>
+      <div class="card-body"><div id="facet-qval"></div></div>
     </div>
 
     <div class="button-submit">

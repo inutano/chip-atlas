@@ -10,7 +10,7 @@
   --ca-panel-border: #ddd;
   --ca-jumbotron-bg: #eee;
   --ca-rule: #eee;
-  --ca-navbar-h: 76px;
+  --ca-navbar-h: 50px;
 
   --bs-primary: #428bca;
   --bs-primary-rgb: 66, 139, 202;
@@ -41,10 +41,13 @@
 
 /* ===== Body ===== */
 body {
-  /* Must clear the fixed navbar. Driven by one token so the two cannot drift:
-     the navbar measured 101px against 70px of padding, so 31px of every page
-     sat underneath it and headings were clipped. */
-  padding-top: var(--ca-navbar-h);
+  /* Must clear the fixed navbar. --ca-navbar-h is the bar's real measured
+     height, so the two cannot drift - a mismatch here hides the top of every
+     page's heading behind the bar. The extra 10px is breathing room: pages
+     with a .page-header have their own margin, but /view starts straight in
+     with its <h2> and sat flush against the bar without it.
+     Re-measure and update --ca-navbar-h if the navbar's contents change. */
+  padding-top: calc(var(--ca-navbar-h) + 10px);
 }
 
 /* ===== Navbar ===== */
@@ -52,6 +55,23 @@ body {
   min-height: 50px;
   padding-top: 2px;
   padding-bottom: 2px;
+}
+
+/* Production insets the bar's contents with 70px of side padding on its
+   .container-fluid (measured: `3.5px 70px`); Bootstrap 5's default gutter is
+   12px, which left the brand and the Go button almost touching the viewport
+   edges. Dropped back to a normal gutter once the menu collapses, where 70px
+   would waste most of a phone's width. */
+.navbar > .container-fluid {
+  padding-left: 70px;
+  padding-right: 70px;
+}
+
+@media (max-width: 991.98px) {
+  .navbar > .container-fluid {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
 }
 
 .navbar .nav-link {
@@ -285,12 +305,16 @@ footer .acknowledgement {
 
 h1 .icon, h3 .icon, h4 .icon { margin-right: 8px; }
 
-/* ===== Navbar right cluster: Search on row 1, ID form on row 2 ===== */
+/* ===== Navbar right cluster: Search and the ID form share one row =====
+   Production stacks these two vertically, which is what made its navbar two
+   rows tall. That was not a design decision over there - it is a wrapping
+   bug - so this deliberately does NOT reproduce it. Keeping them on one row
+   is what lets the whole bar sit at --ca-navbar-h instead of 72px. */
 .navbar-right-stack {
   display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 1px;
+  flex-direction: row;
+  align-items: center;
+  gap: 14px;
 }
 
 .navbar-id-form {
@@ -298,9 +322,13 @@ h1 .icon, h3 .icon, h4 .icon { margin-right: 8px; }
   align-items: center;
 }
 
+/* Inside the collapsed menu there is no bar height to protect and the two
+   controls would be cramped side by side, so they stack there instead. */
 @media (max-width: 991.98px) {
   .navbar-right-stack {
+    flex-direction: column;
     align-items: flex-start;
+    gap: 8px;
     margin-top: 8px;
   }
 }
@@ -336,6 +364,12 @@ h1 .icon, h3 .icon, h4 .icon { margin-right: 8px; }
 .page-header .main-desc {
   line-height: 150%;
   margin-bottom: 0;
+}
+
+/* /view has no .page-header, so without this its <h2> sits almost against the
+   fixed navbar while every other page gets 40px of air from .page-header. */
+.experiment-header-row {
+  margin-top: 40px;
 }
 
 /* ===== Homepage feature tiles (Bootstrap 3 .jumbotron, dropped in BS5) ===== */
@@ -428,32 +462,39 @@ select.list-box option {
 }
 
 /* ===== Bootstrap 3 .panel, dropped in BS5 ===== */
-.panel {
+/* One card component across the whole app. Bootstrap 5's own .card defaults
+   (6px radius, rgba borders, no shadow, 16px padding, 20px headings) do not
+   match production, which is Bootstrap 3 throughout; these overrides carry
+   production's measured panel appearance onto .card so the two components
+   that used to coexist - BS3 .panel on the tool pages, BS5 .card on /view -
+   are now one. Values verified against production's own rendered CSS on both
+   /peak_browser and /view: radius 4px, border #ddd, shadow 0 1px 1px
+   rgba(0,0,0,.05), header 10px/15px on #f5f5f5, title 16px, body 15px. */
+.card {
   margin-bottom: 20px;
   background-color: #fff;
-  border: 1px solid transparent;
+  border: 1px solid var(--ca-panel-border);
   border-radius: 4px;
   box-shadow: 0 1px 1px rgba(0, 0, 0, .05);
 }
 
-.panel-default { border-color: var(--ca-panel-border); }
-
-.panel-heading {
+.card-header {
   padding: 10px 15px;
-  border-bottom: 1px solid transparent;
+  color: #333;
+  background-color: var(--ca-panel-head);
+  border-bottom: 1px solid var(--ca-panel-border);
   border-top-left-radius: 3px;
   border-top-right-radius: 3px;
 }
 
-.panel-default > .panel-heading {
-  color: #333;
-  background-color: var(--ca-panel-head);
-  border-color: var(--ca-panel-border);
-  border-bottom: 1px solid var(--ca-panel-border);
+.card-header .card-title,
+.card-header h4,
+.card-header h5 {
+  margin: 0;
+  font-size: 16px;
 }
 
-.panel-title { margin: 0; font-size: 16px; }
-.panel-body { padding: 15px; }
+.card-body { padding: 15px; }
 
 /* ===== Tutorial dropdown + ⓘ info buttons (Task 16) ===== */
 .dropdown-help { margin-top: 2em; }

@@ -7,14 +7,14 @@
 
 <%== erb :_page_header, locals: {
   title: 'ChIP-Atlas: Colocalization',
-  lead: 'Predict potential partner proteins that form complexes with given TFs.'
+  lead: 'Predict potential partner proteins that form complexes with given TFs.',
+  tutorial: {
+    pdf: 'https://chip-atlas.dbcls.jp/data/manual/Colocalization/Colocalization.pdf',
+    movie: 'https://youtu.be/jhLnWNCe_No',
+    togotv: 'http://doi.org/10.7875/togotv.2018.028'
+  }
 } %>
 
-<%== erb :_tutorial, locals: {
-  pdf: 'https://chip-atlas.dbcls.jp/data/manual/Colocalization/Colocalization.pdf',
-  movie: 'https://youtu.be/jhLnWNCe_No',
-  togotv: 'http://doi.org/10.7875/togotv.2018.028'
-} %>
 
 <!--
   Honest-unavailable notice (frontend/pages/colo.ts, COLO_PICKER_UNAVAILABLE):
@@ -30,9 +30,9 @@
 
   <div class="row">
     <div class="col-md-3">
-      <div class="panel panel-default">
-        <div class="panel-heading"><h4 class="panel-title">1. Search mode</h4></div>
-        <div class="panel-body">
+      <div class="card">
+        <div class="card-header"><h4 class="card-title">1. Search mode</h4></div>
+        <div class="card-body">
           <div class="form-check">
             <input class="form-check-input" type="radio" name="direction" id="direction-track" value="track" checked>
             <label class="form-check-label" for="direction-track">Antigens → Cell Type</label>
@@ -45,18 +45,18 @@
       </div>
     </div>
     <div class="col-md-3">
-      <div class="panel panel-default">
-        <div class="panel-heading"><h4 class="panel-title" id="primary-panel-title">2. Choose Primary Type</h4></div>
-        <div class="panel-body">
+      <div class="card">
+        <div class="card-header"><h4 class="card-title" id="primary-panel-title">2. Choose Primary Type</h4></div>
+        <div class="card-body">
           <input type="text" id="primary-input" class="form-control" placeholder="type to search" autocomplete="off">
           <div id="primary-list" class="mt-2"></div>
         </div>
       </div>
     </div>
     <div class="col-md-3">
-      <div class="panel panel-default">
-        <div class="panel-heading"><h4 class="panel-title" id="secondary-panel-title">3. Choose Secondary Type</h4></div>
-        <div class="panel-body">
+      <div class="card">
+        <div class="card-header"><h4 class="card-title" id="secondary-panel-title">3. Choose Secondary Type</h4></div>
+        <div class="card-body">
           <input type="text" id="secondary-input" class="form-control" placeholder="type to search" autocomplete="off">
           <div id="secondary-list" class="mt-2"></div>
         </div>

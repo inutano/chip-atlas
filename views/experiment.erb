@@ -6,7 +6,7 @@
 %>
 <script id="experiment-data" type="application/json"><%== { expid: @expid, records: @records }.to_json.gsub('</', '<\/') %></script>
 
-<div class="row mb-3">
+<div class="row mb-3 experiment-header-row">
   <div class="col-md-10 offset-md-1">
     <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-3">
       <div>
@@ -155,14 +155,16 @@
 </div>
 
 <% if @profiles && !@profiles.empty? %>
-  <div class="panel panel-default" id="statistics-panel" hidden>
-    <div class="panel-heading">
-      <h4 class="panel-title">
+  <div class="row mb-3">
+    <div class="col-md-10 offset-md-1">
+  <div class="card" id="statistics-panel" hidden>
+    <div class="card-header">
+      <h4 class="card-title">
         <%== erb :_icon, locals: { name: 'chart-bar' } %>
         Experiment Comparative Profile
       </h4>
     </div>
-    <div class="panel-body">
+    <div class="card-body">
       <% @profiles.each do |p| %>
         <div class="statistics-section"
              data-genome="<%= p[:genome] %>"
@@ -194,6 +196,8 @@
           </div>
         </div>
       <% end %>
+    </div>
+  </div>
     </div>
   </div>
 <% end %>

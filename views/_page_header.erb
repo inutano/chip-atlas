@@ -1,9 +1,30 @@
+<%
+# Locals: title (required), lead (optional), tutorial (optional hash of
+# pdf/movie/togotv passed straight to _tutorial).
+#
+# Production lays this out as a grid row - the heading in col-md-10 and the
+# Tutorial dropdown in col-md-2 - so the button sits level with the <h1>.
+# Rendering _tutorial as a float-end sibling AFTER this block instead made it
+# drop past the genome tab strip on every page that has one.
+#
+# The row lives INSIDE .page-header so the bottom rule still spans the full
+# width; only the heading text is constrained to 10 columns.
+%>
 <div class="page-header">
-  <h1>
-    <%== erb :_icon, locals: { name: 'mountain' } %>
-    <%= title %>
-  </h1>
-  <% if defined?(lead) && lead %>
-    <p class="main-desc"><%== lead %></p>
-  <% end %>
+  <div class="row align-items-start">
+    <div class="<%= (defined?(tutorial) && tutorial) ? 'col-md-10' : 'col-12' %>">
+      <h1>
+        <%== erb :_icon, locals: { name: 'mountain' } %>
+        <%= title %>
+      </h1>
+      <% if defined?(lead) && lead %>
+        <p class="main-desc"><%== lead %></p>
+      <% end %>
+    </div>
+    <% if defined?(tutorial) && tutorial %>
+      <div class="col-md-2">
+        <%== erb :_tutorial, locals: tutorial %>
+      </div>
+    <% end %>
+  </div>
 </div>

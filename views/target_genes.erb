@@ -7,31 +7,31 @@
 
 <%== erb :_page_header, locals: {
   title: 'ChIP-Atlas: Target Genes',
-  lead: 'Search for genes bound by given transcription factors.'
+  lead: 'Search for genes bound by given transcription factors.',
+  tutorial: {
+    pdf: 'https://chip-atlas.dbcls.jp/data/manual/Target_Genes/Target_Genes.pdf',
+    movie: 'https://youtu.be/Sp9DUAuKkvQ',
+    togotv: 'http://doi.org/10.7875/togotv.2018.024'
+  }
 } %>
 
-<%== erb :_tutorial, locals: {
-  pdf: 'https://chip-atlas.dbcls.jp/data/manual/Target_Genes/Target_Genes.pdf',
-  movie: 'https://youtu.be/Sp9DUAuKkvQ',
-  togotv: 'http://doi.org/10.7875/togotv.2018.024'
-} %>
 
 <div id="genome-tabs"></div>
 
 <div class="row">
   <div class="col-md-3">
-    <div class="panel panel-default">
-      <div class="panel-heading"><h4 class="panel-title">1. Choose Antigen</h4></div>
-      <div class="panel-body">
+    <div class="card">
+      <div class="card-header"><h4 class="card-title">1. Choose Antigen</h4></div>
+      <div class="card-body">
         <input type="text" id="track-input" class="form-control" placeholder="type to search" autocomplete="off">
         <div id="antigen-list" class="mt-2"></div>
       </div>
     </div>
   </div>
   <div class="col-md-3">
-    <div class="panel panel-default">
-      <div class="panel-heading"><h4 class="panel-title">2. Choose Distance from TSS</h4></div>
-      <div class="panel-body">
+    <div class="card">
+      <div class="card-header"><h4 class="card-title">2. Choose Distance from TSS</h4></div>
+      <div class="card-body">
         <div class="form-check">
           <input class="form-check-input" type="radio" name="distance" id="distance-1" value="1" checked>
           <label class="form-check-label" for="distance-1">±1k</label>
