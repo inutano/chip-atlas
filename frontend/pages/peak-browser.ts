@@ -23,6 +23,7 @@ import { FacetFilter, type FacetFilterOptions } from '../components/facet-filter
 import { Autocomplete } from '../components/autocomplete'
 import { initInfoPopovers } from '../components/info-popover'
 import { getIgvUrl, getDownloadUrl, type UrlCondition } from '../api/client'
+import { igvReachable, igvOriginOf, IGV_UNREACHABLE_MESSAGE } from '../components/igv'
 
 interface PageData {
   genomes: Record<string, string>
@@ -168,6 +169,13 @@ async function init(): Promise<void> {
     status.textContent = 'Building IGV link…'
     try {
       const res = await getIgvUrl(condition)
+      // Check IGV is actually listening first. Navigating blind lands the user
+      // on the browser's connection-error page, which explains nothing.
+      status.textContent = 'Contacting IGV\u2026'
+      if (!(await igvReachable(igvOriginOf(res.url)))) {
+        status.textContent = IGV_UNREACHABLE_MESSAGE
+        return
+      }
       status.textContent = ''
       window.location.href = res.url
     } catch (err) {

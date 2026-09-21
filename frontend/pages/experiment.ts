@@ -3,6 +3,7 @@
 // for the experiment detail page. Reads experiment records from a JSON island.
 
 import { checkRemoteUrlStatus, type ExperimentRecord } from '../api/client'
+import { igvReachable, igvOriginOf, IGV_UNREACHABLE_MESSAGE, IGV_ORIGIN } from '../components/igv'
 
 interface PageData {
   expid: string
@@ -263,6 +264,33 @@ function initComparativeProfile(): void {
   })
 }
 
+// The Visualize menu's entries are plain links at IGV's command port. Left
+// alone, clicking one with IGV not running navigates off this page onto the
+// browser's connection-error screen. Intercept, probe, and only then follow.
+function wireIgvLinks(): void {
+  const menu = document.getElementById('visualize-menu')
+  const status = document.getElementById('igv-status')
+  if (!menu) return
+
+  menu.addEventListener('click', (ev) => {
+    const target = ev.target
+    if (!(target instanceof HTMLAnchorElement)) return
+    if (!target.href.startsWith(IGV_ORIGIN)) return
+
+    ev.preventDefault()
+    const href = target.href
+    if (status) status.textContent = 'Contacting IGV\u2026'
+    void igvReachable(igvOriginOf(href)).then((up) => {
+      if (!up) {
+        if (status) status.textContent = IGV_UNREACHABLE_MESSAGE
+        return
+      }
+      if (status) status.textContent = ''
+      window.location.href = href
+    })
+  })
+}
+
 function init(): void {
   const data = readData()
   if (!data || data.records.length === 0) return
@@ -270,6 +298,7 @@ function init(): void {
   fill('analyze-menu', buildAnalyzeMenu(data))
   fill('download-menu', buildDownloadMenu(data))
   fill('linkout-menu', buildLinkOutMenu(data))
+  wireIgvLinks()
   initComparativeProfile()
 }
 
