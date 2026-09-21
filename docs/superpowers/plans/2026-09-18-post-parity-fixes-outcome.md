@@ -102,6 +102,25 @@ rulings were overturned.
   VACUUM: it detects, it does not prevent.
 - No jsdom anywhere, so DOM wiring is covered by pure-function tests plus manual
   verification — a project-wide convention, not introduced here.
+- **Q3 (open, 2026-09-22): TAIR genome size and coding-gene count.** Enrichment
+  Analysis's estimated run time is computed in the browser from production's own
+  regression (see `frontend/pages/enrichment-analysis.ts`). Two of its branches
+  need per-assembly constants that production's `genomesize` / `numGenes` tables
+  never carried a TAIR entry for, because production has no TAIR tab:
+
+  - sequence motif input (a single tab-free line) needs the genome size in bp,
+    to estimate how often a motif that long occurs by chance;
+  - "RefSeq coding genes" as dataset B needs the total coding-gene count, since
+    dataset B is every coding gene except those in dataset A.
+
+  Both are `—` for TAIR12 today rather than a guessed number. Everything else on
+  TAIR12 estimates normally — ordinary BED input, a user gene list, a gene count
+  table — because those paths never touch either table. **What is needed: the
+  TAIR12 assembly size in bp and its coding-gene count, on the same basis
+  production used for the other assemblies** (hg38 3,137,161,264 bp / 18,622
+  genes; note its figures are per-species, shared between assembly versions).
+  Drop them into `GENOME_SIZE` and `NUM_GENES` and both branches light up with
+  no other change.
 
 ## Six "passes while testing nothing" defects found during this run
 
