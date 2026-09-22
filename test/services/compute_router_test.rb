@@ -99,4 +99,52 @@ class ComputeRouterTest < Minitest::Test
     end
     assert_equal 'empty', captured_cell_class
   end
+  # --- result URLs: shape depends on the job type, not just the backend ---
+  #
+  # An enrichment analysis produces a browsable HTML table plus a TSV of the
+  # same rows; a diff analysis produces a zip archive. Production's two result
+  # pages show exactly that split ("Result URL" + "Download TSV" on one,
+  # a single "Download Result" on the other). Handing a diff job html/tsv
+  # links points the user at files WABI never wrote for it.
+
+  def test_wabi_enrichment_result_urls_are_the_html_table_and_its_tsv
+    urls = ChipAtlas::ComputeRouter.result_urls('wabi', 'wabi_chipatlas_ID', 'enrichment_analysis')
+
+    assert_equal 'https://dtn1.ddbj.nig.ac.jp/wabi/chipatlas/wabi_chipatlas_ID?info=result&format=html', urls[:html]
+    assert_equal 'https://dtn1.ddbj.nig.ac.jp/wabi/chipatlas/wabi_chipatlas_ID?info=result&format=tsv', urls[:tsv]
+    refute urls.key?(:zip)
+  end
+
+  def test_wabi_diff_result_urls_are_a_single_zip
+    urls = ChipAtlas::ComputeRouter.result_urls('wabi', 'wabi_chipatlas_ID', 'diff_analysis')
+
+    assert_equal 'https://dtn1.ddbj.nig.ac.jp/wabi/chipatlas/wabi_chipatlas_ID?info=result&format=zip', urls[:zip]
+    refute urls.key?(:html), 'a diff job has no HTML result table'
+    refute urls.key?(:tsv)
+  end
+
+  def test_result_urls_defaults_to_enrichment_when_no_job_type_is_given
+    assert_equal ChipAtlas::ComputeRouter.result_urls('wabi', 'ID', 'enrichment_analysis'),
+                 ChipAtlas::ComputeRouter.result_urls('wabi', 'ID')
+  end
+
+  # --- job status comes from WABI's own status endpoint ---
+
+  def test_wabi_status_reports_whatever_word_wabi_gives
+    stub_module_method(ChipAtlas::WabiService, :job_status, 'finished') do
+      assert_equal 'finished', ChipAtlas::ComputeRouter.status('wabi', 'ID')
+    end
+    stub_module_method(ChipAtlas::WabiService, :job_status, 'running') do
+      assert_equal 'running', ChipAtlas::ComputeRouter.status('wabi', 'ID')
+    end
+  end
+
+  def test_wabi_status_is_nil_when_wabi_could_not_be_asked
+    # Not "running". An unreachable backend is unknown, and the route turns
+    # nil into "unknown" -- claiming "running" is what the old HEAD-based
+    # check did for every job in every state, finished ones included.
+    stub_module_method(ChipAtlas::WabiService, :job_status, nil) do
+      assert_nil ChipAtlas::ComputeRouter.status('wabi', 'ID')
+    end
+  end
 end

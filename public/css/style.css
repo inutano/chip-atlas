@@ -660,3 +660,29 @@ select.list-box option {
      scrollWidth stays exactly 390. */
   contain: layout paint;
 }
+
+/* ===== Job info table (enrichment / diff analysis result pages) =====
+   The result rows hold full WABI URLs — a single unbroken ~110-character
+   token — and the timestamp rows hold a long local/UTC pair. With the
+   default `overflow-wrap: normal` neither can break, so each sets the
+   table's min-content width and drags the document sideways at phone
+   widths (the same failure mode documented for #result-table-wrap above,
+   reached by a different route). Breaking inside the token is what a URL
+   cell wants anyway: there is nothing useful to keep on one line. */
+.job-info td,
+.job-info th[scope="row"] {
+  overflow-wrap: anywhere;
+}
+
+.job-info th[scope="row"] {
+  font-weight: 600;
+  width: 30%;
+}
+
+/* A result URL is shown as plain text until the job finishes, then gains an
+   href (see job-tracker.ts's showResultUrls). Keep the two states the same
+   size so the row does not shift under the reader at the moment it becomes
+   clickable. */
+.job-info .result-cell a:not([href]) {
+  color: var(--bs-secondary-color, #6c757d);
+}

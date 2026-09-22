@@ -133,7 +133,10 @@ async function refreshEstimate(): Promise<void> {
   }
   try {
     const res = await getEstimatedTime(ids, getAnalysisType())
-    out.textContent = res.minutes != null ? `${res.minutes} min` : '—'
+    // "mins", not "min": production writes `minutes + " mins"` here, and the
+    // result page parses this same string back out of the URL to work out the
+    // estimated finishing time (see job-tracker.ts's parseEstimateMinutes).
+    out.textContent = res.minutes != null ? `${res.minutes} mins` : '—'
   } catch (err) {
     console.error(err)
     out.textContent = '(failed)'
@@ -367,7 +370,13 @@ async function init(): Promise<void> {
     status.textContent = 'Submitting…'
     try {
       const result = await submitJob({ type: 'diff_analysis', params })
-      window.location.href = `/diff_analysis_result?id=${encodeURIComponent(result.job_id)}&backend=${encodeURIComponent(result.backend)}`
+      // See enrichment-analysis.ts's submit handler: production carries the
+      // title and the run-time estimate to the result page in the URL.
+      const calcm = document.getElementById('estimated-run-time')?.textContent ?? ''
+      window.location.href = `/diff_analysis_result?id=${encodeURIComponent(result.job_id)}` +
+        `&backend=${encodeURIComponent(result.backend)}` +
+        `&title=${encodeURIComponent(($('title') as HTMLInputElement).value)}` +
+        `&calcm=${encodeURIComponent(calcm)}`
     } catch (err) {
       console.error(err)
       status.textContent = 'Submit failed. Try again or check the service status.'

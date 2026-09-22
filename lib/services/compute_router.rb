@@ -59,20 +59,31 @@ module ChipAtlas
       job_id ? { backend: route[:backend], job_id: job_id } : { error: :submission_rejected }
     end
 
-    # Check job status. Returns "finished", "running", "error", or nil.
+    # Check job status. Returns the backend's own status word ("finished",
+    # "running", ...) or nil when it could not be determined.
     def status(backend, job_id)
       case backend
-      when 'wabi' then ChipAtlas::WabiService.job_finished?(job_id) ? 'finished' : 'running'
+      when 'wabi' then ChipAtlas::WabiService.job_status(job_id)
       when 'wes'  then ChipAtlas::SapporoService.job_status(job_id)
       end
     end
 
-    # Get result URLs. Returns { html:, tsv:, ... } or nil.
-    def result_urls(backend, job_id)
+    # Get result URLs. Returns { html:, tsv: } / { zip: } or nil.
+    #
+    # The shape depends on the job type, not just the backend: an enrichment
+    # analysis produces a browsable HTML table and a TSV of the same rows,
+    # while a diff analysis produces a zip archive. Production's two result
+    # pages reflect exactly that -- "Result URL" + "Download TSV" on one,
+    # a single "Download Result" on the other.
+    def result_urls(backend, job_id, job_type = 'enrichment_analysis')
       case backend
       when 'wabi'
         base = "https://dtn1.ddbj.nig.ac.jp/wabi/chipatlas/#{job_id}?info=result"
-        { html: "#{base}&format=html", tsv: "#{base}&format=tsv" }
+        if job_type == 'diff_analysis'
+          { zip: "#{base}&format=zip" }
+        else
+          { html: "#{base}&format=html", tsv: "#{base}&format=tsv" }
+        end
       when 'wes'
         {
           html: ChipAtlas::SapporoService.result_url(job_id),

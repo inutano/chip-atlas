@@ -419,8 +419,16 @@ export async function getJobStatus(id: string, backend: string): Promise<JobStat
   return request<JobStatus>(`/jobs/${encodeURIComponent(id)}/status` + qs({ backend }))
 }
 
-export async function getJobResult(id: string, backend: string): Promise<JobResult> {
-  return request<JobResult>(`/jobs/${encodeURIComponent(id)}/result` + qs({ backend }))
+// `type` selects the shape of the URLs that come back: an enrichment job has
+// an HTML result table and a TSV of the same rows, a diff job a zip archive
+// (see ComputeRouter.result_urls). The server rejects anything else rather
+// than defaulting, so this stays a closed set here too.
+export async function getJobResult(
+  id: string,
+  backend: string,
+  type: 'enrichment_analysis' | 'diff_analysis' = 'enrichment_analysis',
+): Promise<JobResult> {
+  return request<JobResult>(`/jobs/${encodeURIComponent(id)}/result` + qs({ backend, type }))
 }
 
 export async function getJobLog(id: string, backend: string): Promise<string> {
@@ -429,11 +437,12 @@ export async function getJobLog(id: string, backend: string): Promise<string> {
 
 export async function getEstimatedTime(
   ids: string[],
-  // The server only models 'dmr' and 'diffbind' (routes/jobs.rb); any other
-  // value — 'enrichment' included — falls through to a null estimate.
-  // Enrichment Analysis has no modeled formula yet but still calls this
-  // endpoint through the shared typed client rather than a raw fetch.
-  analysis: 'dmr' | 'diffbind' | 'enrichment'
+  // Diff Analysis only — these are the two formulas routes/jobs.rb models,
+  // matching production, which also computes this one server-side. Enrichment
+  // Analysis does not come through here: production computes its estimate in
+  // the browser and so does this app (see enrichment-analysis.ts's
+  // estimateSeconds), with no server round trip to add.
+  analysis: 'dmr' | 'diffbind'
 ): Promise<EstimatedTime> {
   return request<EstimatedTime>('/jobs/estimated_time', {
     method: 'POST',

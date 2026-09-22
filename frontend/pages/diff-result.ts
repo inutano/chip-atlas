@@ -1,25 +1,25 @@
 // frontend/pages/diff-result.ts
-// Mounts JobTracker for a diff analysis job.
+// Mounts JobTracker over the job-info table in views/diff_analysis_result.erb.
 
 import { JobTracker } from '../components/job-tracker'
+import { readResultPageParams } from '../components/result-page-params'
 
 function init(): void {
-  const params = new URLSearchParams(window.location.search)
-  const id = params.get('id')
-  const backend = params.get('backend')
+  const container = document.getElementById('job-tracker')
+  if (!container) return
 
-  if (!id || !backend) {
+  const params = readResultPageParams(window.location.search)
+  if (!params) {
     const err = document.getElementById('error-state')
     if (err) {
       err.textContent = 'Missing id or backend parameter in URL.'
       err.hidden = false
     }
+    container.hidden = true
     return
   }
 
-  const container = document.getElementById('job-tracker')
-  if (!container) return
-  JobTracker.init(container, id, backend)
+  JobTracker.init(container, { ...params, jobType: 'diff_analysis' })
 }
 
 document.addEventListener('DOMContentLoaded', init)

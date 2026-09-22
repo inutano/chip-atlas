@@ -3,15 +3,49 @@
   @page_description = 'Job status and downloads for a submitted enrichment analysis.'
   @active_menu = 'enrichment_analysis'
 %>
-<div class="row mb-3">
-  <div class="col-md-10 offset-md-1">
-    <h1>ChIP-Atlas: Enrichment Analysis Result</h1>
-  </div>
-</div>
+
+<%== erb :_page_header, locals: {
+  title: 'ChIP-Atlas: Enrichment Analysis',
+  lead: 'Identify common epigenetic features of a given set of genomic loci and genes.'
+} %>
 
 <div class="row">
   <div class="col-md-10 offset-md-1">
-    <div id="job-tracker"></div>
     <div id="error-state" class="alert alert-danger" hidden></div>
+
+    <%#
+      The job-info table production shows, filled in by
+      frontend/components/job-tracker.ts. The ids are production's own, so the
+      two pages can be compared field by field. Each result anchor names the
+      key it wants out of GET /jobs/:id/result via data-result-key — an
+      enrichment job has an HTML result table and a TSV of the same rows.
+    %>
+    <div id="job-tracker" class="job-info">
+      <p>Result page URL will be available for a week from the time when 'status' is 'finished'.</p>
+
+      <table class="table">
+        <tbody>
+          <tr><th scope="row">Project title</th><td id="project-title"></td></tr>
+          <tr><th scope="row">Request ID</th><td id="request-id"></td></tr>
+          <tr><th scope="row">Submitted at</th><td id="submitted-at"></td></tr>
+          <tr><th scope="row">Estimated finishing time</th><td id="estimated-finishing-time"></td></tr>
+          <tr><th scope="row">Current time</th><td id="current-time"></td></tr>
+          <tr><th scope="row">Status</th><td id="status">Requesting</td></tr>
+          <tr><th scope="row">Result URL</th><td class="result-cell"><a id="result-url" data-result-key="html"></a></td></tr>
+          <tr><th scope="row">Download TSV</th><td class="result-cell"><a id="download-tsv" data-result-key="tsv"></a></td></tr>
+        </tbody>
+      </table>
+
+      <div id="execution-log"></div>
+
+      <hr>
+
+      <p class="text-muted small mb-0">
+        As this function uses the NIG supercomputer system, it may take time to start your job when the
+        nodes are busy. Please check computation node status
+        <a href="https://sc.ddbj.nig.ac.jp/en/operation/job_queue_status/" target="_blank" rel="noopener noreferrer">here</a>
+        (epyc.q).
+      </p>
+    </div>
   </div>
 </div>

@@ -94,16 +94,46 @@ module ChipAtlas
       body.split("\n").find { |l| l.start_with?('requestId') }&.split(/\s/)&.last
     end
 
-    def job_finished?(request_id)
-      uri = URI.parse("#{ENDPOINT}#{request_id}?info=result&format=html")
+    # WABI's own status endpoint. Returns the status word it reports
+    # ("finished", "running", ...) or nil when WABI cannot be reached or does
+    # not recognise the request ID.
+    #
+    # This replaced a HEAD request against `?info=result&format=html` whose
+    # 200 was taken to mean "finished". WABI answers HEAD with 405 Method Not
+    # Allowed, so that test was false for every job in every state: the status
+    # was pinned to "running" forever and the result links, which the frontend
+    # only renders on a terminal status, never appeared at all.
+    def job_status(request_id)
+      uri = URI.parse("#{ENDPOINT}#{request_id}?info=status")
       http = Net::HTTP.new(uri.host, uri.port)
       http.use_ssl = true
       http.open_timeout = 5
       http.read_timeout = 10
-      response = http.request_head(uri.request_uri)
-      response.code == '200'
+      response = http.get(uri.request_uri)
+      return nil unless response.code == '200'
+
+      parse_status(response.body)
     rescue Timeout::Error, SocketError, Errno::ECONNREFUSED, Net::HTTPError
       nil
+    end
+
+    # `?info=status` answers with a short colon-delimited record:
+    #
+    #   request-ID: wabi_chipatlas_2026-0922-1049-51-290-755138
+    #   status: finished
+    #   current-time: 2026-09-22 10:54:07
+    #   system-info: 20752202 chipatlas epyc ... COMPLETED 0:0
+    #
+    # Only the status line is wanted. An unknown request ID comes back as a
+    # JSON error body with a 400, which never reaches here. A 200 whose body
+    # has no status line yields nil rather than a guess -- the route renders
+    # nil as "unknown", which is honest, where "running" would be a claim.
+    def parse_status(body)
+      line = body.to_s.lines.find { |l| l.start_with?('status:') }
+      return nil unless line
+
+      value = line.split(':', 2).last.to_s.strip
+      value.empty? ? nil : value
     end
 
     def fetch_log(request_id)

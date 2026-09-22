@@ -775,7 +775,15 @@ async function init(): Promise<void> {
       })
 
       const result = await submitJob({ type: 'enrichment_analysis', params })
-      window.location.href = `/enrichment_analysis_result?id=${encodeURIComponent(result.job_id)}&backend=${encodeURIComponent(result.backend)}`
+      // title and calcm ride along in the URL, as production's redirect does:
+      // neither is anything WABI stores, and the result page shows both.
+      // calcm is whatever the estimate panel is displaying at this moment,
+      // which is the estimate for exactly the job being submitted.
+      const calcm = document.getElementById('estimated-run-time')?.textContent ?? ''
+      window.location.href = `/enrichment_analysis_result?id=${encodeURIComponent(result.job_id)}` +
+        `&backend=${encodeURIComponent(result.backend)}` +
+        `&title=${encodeURIComponent(($('title') as HTMLInputElement).value)}` +
+        `&calcm=${encodeURIComponent(calcm)}`
     } catch (err) {
       console.error(err)
       status.textContent = 'Submit failed. Try again or check the service status.'

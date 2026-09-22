@@ -170,4 +170,71 @@ class JobsTest < Minitest::Test
     assert_equal 'rnd', captured['typeB']
     assert_equal '50', captured['threshold']
   end
+  # --- GET /jobs/:id/result: the job type selects the URL shape ---
+
+  def test_result_route_returns_html_and_tsv_for_an_enrichment_job
+    stub_module_method(ChipAtlas::ServiceMonitor, :status, true) do
+      get '/jobs/wabi_chipatlas_ID/result?backend=wabi&type=enrichment_analysis'
+    end
+
+    assert_equal 200, last_response.status
+    urls = JSON.parse(last_response.body)['urls']
+    assert_equal %w[html tsv], urls.keys.sort
+    assert_includes urls['html'], 'format=html'
+    assert_includes urls['tsv'], 'format=tsv'
+  end
+
+  def test_result_route_returns_a_zip_for_a_diff_job
+    stub_module_method(ChipAtlas::ServiceMonitor, :status, true) do
+      get '/jobs/wabi_chipatlas_ID/result?backend=wabi&type=diff_analysis'
+    end
+
+    assert_equal 200, last_response.status
+    urls = JSON.parse(last_response.body)['urls']
+    assert_equal ['zip'], urls.keys
+    assert_includes urls['zip'], 'format=zip'
+  end
+
+  def test_result_route_defaults_to_enrichment_when_type_is_omitted
+    stub_module_method(ChipAtlas::ServiceMonitor, :status, true) do
+      get '/jobs/wabi_chipatlas_ID/result?backend=wabi'
+    end
+
+    assert_equal 200, last_response.status
+    assert_equal %w[html tsv], JSON.parse(last_response.body)['urls'].keys.sort
+  end
+
+  def test_result_route_400s_on_an_unrecognized_job_type
+    # Rejected rather than silently treated as an enrichment analysis, which
+    # would hand back links to files the job never produced.
+    stub_module_method(ChipAtlas::ServiceMonitor, :status, true) do
+      get '/jobs/wabi_chipatlas_ID/result?backend=wabi&type=colo'
+    end
+
+    assert_equal 400, last_response.status
+    assert_equal 'Invalid job type', JSON.parse(last_response.body)['error']
+  end
+
+  # --- GET /jobs/:id/status: nil from the backend is "unknown", not "running" ---
+
+  def test_status_route_reports_unknown_when_the_backend_status_cannot_be_determined
+    stub_module_method(ChipAtlas::ServiceMonitor, :status, true) do
+      stub_module_method(ChipAtlas::WabiService, :job_status, nil) do
+        get '/jobs/wabi_chipatlas_ID/status?backend=wabi'
+      end
+    end
+
+    assert_equal 200, last_response.status
+    assert_equal 'unknown', JSON.parse(last_response.body)['status']
+  end
+
+  def test_status_route_passes_wabis_finished_through
+    stub_module_method(ChipAtlas::ServiceMonitor, :status, true) do
+      stub_module_method(ChipAtlas::WabiService, :job_status, 'finished') do
+        get '/jobs/wabi_chipatlas_ID/status?backend=wabi'
+      end
+    end
+
+    assert_equal 'finished', JSON.parse(last_response.body)['status']
+  end
 end

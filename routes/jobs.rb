@@ -19,6 +19,19 @@ module ChipAtlas
             backend
           end
 
+          # Which of the two job types a result request is about. It decides
+          # the shape of the result URLs (see ComputeRouter.result_urls), so an
+          # unrecognised value is rejected rather than quietly treated as an
+          # enrichment analysis and handed back links to files a diff job never
+          # produces.
+          def validated_job_type
+            type = params[:type] || 'enrichment_analysis'
+            unless %w[enrichment_analysis diff_analysis].include?(type)
+              halt 400, json_response({ error: 'Invalid job type' })
+            end
+            type
+          end
+
           def backend_available?(backend)
             case backend
             when 'wabi' then ChipAtlas::ServiceMonitor.status(:wabi)
@@ -86,7 +99,7 @@ module ChipAtlas
             halt 503, json_response({ error: 'Backend unavailable', retry: false })
           end
 
-          urls = ChipAtlas::ComputeRouter.result_urls(backend, id)
+          urls = ChipAtlas::ComputeRouter.result_urls(backend, id, validated_job_type)
           json_response({ backend: backend, job_id: id, urls: urls })
         end
 

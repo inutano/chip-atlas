@@ -151,6 +151,53 @@ class WabiServiceTest < Minitest::Test
     end
   end
 
+  # --- job status: WABI's `?info=status` record ---
+  #
+  # This used to be a HEAD against `?info=result&format=html` whose 200 meant
+  # "finished". WABI answers HEAD with 405, so the check was false for every
+  # job in every state: status stuck on "running" forever and the frontend,
+  # which only renders result links on a terminal status, never showed any.
+  # These parse the record shape WABI actually returns, captured from two
+  # real finished jobs.
+
+  WABI_STATUS_RECORD = <<~RECORD
+    request-ID: wabi_chipatlas_2026-0922-1049-51-290-755138
+    status: finished
+    current-time: 2026-09-22 10:54:07
+    system-info: 20752202      chipatlas       epyc general_a+          1  COMPLETED      0:0#{' '}
+    20752202.ba+      batch            general_a+          1  COMPLETED      0:0#{' '}
+  RECORD
+
+  def test_parse_status_reads_the_status_line_from_wabis_record
+    assert_equal 'finished', ChipAtlas::WabiService.parse_status(WABI_STATUS_RECORD)
+  end
+
+  def test_parse_status_is_not_fooled_by_the_other_lines
+    # "request-ID" comes first and "current-time" contains colons of its own;
+    # a looser parser picks up one of those instead of the status.
+    refute_equal 'wabi_chipatlas_2026-0922-1049-51-290-755138',
+                 ChipAtlas::WabiService.parse_status(WABI_STATUS_RECORD)
+  end
+
+  def test_parse_status_passes_through_whatever_word_wabi_reports
+    # The frontend decides which words are terminal; this layer does not
+    # narrow the vocabulary to the ones seen so far.
+    assert_equal 'running', ChipAtlas::WabiService.parse_status("status: running\n")
+    assert_equal 'accepted', ChipAtlas::WabiService.parse_status("status: accepted\n")
+  end
+
+  def test_parse_status_returns_nil_rather_than_guessing
+    # A body with no status line, or an empty one, must not resolve to
+    # "running" -- the route renders nil as "unknown", which is honest.
+    assert_nil ChipAtlas::WabiService.parse_status('')
+    assert_nil ChipAtlas::WabiService.parse_status("request-ID: x\ncurrent-time: y\n")
+    assert_nil ChipAtlas::WabiService.parse_status("status:   \n")
+    # An unknown request ID comes back as a JSON error body (with a 400, so
+    # job_status never even parses it) -- but if it ever arrived here it must
+    # not read as a status either.
+    assert_nil ChipAtlas::WabiService.parse_status('{"Message":"Error","error-message":"BAD_REQUEST (null)"}')
+  end
+
   private
 
   def capture_submission(job_type, params)
