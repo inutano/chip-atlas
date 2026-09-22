@@ -112,8 +112,17 @@ namespace :metadata do
     DB[:analyses].delete
     stats = ChipAtlas::Analysis.load_from_file(analysis_table_fpath)
     puts "   #{stats[:total]} analyses loaded (#{sprintf('%.2f', Time.now - start)}s)"
-    puts "   #{stats[:unrecognized_shape]} row(s) with an unrecognized track.distance shape " \
-         '(kept with distance NULL, excluded from the Target Genes index - expected to be 0)'
+    if stats[:broken_build_rows].zero?
+      puts '   0 rows carry a .1/.5/.10 antigen suffix (the 2026-09 broken-build signature)'
+    else
+      # Not fatal - the rows are stored verbatim either way - but loud,
+      # because the September build was ingested in silence and a month of
+      # work was built on the shape it implied. See lib/models/analysis.rb.
+      warn "   WARNING: #{stats[:broken_build_rows]} of #{stats[:total]} rows carry a .1/.5/.10 " \
+           'antigen suffix. That is the signature of the broken 2026-09 build of ' \
+           'analysisList.tab: check cell_list is populated and human rows are present ' \
+           'before trusting this load.'
+    end
   end
 
   task :load_bedsize => bedsize_table_fpath do

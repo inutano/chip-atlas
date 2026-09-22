@@ -470,4 +470,48 @@ class ApiTest < Minitest::Test
       Net::HTTP.define_method(:request_head, original)
     end
   end
+  # --- /api/colo_index: both directions, and no literal "-" in either ---
+
+  def test_colo_index_offers_both_directions
+    get '/api/colo_index?genome=hg38'
+
+    assert_equal 200, last_response.status
+    body = JSON.parse(last_response.body)['hg38']
+    assert_equal %w[K-562 HeLa-S3 GM12878], body['track']['CTCF']
+    assert_includes body['cell_type']['K-562'], 'CTCF'
+    assert_includes body['cell_type']['K-562'], 'H3K4me3'
+  end
+
+  def test_colo_index_never_offers_a_literal_dash_as_a_cell_type
+    # The reverse index used to collapse to a single "-" because a cell_list
+    # of "-" splits to ["-"]. Direct API consumers saw that even while the
+    # page-level gate hid it from users, so this asserts on the endpoint.
+    get '/api/colo_index?genome=hg38'
+
+    body = JSON.parse(last_response.body)['hg38']
+    refute_includes body['cell_type'].keys, '-'
+    refute_includes body['track'].keys, 'NOCOLO'
+    body['track'].each_value { |cells| refute_includes cells, '-' }
+  end
+
+  def test_colo_index_is_empty_for_a_genome_with_no_colo_data
+    get '/api/colo_index?genome=TAIR12'
+
+    assert_equal 200, last_response.status
+    body = JSON.parse(last_response.body)['TAIR12']
+    assert_empty body['track']
+    assert_empty body['cell_type']
+  end
+
+  def test_target_genes_index_covers_every_genome_with_rows
+    get '/api/target_genes_index'
+
+    assert_equal 200, last_response.status
+    body = JSON.parse(last_response.body)
+    assert_includes body['hg38'], 'CTCF'
+    # A "-" cell_list says nothing about Target Genes: NOCOLO is flagged "+"
+    # and must still be offered here.
+    assert_includes body['hg38'], 'NOCOLO'
+    assert_includes body['TAIR12'], 'AGL20'
+  end
 end

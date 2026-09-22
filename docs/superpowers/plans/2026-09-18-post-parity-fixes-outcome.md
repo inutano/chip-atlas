@@ -8,8 +8,9 @@ review, is in `2026-09-18-post-parity-fixes-ledger.md` beside this file.
 
 ## State
 
-15 of 16 tasks done. B4 (the Colocalization index) was held back by the project
-owner because it is blocked on a question out with a collaborator.
+All 16 tasks done. B4 (the Colocalization index) was held back at the time,
+blocked on a question that turned out to rest on a misreading of a broken
+upstream file; it was completed 2026-09-22 once the file was rebuilt.
 
 ```
 Ruby suite      215 runs / 0 failures   (was 104 at 0c66277)
@@ -96,7 +97,10 @@ checked field by field:
 So B4's open question is answered by the data: the regenerated upstream file is
 the source, for both indexes, and the vendored snapshot is redundant.
 
-## What B4 needs, given the above
+## B4 — done 2026-09-22
+
+Everything below was what B4 needed; all of it is done. Kept as the record of
+what the task turned out to be.
 - **`Analysis.colo_result_by_genome` (`lib/models/analysis.rb`) still splits a
   `cell_list` of `"-"` into `["-"]` rather than `[]`.** This is why the picker
   offered a literal `-`. The `/colo` gate (Ruling 22) hides the human-facing

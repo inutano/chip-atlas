@@ -3,45 +3,11 @@
 
 import { GenomeTabs } from '../components/genome-tabs'
 import { Autocomplete } from '../components/autocomplete'
-import { getColoIndex, type ColoIndex } from '../api/client'
+import { getColoIndex, type ColoIndex, type ColoIndexEntry } from '../api/client'
 
 interface PageData {
   genomes: Record<string, string>
 }
-
-// === Availability ===
-// The picker cannot currently produce a valid (genome, track, cell_type)
-// combination: ChipAtlas::Analysis.colo_result_by_genome
-// (lib/models/analysis.rb) has no reliable signal for which
-// (antigen, cell-type-class) pairs actually have a precomputed colo result
-// file on the archive -- see Q2 in
-// docs/superpowers/plans/2026-09-18-post-parity-fixes.md ("Who produces the
-// Colocalization index?"), still pending the collaborator as of
-// 2026-09-19. Every entry the picker offers today routes through a
-// `cell_list` of "-" (no known cell types), which the real archive 404s on
-// for every combination -- this is a live navbar entry that fails on every
-// query, not an edge case.
-//
-// Rather than present a full picker that always fails, show an honest
-// "temporarily unavailable" notice and hide the picker -- the same
-// treatment Diff Analysis got in this fix wave for its own defunct compute
-// backend (see frontend/pages/diff-analysis.ts's Availability section).
-// Unlike that page, there is no backend health check to poll here (the
-// picker is unavailable by construction, not intermittently), so this is a
-// static switch rather than a runtime check.
-//
-// /colo_result itself is NOT gated by this -- it renders correctly given
-// real (genome, track, cell_type) query params (see colo-result.ts /
-// ChipAtlas::ColoTsv); only the picker that can no longer produce valid
-// params is disabled here.
-//
-// TO RE-ENABLE: once a real colo index lands (Q2) and
-// Analysis.colo_result_by_genome reflects it, flip this to `false`. That is
-// the only change needed here.
-const COLO_PICKER_UNAVAILABLE = true
-
-const UNAVAILABLE_MESSAGE =
-  'Colocalization search is temporarily unavailable while the colocalization index is rebuilt upstream. Please check back later.'
 
 let currentGenome = ''
 let currentPrimary = ''
@@ -60,7 +26,38 @@ function readPageData(): PageData {
   return JSON.parse(el.textContent) as PageData
 }
 
-function getDirection(): 'track' | 'cell_type' {
+export type ColoDirection = 'track' | 'cell_type'
+
+/**
+ * What the primary panel offers: every antigen, or every cell-type class,
+ * depending on the search mode. It never depends on what is selected.
+ */
+export function primaryItemsFor(entry: ColoIndexEntry | undefined, direction: ColoDirection): string[] {
+  if (!entry) return []
+  return direction === 'track' ? Object.keys(entry.track) : Object.keys(entry.cell_type)
+}
+
+/**
+ * What the secondary panel offers: the partners of the chosen primary, or —
+ * before anything is chosen — everything this genome has, so the panel shows
+ * the range on offer rather than an empty box.
+ *
+ * A primary that is not in the index (a stale value carried across a genome
+ * switch, say) also falls back to everything rather than to nothing.
+ */
+export function secondaryItemsFor(
+  entry: ColoIndexEntry | undefined,
+  direction: ColoDirection,
+  primary: string,
+): string[] {
+  if (!entry) return []
+  const forward = direction === 'track'
+  const index = forward ? entry.track : entry.cell_type
+  const all = forward ? Object.keys(entry.cell_type) : Object.keys(entry.track)
+  return (primary && index[primary]) || all
+}
+
+function getDirection(): ColoDirection {
   const r = document.querySelector<HTMLInputElement>('input[name="direction"]:checked')
   return r?.value === 'cell_type' ? 'cell_type' : 'track'
 }
@@ -99,44 +96,40 @@ function buildLinkParams(): URLSearchParams | null {
 }
 
 async function init(): Promise<void> {
-  if (COLO_PICKER_UNAVAILABLE) {
-    const notice = $('colo-unavailable-notice')
-    notice.textContent = UNAVAILABLE_MESSAGE
-    notice.hidden = false
-    $('colo-picker').hidden = true
-    return
-  }
-
   const data = readPageData()
   const pInput = $('primary-input') as HTMLInputElement
   const sInput = $('secondary-input') as HTMLInputElement
 
+  // The two panels are refreshed separately on purpose. The primary panel's
+  // contents depend only on the genome and the direction; the secondary's
+  // also depend on what the primary is. Re-setting the primary's items when
+  // only the secondary needed updating re-renders its list box, which drops
+  // the visible selection back to the first row -- so choosing STAT3 left
+  // the query correct but the list box sitting on AATF.
+  function refreshPrimary(): void {
+    Autocomplete.setItems(pInput, primaryItemsFor(coloIndex[currentGenome], getDirection()))
+  }
+
+  function refreshSecondary(): void {
+    Autocomplete.setItems(
+      sInput,
+      secondaryItemsFor(coloIndex[currentGenome], getDirection(), currentPrimary),
+    )
+  }
+
   function refresh(): void {
-    const entry = coloIndex[currentGenome]
-    if (!entry) {
-      Autocomplete.setItems(pInput, [])
-      Autocomplete.setItems(sInput, [])
-      return
-    }
-    const direction = getDirection()
-    if (direction === 'track') {
-      Autocomplete.setItems(pInput, Object.keys(entry.track))
-      const secondaries = currentPrimary && entry.track[currentPrimary]
-        ? entry.track[currentPrimary]
-        : Object.keys(entry.cell_type)
-      Autocomplete.setItems(sInput, secondaries)
-    } else {
-      Autocomplete.setItems(pInput, Object.keys(entry.cell_type))
-      const secondaries = currentPrimary && entry.cell_type[currentPrimary]
-        ? entry.cell_type[currentPrimary]
-        : Object.keys(entry.track)
-      Autocomplete.setItems(sInput, secondaries)
-    }
+    refreshPrimary()
+    refreshSecondary()
   }
 
   Autocomplete.init(pInput, [], (value) => {
     currentPrimary = value
-    refresh()
+    // Whatever was chosen for the secondary belongs to the previous primary
+    // and may not even be offered for this one -- clear it rather than carry
+    // a stale pair into /colo_result.
+    currentSecondary = ''
+    sInput.value = ''
+    refreshSecondary()
   }, { pairedList: $('primary-list') })
   Autocomplete.init(sInput, [], (value) => {
     currentSecondary = value
@@ -190,4 +183,11 @@ async function init(): Promise<void> {
   })
 }
 
-document.addEventListener('DOMContentLoaded', init)
+// Guarded (rather than a bare top-level call) so primaryItemsFor and
+// secondaryItemsFor can be imported and unit-tested under plain Node, which
+// has no `document` — the same pattern as enrichment-analysis.ts and
+// colo-result.ts. It was missing here only because nothing in this file was
+// exported to test while the picker was gated off.
+if (typeof document !== 'undefined') {
+  document.addEventListener('DOMContentLoaded', init)
+}

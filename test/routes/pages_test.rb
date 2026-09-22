@@ -271,18 +271,29 @@ class PagesTest < Minitest::Test
     refute_includes body, 'col-md-4', '/colo panels must match production col-md-3, not col-md-4'
   end
 
-  def test_colo_ships_an_honest_unavailable_notice_and_a_hideable_picker
-    # The picker (frontend/pages/colo.ts, COLO_PICKER_UNAVAILABLE) can't
-    # currently produce a valid (genome, track, cell_type) combination --
-    # see item 6 of docs/superpowers/plans/2026-09-18-post-parity-fixes.md's
-    # final fix wave. The server-rendered markup must ship both the notice
-    # (hidden by default; JS un-hides it) and a single wrapper the JS can
-    # hide around the whole picker, so re-enabling the picker later is a
-    # one-line JS change with no markup change required.
+  def test_colo_ships_a_live_picker_with_no_unavailable_notice
+    # The picker was gated behind an honest-unavailable notice while the
+    # colocalization index had no source. The regenerated analysisList.tab
+    # supplies one (see lib/models/analysis.rb), so the gate and its notice
+    # are gone and the picker ships live.
     get '/colo'
     body = last_response.body
-    assert_includes body, 'id="colo-unavailable-notice"'
     assert_includes body, 'id="colo-picker"'
+    refute_includes body, 'colo-unavailable-notice',
+                    'the gate is gone; leaving its markup behind invites re-gating by accident'
+    refute_includes body, 'temporarily unavailable'
+  end
+
+  def test_colo_offers_only_genomes_that_have_colocalization_data
+    # The tab strip comes from Analysis.genomes_with_colo, which is derived
+    # from the data rather than an allowlist. The seed gives hg38 real cell
+    # types and TAIR12 only "-", so TAIR12 must not be offered.
+    seed_analyses
+    get '/colo'
+
+    genomes = JSON.parse(last_response.body[/<script id="page-data"[^>]*>(.*?)<\/script>/m, 1])['genomes']
+    assert genomes.key?('hg38')
+    refute genomes.key?('TAIR12')
   end
 
   def test_colo_result_has_legends_download_links_and_a_result_table

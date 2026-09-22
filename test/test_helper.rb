@@ -47,12 +47,22 @@ module TestHelper
     ])
   end
 
+  # One row per antigen, as analysisList.tab has had since 2015: cell_list is
+  # the colo index and target_genes is the "+"/"-" flag. The "-" row matters
+  # -- 567 of them are in the real file, and a reader that splits "-" on ","
+  # turns it into a cell-type class called "-".
   def seed_analyses
     DB[:analyses].multi_insert([
-      { track: 'CTCF', cell_list: 'K-562,HeLa-S3,GM12878', distance: '1',
+      { track: 'CTCF', cell_list: 'K-562,HeLa-S3,GM12878',
         target_genes: true, genome: 'hg38', created_at: Time.now },
       { track: 'H3K4me3', cell_list: 'K-562,Neuron',
         target_genes: false, genome: 'hg38', created_at: Time.now },
+      { track: 'NOCOLO', cell_list: '-',
+        target_genes: true, genome: 'hg38', created_at: Time.now },
+      # TAIR12 stands in for a genome with rows but no colo data at all, the
+      # case genomes_with_colo has to exclude.
+      { track: 'AGL20', cell_list: '-',
+        target_genes: true, genome: 'TAIR12', created_at: Time.now },
     ])
   end
 

@@ -10,39 +10,37 @@ module ChipAtlas
       { id: '10', label: '10 kb' },
     ].freeze
 
-    # --- Human Target Genes index: stopgap snapshot -------------------------
+    # analysisList.tab is a COMBINED index and has had the same four columns
+    # since 2015: antigen, cell_list, target_genes_flag, genome. `cell_list`
+    # is the Colocalization index - the cell-type classes that antigen has
+    # colo results for - and the flag says whether it also has Target Genes
+    # output. There is no distance dimension in it and there never was; the
+    # TSS distance lives in the filenames (CTCF.1.tsv / .5 / .10) and in
+    # TARGET_GENES_DISTANCES above, which is the UI's fixed set.
     #
-    # analysisList.tab is repurposed as the Target Genes index: each row is
-    # (TF.kb, cell_list, target_genes_flag, genome), and it currently has
-    # ZERO rows for any human genome even though the human data files exist
-    # on the archive (e.g. hg38/target/STAT3.1.tsv -> 200) - that is an
-    # upstream bug tracked separately (see task B1's brief, Q4). Until the
-    # regenerated analysisList.tab covers human, #target_genes_result
-    # backfills any genome the tab has no rows for at all from a vendored
-    # snapshot of production's /data/target_genes_analysis.json, captured
-    # 2026-09-19 (public/target_genes_analysis.snapshot-20260919.json, 49KB,
-    # keys ce10 ce11 dm3 dm6 hg19 hg38 mm10 mm9 rn6 sacCer3; hg38 = 1,766
-    # names). The app never fetches chip-atlas.org itself, at runtime or at
-    # build time - this file is committed and read locally only.
+    # An earlier build of this file (2026-09-09..13) was broken three ways at
+    # once - cell_list blanked to "-" on every row, every human row dropped,
+    # and a ".1"/".5"/".10" suffix appended to the antigen name - and this
+    # app was built against it: a `distance` column, a splitter for that
+    # suffix, and a vendored snapshot of production's Target Genes index to
+    # paper over the missing human rows. All of that is gone, along with the
+    # reading of the file it encoded. #load_from_file now watches for that
+    # build returning, because ingesting it silently is what cost the time.
     #
-    # Once upstream lands and analysisList.tab covers human, delete
-    # DEFAULT_HUMAN_SNAPSHOT_PATH, #human_snapshot_path(=), #human_snapshot,
-    # the snapshot file, and the backfill loop in #target_genes_result - the
-    # DB-only path already handles every genome correctly on its own.
-    DEFAULT_HUMAN_SNAPSHOT_PATH = File.expand_path(
-      File.join('..', '..', 'public', 'target_genes_analysis.snapshot-20260919.json'), __dir__
-    ).freeze
+    # Verified against the 2026-09-22 build: `cell_list` reproduces
+    # production's /data/colo_analysis.json for all ten genomes it serves
+    # (6,251 antigens, every cell-type list), and the rows flagged "+"
+    # reproduce its /data/target_genes_analysis.json for the same ten, plus
+    # TAIR12, which production has no tab for.
 
-    @human_snapshot_path = DEFAULT_HUMAN_SNAPSHOT_PATH
-    @human_snapshot = nil
+    # The ".1"/".5"/".10" suffix the broken build appended to antigen names.
+    # Matched only to report it - see #load_from_file.
+    BROKEN_BUILD_SUFFIX = /\.(?:#{TARGET_GENES_DISTANCES.map { |d| d[:id] }.join('|')})\z/
 
-    # TODO(B4): once the colo index build exists, replace this explicit
-    # allowlist with a check derived from which genomes actually have a colo
-    # index (the archive has no `colo/` directory at all under TAIR12 today,
-    # and there is no reliable signal for "has colo data" in this table yet —
-    # see task A2's report for why an allowlist was used instead of deriving
-    # this from the `analyses` table).
-    GENOMES_WITH_COLO = %w[hg38 mm10 rn6 dm6 ce11 sacCer3].freeze
+    # cell_list's "no colo data for this antigen" marker. Splitting it on ","
+    # yields ["-"], which is how a literal "-" reached the /colo picker as if
+    # it were a cell-type class.
+    NO_CELL_TYPES = '-'
 
     module_function
 
@@ -50,41 +48,35 @@ module ChipAtlas
       TARGET_GENES_DISTANCES
     end
 
-    # Test-only hook: point the human snapshot at a different JSON fixture.
-    # Resets the memo so the next #target_genes_result re-reads the file.
-    def human_snapshot_path=(path)
-      @human_snapshot_path = path
-      @human_snapshot = nil
-    end
-
-    def human_snapshot_path
-      @human_snapshot_path
-    end
-
-    # Test-only hook: put the snapshot path back on the real vendored file.
-    def reset_human_snapshot_path!
-      @human_snapshot_path = DEFAULT_HUMAN_SNAPSHOT_PATH
-      @human_snapshot = nil
-    end
-
-    def human_snapshot
-      @human_snapshot ||= JSON.parse(File.read(human_snapshot_path))
-    end
-
-    # Genome tab strip for /colo: the full registry, filtered down to genomes
-    # known to have colocalization data. Preserves config/genomes.yml order.
+    # Genome tab strip for /colo: the full registry, filtered down to the
+    # genomes that actually have colocalization data, in config/genomes.yml
+    # order. Derived rather than listed - a genome is offered exactly when at
+    # least one of its rows names a cell-type class. TAIR12 has 77 rows and
+    # all of them are "-", matching the archive having no colo/ directory for
+    # it, so it is correctly absent.
     def genomes_with_colo
-      ChipAtlas::Experiment.genomes.select { |id, _| GENOMES_WITH_COLO.include?(id) }
+      ids = dataset.exclude(cell_list: NO_CELL_TYPES)
+                   .exclude(cell_list: nil)
+                   .distinct
+                   .select_map(:genome)
+      ChipAtlas::Experiment.genomes.select { |id, _| ids.include?(id) }
     end
 
     def dataset
       DB[:analyses]
     end
 
+    # antigen -> cell-type classes, and the reverse. Rows whose cell_list is
+    # the "-" marker are skipped outright: they have no colo results, and
+    # `"-".split(",")` gives ["-"], which is how a literal "-" ended up
+    # offered as a cell-type class in the picker (and still reaches direct
+    # /api/colo_index consumers). 567 rows carry it in the 2026-09-22 build,
+    # so this is the difference between a correct index and a visibly wrong
+    # one, not a tidy-up.
     def colo_result_by_genome(genome)
       result = { genome => { track: {}, cell_type: {} } }
 
-      dataset.where(genome: genome).each do |row|
+      dataset.where(genome: genome).exclude(cell_list: NO_CELL_TYPES).each do |row|
         cell_list = row[:cell_list].to_s.split(',')
         next if cell_list.empty?
 
@@ -99,71 +91,50 @@ module ChipAtlas
       result
     end
 
-    # genome -> bare antigen names with precomputed Target Genes data.
-    # `track` is already bare (see #load_from_file) so this just dedupes the
-    # per-distance rows down to one entry per antigen, then backfills any
-    # genome the tab has no rows for at all - see the stopgap comment above.
-    # Rows #load_from_file could not resolve to a known distance (distance
-    # IS NULL) are excluded: no valid <track>.<distance>.tsv can exist for
-    # them, so offering them in the picker would just reproduce the original
-    # bug (an antigen name the archive can never match).
+    # genome -> antigen names with precomputed Target Genes data, i.e. the
+    # rows whose third column is "+". The names are used verbatim to build
+    # <genome>/target/<antigen>.<distance>.tsv, so they must stay exactly as
+    # the file spells them.
+    #
+    # This used to exclude rows with a NULL `distance` and then backfill any
+    # genome it found nothing for from a vendored snapshot of production's
+    # index. Both existed only because of the broken 2026-09 build (see the
+    # note at the top of this file) and both are gone: the flag column is the
+    # answer, for every genome including TAIR12, which the snapshot never
+    # covered.
     def target_genes_result
       result = {}
-      dataset.where(target_genes: true).exclude(distance: nil).each do |row|
+      dataset.where(target_genes: true).each do |row|
         genome = row[:genome]
         result[genome] ||= []
         result[genome] << row[:track]
       end
       result.each_value(&:uniq!)
-
-      ChipAtlas::Experiment.genomes.each_key do |genome|
-        next if result.key?(genome)
-
-        fallback = human_snapshot[genome]
-        result[genome] = fallback if fallback
-      end
-
       result
     end
 
-    # Splits a raw analysisList.tab track field ("Acaa2.10") into its bare
-    # antigen name and TSS distance in kb ("Acaa2", "10"). Distance is
-    # always the last dot-separated segment IF that segment is one of the
-    # known distance ids (see TARGET_GENES_DISTANCES, the one source for
-    # that set in this file) - so this splits on the LAST dot only, and
-    # only when the trailing piece is actually a distance. That guard
-    # matters for two reasons at once: antigen names that themselves
-    # contain a dot (e.g. "wdr-5.1", which appears in the file as
-    # "wdr-5.1.1", "wdr-5.1.5", "wdr-5.1.10") must not be corrupted by a
-    # naive `split('.')`, and a row whose trailing component ISN'T a
-    # distance at all (a future feed-shape change, not seen in the file
-    # today) must not be silently mangled into a wrong track/distance pair
-    # either - it stays whole. A raw value with no dot, or whose trailing
-    # segment doesn't match a known distance id, is kept whole as `track`
-    # with a nil `distance` rather than guessed at.
-    def split_track_and_distance(raw)
-      return [raw, nil] unless raw.include?('.')
-
-      track, _sep, distance = raw.rpartition('.')
-      return [raw, nil] unless TARGET_GENES_DISTANCES.any? { |d| d[:id] == distance }
-
-      [track, distance]
-    end
-
-    # Returns { total:, unrecognized_shape: } - unrecognized_shape counts
-    # rows whose track field #split_track_and_distance could not resolve to
-    # a known distance (see there). Those rows are still stored (distance
-    # NULL) so nothing about the source file is silently thrown away, but
-    # #target_genes_result excludes them from the picker index. Expected to
-    # be 0 against today's analysisList.tab; the point of counting and
-    # reporting it (see lib/tasks/metadata.rake's load_analysis task) is
-    # that a feed-shape change shows up in the load output instead of
-    # silently mangling data one layer down - the same failure mode task A3
-    # closed for experiments/experiments_fts.
+    # Returns { total:, broken_build_rows: }.
+    #
+    # broken_build_rows counts antigen names ending in a TARGET_GENES_DISTANCES
+    # id, which is the signature of the 2026-09 build described at the top of
+    # this file. Those rows are still stored verbatim - nothing about the
+    # source file is thrown away here - but the count is surfaced by
+    # lib/tasks/metadata.rake so a bad upstream build announces itself at load
+    # time. It is expected to be 0. It was 8,345 of 8,345 in September, and
+    # nothing said so: the app loaded it, the site looked like it worked, and
+    # a month of reasoning was built on the wrong shape. Same failure mode
+    # task A3 closed for experiments/experiments_fts, one table over.
+    #
+    # `wdr-5.1` (ce10/ce11) is the only real antigen name whose trailing
+    # segment could ever match, and upstream currently spells it `wdr-5` -
+    # as do production's own colo and Target Genes indexes - so a nonzero
+    # count today means the suffix is back, not a false positive. If that
+    # name is ever corrected upstream this counter reports 2, which is a
+    # cheap thing to read past and worth the check it buys.
     def load_from_file(table_path)
       timestamp = Time.now
       total = 0
-      unrecognized_shape = 0
+      broken_build_rows = 0
       batch_size = 5_000
 
       DB.transaction do
@@ -174,12 +145,11 @@ module ChipAtlas
           genome = cols[3]
           next unless ChipAtlas::Experiment.genomes.key?(genome)
 
-          track, distance = split_track_and_distance(cols[0])
-          unrecognized_shape += 1 if distance.nil?
+          track = cols[0]
+          broken_build_rows += 1 if track.match?(BROKEN_BUILD_SUFFIX)
 
           records << {
             track:        track,
-            distance:     distance,
             cell_list:    cols[1],
             target_genes: cols[2] == '+',
             genome:       genome,
@@ -198,7 +168,7 @@ module ChipAtlas
           total += records.size
         end
       end
-      { total: total, unrecognized_shape: unrecognized_shape }
+      { total: total, broken_build_rows: broken_build_rows }
     end
   end
 end

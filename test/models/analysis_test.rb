@@ -44,107 +44,125 @@ class AnalysisTest < Minitest::Test
     refute_includes result['hg38'], 'H3K4me3'
   end
 
-  def test_load_from_file_splits_track_and_distance
+  def test_load_from_file_stores_one_row_per_antigen_verbatim
     DB[:analyses].delete
     fixture = File.join(__dir__, '..', 'fixtures', 'analysis_list_sample.tab')
 
     stats = ChipAtlas::Analysis.load_from_file(fixture)
 
-    # Ahr.1/ce10 is dropped: ce10 is not in config/genomes.yml. The other 5
-    # fixture rows are all for supported genomes and all get stored,
-    # including the one with an unrecognized track.distance shape below.
-    assert_equal 5, stats[:total]
-    assert_equal 1, stats[:unrecognized_shape]
-
-    tair12 = DB[:analyses].where(genome: 'TAIR12').first
-    assert_equal 'AGL20', tair12[:track]
-    assert_equal '1', tair12[:distance]
-
-    mm10 = DB[:analyses].where(genome: 'mm10', track: 'Acaa2').first
-    assert_equal 'Acaa2', mm10[:track]
-    assert_equal '10', mm10[:distance]
-
-    # "wdr-5.1.1" / "wdr-5.1.5": the antigen name itself contains a dot
-    # ("wdr-5.1"), so only the LAST dot-separated segment is the distance -
-    # a naive split('.') would corrupt this into track "wdr-5" + distance
-    # "1.1".
-    ce11 = DB[:analyses].where(genome: 'ce11').order(:distance).all
-    assert_equal %w[wdr-5.1 wdr-5.1], ce11.map { |row| row[:track] }
-    assert_equal %w[1 5], ce11.map { |row| row[:distance] }
-
+    # Ahr/ce10 is dropped: ce10 is not in config/genomes.yml. The other four
+    # fixture rows are all for supported genomes.
+    assert_equal 4, stats[:total]
     refute DB[:analyses].where(genome: 'ce10').any?, 'ce10 is not in config/genomes.yml and must be dropped'
 
-    # "Weird.Track.Name": trailing component "Name" is not one of the known
-    # distance ids, so the guard must refuse to split it - the whole string
-    # is kept as track with distance left nil, not guessed at.
-    weird = DB[:analyses].where(genome: 'mm10', track: 'Weird.Track.Name').first
-    refute_nil weird, 'a row with an unrecognized track.distance shape must still be stored (distance NULL)'
-    assert_nil weird[:distance]
+    # The antigen name is stored exactly as the file spells it -- it is used
+    # verbatim to build <genome>/target/<antigen>.<distance>.tsv, so any
+    # transformation here breaks the lookup.
+    assert_equal 'AGL20', DB[:analyses].where(genome: 'TAIR12').first[:track]
+    assert_equal 'Acaa2', DB[:analyses].where(genome: 'mm10', track: 'Acaa2').first[:track]
+    assert_equal 'wdr-5', DB[:analyses].where(genome: 'ce11').first[:track]
+
+    assert_equal 'Liver,Neural', DB[:analyses].where(track: 'Acaa2').first[:cell_list]
+    assert_equal false, DB[:analyses].where(track: 'NoTargetGenes').first[:target_genes]
   end
 
-  def test_split_track_and_distance_handles_dotted_antigen_names
-    assert_equal %w[Acaa2 10], ChipAtlas::Analysis.split_track_and_distance('Acaa2.10')
-    assert_equal ['wdr-5.1', '1'], ChipAtlas::Analysis.split_track_and_distance('wdr-5.1.1')
-    assert_equal ['wdr-5.1', '10'], ChipAtlas::Analysis.split_track_and_distance('wdr-5.1.10')
+  def test_load_from_file_reports_zero_broken_build_rows_for_a_well_formed_file
+    DB[:analyses].delete
+    fixture = File.join(__dir__, '..', 'fixtures', 'analysis_list_sample.tab')
+
+    assert_equal 0, ChipAtlas::Analysis.load_from_file(fixture)[:broken_build_rows]
   end
 
-  def test_split_track_and_distance_refuses_to_guess_at_an_unrecognized_trailing_segment
-    # "Bar" is not a valid distance id (TARGET_GENES_DISTANCES is '1'/'5'/
-    # '10' only) - the whole string must be kept as track, not chopped at
-    # the last dot regardless of what follows it.
-    assert_equal ['Foo.Bar', nil], ChipAtlas::Analysis.split_track_and_distance('Foo.Bar')
+  def test_load_from_file_counts_the_broken_2026_09_build_signature
+    # The 2026-09 build of analysisList.tab appended ".1"/".5"/".10" to every
+    # antigen name, and this app ingested 8,345 such rows without a word --
+    # which is what let a month of work be built on the wrong shape. The
+    # count exists so that build announces itself; the rows are still stored
+    # verbatim either way.
+    DB[:analyses].delete
+    fixture = File.join(__dir__, '..', 'fixtures', 'analysis_list_broken_build.tab')
 
-    # No dot at all: same outcome, for the same reason.
-    assert_equal ['NoDotHere', nil], ChipAtlas::Analysis.split_track_and_distance('NoDotHere')
+    stats = ChipAtlas::Analysis.load_from_file(fixture)
 
-    # Still splits real dotted antigen names correctly - the guard must not
-    # become over-strict and start rejecting valid rows too.
-    assert_equal ['wdr-5.1', '1'], ChipAtlas::Analysis.split_track_and_distance('wdr-5.1.1')
+    assert_equal 4, stats[:total], 'suspect rows are still stored, not skipped'
+    assert_equal 3, stats[:broken_build_rows]
+    assert_equal 'AGL20.1', DB[:analyses].where(genome: 'TAIR12').order(:track).first[:track]
+    refute_nil DB[:analyses].where(track: 'Plain').first, 'the unsuffixed row is not counted'
   end
 
-  def test_target_genes_result_excludes_rows_with_unrecognized_track_distance_shape
+  def test_target_genes_result_covers_every_genome_from_the_flag_column_alone
     DB[:analyses].delete
     fixture = File.join(__dir__, '..', 'fixtures', 'analysis_list_sample.tab')
     ChipAtlas::Analysis.load_from_file(fixture)
 
     result = ChipAtlas::Analysis.target_genes_result
 
-    # No valid <track>.<distance>.tsv can exist for a row the loader could
-    # not resolve to a known distance, so it must never reach the picker
-    # index - even though it was stored in the DB (see the load test above).
-    refute_includes result['mm10'], 'Weird.Track.Name'
-    assert_includes result['mm10'], 'Acaa2', 'the well-formed mm10 row must still make it through'
+    assert_equal ['Acaa2'], result['mm10'], 'the "-" row must not be offered'
+    # TAIR12 is the case the deleted vendored snapshot never covered: the
+    # flag column answers for it like any other genome.
+    assert_equal ['AGL20'], result['TAIR12']
+    assert_equal ['wdr-5'], result['ce11']
   end
 
-  def test_target_genes_result_falls_back_to_human_snapshot_for_genomes_the_tab_does_not_cover
-    fixture = File.join(__dir__, '..', 'fixtures', 'target_genes_human_snapshot_sample.json')
-    ChipAtlas::Analysis.human_snapshot_path = fixture
+  def test_target_genes_result_does_not_invent_rows_for_genomes_with_none
+    DB[:analyses].delete
+    fixture = File.join(__dir__, '..', 'fixtures', 'analysis_list_sample.tab')
+    ChipAtlas::Analysis.load_from_file(fixture)
 
-    result = ChipAtlas::Analysis.target_genes_result
-
-    # rn6 has no rows in the seeded analyses table at all, so it falls back
-    # to the snapshot.
-    assert_equal %w[Ahr Ar], result['rn6']
-
-    # hg38 DOES have rows (seeded above), so the real DB data wins over
-    # whatever the snapshot says - the fallback is only for genomes the tab
-    # has zero rows for.
-    assert_includes result['hg38'], 'CTCF'
-
-    # hg19 is in the snapshot but not in config/genomes.yml (a legacy build
-    # this app deliberately does not support) and must not leak in.
-    refute result.key?('hg19')
-  ensure
-    ChipAtlas::Analysis.reset_human_snapshot_path!
+    # rn6 has no rows. It used to be backfilled from a vendored snapshot of
+    # production's index; that snapshot existed only to paper over the
+    # broken build's missing human rows and is gone.
+    refute ChipAtlas::Analysis.target_genes_result.key?('rn6')
   end
 
-  def test_genomes_with_colo_excludes_tair12
+  # --- the "-" marker: 567 rows carry it in the real file ---
+
+  def test_colo_result_by_genome_treats_a_dash_cell_list_as_no_colo_data
+    result = ChipAtlas::Analysis.colo_result_by_genome('hg38')
+
+    refute result['hg38'][:track].key?('NOCOLO'),
+           'an antigen with no colo cell types must not be offered'
+    refute result['hg38'][:cell_type].key?('-'),
+           '"-".split(",") is ["-"], which is how a literal "-" became a cell-type class'
+  end
+
+  def test_colo_result_by_genome_offers_no_dash_in_either_direction
+    result = ChipAtlas::Analysis.colo_result_by_genome('hg38')
+
+    refute_includes result['hg38'][:cell_type].keys, '-'
+    result['hg38'][:track].each_value do |cells|
+      refute_includes cells, '-', 'a "-" must never appear inside a cell-type list either'
+    end
+  end
+
+  # genomes_with_colo is derived from the data now, not an allowlist: the
+  # seed gives hg38 rows with real cell types and TAIR12 rows that are all
+  # "-", which is exactly the shape of the real file.
+  def test_genomes_with_colo_excludes_a_genome_whose_rows_are_all_dashes
     genomes = ChipAtlas::Analysis.genomes_with_colo
 
     assert genomes.key?('hg38')
-    refute genomes.key?('TAIR12'), 'TAIR12 has no colo/ directory on the archive and must not offer Colo'
+    refute genomes.key?('TAIR12'),
+           'TAIR12 has rows but every cell_list is "-", so it has no colo data to offer'
     assert_equal 'A. thaliana (TAIR12)', ChipAtlas::Experiment.genomes['TAIR12'],
                  'sanity check: TAIR12 is still in the full genome registry, just not in the colo one'
+  end
+
+  def test_genomes_with_colo_excludes_a_genome_with_no_rows_at_all
+    refute ChipAtlas::Analysis.genomes_with_colo.key?('rn6')
+  end
+
+  def test_genomes_with_colo_preserves_the_registry_order
+    DB[:analyses].delete
+    # Inserted back-to-front on purpose: the tab strip's order comes from
+    # config/genomes.yml, never from whatever the query happens to return.
+    DB[:analyses].multi_insert([
+      { track: 'A', cell_list: 'Blood', target_genes: true, genome: 'sacCer3', created_at: Time.now },
+      { track: 'B', cell_list: 'Blood', target_genes: true, genome: 'hg38', created_at: Time.now },
+      { track: 'C', cell_list: 'Blood', target_genes: true, genome: 'mm10', created_at: Time.now },
+    ])
+
+    assert_equal %w[hg38 mm10 sacCer3], ChipAtlas::Analysis.genomes_with_colo.keys
   end
 
   def test_target_genes_distances
