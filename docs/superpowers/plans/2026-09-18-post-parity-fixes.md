@@ -88,6 +88,17 @@ show exactly this symptom.
 
 ## What `analysisList.tab` actually is
 
+> **Superseded 2026-09-22 — this whole section is wrong.** It reasons from the
+> 2026-09-09/13 build of the file, which was broken: it had blanked `cell_list`
+> to `-` on every row, dropped all human rows, and appended a `.1`/`.5`/`.10`
+> suffix to the antigen name. The file is a **combined colo + Target Genes**
+> index and has had the same shape since 2015, with no distance dimension at
+> any point. The original parity report's reading was right and the
+> "correction" below was not. See "What `analysisList.tab` actually is —
+> corrected 2026-09-22" in `2026-09-18-post-parity-fixes-outcome.md`, which
+> carries the evidence and what it means for B4. Kept as written because the
+> ledger's rulings refer to it.
+
 This corrects the parity report, which described the file as "degraded". It is
 not degraded — it has been repurposed, and the report's Fault 2 overstated the
 damage. Each row is one **(TF, distance)** pair for **Target Genes only**:

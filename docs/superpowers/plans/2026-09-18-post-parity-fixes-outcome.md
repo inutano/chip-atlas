@@ -23,10 +23,10 @@ ui-checklist    34/34
 1. **Result endpoints requested a file format that has never existed.** The app
    asked for `.json`; the data server publishes `.tsv` and `.html` only. Fixed by
    parsing the TSV that exists (owner's choice, D4).
-2. **`analysisList.tab` was misread as a Colo index.** It is a **Target Genes**
-   index: each row is a (TF, distance) pair and the `.1`/`.5`/`.10` suffix matches
-   real filenames exactly. Colocalization has no index source in the pipeline at
-   all — that is what B4 must supply.
+2. ~~**`analysisList.tab` was misread as a Colo index.**~~ **This finding was
+   wrong — corrected 2026-09-22.** It was read off a single broken build of the
+   file, the 2026-09-09/13 one this project happened to download, and does not
+   describe the file. See "What `analysisList.tab` actually is" below.
 3. **The job payload used field names WABI does not know.** No translation layer
    existed. The frontend now emits WABI's own vocabulary; the server adds the
    operational fields.
@@ -58,17 +58,70 @@ rulings were overturned.
 | 21 | Final review scoped to this plan, not the whole branch | |
 | 22 | Gate `/colo` behind the honest-unavailable state until B4 | **confirmed by owner 2026-09-19** |
 
-## What B4 needs when Q2 is answered
+## What `analysisList.tab` actually is — corrected 2026-09-22
 
-- **Colocalization has no index source.** `analysisList.tab` cannot supply one
-  (fault 2 above). Production serves `/data/colo_analysis.json?genome=…` in the
-  right shape; whether that endpoint or a regenerated upstream file becomes the
-  source is the open question.
+The file is a **combined index**, and has had the same four-column shape since
+2015: `antigen`, `cell_list`, `target_genes_flag`, `genome`. `cell_list` is the
+**Colocalization** index — the cell types that antigen has colo results for —
+and the third column flags whether it also has Target Genes output. There is no
+distance dimension in it and there never was.
+
+The 2026-09-09/13 build this project downloaded was broken in three separate
+ways at once, which is what produced fault 2:
+
+| | 2015 copies (x3) | 2026-09-13 | 2026-09-22 |
+|---|---|---|---|
+| rows | 1,077 | 8,345 | 6,328 |
+| antigen field | bare | `antigen.1` / `.5` / `.10` | bare |
+| `cell_list` | populated | **every row `-`** | populated |
+| human rows | hg19 583 | **0** | hg19 1,768 / hg38 1,767 |
+
+Blanking `cell_list` destroyed the colo index; the `.N` suffix then made the
+file look like a Target Genes (TF, distance) enumeration, which it is not. The
+original reading was the right one. Evidence: three independent 2015 copies at
+`Dropbox/00_Research/Archive/2015-2016/peakjohn/{20150520,20150522,20150623}`,
+all in the 2026-09-22 shape, and the upstream maintainer's own account that the
+distance was never in the file.
+
+**The 2026-09-22 build reproduces both of production's index endpoints exactly**,
+checked field by field:
+
+- `cell_list` vs `/data/colo_analysis.json?genome=…`: identical for all ten
+  genomes production serves — 6,251 antigens, every key and every cell-type
+  list.
+- rows flagged `+` vs `/data/target_genes_analysis.json` (the vendored
+  2026-09-19 snapshot): identical for the same ten genomes, and it additionally
+  covers TAIR12 (77 antigens), which production has no tab for.
+
+So B4's open question is answered by the data: the regenerated upstream file is
+the source, for both indexes, and the vendored snapshot is redundant.
+
+## What B4 needs, given the above
 - **`Analysis.colo_result_by_genome` (`lib/models/analysis.rb`) still splits a
   `cell_list` of `"-"` into `["-"]` rather than `[]`.** This is why the picker
   offered a literal `-`. The `/colo` gate (Ruling 22) hides the human-facing
   symptom but **`/api/colo_index` still returns the bogus entry to direct API
-  consumers.** B4 owns the real fix.
+  consumers.** B4 owns the real fix. Against the 2026-09-22 file this stops
+  being theoretical: **567 rows carry `-`** (hg19 125, hg38 114, mm10 105,
+  mm9 103, sacCer3 25, dm6 8, dm3 7, TAIR12 77, ce10/ce11/rn6 1 each).
+- **The `distance` column, `split_track_and_distance` and
+  `target_genes_result`'s `.exclude(distance: nil)` were all built to fit the
+  broken build** and have nothing to read in the restored file: every row now
+  resolves to `distance` NULL, so `target_genes_result` returns nothing and
+  silently falls through to the vendored snapshot for every genome — with
+  TAIR12, absent from that snapshot, going empty. They come out with B4, along
+  with `DEFAULT_HUMAN_SNAPSHOT_PATH` and the snapshot file itself. The distance
+  dimension stays in the **UI** (`TARGET_GENES_DISTANCES`) and in the filenames
+  (`CTCF.1.tsv`, `.5`, `.10` all resolve); it was simply never in this index.
+- **`Analysis.GENOMES_WITH_COLO`'s hardcoded allowlist can now be derived**, as
+  its TODO asks: the genomes with at least one non-`-` `cell_list` are exactly
+  hg38, mm10, rn6, dm6, ce11, sacCer3 among those this app offers. TAIR12's 77
+  rows are all `-`, matching the archive having no `colo/` directory for it.
+- **`wdr-5` (ce10, ce11) resolves no Target Genes file** — the real ones are
+  `wdr-5.1.{1,5,10}.tsv`, after the C. elegans gene `wdr-5.1`. Not a regression
+  in this build: production's own colo and target-genes indexes both say
+  `wdr-5` too, so its Target Genes page has the same dead entry. Upstream's to
+  fix, and worth reporting; one row per genome.
 - `Analysis.genomes_with_colo` is a hardcoded allowlist with a TODO pointing here.
 - Re-enabling the `/colo` picker is one line: `COLO_PICKER_UNAVAILABLE` in
   `frontend/pages/colo.ts`.
