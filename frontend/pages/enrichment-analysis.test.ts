@@ -491,19 +491,41 @@ test('estimateSeconds: null when the genome/antigen/cell/qval combination is not
   assert.equal(estimateSeconds({ ...BASE, dataAText: 'chr1\t1\t2\n', numRef: undefined }), null)
 })
 
-test('estimateSeconds: null for a motif on an assembly production published no genome size for', () => {
-  assert.equal(estimateSeconds({ ...BASE, genome: 'TAIR12', dataAText: 'GGAATTCC' }), null)
+// TAIR12 is the one genome in the tabs that production has no tab for, so
+// both its constants had to be derived from the assembly ChIP-Atlas publishes
+// rather than copied. These pin the derived values at the two places they are
+// the only thing standing between the panel and an em dash.
+test('estimateSeconds: a motif on TAIR12 uses the assembly size summed from its faidx index', () => {
+  assert.equal(
+    estimateSeconds({ ...BASE, genome: 'TAIR12', dataAText: 'GGAATTCC' }),
+    getSeconds(142481245 / Math.pow(4, 8), 1, 5089448, 'rnd'),
+  )
+})
+
+test('estimateSeconds: RefSeq comparison on TAIR12 uses its protein-coding locus count', () => {
+  assert.equal(
+    estimateSeconds({ ...BASE, genome: 'TAIR12', aType: 'gene', bType: 'refseq', dataAText: 'AT1G01010\n' }),
+    getSeconds(1, 26867 - 1, 5089448, 'bed'),
+  )
+})
+
+// The fallback the two tables above still need. Both paths reach for a
+// per-assembly constant, and production divides by `undefined` when it has
+// none — rendering the string "NaN hr". danRer11 stands in for any assembly
+// added to the tabs before someone adds its two constants.
+test('estimateSeconds: null for a motif on an assembly missing from GENOME_SIZE', () => {
+  assert.equal(estimateSeconds({ ...BASE, genome: 'danRer11', dataAText: 'GGAATTCC' }), null)
   // ...but an ordinary BED region on the same assembly still estimates fine,
   // because that path never needs the genome size.
   assert.equal(
-    estimateSeconds({ ...BASE, genome: 'TAIR12', dataAText: 'Chr1\t1\t2\n' }),
+    estimateSeconds({ ...BASE, genome: 'danRer11', dataAText: 'chr1\t1\t2\n' }),
     getSeconds(1, 1, 5089448, 'rnd'),
   )
 })
 
-test('estimateSeconds: null for RefSeq comparison on an assembly with no published gene count', () => {
+test('estimateSeconds: null for RefSeq comparison on an assembly missing from NUM_GENES', () => {
   assert.equal(
-    estimateSeconds({ ...BASE, genome: 'TAIR12', aType: 'gene', bType: 'refseq', dataAText: 'AT1G01010\n' }),
+    estimateSeconds({ ...BASE, genome: 'danRer11', aType: 'gene', bType: 'refseq', dataAText: 'myod1\n' }),
     null,
   )
 })

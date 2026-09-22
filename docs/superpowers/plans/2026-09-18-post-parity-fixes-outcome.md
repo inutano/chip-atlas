@@ -102,25 +102,35 @@ rulings were overturned.
   VACUUM: it detects, it does not prevent.
 - No jsdom anywhere, so DOM wiring is covered by pure-function tests plus manual
   verification — a project-wide convention, not introduced here.
-- **Q3 (open, 2026-09-22): TAIR genome size and coding-gene count.** Enrichment
-  Analysis's estimated run time is computed in the browser from production's own
-  regression (see `frontend/pages/enrichment-analysis.ts`). Two of its branches
-  need per-assembly constants that production's `genomesize` / `numGenes` tables
-  never carried a TAIR entry for, because production has no TAIR tab:
+- ~~**Q3: TAIR genome size and coding-gene count**~~ — **resolved 2026-09-22**,
+  both derived from the assembly ChIP-Atlas itself publishes at
+  `chip-atlas.dbcls.jp/data/genome/TAIR12/`, which the owner pointed to. They
+  were the last two gaps in the Enrichment Analysis estimate: the sequence-motif
+  branch needs a genome size, the "RefSeq coding genes" branch needs a gene
+  count, and production's tables have no TAIR entry because it has no TAIR tab.
 
-  - sequence motif input (a single tab-free line) needs the genome size in bp,
-    to estimate how often a motif that long occurs by chance;
-  - "RefSeq coding genes" as dataset B needs the total coding-gene count, since
-    dataset B is every coding gene except those in dataset A.
+  - **Genome size 142,481,245 bp** — the sum of all five sequences in
+    `TAIR12.fa.gz.fai`. The basis was verified against production rather than
+    assumed: summing the chrom.sizes ChIP-Atlas publishes reproduces
+    production's `genomesize` entry **to the byte for rn6 and sacCer3**, the two
+    genomes whose entry corresponds to an assembly still measurable today. The
+    other four differ only because production's figures are per-species and it
+    kept the older assembly's total — its hg38 entry is hg19's, its dm6 entry is
+    dm3's, its mm10 entry mm9's, its ce11 entry ce10's. Those are left alone.
 
-  Both are `—` for TAIR12 today rather than a guessed number. Everything else on
-  TAIR12 estimates normally — ordinary BED input, a user gene list, a gene count
-  table — because those paths never touch either table. **What is needed: the
-  TAIR12 assembly size in bp and its coding-gene count, on the same basis
-  production used for the other assemblies** (hg38 3,137,161,264 bp / 18,622
-  genes; note its figures are per-species, shared between assembly versions).
-  Drop them into `GENOME_SIZE` and `NUM_GENES` and both branches light up with
-  no other change.
+  - **Coding genes 26,867** — distinct AGI locus codes parenting an mRNA feature
+    in `TAIR12.genes.gff3.gz`, agreed on by two independent passes (mRNA Parent
+    and CDS Parent) and distributed across Chr1-5 as 7,029 / 4,159 / 5,329 /
+    4,097 / 6,253. This could not come from production's basis on any reading:
+    Arabidopsis has no RefSeq annotation, so the gene set an analysis runs
+    against is the one ChIP-Atlas publishes. Production's own `numGenes` figures
+    stay copied as given — no counting rule over the RefSeq Curated tables
+    published today reproduces any of them (current counts run a few percent
+    above production's for five genomes and well below it for rn6), so their
+    derivation is not recoverable and was not guessed at.
+
+  Precision was checked before relying on it: at TAIR12's largest numRef a 12%
+  error in the gene count moves the estimate by one minute.
 
 ## Six "passes while testing nothing" defects found during this run
 

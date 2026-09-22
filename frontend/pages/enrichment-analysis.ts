@@ -307,11 +307,26 @@ function syncDatasetBVisibility(): void {
 // stay diffable.
 
 /**
- * Genome sizes in bp, verbatim from production's `genomesize` table. Used only
- * for the sequence-motif case below. Production's table predates this app's
- * genome list on both ends: it still carries hg19/mm9/dm3/ce10, which the tabs
- * no longer offer, and it has no entry for TAIR — kept as-is so a diff against
- * production shows only real drift.
+ * Genome sizes in bp. Used only for the sequence-motif case below.
+ *
+ * Every entry except TAIR12 is verbatim from production's `genomesize` table,
+ * including the hg19/mm9/dm3/ce10 assemblies these tabs no longer offer —
+ * copied rather than trimmed so a diff against production shows only real
+ * drift. Production's figures are per *species*, and for the four species with
+ * two assemblies it kept the older assembly's total and never revised it: its
+ * hg38 entry is hg19's total, its dm6 entry is dm3's, and so on. Left alone;
+ * changing them would put this app's estimates out of step with production's
+ * for a difference of at most a few percent in one term.
+ *
+ * TAIR12 is ours — production has no TAIR tab and so no entry. It is the sum
+ * of all five sequences in the assembly's own faidx index
+ * (chip-atlas.dbcls.jp/data/genome/TAIR12/TAIR12.fa.gz.fai: Chr1 32,637,894 +
+ * Chr2 27,782,540 + Chr3 26,149,336 + Chr4 25,768,865 + Chr5 30,142,610),
+ * which is the same basis production's own figures use. That basis was checked
+ * against production rather than assumed: summing the published chrom.sizes
+ * reproduces its entry to the byte for rn6 and sacCer3 — the two genomes whose
+ * table entry corresponds to an assembly that can still be measured — and the
+ * four that differ are exactly the stale-older-assembly cases above.
  */
 const GENOME_SIZE: Record<string, number> = {
   ce10: 100286070,
@@ -324,9 +339,32 @@ const GENOME_SIZE: Record<string, number> = {
   mm10: 2725765481,
   sacCer3: 12157105,
   rn6: 2870182909,
+  TAIR12: 142481245,
 }
 
-/** RefSeq coding-gene counts, verbatim from production's `numGenes` table. */
+/**
+ * Coding-gene counts, for "RefSeq coding genes" as dataset B.
+ *
+ * Every entry except TAIR12 is verbatim from production's `numGenes` table.
+ * Those are historical figures whose derivation could not be recovered: no
+ * counting rule over the RefSeq Curated tables ChIP-Atlas publishes today
+ * reproduces any of them — the current counts run a few percent above
+ * production's for five genomes and well below it for rn6 — so they are copied
+ * as given, not recomputed.
+ *
+ * TAIR12 is ours, and cannot come from that table on any basis: Arabidopsis has
+ * no RefSeq annotation, so the gene set an analysis actually runs against is
+ * the one ChIP-Atlas publishes for the assembly. This is the number of
+ * protein-coding loci in it
+ * (chip-atlas.dbcls.jp/data/genome/TAIR12/TAIR12.genes.gff3.gz) — distinct AGI
+ * locus codes parenting an mRNA feature, which two independent passes agree on
+ * (26,867 from mRNA Parent, 26,867 from CDS Parent), distributed across Chr1-5
+ * as 7,029 / 4,159 / 5,329 / 4,097 / 6,253.
+ *
+ * Precision here barely matters: the count enters as dataset B's line count in
+ * the 'bed' regression, where at TAIR12's largest numRef a 12% error moves the
+ * estimate by one minute.
+ */
 const NUM_GENES: Record<string, number> = {
   ce10: 17958,
   ce11: 17958,
@@ -338,6 +376,7 @@ const NUM_GENES: Record<string, number> = {
   mm10: 19909,
   sacCer3: 5809,
   rn6: 23425,
+  TAIR12: 26867,
 }
 
 /**
@@ -434,8 +473,9 @@ export interface EstimateInput {
  * Production's estimateTime(), minus its final formatting step.
  *
  * Returns null for every combination production leaves `seconds` undefined in
- * (and therefore renders as "NaN hr"): an unknown genome/antigen/cell/qval
- * combination, and the dataset A/B pairings its switch has no branch for —
+ * (and therefore renders as "NaN hr"): a genome missing from the two tables
+ * above, an unknown genome/antigen/cell/qval combination, and the dataset A/B
+ * pairings its switch has no branch for —
  * notably gene list + random permutation, which this app's dataset B panel
  * allows and production's own panel does too. Callers render null as an em
  * dash. This is the one deliberate behavioural difference from production
