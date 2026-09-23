@@ -23,11 +23,24 @@ module ChipAtlas
       igv = @data['igv'] || 'http://localhost:60151'
       case @condition[:track_class]
       when 'Annotation tracks'
-        trackname = ChipAtlas::Bedfile.get_trackname(@condition).gsub(', ', '_')
-        "#{igv}/load?genome=#{@genome}&file=#{annotation_url}&name=#{trackname}"
+        # PB-19: both lookups must see the same merged condition. The old
+        # code looked up the trackname against the caller's raw
+        # cell_type_class (e.g. "NA") while the filename lookup silently
+        # overrode it to "All cell types" -- so any Annotation tracks
+        # request whose cell_type_class wasn't already "All cell types"
+        # raised Bedfile::NotFound here, uncaught (production's
+        # old-app/lib/pj/location.rb:30-36, 58-60 got away with this only
+        # because Ruby happens to evaluate the trackname's string
+        # interpolation after the filename lookup's condition mutation).
+        condition_with_all = @condition.merge(cell_type_class: 'All cell types')
+        filename  = ChipAtlas::Bedfile.get_filename(condition_with_all)
+        trackname = ChipAtlas::Bedfile.get_trackname(condition_with_all).gsub(', ', '_')
+        "#{igv}/load?genome=#{@genome}&file=#{ARCHIVE_BASE}/annotations/#{@genome}/#{filename}&name=#{trackname}"
       else
         "#{igv}/load?genome=#{@genome}&file=#{bed_url}"
       end
+    rescue ChipAtlas::Bedfile::NotFound
+      nil
     end
 
     # Colocalization result URLs
@@ -54,8 +67,12 @@ module ChipAtlas
     end
 
     def correlation_tsv_url
-      track = @condition[:track_subclass].to_s.tr(' ', '_')
-      cell  = @condition[:cell_type_subclass].to_s.tr(' ', '_')
+      # SV-41: production sanitises with gsub(/[^a-zA-Z0-9_-]/, '_')
+      # (old-app/views/experiment.haml:333-338), not just spaces -- a plain
+      # tr(' ', '_') left '+', '.', '/', ',' etc. in the URL and 404'd
+      # against the data server for ~5.8% of antigen/cell-type names.
+      track = @condition[:track_subclass].to_s.gsub(/[^a-zA-Z0-9_-]/, '_')
+      cell  = @condition[:cell_type_subclass].to_s.gsub(/[^a-zA-Z0-9_-]/, '_')
       "#{ARCHIVE_BASE}/#{@genome}/correlation/tsv/#{@genome}__x__#{track}__x__#{cell}.tsv"
     end
 

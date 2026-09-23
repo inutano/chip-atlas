@@ -156,6 +156,75 @@ class ApiTest < Minitest::Test
     assert_equal 400, last_response.status
   end
 
+  def test_post_download_url_with_non_object_json_body_returns_400
+    post '/api/download_url', JSON.generate([1, 2]), 'CONTENT_TYPE' => 'application/json'
+    assert_equal 400, last_response.status
+    data = JSON.parse(last_response.body)
+    assert_equal 'JSON body must be an object', data['error']
+  end
+
+  # API-53 / SV-... : genome is validated against ChipAtlas::Experiment.genomes
+  # rather than interpolated unchecked into a URL (which used to raise
+  # URI::InvalidURIError -> 500 for garbage like a path traversal attempt).
+  def test_get_igv_url_invalid_genome_returns_400
+    get '/api/igv_url', genome: 'util/lineNum.tsv#', track_class: 'Histone'
+    assert_equal 400, last_response.status
+    data = JSON.parse(last_response.body)
+    assert_match(/Unknown genome/, data['error'])
+  end
+
+  def test_get_download_url_invalid_genome_returns_400
+    get '/api/download_url', genome: 'util/lineNum.tsv#', track_class: 'Histone'
+    assert_equal 400, last_response.status
+  end
+
+  def test_post_igv_url_invalid_genome_returns_400
+    post '/api/igv_url', JSON.generate({
+      condition: { genome: 'util/lineNum.tsv#', track_class: 'Histone', track_subclass: 'H3K4me3',
+                   cell_type_class: 'Blood', cell_type_subclass: '-', qval: '05' }
+    }), 'CONTENT_TYPE' => 'application/json'
+    assert_equal 400, last_response.status
+  end
+
+  def test_post_download_url_invalid_genome_returns_400
+    post '/api/download_url', JSON.generate({
+      condition: { genome: 'util/lineNum.tsv#', track_class: 'Histone', track_subclass: 'H3K4me3',
+                   cell_type_class: 'Blood', cell_type_subclass: '-', qval: '05' }
+    }), 'CONTENT_TYPE' => 'application/json'
+    assert_equal 400, last_response.status
+  end
+
+  # PB-19: Annotation tracks used to raise Bedfile::NotFound (uncaught, ->
+  # 500) via /api/igv_url because the trackname lookup ran before the
+  # cell_type_class: 'All cell types' merge that the filename lookup
+  # already got. Both must now use the merged condition.
+  def test_get_igv_url_annotation_tracks_returns_a_url_when_a_bedfile_matches
+    DB[:bedfiles].insert(
+      filename: 'cpg_island.hg38.bed', genome: 'hg38', track_class: 'Annotation tracks',
+      track_subclass: 'CpG Islands', cell_type_class: 'All cell types', cell_type_subclass: '-',
+      qval: 'anno', experiments: '', created_at: Time.now
+    )
+
+    get '/api/igv_url', genome: 'hg38', track_class: 'Annotation tracks', track_subclass: 'CpG Islands',
+                         cell_type_class: 'NA', qval: 'anno'
+
+    assert last_response.ok?
+    data = JSON.parse(last_response.body)
+    assert_match %r{annotations/hg38/}, data['url']
+    assert_match(/&name=/, data['url'])
+  end
+
+  def test_post_igv_url_annotation_tracks_returns_null_url_when_no_bedfile_matches
+    post '/api/igv_url', JSON.generate({
+      condition: { genome: 'hg38', track_class: 'Annotation tracks', track_subclass: 'NoSuchSubclass',
+                   cell_type_class: 'NA', qval: 'anno' }
+    }), 'CONTENT_TYPE' => 'application/json'
+
+    assert_equal 200, last_response.status
+    data = JSON.parse(last_response.body)
+    assert_nil data['url']
+  end
+
   def test_get_download_url
     get '/api/download_url', genome: 'hg38', track_class: 'Histone', track_subclass: 'H3K4me3',
                              cell_type_class: 'Blood', cell_type_subclass: '-', qval: '05'
@@ -323,6 +392,16 @@ class ApiTest < Minitest::Test
     assert_equal 400, last_response.status
   end
 
+  def test_target_genes_invalid_genome_returns_400
+    get '/api/target_genes', genome: 'util/lineNum.tsv#', track: 'Stat3', distance: '1'
+    assert_equal 400, last_response.status
+  end
+
+  def test_target_genes_invalid_distance_returns_400
+    get '/api/target_genes', genome: 'mm10', track: 'Stat3', distance: '7'
+    assert_equal 400, last_response.status
+  end
+
   # /api/colo proxies ChipAtlas::ColoTsv, which fetches and parses the
   # precomputed TSV (there is no JSON file on the data server for this
   # analysis, and never has been - see task B5's brief and
@@ -381,6 +460,11 @@ class ApiTest < Minitest::Test
     assert_equal 400, last_response.status
   end
 
+  def test_colo_invalid_genome_returns_400
+    get '/api/colo', genome: 'util/lineNum.tsv#', track: 'Stat3', cell_type: 'CellA'
+    assert_equal 400, last_response.status
+  end
+
   # --- download routes: 404 body now carries a JSON error, not bare text ---
   #
   # /api/colo/download and /api/target_genes/download call
@@ -412,6 +496,13 @@ class ApiTest < Minitest::Test
     ChipAtlas::DataProxy.fetcher = nil
   end
 
+  # API-53: a genome containing '/', '#', '..' etc. used to be interpolated
+  # straight into the outbound archive URL.
+  def test_colo_download_invalid_genome_returns_400
+    get '/api/colo/download', genome: 'util/lineNum.tsv#', track: 'x', cell_type: 'y', format: 'tsv'
+    assert_equal 400, last_response.status
+  end
+
   def test_target_genes_download_missing_file_returns_404_with_json_body
     ChipAtlas::DataProxy.fetcher = ->(_url) { nil }
 
@@ -423,6 +514,16 @@ class ApiTest < Minitest::Test
     assert_equal 'File not found', data['error']
   ensure
     ChipAtlas::DataProxy.fetcher = nil
+  end
+
+  def test_target_genes_download_invalid_genome_returns_400
+    get '/api/target_genes/download', genome: 'util/lineNum.tsv#', track: 'x', distance: '1', format: 'tsv'
+    assert_equal 400, last_response.status
+  end
+
+  def test_target_genes_download_invalid_distance_returns_400
+    get '/api/target_genes/download', genome: 'mm10', track: 'x', distance: '7', format: 'tsv'
+    assert_equal 400, last_response.status
   end
 
   # /api/remote_url_status must rescue the fuller set of transient upstream

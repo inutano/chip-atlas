@@ -110,4 +110,64 @@ class LocationServiceTest < Minitest::Test
                  'hg38__x__Input_control__x__Adipose_stromal_cell.tsv',
                  svc.correlation_tsv_url
   end
+
+  # SV-41: production sanitises with gsub(/[^a-zA-Z0-9_-]/, '_'), not just
+  # spaces -- a plain tr(' ', '_') leaves '+', '.', '/', ',' etc. in the
+  # URL and 404s against the data server for ~5.8% of antigen/cell-type
+  # names (old-app/views/experiment.haml:333-338).
+  def test_correlation_tsv_url_sanitises_special_characters_like_production
+    svc = ChipAtlas::LocationService.new(
+      'condition' => {
+        'genome' => 'hg38',
+        'track_subclass' => 'H2A.Z',
+        'cell_type_subclass' => 'CD4+ T cells'
+      }
+    )
+    assert_equal 'https://chip-atlas.dbcls.jp/data/hg38/correlation/tsv/' \
+                 'hg38__x__H2A_Z__x__CD4__T_cells.tsv',
+                 svc.correlation_tsv_url
+  end
+
+  def test_correlation_tsv_url_sanitises_slash_in_cell_type_name
+    svc = ChipAtlas::LocationService.new(
+      'condition' => {
+        'genome' => 'mm10',
+        'track_subclass' => 'CTCF',
+        'cell_type_subclass' => 'NIH/3T3'
+      }
+    )
+    assert_equal 'https://chip-atlas.dbcls.jp/data/mm10/correlation/tsv/' \
+                 'mm10__x__CTCF__x__NIH_3T3.tsv',
+                 svc.correlation_tsv_url
+  end
+
+  # PB-19: igv_browsing_url used to look up the trackname with the caller's
+  # raw cell_type_class (e.g. "NA") while the filename lookup silently
+  # overrode it to "All cell types" -- so a request that worked for
+  # download_url raised Bedfile::NotFound, uncaught, for igv_url. Both
+  # lookups must use the same merged condition.
+  def test_igv_browsing_url_for_annotation_tracks_overrides_cell_type_class_to_all_cell_types
+    DB[:bedfiles].insert(
+      filename: 'cpg_island.hg38.bed', genome: 'hg38', track_class: 'Annotation tracks',
+      track_subclass: 'CpG Islands', cell_type_class: 'All cell types', cell_type_subclass: '-',
+      qval: 'anno', experiments: '', created_at: Time.now
+    )
+    data = { 'condition' => {
+      'genome' => 'hg38', 'track_class' => 'Annotation tracks', 'track_subclass' => 'CpG Islands',
+      'cell_type_class' => 'NA', 'cell_type_subclass' => '-', 'qval' => 'anno'
+    }}
+    svc = ChipAtlas::LocationService.new(data)
+    url = svc.igv_browsing_url
+    assert_match %r{file=https://chip-atlas\.dbcls\.jp/data/annotations/hg38/cpg_island\.hg38\.bed}, url
+    assert_match(/name=CpG Islands/, url)
+  end
+
+  def test_igv_browsing_url_for_annotation_tracks_returns_nil_instead_of_raising_when_no_bedfile_matches
+    data = { 'condition' => {
+      'genome' => 'hg38', 'track_class' => 'Annotation tracks', 'track_subclass' => 'NoSuchSubclass',
+      'cell_type_class' => 'NA', 'cell_type_subclass' => '-', 'qval' => 'anno'
+    }}
+    svc = ChipAtlas::LocationService.new(data)
+    assert_nil svc.igv_browsing_url
+  end
 end

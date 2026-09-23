@@ -39,7 +39,28 @@ module ChipAtlas
           def body_with_condition
             data = parsed_json
             halt 400, json_response({ error: 'condition object required' }) unless data['condition'].is_a?(Hash)
+            validated_genome!(data['condition']['genome'])
             data
+          end
+
+          # API-53: genome used to be interpolated unchecked into outbound
+          # URLs (a value like "util/lineNum.tsv#" or "a b" raised
+          # URI::InvalidURIError deep inside LocationService/BedExtensionResolver,
+          # an uncaught 500). Defaults to the query-string param so GET routes
+          # can call it bare; POST routes pass the condition's genome explicitly.
+          def validated_genome!(genome = params[:genome])
+            return if genome.is_a?(String) && ChipAtlas::Experiment.genomes.key?(genome)
+
+            halt 400, json_response({ error: "Unknown genome: #{genome.inspect}" })
+          end
+
+          # API-53: distance must be one of the UI's fixed set, not any
+          # string the caller happens to send.
+          def validated_distance!
+            distance = params[:distance]
+            return if ChipAtlas::Analysis::TARGET_GENES_DISTANCES.any? { |d| d[:id] == distance }
+
+            halt 400, json_response({ error: "Unknown distance: #{distance.inspect}" })
           end
         end
 
@@ -132,6 +153,7 @@ module ChipAtlas
 
         app.get '/api/igv_url' do
           halt 400, json_response({ error: 'genome and track_class required' }) unless params[:genome] && params[:track_class]
+          validated_genome!
           url = ChipAtlas::LocationService.new(condition_from_params).igv_browsing_url
           json_response({ url: url })
         end
@@ -143,6 +165,7 @@ module ChipAtlas
 
         app.get '/api/download_url' do
           halt 400, json_response({ error: 'genome and track_class required' }) unless params[:genome] && params[:track_class]
+          validated_genome!
           url = ChipAtlas::LocationService.new(condition_from_params).archive_url
           json_response({ url: url })
         end
@@ -157,6 +180,7 @@ module ChipAtlas
         # analysis, and never has been - see ChipAtlas::ColoTsv).
         app.get '/api/colo' do
           halt 400, json_response({ error: 'genome, track, and cell_type required' }) unless params[:genome] && params[:track] && params[:cell_type]
+          validated_genome!
           svc = ChipAtlas::LocationService.new(condition_from_params)
 
           result = begin
@@ -173,6 +197,7 @@ module ChipAtlas
         # Colocalization file download (proxied from data server)
         app.get '/api/colo/download' do
           halt 400, json_response({ error: 'genome, track, cell_type, and format required' }) unless params[:genome] && params[:track] && params[:cell_type] && params[:format]
+          validated_genome!
           svc = ChipAtlas::LocationService.new(condition_from_params)
           url = case params[:format]
                 when 'tsv' then svc.colo_tsv_url
@@ -191,6 +216,8 @@ module ChipAtlas
         # server for this analysis - see ChipAtlas::TargetGenesTsv).
         app.get '/api/target_genes' do
           halt 400, json_response({ error: 'genome, track, and distance required' }) unless params[:genome] && params[:track] && params[:distance]
+          validated_genome!
+          validated_distance!
           svc = ChipAtlas::LocationService.new(condition_from_params)
 
           result = begin
@@ -214,6 +241,8 @@ module ChipAtlas
         # Target genes file download (proxied from data server)
         app.get '/api/target_genes/download' do
           halt 400, json_response({ error: 'genome, track, distance, and format required' }) unless params[:genome] && params[:track] && params[:distance] && params[:format]
+          validated_genome!
+          validated_distance!
           svc = ChipAtlas::LocationService.new(condition_from_params)
           url = case params[:format]
                 when 'tsv' then svc.target_genes_tsv_url

@@ -9,22 +9,50 @@ module ChipAtlas
   class SraService
     EUTILS_BASE = 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils'
 
+    TEST_ENV_VALUES = %w[test].freeze
+
+    # Raised when a test would make a live request to NCBI eutils because no
+    # http_get stub was installed. Mirrors DataProxy::LiveFetchNotStubbed /
+    # ColoTsv::LiveFetchNotStubbed / TargetGenesTsv::LiveFetchNotStubbed --
+    # exists so a forgotten stub fails loudly under RACK_ENV=test instead of
+    # silently falling into fetch_from_ncbi's rescue clause.
+    LiveFetchNotStubbed = Class.new(StandardError)
+
+    @http_get = nil
+
+    class << self
+      # Test-only hook: replace the real HTTP GET with a stub. `callable` is
+      # invoked as `callable.call(url)` and must return the response body
+      # (String) or nil (request failed / non-200).
+      attr_accessor :http_get
+    end
+
     def initialize(experiment_id)
       @experiment_id = experiment_id
     end
 
+    # SV-34: only a metadata hash that actually came from NCBI is cached --
+    # a failure (fetch_from_ncbi returning nil) is never stored, so the next
+    # view retries NCBI instead of replaying "ERROR: cannot retrieve data
+    # from NCBI" to every visitor for SraCache::TTL_SECONDS (30 days).
     def fetch
       cached = ChipAtlas::SraCache.get(@experiment_id)
       return cached if cached
 
       metadata = fetch_from_ncbi
-      ChipAtlas::SraCache.set(@experiment_id, metadata) if metadata
+      return error_metadata unless metadata
+
+      ChipAtlas::SraCache.set(@experiment_id, metadata)
       metadata
     end
 
     private
 
     def http_get(url)
+      return self.class.http_get.call(url) if self.class.http_get
+
+      raise_if_unstubbed_under_test!(url)
+
       uri = URI.parse(url)
       http = Net::HTTP.new(uri.host, uri.port)
       http.use_ssl = uri.scheme == 'https'
@@ -34,17 +62,26 @@ module ChipAtlas
       response.body if response.code == '200'
     end
 
+    def raise_if_unstubbed_under_test!(url)
+      return unless TEST_ENV_VALUES.include?(ENV['RACK_ENV']) || TEST_ENV_VALUES.include?(ENV['APP_ENV'])
+
+      raise LiveFetchNotStubbed,
+            "SraService would make a live request to #{url} under " \
+            "RACK_ENV=#{ENV['RACK_ENV'].inspect}/APP_ENV=#{ENV['APP_ENV'].inspect}. " \
+            'Stub ChipAtlas::SraService.http_get= in this test.'
+    end
+
     def fetch_from_ncbi
       uid = get_uid
-      return error_metadata unless uid
+      return nil unless uid
 
       xml_str = http_get("#{EUTILS_BASE}/efetch.fcgi?db=sra&id=#{uid}")
-      return error_metadata unless xml_str
+      return nil unless xml_str
 
       doc = REXML::Document.new(xml_str)
       parse_experiment(doc)
     rescue SocketError, Timeout::Error, Errno::ECONNREFUSED, REXML::ParseException
-      error_metadata
+      nil
     end
 
     def get_uid

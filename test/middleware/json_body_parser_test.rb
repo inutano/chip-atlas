@@ -56,4 +56,20 @@ class JsonBodyParserTest < Minitest::Test
     data = JSON.parse(last_response.body)
     assert_nil data['parsed']
   end
+
+  def test_json_array_body_returns_400
+    post '/', JSON.generate([1, 2]), 'CONTENT_TYPE' => 'application/json'
+
+    assert_equal 400, last_response.status
+    data = JSON.parse(last_response.body)
+    assert_equal 'JSON body must be an object', data['error']
+  end
+
+  def test_json_scalar_body_returns_400
+    post '/', JSON.generate('just a string'), 'CONTENT_TYPE' => 'application/json'
+
+    assert_equal 400, last_response.status
+    data = JSON.parse(last_response.body)
+    assert_equal 'JSON body must be an object', data['error']
+  end
 end
