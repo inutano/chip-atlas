@@ -162,7 +162,13 @@ class PagesTest < Minitest::Test
 
   def test_peak_browser_has_a_subclass_warning_container_above_the_panels
     get '/peak_browser'
-    assert_includes last_response.body, '<div class="panel-message" id="subclass-warning"></div>'
+    body = last_response.body
+    assert_includes body, '<div class="panel-message" id="subclass-warning"></div>'
+    # Not just present: it must sit above the panels' row, not merely
+    # somewhere on the page (the page has other unrelated `class="row"`
+    # elements below, in the footer).
+    assert_operator body.index('id="subclass-warning"'), :<, body.index('class="row"'),
+                     'the warning container must appear above the panels row'
   end
 
   def test_peak_browser_igv_help_link_is_an_info_popover_not_a_wiki_link

@@ -16,7 +16,7 @@
 
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { peakBrowserFacetFilterOptions, resolveSubclassExclusion } from './peak-browser'
+import { peakBrowserFacetFilterOptions, resolveSubclassExclusion, qvalListBoxSize } from './peak-browser'
 
 test('peakBrowserFacetFilterOptions: passes no track-class exclusion (keeps Annotation tracks)', () => {
   const mount = {} as Record<
@@ -71,4 +71,28 @@ test('resolveSubclassExclusion: both "-" (All) -> no reset needed', () => {
     resolveSubclassExclusion('track_subclass', '-', '-'),
     { resetFacet: null },
   )
+})
+
+// ===== qvalListBoxSize — production's fixed size=5, except the degenerate
+// single-"NA"-option case (Bisulfite-Seq/Annotation tracks) =====
+// Fix-round-1 regression: an earlier version of this formula
+// (Math.max(2, Math.min(5, optionCount))) also shrank the box for the
+// *normal* four-option case (every real track class) to 4, contradicting
+// production's own fixed size=5 there. Each case below gets its own
+// assertion specifically so that regression cannot come back silently.
+
+test('qvalListBoxSize: 0 options (nothing loaded yet) -> 2', () => {
+  assert.equal(qvalListBoxSize(0), 2)
+})
+
+test('qvalListBoxSize: 1 option (Bisulfite-Seq/Annotation tracks\' fixed "NA") -> 2, not 5 blank rows', () => {
+  assert.equal(qvalListBoxSize(1), 2)
+})
+
+test('qvalListBoxSize: 4 options (the normal case: Histone, RNA polymerase, TFs and others, ...) -> production\'s 5', () => {
+  assert.equal(qvalListBoxSize(4), 5)
+})
+
+test('qvalListBoxSize: 8 options (hypothetical larger list) -> still 5, same fixed size as production', () => {
+  assert.equal(qvalListBoxSize(8), 5)
 })

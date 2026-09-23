@@ -41,6 +41,13 @@ export type HelpTopic = string | { text: string; link: HelpLink }
 function buildLinkedContent(topic: { text: string; link: HelpLink }): DocumentFragment {
   const fragment = document.createDocumentFragment()
   fragment.appendChild(document.createTextNode(topic.text))
+  // Without a separator the text and link butt straight up against each
+  // other ("...browse the data.IGV download page"). A blank-line text node
+  // renders as a single collapsed space today and, once a future task adds
+  // `white-space: pre-line` to .popover-body, as a real paragraph break —
+  // either way it separates every current and future linked topic, so it
+  // belongs here rather than duplicated into each topic's own `text`.
+  fragment.appendChild(document.createTextNode('\n\n'))
   const a = document.createElement('a')
   a.href = topic.link.href
   a.target = '_blank'

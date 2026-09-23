@@ -193,6 +193,20 @@ function applySubclassExclusion(
   warningContainer.replaceChildren(buildSubclassWarning())
 }
 
+// Production hardcodes the significance-threshold list box to size=5
+// regardless of how many real options it holds (confirmed against production
+// for the normal four-option case — see ui-peak-browser.md's "差分なしを確認
+// した事項" — so the ordinary Histone/RNA polymerase/TFs and others case must
+// keep production's five rows, blank trailing row and all). The one
+// exception is Bisulfite-Seq/Annotation tracks' single fixed "NA" option
+// (Task 2's qvalOptionsFor): four blank rows under one real row reads as
+// broken, not as parity, so that degenerate case alone shrinks to 2. Pure
+// and exported so the size math has its own coverage, separate from the DOM
+// wiring in the facet-change listener — see peak-browser.test.ts.
+export function qvalListBoxSize(optionCount: number): number {
+  return optionCount <= 1 ? 2 : 5
+}
+
 // Task D2: the FacetFilterOptions this page's genome-change handler passes
 // to FacetFilter.init, pulled out into its own exported function (mirroring
 // enrichmentFacetFilterOptions in enrichment-analysis.ts) so it can be
@@ -230,12 +244,8 @@ async function init(): Promise<void> {
   facet.addEventListener('facet-change', (e: Event) => {
     refreshSubclassSearch(trackSearch)
     refreshSubclassSearch(cellSearch)
-    // Production shows five rows for the significance threshold, not eight —
-    // but never fewer rows than there are options (Bisulfite-Seq/Annotation
-    // tracks offer a single fixed "NA" row; clamping to the real option count
-    // avoids trailing blank rows in the list box for those).
     const qvalSelect = subclassSelect(mount.qval)
-    if (qvalSelect) qvalSelect.size = Math.max(2, Math.min(5, qvalSelect.options.length))
+    if (qvalSelect) qvalSelect.size = qvalListBoxSize(qvalSelect.options.length)
 
     const trackSubclassSelect = subclassSelect(mount.track_subclass)
     const cellTypeSubclassSelect = subclassSelect(mount.cell_type_subclass)
