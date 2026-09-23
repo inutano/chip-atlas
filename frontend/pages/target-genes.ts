@@ -43,10 +43,14 @@ async function init(): Promise<void> {
   tabsContainer.addEventListener('genome-change', (e: Event) => {
     const detail = (e as CustomEvent<{ genome: string }>).detail
     currentGenome = detail.genome
-    const tracks = allTracks[currentGenome] || []
-    Autocomplete.setItems(trackInput, tracks)
+    // Clear before repopulating, not after: Autocomplete.setItems only fires
+    // its auto-selection sync (TG-09) when the input is empty at the time it
+    // runs, so currentTrack ends up set to the new genome's first antigen
+    // instead of being wiped back to '' by these two lines a moment later.
     currentTrack = ''
     trackInput.value = ''
+    const tracks = allTracks[currentGenome] || []
+    Autocomplete.setItems(trackInput, tracks)
   })
 
   const trackInput = $('track-input') as HTMLInputElement

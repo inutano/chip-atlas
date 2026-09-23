@@ -75,6 +75,39 @@ function filterForPairedList(items: string[], query: string): string[] {
   return filter(items, query)
 }
 
+// The item whose lower-cased, trimmed form equals the lower-cased, trimmed
+// text, or null. Case-insensitive/trimmed equivalent of production's
+// `$.inArray(input, options) > -1` (colo.js:153, target_genes.js:154), used
+// to sync the paired ListBox to text the user typed without picking a
+// suggestion.
+export function exactMatch(items: string[], text: string): string | null {
+  const q = text.trim().toLowerCase()
+  if (!q) return null
+  for (const item of items) {
+    if (item.trim().toLowerCase() === q) return item
+  }
+  return null
+}
+
+// After the paired ListBox (re)populates, ListBox.setOptions — absent a
+// `selected` it can match, which Autocomplete never passes — always lands on
+// row one (list-box.ts), the same way production's appendOptions always gave
+// the first <option> selected="selected" outright (colo.js:107-125,
+// target_genes.js:113-120). Nothing fired onChange for that, so the page's
+// own state (currentPrimary, currentTrack, ...) does not know about it yet.
+// Tell it, the same way a user's own click would — but only when the input
+// agrees with that row, so a value the user is still typing (not yet an
+// exact match) is not silently overridden by whatever now sits on top.
+function syncListBoxSelection(inst: Instance): void {
+  const { listBox, input, items, onSelect } = inst
+  if (!listBox) return
+  const value = listBox.value
+  if (value == null) return
+  if (input.value === '' || exactMatch(items, input.value) === value) {
+    onSelect(value)
+  }
+}
+
 function render(inst: Instance): void {
   const { menu, filtered, active } = inst
   if (filtered.length === 0) {
@@ -185,10 +218,25 @@ export const Autocomplete = {
           close(inst)
         },
       })
+      syncListBoxSelection(inst)
     }
 
     input.addEventListener('focus', () => open(inst))
     input.addEventListener('input', () => open(inst))
+    // Production's typeahead:select/keyup handler kept the <select> in sync
+    // with whatever the input named exactly, even without Enter or a
+    // suggestion click (colo.js:151-159, target_genes.js:152-157). This must
+    // run after the open() listener above: open() repopulates the paired
+    // list box to the filtered set (and, absent a match, re-lands it on that
+    // set's first row) on every keystroke, which would otherwise clobber the
+    // forced selection made here.
+    input.addEventListener('input', () => {
+      const m = exactMatch(inst.items, input.value)
+      if (m && inst.listBox) {
+        inst.listBox.value = m
+        onSelect(m)
+      }
+    })
     input.addEventListener('blur', () => {
       // Delay close so a click on the menu can fire first.
       setTimeout(() => close(inst), 100)
@@ -201,7 +249,10 @@ export const Autocomplete = {
     const inst = registry.get(input)
     if (!inst) return
     inst.items = items
-    if (inst.listBox) inst.listBox.setOptions(toOptions(items))
+    if (inst.listBox) {
+      inst.listBox.setOptions(toOptions(items))
+      syncListBoxSelection(inst)
+    }
     if (document.activeElement === input) open(inst)
   },
 }

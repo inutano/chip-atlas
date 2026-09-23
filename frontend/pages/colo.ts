@@ -31,10 +31,15 @@ export type ColoDirection = 'track' | 'cell_type'
 /**
  * What the primary panel offers: every antigen, or every cell-type class,
  * depending on the search mode. It never depends on what is selected.
+ *
+ * Sorted (COLO-03): Object.keys() preserves the index's insertion order,
+ * which is the data's first-seen order, not an alphabetical one. Production
+ * always called options.sort() before rendering these panels.
  */
 export function primaryItemsFor(entry: ColoIndexEntry | undefined, direction: ColoDirection): string[] {
   if (!entry) return []
-  return direction === 'track' ? Object.keys(entry.track) : Object.keys(entry.cell_type)
+  const keys = direction === 'track' ? Object.keys(entry.track) : Object.keys(entry.cell_type)
+  return [...keys].sort()
 }
 
 /**
@@ -44,6 +49,11 @@ export function primaryItemsFor(entry: ColoIndexEntry | undefined, direction: Co
  *
  * A primary that is not in the index (a stale value carried across a genome
  * switch, say) also falls back to everything rather than to nothing.
+ *
+ * The "everything" fallback is sorted the same way primaryItemsFor is
+ * (COLO-03), for the same reason. A chosen primary's own partner list is not
+ * re-sorted here: it comes straight from the index, which already lists it
+ * alphabetically (unlike the index's key order).
  */
 export function secondaryItemsFor(
   entry: ColoIndexEntry | undefined,
@@ -53,7 +63,8 @@ export function secondaryItemsFor(
   if (!entry) return []
   const forward = direction === 'track'
   const index = forward ? entry.track : entry.cell_type
-  const all = forward ? Object.keys(entry.cell_type) : Object.keys(entry.track)
+  const keys = forward ? Object.keys(entry.cell_type) : Object.keys(entry.track)
+  const all = [...keys].sort()
   return (primary && index[primary]) || all
 }
 
@@ -123,6 +134,13 @@ async function init(): Promise<void> {
   }
 
   Autocomplete.init(pInput, [], (value) => {
+    // Autocomplete now re-fires this on its own -- setItems auto-selecting
+    // the list box's first row, or the input's exact-match sync -- for a
+    // value the page may already hold (e.g. re-typing the current primary
+    // character by character). Without this guard that would still be
+    // harmless on its own, but it would wipe and re-seed the secondary panel
+    // for no reason, discarding whatever the user had picked there.
+    if (value === currentPrimary) return
     currentPrimary = value
     // Whatever was chosen for the secondary belongs to the previous primary
     // and may not even be offered for this one -- clear it rather than carry

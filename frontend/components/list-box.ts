@@ -43,7 +43,13 @@ export class ListBox {
     this.setOptions(opts.options, opts.selected)
   }
 
-  setOptions(options: ListBoxOption[], selected?: string): void {
+  // Returns whether it auto-selected the first row because nothing matched
+  // `selected` — callers that care whether a selection is real but unasked
+  // for (e.g. Autocomplete syncing page state to what just became the
+  // visible row) can tell that apart from a preserved or explicit one. Never
+  // fires onChange either way: onChange means a user action, and callers
+  // that cascade on it (FacetFilter) would misfire on every re-render.
+  setOptions(options: ListBoxOption[], selected?: string): boolean {
     this.select.innerHTML = ''
     let matched = false
     for (const opt of options) {
@@ -64,9 +70,11 @@ export class ListBox {
     // explicitly so a facet with no prior/matching selection still starts on
     // its first row instead of sitting fully unselected — this is what lets
     // a cascading facet (e.g. FacetFilter) seed its dependents on first load.
-    if (!matched && this.select.options.length > 0) {
+    const autoSelected = !matched && this.select.options.length > 0
+    if (autoSelected) {
       this.select.options[0].selected = true
     }
+    return autoSelected
   }
 
   get value(): string | null {
