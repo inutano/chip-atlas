@@ -89,5 +89,10 @@ That guarantee only holds for a single-process, effectively single-connection
 instance -- exclusive mode makes a second *simultaneous* connection fail with
 `SQLite3::BusyException: database is locked`, so do not set it where more than
 one process (or a Puma instance with `WEB_CONCURRENCY` > 0) shares the same
-database file. Production leaves both variables unset and keeps the original
-defaults (`NORMAL` locking, 256MB mmap).
+database file. `ChipAtlas::DbSettings.connect_options` enforces the
+single-connection consequence structurally by capping the pool at
+`max_connections: 1` whenever `SQLITE_LOCKING_MODE=EXCLUSIVE`, so a second
+Puma thread needing the database queues (up to `pool_timeout`, 300s) instead
+of racing to open a connection that is guaranteed to fail. Production leaves
+both variables unset and keeps the original defaults (`NORMAL` locking, 256MB
+mmap, Sequel's default pool size).

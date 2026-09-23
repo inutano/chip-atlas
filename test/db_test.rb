@@ -26,7 +26,37 @@ class DbSettingsTest < Minitest::Test
         assert_equal 'normal', pragma(db, 'locking_mode')
         assert_equal 'wal', pragma(db, 'journal_mode')
         assert_equal 268_435_456, pragma(db, 'mmap_size')
+        assert_equal 1, pragma(db, 'synchronous') # SQLite reports NORMAL as 1
+        assert_equal(-64_000, pragma(db, 'cache_size'))
       end
+    end
+  end
+
+  def test_in_memory_connections_skip_pragmas
+    # sqlite:/ (the test suite's own fixture DB, via test_helper) has no
+    # backing file, so apply_pragmas must leave it alone rather than error
+    # trying to WAL/mmap-configure something that isn't there.
+    db = Sequel.connect('sqlite:/', after_connect: ChipAtlas::DbSettings.after_connect_proc)
+    assert_equal 'memory', pragma(db, 'journal_mode')
+  ensure
+    db&.disconnect
+  end
+
+  def test_connect_options_caps_max_connections_to_one_under_exclusive_locking
+    # A second *simultaneous* connection cannot work at all under EXCLUSIVE
+    # locking (see test_exclusive_locking_mode_is_reapplied_after_a_reconnect
+    # and apply_pragmas' comment) -- nothing before this made that
+    # structural, so two overlapping request threads could still race to
+    # open a second connection that would fail. Capping the pool at 1 makes
+    # a second thread queue on pool_timeout instead.
+    with_env('SQLITE_LOCKING_MODE' => 'EXCLUSIVE', 'SQLITE_MMAP_SIZE' => nil) do
+      assert_equal 1, ChipAtlas::DbSettings.connect_options[:max_connections]
+    end
+  end
+
+  def test_connect_options_leaves_max_connections_unset_under_normal_locking
+    with_env('SQLITE_LOCKING_MODE' => nil, 'SQLITE_MMAP_SIZE' => nil) do
+      refute_includes ChipAtlas::DbSettings.connect_options.keys, :max_connections
     end
   end
 

@@ -68,6 +68,23 @@ module ChipAtlas
       method(:apply_pragmas)
     end
 
+    # Options for `Sequel.connect` that both `DB` below and the test suite
+    # share, so the pool size can never drift out of sync with what
+    # `locking_mode` actually decided. Under EXCLUSIVE locking, a second
+    # *simultaneous* connection cannot work at all -- SQLite refuses it
+    # outright rather than doing something unsafe (see `apply_pragmas`) --
+    # so leaving Sequel's own default pool size (4) in place would just let
+    # two overlapping request threads race to open a connection that is
+    # guaranteed to fail. Capping the pool at 1 makes that structural: a
+    # second thread needing the database queues on `pool_timeout` (already
+    # generous, at 300s) instead. NORMAL locking has no such restriction, so
+    # it leaves Sequel's default alone.
+    def connect_options
+      opts = { pool_timeout: 300, after_connect: after_connect_proc }
+      opts[:max_connections] = 1 if locking_mode == 'EXCLUSIVE'
+      opts
+    end
+
     # In-memory databases (no backing file -- `sqlite:/`, `sqlite::memory:`,
     # the test suite's shared fixture DB) have no journal or mmap-able
     # storage, so PRAGMAs are skipped for them, matching the previous
@@ -83,14 +100,18 @@ module ChipAtlas
       conn.execute("PRAGMA synchronous=#{settings[:synchronous]}")
       conn.execute("PRAGMA cache_size=#{settings[:cache_size]}")
       conn.execute("PRAGMA mmap_size=#{settings[:mmap_size]}")
-    rescue SQLite3::Exception, Sequel::DatabaseError
-      # A PRAGMA failing should never prevent the connection from being usable.
+    rescue SQLite3::Exception, Sequel::DatabaseError => e
+      # A PRAGMA failing should never prevent the connection from being
+      # usable -- but leaving a misconfigured connection in the pool with
+      # no trace of why is worse than a log line, so this still surfaces
+      # (e.g. to puma.stderr.log) instead of vanishing silently.
+      warn "chip-atlas: PRAGMA application failed: #{e.class}: #{e.message}"
     end
   end
 end
 
 unless defined?(DB)
   ENV['DATABASE_URL'] ||= "sqlite://database.sqlite"
-  DB = Sequel.connect(ENV['DATABASE_URL'], pool_timeout: 300, after_connect: ChipAtlas::DbSettings.after_connect_proc)
+  DB = Sequel.connect(ENV['DATABASE_URL'], **ChipAtlas::DbSettings.connect_options)
   Sequel.extension :migration
 end
