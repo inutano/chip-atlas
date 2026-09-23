@@ -29,10 +29,12 @@ module ChipAtlas
           data = ChipAtlas::ServiceMonitor.all_statuses
 
           # ServiceMonitor's own diff_analysis flag only ever reflects WABI
-          # reachability, not whether WABI actually serves diff-analysis jobs
-          # (it currently does not — see ComputeRouter::JOB_TYPE_BACKENDS,
-          # task C3/D12). Defer to ComputeRouter, the single source of truth
-          # for job-type routing, so this endpoint can't drift from it.
+          # reachability, not which job types WABI actually serves -- that
+          # is ComputeRouter::JOB_TYPE_BACKENDS's job (diff analysis was
+          # re-enabled there on 2026-09-24 once the project owner confirmed
+          # WABI serves it again). Defer to ComputeRouter, the single source
+          # of truth for job-type routing, so this endpoint can't drift from
+          # it.
           data[:features][:diff_analysis] =
             ChipAtlas::ComputeRouter.available_backend('diff_analysis')[:available] ? 'ok' : 'unavailable'
 

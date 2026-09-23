@@ -4,23 +4,31 @@ module ChipAtlas
   # Routes analysis jobs to the available compute backend.
   #
   # Enrichment analysis: WABI (primary) → Sapporo/WES (fallback) → unavailable
-  # Diff analysis:       WABI (primary) → unavailable
+  # Diff analysis:       WABI (only) → unavailable
   module ComputeRouter
     # Which backends can serve each job type, in priority order. This is
     # deliberately code, not config (per the project owner, task C3/D12):
     # backend routing changes when the app is deployed, not at runtime.
     #
     # A job type mapped to no backends is unavailable regardless of any
-    # backend's health check — this is how "WABI does not currently serve
-    # diff analysis" (a fact about what WABI accepts, independent of whether
-    # WABI itself is reachable) gets modelled. Before this map existed,
+    # backend's health check — this map is the single deploy-time switch for
+    # which backend(s) a job type may use, independent of whether a given
+    # backend happens to be reachable right now. Before this map existed,
     # #available_backend ignored job_type entirely and routed every job type
-    # to WABI whenever WABI was merely reachable, so /status reported
-    # "diff_analysis":"ok" and /jobs/available offered a live backend while
-    # every diff-analysis submission actually failed.
+    # to WABI whenever WABI was merely reachable, so /status could report a
+    # job type "ok" and /jobs/available could offer a live backend for a job
+    # type WABI does not actually accept.
+    #
+    # 'diff_analysis' was mapped to no backends here from launch until
+    # 2026-09-24: WABI was believed not to serve diff-analysis jobs at all.
+    # The project owner confirmed on 2026-09-24 that WABI serves them again
+    # and asked for this map to route diff_analysis to it (see
+    # docs/review-2026-09-23/findings/ui-diff-analysis.md, DA-01). WES has
+    # never served diff analysis (it is enrichment-analysis-only), so WABI
+    # is diff analysis's only entry rather than one end of a fallback pair.
     JOB_TYPE_BACKENDS = {
       'enrichment_analysis' => %w[wabi wes].freeze,
-      'diff_analysis'       => [].freeze,
+      'diff_analysis'       => %w[wabi].freeze,
     }.freeze
 
     module_function

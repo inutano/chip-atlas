@@ -27,8 +27,18 @@ class JobsTest < Minitest::Test
 
   # --- task C3: /jobs/available is honest per job type ---
 
-  def test_jobs_available_reports_diff_analysis_unavailable_even_when_wabi_is_reachable
+  def test_jobs_available_reports_diff_analysis_available_when_wabi_is_reachable
     stub_module_method(ChipAtlas::ServiceMonitor, :status, true) do
+      get '/jobs/available', type: 'diff_analysis'
+    end
+    assert last_response.ok?
+    data = JSON.parse(last_response.body)
+    assert_equal true, data['available']
+    assert_equal 'wabi', data['backend']
+  end
+
+  def test_jobs_available_reports_diff_analysis_unavailable_when_wabi_is_down
+    stub_module_method(ChipAtlas::ServiceMonitor, :status, false) do
       get '/jobs/available', type: 'diff_analysis'
     end
     assert last_response.ok?
@@ -58,8 +68,8 @@ class JobsTest < Minitest::Test
     assert_equal 'No compute backend available', data['error']
   end
 
-  def test_jobs_submit_503s_for_diff_analysis_because_no_backend_serves_it_regardless_of_wabi_health
-    stub_module_method(ChipAtlas::ServiceMonitor, :status, true) do
+  def test_jobs_submit_503s_for_diff_analysis_when_wabi_is_down
+    stub_module_method(ChipAtlas::ServiceMonitor, :status, false) do
       post_json '/jobs/submit', { type: 'diff_analysis', params: { genome: 'hg38', antigenClass: 'diffbind' } }
     end
     assert_equal 503, last_response.status
@@ -81,21 +91,14 @@ class JobsTest < Minitest::Test
 
   # --- task C2: WabiService merges the operational fields at submission time ---
 
-  # diff_analysis maps to no backends today (ComputeRouter::JOB_TYPE_BACKENDS
-  # -- task C3, modelling that WABI does not currently serve it), so a plain
-  # POST here would 503 before ever reaching WabiService. Temporarily give
-  # diff_analysis a backend to exercise the full route -> ComputeRouter ->
-  # WabiService merge for the day that map is updated.
   def test_jobs_submit_succeeds_and_the_server_merged_diff_analysis_operational_fields
     captured = nil
     ChipAtlas::WabiService.poster = lambda { |params|
       captured = params
       "requestId\tABC123\n"
     }
-    stub_const(ChipAtlas::ComputeRouter, :JOB_TYPE_BACKENDS, { 'diff_analysis' => ['wabi'] }) do
-      stub_module_method(ChipAtlas::ServiceMonitor, :status, true) do
-        post_json '/jobs/submit', { type: 'diff_analysis', params: { genome: 'hg38', antigenClass: 'dmr' } }
-      end
+    stub_module_method(ChipAtlas::ServiceMonitor, :status, true) do
+      post_json '/jobs/submit', { type: 'diff_analysis', params: { genome: 'hg38', antigenClass: 'dmr' } }
     end
 
     assert last_response.ok?
@@ -130,16 +133,13 @@ class JobsTest < Minitest::Test
   # --- review round (D12 minor #2): pin what an unrecognized antigenClass
   # does on the full route, not just inside WabiService (see
   # wabi_service_test.rb for the unit-level assertions on the message
-  # itself). diff_analysis maps to no backends today, so temporarily give
-  # it one the same way the C2 merge test above does. ---
+  # itself). ---
 
   def test_jobs_submit_raises_for_diff_analysis_with_an_unrecognized_antigen_class
     ChipAtlas::WabiService.poster = ->(_params) { flunk 'must not reach the poster -- the raise happens before posting' }
-    stub_const(ChipAtlas::ComputeRouter, :JOB_TYPE_BACKENDS, { 'diff_analysis' => ['wabi'] }) do
-      stub_module_method(ChipAtlas::ServiceMonitor, :status, true) do
-        assert_raises(ChipAtlas::WabiService::UnknownAntigenClass) do
-          post_json '/jobs/submit', { type: 'diff_analysis', params: { genome: 'hg38', antigenClass: 'bogus' } }
-        end
+    stub_module_method(ChipAtlas::ServiceMonitor, :status, true) do
+      assert_raises(ChipAtlas::WabiService::UnknownAntigenClass) do
+        post_json '/jobs/submit', { type: 'diff_analysis', params: { genome: 'hg38', antigenClass: 'bogus' } }
       end
     end
   end

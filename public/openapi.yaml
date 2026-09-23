@@ -1225,7 +1225,7 @@ paths:
                 wes: false
                 feature_status:
                   enrichment_analysis: true
-                  diff_analysis: false
+                  diff_analysis: true
 
   /jobs/available:
     get:

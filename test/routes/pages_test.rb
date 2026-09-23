@@ -268,6 +268,19 @@ class PagesTest < Minitest::Test
     assert_includes body, 'id="estimated-run-time"'
   end
 
+  def test_diff_analysis_panel_headings_match_production
+    # DA-08/DA-15: headings drifted to "Dataset A/B (Experiment IDs)", which
+    # left the dataset-title ⓘ help text (frontend/pages/diff-analysis.ts)
+    # referencing a heading that no longer existed. Restored to production's
+    # wording rather than rewriting the help text.
+    get '/diff_analysis'
+    body = last_response.body
+    assert_includes body, '2. Enter dataset A'
+    assert_includes body, '3. Enter dataset B'
+    refute_includes body, 'Dataset A (Experiment IDs)'
+    refute_includes body, 'Dataset B (Experiment IDs)'
+  end
+
   def test_diff_analysis_title_inputs_are_empty_in_markup
     # Production seeds "My project" / "dataset A" / "dataset B" via JS
     # (diff_analysis.js), not in server-rendered markup. Unlike Enrichment

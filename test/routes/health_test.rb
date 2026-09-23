@@ -19,20 +19,21 @@ class HealthTest < Minitest::Test
     assert_equal 'ok', data['checks']['database']
   end
 
-  # --- task C3: /status must not report diff_analysis "ok" just because
-  # WABI itself is reachable -- WABI does not currently serve diff-analysis
-  # jobs at all (ComputeRouter::JOB_TYPE_BACKENDS), independent of health. ---
+  # --- task C3 (updated 2026-09-24, DA-01): /status must defer to
+  # ComputeRouter for diff_analysis rather than reading WABI reachability
+  # directly, so this endpoint can't drift from the routing map that
+  # actually decides what WABI serves (ComputeRouter::JOB_TYPE_BACKENDS). ---
 
-  def test_status_reports_diff_analysis_unavailable_even_when_wabi_is_reachable
+  def test_status_reports_diff_analysis_ok_when_wabi_is_reachable
     stub_module_method(ChipAtlas::ServiceMonitor, :status, true) do
       get '/status'
     end
     assert last_response.ok?
     data = JSON.parse(last_response.body)
-    assert_equal 'unavailable', data['features']['diff_analysis']
+    assert_equal 'ok', data['features']['diff_analysis']
   end
 
-  def test_status_reports_diff_analysis_unavailable_when_wabi_is_down_too
+  def test_status_reports_diff_analysis_unavailable_when_wabi_is_down
     stub_module_method(ChipAtlas::ServiceMonitor, :status, false) do
       get '/status'
     end

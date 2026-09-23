@@ -16,8 +16,14 @@ class ComputeRouterTest < Minitest::Test
 
   # --- task C3: per-job-type availability, driven by JOB_TYPE_BACKENDS ---
 
-  def test_diff_analysis_is_unavailable_even_when_wabi_is_reachable
+  def test_diff_analysis_routes_to_wabi_when_wabi_is_up
     stub_module_method(ChipAtlas::ServiceMonitor, :status, true) do
+      assert_equal({ backend: 'wabi', available: true }, ChipAtlas::ComputeRouter.available_backend('diff_analysis'))
+    end
+  end
+
+  def test_diff_analysis_is_unavailable_when_wabi_is_down
+    stub_module_method(ChipAtlas::ServiceMonitor, :status, false) do
       assert_equal({ backend: nil, available: false }, ChipAtlas::ComputeRouter.available_backend('diff_analysis'))
     end
   end
@@ -80,22 +86,15 @@ class ComputeRouterTest < Minitest::Test
   # WabiService doesn't expose the job_type it merged with directly, so
   # assert indirectly: diff analysis's operational cellClass ('empty') only
   # appears in the merged params when #submit passed job_type through to
-  # WabiService.submit_job as 'diff_analysis' (task C2). diff_analysis maps
-  # to no backends today (JOB_TYPE_BACKENDS), so #submit never actually
-  # reaches WabiService for it in production right now -- this proves the
-  # wiring is correct for the day that map gets updated, by temporarily
-  # giving diff_analysis a backend the way JOB_TYPE_BACKENDS documents it
-  # would look once WABI serves it again.
+  # WabiService.submit_job as 'diff_analysis' (task C2).
   def test_submit_passes_job_type_through_to_wabi_service_so_it_can_pick_the_right_operational_fields
     captured_cell_class = nil
     ChipAtlas::WabiService.poster = lambda { |params|
       captured_cell_class = params['cellClass']
       "requestId\tABC\n"
     }
-    stub_const(ChipAtlas::ComputeRouter, :JOB_TYPE_BACKENDS, { 'diff_analysis' => ['wabi'] }) do
-      stub_module_method(ChipAtlas::ServiceMonitor, :status, true) do
-        ChipAtlas::ComputeRouter.submit('diff_analysis', { 'antigenClass' => 'diffbind' })
-      end
+    stub_module_method(ChipAtlas::ServiceMonitor, :status, true) do
+      ChipAtlas::ComputeRouter.submit('diff_analysis', { 'antigenClass' => 'diffbind' })
     end
     assert_equal 'empty', captured_cell_class
   end

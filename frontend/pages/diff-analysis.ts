@@ -196,11 +196,18 @@ export function buildDiffAnalysisParams(form: DiffFormState): Record<string, unk
 
 // ===== Availability =====
 // GET /jobs/available?type=diff_analysis (routes/jobs.rb -> ComputeRouter,
-// see lib/services/compute_router.rb, Task C3/D12) is now the honest source
-// of truth: WABI does not currently serve diff analysis at all, so this
-// always comes back { backend: null, available: false } today, independent
-// of WABI's own reachability. Nothing on this page called it, so the user
-// still saw a complete, fillable form that could never actually submit.
+// see lib/services/compute_router.rb) is the honest source of truth for
+// whether a compute backend currently serves this job type. Diff analysis
+// maps to WABI only (no WES fallback, unlike enrichment analysis), so this
+// notice shows exactly when WABI itself is unreachable. From launch until
+// 2026-09-24, WABI was believed not to serve diff-analysis jobs at all, so
+// diff_analysis was mapped to no backend and this endpoint always came back
+// { backend: null, available: false } regardless of WABI's reachability --
+// the project owner confirmed on 2026-09-24 that WABI serves them again and
+// had ComputeRouter's routing map updated (see
+// docs/review-2026-09-23/findings/ui-diff-analysis.md, DA-01). Originally,
+// nothing on this page even called this endpoint, so the user saw a
+// complete, fillable form that could never actually submit.
 export const UNAVAILABLE_MESSAGE =
   'Diff analysis is currently unavailable: no compute backend is serving this job type right now. Please check back later.'
 
