@@ -76,18 +76,21 @@
     <div class="card">
       <div class="card-header"><h4 class="card-title">5. Enter dataset B</h4></div>
       <div class="card-body">
-        <div class="form-check"><input class="form-check-input" type="radio" name="dataB-type" id="dataB-rnd" value="rnd" checked><label class="form-check-label" for="dataB-rnd">Random permutation of dataset A</label><a class="info-btn" href="#" data-info="permutation" role="button" aria-label="About random permutation">&#x24D8;</a></div>
-        <div id="permutation-row" class="ms-4 mb-2">
-          <span class="form-check form-check-inline"><input class="form-check-input" type="radio" name="dataB-perm" id="perm-1" value="1" checked><label class="form-check-label" for="perm-1">×1</label></span>
-          <span class="form-check form-check-inline"><input class="form-check-input" type="radio" name="dataB-perm" id="perm-10" value="10"><label class="form-check-label" for="perm-10">×10</label></span>
-          <span class="form-check form-check-inline"><input class="form-check-input" type="radio" name="dataB-perm" id="perm-100" value="100"><label class="form-check-label" for="perm-100">×100</label></span>
+        <div id="dataB-panel-body">
+          <div class="form-check"><input class="form-check-input" type="radio" name="dataB-type" id="dataB-rnd" value="rnd" checked><label class="form-check-label" for="dataB-rnd">Random permutation of dataset A</label><a class="info-btn" href="#" data-info="permutation" role="button" aria-label="About random permutation">&#x24D8;</a></div>
+          <div id="permutation-row" class="ms-4 mb-2">
+            <span class="form-check form-check-inline"><input class="form-check-input" type="radio" name="dataB-perm" id="perm-1" value="1" checked><label class="form-check-label" for="perm-1">×1</label></span>
+            <span class="form-check form-check-inline"><input class="form-check-input" type="radio" name="dataB-perm" id="perm-10" value="10"><label class="form-check-label" for="perm-10">×10</label></span>
+            <span class="form-check form-check-inline"><input class="form-check-input" type="radio" name="dataB-perm" id="perm-100" value="100"><label class="form-check-label" for="perm-100">×100</label></span>
+          </div>
+          <div class="form-check"><input class="form-check-input" type="radio" name="dataB-type" id="dataB-bed" value="bed"><label class="form-check-label" for="dataB-bed">Genomic regions (BED)</label><a class="info-btn" href="#" data-info="dataset-b-bed" role="button" aria-label="About genomic regions (BED) for dataset B">&#x24D8;</a></div>
+          <div class="form-check"><input class="form-check-input" type="radio" name="dataB-type" id="dataB-refseq" value="refseq" disabled><label class="form-check-label" for="dataB-refseq">Refseq coding genes (gene-list mode only)</label></div>
+          <div class="form-check mb-2"><input class="form-check-input" type="radio" name="dataB-type" id="dataB-userlist" value="userlist" disabled><label class="form-check-label" for="dataB-userlist">Gene list (gene-list mode only)</label></div>
+          <textarea class="form-control mb-2" id="dataB-text" rows="6" placeholder="Paste content or use the file picker below." hidden></textarea>
+          <input type="file" id="dataB-file" class="form-control form-control-sm" hidden>
+          <p id="dataB-note" class="text-muted small mb-0">Random permutation needs no input.</p>
         </div>
-        <div class="form-check"><input class="form-check-input" type="radio" name="dataB-type" id="dataB-bed" value="bed"><label class="form-check-label" for="dataB-bed">Genomic regions (BED)</label><a class="info-btn" href="#" data-info="dataset-b-bed" role="button" aria-label="About genomic regions (BED) for dataset B">&#x24D8;</a></div>
-        <div class="form-check"><input class="form-check-input" type="radio" name="dataB-type" id="dataB-refseq" value="refseq" disabled><label class="form-check-label" for="dataB-refseq">Refseq coding genes (gene-list mode only)</label></div>
-        <div class="form-check mb-2"><input class="form-check-input" type="radio" name="dataB-type" id="dataB-userlist" value="userlist" disabled><label class="form-check-label" for="dataB-userlist">Gene list (gene-list mode only)</label></div>
-        <textarea class="form-control mb-2" id="dataB-text" rows="6" placeholder="Paste content or use the file picker below." hidden></textarea>
-        <input type="file" id="dataB-file" class="form-control form-control-sm" hidden>
-        <p id="dataB-note" class="text-muted small mb-0">Random permutation needs no input.</p>
+        <p id="count-mode-note" class="text-muted small mb-0" hidden>Not required for gene count table analysis</p>
       </div>
     </div>
   </div>
@@ -101,13 +104,15 @@
           <a class="info-btn" href="#" data-info="analysis-title" role="button" aria-label="About analysis title">&#x24D8;</a>
           <input type="text" id="title" class="form-control form-control-sm" value="My project">
         </div>
-        <div class="mb-2">
-          <label for="dataA-title" class="form-label small text-muted">Dataset A title</label>
-          <input type="text" id="dataA-title" class="form-control form-control-sm" value="Dataset A">
-        </div>
-        <div class="mb-3">
-          <label for="dataB-title" class="form-label small text-muted">Dataset B title</label>
-          <input type="text" id="dataB-title" class="form-control form-control-sm" value="Dataset B">
+        <div id="dataset-titles">
+          <div class="mb-2">
+            <label for="dataA-title" class="form-label small text-muted">Dataset A title</label>
+            <input type="text" id="dataA-title" class="form-control form-control-sm" value="Dataset A">
+          </div>
+          <div class="mb-3">
+            <label for="dataB-title" class="form-label small text-muted">Dataset B title</label>
+            <input type="text" id="dataB-title" class="form-control form-control-sm" value="Dataset B">
+          </div>
         </div>
         <div class="mb-3" id="distance-tss-row" hidden>
           <label class="form-label small text-muted mb-1">
@@ -125,7 +130,7 @@
         <div class="d-grid">
           <button type="button" id="submit-job" class="btn btn-primary btn-lg">Submit</button>
         </div>
-        <div id="submit-status" class="text-muted small mt-2" aria-live="polite"></div>
+        <div id="submit-status" class="text-muted small mt-2" aria-live="polite" style="white-space: pre-line"></div>
         <p class="estimated-run-time mb-1">
           Estimated run time: <span id="estimated-run-time">&mdash;</span>
         </p>

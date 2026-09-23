@@ -247,6 +247,21 @@ function syncDatasetBVisibility(): void {
   const aType = getCheckedValue('dataA-type')
   const isGeneMode = aType === 'gene'
 
+  // EA-15: a gene count table has no dataset B at all. Production's
+  // positionCount() hides panel 5's radios/permutation/textarea/file picker
+  // behind a single "Not required..." message, and hides panel 6's Dataset
+  // A/B title inputs outright (their values are replaced by fixed internal
+  // strings in buildEnrichmentParams instead, since the inputs a user could
+  // edit are no longer on screen). This wraps rather than replaces the
+  // gene-mode gating below: #dataB-panel-body's own children keep getting
+  // their visibility computed exactly as before, and the whole group simply
+  // becomes invisible — or visible again on leaving count mode — alongside
+  // the static note.
+  const isCountMode = aType === 'count'
+  ;($('dataB-panel-body') as HTMLElement).hidden = isCountMode
+  ;($('count-mode-note') as HTMLElement).hidden = !isCountMode
+  ;($('dataset-titles') as HTMLElement).hidden = isCountMode
+
   const transition = applyDatasetBGateTransition(
     prevDatasetBGateOpen,
     isGeneMode,
@@ -605,6 +620,14 @@ export function buildEnrichmentParams(
   condition: Pick<FacetCondition, 'genome' | 'track_class' | 'cell_type_class' | 'qval'>,
   form: EnrichmentFormState,
 ): Record<string, unknown> {
+  // EA-15/EA-16: a gene count table has no dataset B — panel 5 shows only a
+  // static note and panel 6 hides the title inputs (syncDatasetBVisibility)
+  // — so production's retrievePostData() force-overwrites typeB/bedBFile to
+  // the literal "empty" regardless of whichever dataset B radio is still
+  // checked underneath, and positionCount() stuffs the two description
+  // fields with these fixed internal strings rather than whatever is
+  // sitting in the (hidden) title inputs.
+  const isCount = form.aType === 'count'
   const params: Record<string, unknown> = {
     genome: condition.genome,
     antigenClass: condition.track_class,
@@ -612,23 +635,23 @@ export function buildEnrichmentParams(
     threshold: qvalCodeToThreshold(condition.qval),
     typeA: form.aType,
     bedAFile: form.dataAText,
-    typeB: form.bType,
+    typeB: isCount ? 'empty' : form.bType,
     title: form.title,
-    descriptionA: form.dataATitle,
-    descriptionB: form.dataBTitle,
+    descriptionA: isCount ? 'Dataset A from count table header' : form.dataATitle,
+    descriptionB: isCount ? 'Dataset B not applicable for count table' : form.dataBTitle,
     // Restored per D8: production always submits these (default 5000),
     // even though the inputs are only shown in gene-list / gene-count-table
     // modes — see syncDatasetBVisibility's #distance-tss-row toggle.
     distanceUp: form.distanceUp,
     distanceDown: form.distanceDown,
   }
-  if (form.bType === 'rnd') params.permTime = form.permTime
+  if (!isCount && form.bType === 'rnd') params.permTime = form.permTime
   // bedBFile is ALWAYS sent. Production's retrieveInputData() substitutes the
   // literal string "empty" for a blank textarea, and its own validation then
   // requires the field to be present unless typeA is "count" - so omitting it
   // for Random permutation (the default) made WABI reject every submission
   // from that path.
-  params.bedBFile = orEmpty(form.dataBText)
+  params.bedBFile = isCount ? 'empty' : orEmpty(form.dataBText)
   return params
 }
 
@@ -637,17 +660,69 @@ function orEmpty(text: string): string {
   return text.trim() === '' ? 'empty' : text
 }
 
+// ===== Title / distance validation =====
+// Production's evaluateText()/isValid() (enrichment_analysis.js:639-689),
+// run just before every submission. Kept as pure, DOM-free helpers — same
+// reasoning as buildEnrichmentParams above — so the exact message text is
+// pinned by a test without touching a live submit button. Production's
+// character check strips newlines first (`string.replace(/\n/g, "")`
+// ahead of the character-class scrub); that distinction does not matter for
+// these single-line <input> fields, so it is reproduced here as a plain
+// whole-string character-class test.
+
+/** Project title / User data title / Compared data title (EA-27). Empty is
+ * valid — production's isValid() only rejects disallowed *characters*, and
+ * an empty string contains none. */
+export function validateTitleText(label: string, text: string): string | null {
+  if (/^[A-Za-z0-9 _.-]*$/.test(text)) return null
+  return `Invalid characters are detected in ${label}. Acceptable characters are:\n- alphanumerics (abcABC123)\n- space ( )\n- underscore (_)\n- period (.)\n- hyphen (-)`
+}
+
+/** Distance-from-TSS inputs (EA-27), checked only while #distance-tss-row is
+ * visible. Production labels distanceUp's value "Distance down range" and
+ * distanceDown's "Distance up range" (evaluateText's descSet is built with
+ * the two swapped) — a single fixed label is used for both here instead of
+ * reproducing that mismatch. */
+export function validateDistance(text: string): string | null {
+  if (/^\d+$/.test(text)) return null
+  return 'Invalid characters are detected in Distance from TSS. Acceptable characters are:\n- positive integer (1,2,3,..)'
+}
+
 // ===== Try with example =====
+
+/**
+ * Which example file "Try with example" loads for each dataset A mode
+ * (EA-12). Production's putUserData() (enrichment_analysis.js:360-370)
+ * switches on the same three radio values and never touches the radio
+ * itself — loadExample below does the same, rather than always loading
+ * bedA.txt and forcing the BED radio.
+ */
+export function exampleFileFor(aType: 'bed' | 'gene' | 'count'): 'bedA.txt' | 'geneA.txt' | 'countA.txt' {
+  if (aType === 'bed') return 'bedA.txt'
+  if (aType === 'gene') return 'geneA.txt'
+  return 'countA.txt'
+}
+
 async function loadExample(): Promise<void> {
   if (!currentGenome) return
   const status = $('submit-status')
+  // Per-mode, not forced to BED (EA-12): whichever of the three dataset A
+  // radios is checked right now decides which file loads, and the radio
+  // itself is left alone.
+  const aType = getCheckedValue('dataA-type') as 'bed' | 'gene' | 'count'
   try {
-    const res = await fetch(`/examples/${encodeURIComponent(currentGenome)}/bedA.txt`)
+    const res = await fetch(`/examples/${encodeURIComponent(currentGenome)}/${exampleFileFor(aType)}`)
+    if (res.status === 404) {
+      // EA-13: a genome with no examples directory yet (currently TAIR12 —
+      // the owner will supply its files later). Once
+      // /examples/<genome>/{bedA,geneA,countA}.txt exist, this starts
+      // working with no further code change.
+      status.textContent = 'No example data available for this genome and experiment type.'
+      return
+    }
     if (!res.ok) throw new Error(`example fetch: ${res.status}`)
     const text = await res.text()
-    ;(document.getElementById('dataA-bed') as HTMLInputElement).checked = true
     ;($('dataA-text') as HTMLTextAreaElement).value = text
-    syncDatasetBVisibility()
     ;($('dataA-text') as HTMLTextAreaElement).dispatchEvent(new Event('input', { bubbles: true }))
   } catch (err) {
     console.error(err)
@@ -755,7 +830,8 @@ async function init(): Promise<void> {
 
   void refreshEstimate(facet)
 
-  $('submit-job').addEventListener('click', async () => {
+  const submitBtn = $('submit-job') as HTMLButtonElement
+  submitBtn.addEventListener('click', async () => {
     const condition = FacetFilter.getCondition(facet)
     if (!condition) { status.textContent = 'Filter not ready yet.'; return }
 
@@ -764,6 +840,36 @@ async function init(): Promise<void> {
     const dataAText = ($('dataA-text') as HTMLTextAreaElement).value.trim()
     if (!dataAText) { status.textContent = 'Dataset A is empty.'; return }
 
+    const title = ($('title') as HTMLInputElement).value
+    const dataATitle = ($('dataA-title') as HTMLInputElement).value
+    const dataBTitle = ($('dataB-title') as HTMLInputElement).value
+    const distanceUp = ($('distance-up') as HTMLInputElement).value
+    const distanceDown = ($('distance-down') as HTMLInputElement).value
+
+    // EA-27: production's evaluateText() runs right before every submission
+    // and stops at the first invalid field — titles first, then (only when
+    // the TSS row is showing) both distance inputs. Dataset A/B titles are
+    // skipped in count mode: their inputs are hidden and buildEnrichmentParams
+    // substitutes production's own fixed values for them, so whatever text
+    // is left sitting in the (invisible) inputs is moot.
+    const isCountMode = aType === 'count'
+    const tssRowVisible = !($('distance-tss-row') as HTMLElement).hidden
+    const validationError =
+      validateTitleText('Project title', title) ??
+      (isCountMode ? null : validateTitleText('User data title', dataATitle)) ??
+      (isCountMode ? null : validateTitleText('Compared data title', dataBTitle)) ??
+      (tssRowVisible ? validateDistance(distanceUp) : null) ??
+      (tssRowVisible ? validateDistance(distanceDown) : null)
+    if (validationError) {
+      status.textContent = validationError
+      return
+    }
+
+    // EA-24: disabled only once validation has passed and a request is
+    // actually about to go out, so a validation failure stays correctable
+    // instead of locking the button — but nothing past that point can fire a
+    // second, overlapping submission.
+    submitBtn.disabled = true
     status.textContent = 'Submitting…'
     try {
       // buildEnrichmentParams (and qvalCodeToThreshold inside it) is called
@@ -776,12 +882,12 @@ async function init(): Promise<void> {
         bType,
         dataAText,
         dataBText: ($('dataB-text') as HTMLTextAreaElement).value,
-        title: ($('title') as HTMLInputElement).value,
-        dataATitle: ($('dataA-title') as HTMLInputElement).value,
-        dataBTitle: ($('dataB-title') as HTMLInputElement).value,
+        title,
+        dataATitle,
+        dataBTitle,
         permTime: getCheckedValue('dataB-perm'),
-        distanceUp: ($('distance-up') as HTMLInputElement).value,
-        distanceDown: ($('distance-down') as HTMLInputElement).value,
+        distanceUp,
+        distanceDown,
       })
 
       const result = await submitJob({ type: 'enrichment_analysis', params })
@@ -792,10 +898,11 @@ async function init(): Promise<void> {
       const calcm = document.getElementById('estimated-run-time')?.textContent ?? ''
       window.location.href = `/enrichment_analysis_result?id=${encodeURIComponent(result.job_id)}` +
         `&backend=${encodeURIComponent(result.backend)}` +
-        `&title=${encodeURIComponent(($('title') as HTMLInputElement).value)}` +
+        `&title=${encodeURIComponent(title)}` +
         `&calcm=${encodeURIComponent(calcm)}`
     } catch (err) {
       console.error(err)
+      submitBtn.disabled = false
       status.textContent = 'Submit failed. Try again or check the service status.'
     }
   })

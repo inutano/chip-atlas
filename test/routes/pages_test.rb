@@ -199,6 +199,30 @@ class PagesTest < Minitest::Test
     assert_includes body, 'Try with example'
   end
 
+  # Task 7 (EA-15): count-table mode hides panel 5's radios/permutation/
+  # textarea/file picker behind #dataB-panel-body and shows the single
+  # #count-mode-note line instead; panel 6's Dataset A/B title inputs are
+  # wrapped in #dataset-titles so both can be hidden together. All three ids
+  # are what frontend/pages/enrichment-analysis.ts's syncDatasetBVisibility
+  # toggles - this only pins that the ERB still gives it something to find.
+  def test_enrichment_analysis_has_count_mode_ids
+    get '/enrichment_analysis'
+    body = last_response.body
+    assert_includes body, 'id="dataB-panel-body"'
+    assert_includes body, 'id="count-mode-note"'
+    assert_includes body, 'Not required for gene count table analysis'
+    assert_includes body, 'id="dataset-titles"'
+  end
+
+  # Task 7 (EA-27): validation failures are written into #submit-status,
+  # whose message can contain production's multi-line "Acceptable
+  # characters are:\n- ..." text - it needs `white-space: pre-line` or the
+  # newlines collapse to spaces.
+  def test_enrichment_analysis_submit_status_preserves_newlines
+    get '/enrichment_analysis'
+    assert_includes last_response.body, 'white-space: pre-line'
+  end
+
   def test_target_genes_has_an_antigen_list_box
     get '/target_genes'
     body = last_response.body

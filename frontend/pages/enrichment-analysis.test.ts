@@ -28,11 +28,14 @@ import {
   countLines,
   distanceDefaultFor,
   enrichmentFacetFilterOptions,
+  exampleFileFor,
   prefillSelection,
   estimateSeconds,
   formatEstimate,
   getSeconds,
   qvalCodeToThreshold,
+  validateDistance,
+  validateTitleText,
   type EnrichmentFormState,
 } from './enrichment-analysis'
 
@@ -78,6 +81,19 @@ test('qvalCodeToThreshold: throws on an unparseable code rather than forwarding 
   // than silently reach WABI as `threshold`.
   assert.throws(() => qvalCodeToThreshold(''), /unparseable qval code/)
   assert.throws(() => qvalCodeToThreshold('not-a-code'), /unparseable qval code/)
+})
+
+// ===== exampleFileFor — Task 7 (EA-12/EA-13) =====
+//
+// "Try with example" must load the file that matches whichever dataset A
+// mode is currently selected, not always bedA.txt — production's
+// putUserData() (enrichment_analysis.js:360-370) switches on the same three
+// radio values and never touches the radio itself.
+
+test('exampleFileFor: maps each dataset A mode to its own example file', () => {
+  assert.equal(exampleFileFor('bed'), 'bedA.txt')
+  assert.equal(exampleFileFor('gene'), 'geneA.txt')
+  assert.equal(exampleFileFor('count'), 'countA.txt')
 })
 
 // ===== buildEnrichmentParams — full WABI field-name payload =====
@@ -165,6 +181,44 @@ test('buildEnrichmentParams: bedBFile is always sent, "empty" when dataset B has
 
   const blank = buildEnrichmentParams(baseCondition, { ...baseForm, bType: 'bed', dataBText: '   ' })
   assert.equal(blank.bedBFile, 'empty')
+})
+
+// EA-16: production's retrievePostData() special-cases typeA === "count" —
+// it force-overwrites typeB/bedBFile to the literal "empty" regardless of
+// whatever dataset B radio happens to be checked underneath the hidden
+// panel (enrichment_analysis.js:613-619), and positionCount() stuffs the
+// two title inputs with fixed internal values, because panel 5/6 hide the
+// real dataset B controls and the title inputs in this mode (EA-15). This
+// previously sent whatever dataset B radio/textarea/title happened to be
+// selected — the exact regression EA-16 flagged.
+test('buildEnrichmentParams: count mode forces typeB/bedBFile to "empty", drops permTime, and substitutes production\'s internal descriptions', () => {
+  const params = buildEnrichmentParams(baseCondition, {
+    ...baseForm,
+    aType: 'count',
+    bType: 'rnd',
+    permTime: '10',
+    dataBText: 'chr1\t1\t100',
+    dataATitle: 'Dataset A',
+    dataBTitle: 'Dataset B',
+  })
+  assert.equal(params.typeB, 'empty')
+  assert.equal(params.bedBFile, 'empty')
+  assert.equal('permTime' in params, false)
+  assert.equal(params.descriptionA, 'Dataset A from count table header')
+  assert.equal(params.descriptionB, 'Dataset B not applicable for count table')
+})
+
+test('buildEnrichmentParams: count mode forces "empty" even when dataset B is BED with real content', () => {
+  // typeB/bedBFile must come out "empty" regardless of what is sitting in
+  // dataset B's (hidden) radio/textarea, not just for the "rnd" default.
+  const params = buildEnrichmentParams(baseCondition, {
+    ...baseForm,
+    aType: 'count',
+    bType: 'bed',
+    dataBText: 'chr2\t1\t100',
+  })
+  assert.equal(params.typeB, 'empty')
+  assert.equal(params.bedBFile, 'empty')
 })
 
 test('buildEnrichmentParams: distanceUp/distanceDown are sent on every submission, regardless of dataset A type', () => {
@@ -621,4 +675,57 @@ test('prefillSelection: `genes` wins when both it and the pair are present', () 
 test('prefillSelection: half a pair is not a prefill — both halves are required', () => {
   assert.equal(prefillSelection({ genesetA: 'POU5F1\n' }), null)
   assert.equal(prefillSelection({ genesetB: 'SOX2\n' }), null)
+})
+
+// ===== validateTitleText / validateDistance — Task 7 (EA-27) =====
+//
+// Production's evaluateText()/isValid() (enrichment_analysis.js:639-689),
+// run just before every submission, rejects a Project title / User data
+// title / Compared data title containing anything outside alphanumerics,
+// space, underscore, period and hyphen, and rejects a TSS distance that is
+// not a bare positive integer. Exported as pure, DOM-free helpers — same
+// reasoning as buildEnrichmentParams above — so production's exact message
+// text is pinned without a live submit button.
+
+test('validateTitleText: accepts alphanumerics, space, underscore, period and hyphen', () => {
+  assert.equal(validateTitleText('Project title', 'My project_1.2-3 ABC'), null)
+})
+
+test('validateTitleText: an empty string is valid — production only checks characters, not length', () => {
+  assert.equal(validateTitleText('Project title', ''), null)
+})
+
+test('validateTitleText: rejects "&", with production\'s exact message and the given label', () => {
+  assert.equal(
+    validateTitleText('Project title', 'My & project'),
+    'Invalid characters are detected in Project title. Acceptable characters are:\n' +
+      '- alphanumerics (abcABC123)\n- space ( )\n- underscore (_)\n- period (.)\n- hyphen (-)',
+  )
+})
+
+test('validateTitleText: the label in the message is whichever one is passed in', () => {
+  assert.match(
+    validateTitleText('User data title', '<script>')!,
+    /^Invalid characters are detected in User data title\. /,
+  )
+  assert.match(
+    validateTitleText('Compared data title', '<script>')!,
+    /^Invalid characters are detected in Compared data title\. /,
+  )
+})
+
+test('validateDistance: accepts a bare positive integer, including zero', () => {
+  assert.equal(validateDistance('5000'), null)
+  assert.equal(validateDistance('0'), null)
+})
+
+test('validateDistance: rejects anything that is not all digits, with production\'s exact message', () => {
+  assert.equal(
+    validateDistance('-1'),
+    'Invalid characters are detected in Distance from TSS. Acceptable characters are:\n' +
+      '- positive integer (1,2,3,..)',
+  )
+  assert.notEqual(validateDistance('5000.5'), null)
+  assert.notEqual(validateDistance(''), null)
+  assert.notEqual(validateDistance('abc'), null)
 })
