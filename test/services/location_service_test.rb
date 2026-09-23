@@ -170,4 +170,19 @@ class LocationServiceTest < Minitest::Test
     svc = ChipAtlas::LocationService.new(data)
     assert_nil svc.igv_browsing_url
   end
+
+  # Finding 1 (2026-09-24 final review): the non-Annotation `else` branch
+  # used to interpolate bed_url directly into the URL string. bed_url
+  # rescues Bedfile::NotFound internally and returns nil on no match, so the
+  # interpolation produced "http://localhost:60151/load?genome=hg38&file="
+  # (an empty file= param) instead of igv_browsing_url returning nil -- the
+  # same contract archive_url/download_url already have for a no-match.
+  def test_igv_browsing_url_returns_nil_instead_of_empty_file_param_when_no_bedfile_matches
+    data = { 'condition' => {
+      'genome' => 'hg38', 'track_class' => 'Histone', 'track_subclass' => 'NONEXISTENT',
+      'cell_type_class' => 'Blood', 'cell_type_subclass' => '-', 'qval' => '05'
+    }}
+    svc = ChipAtlas::LocationService.new(data)
+    assert_nil svc.igv_browsing_url
+  end
 end

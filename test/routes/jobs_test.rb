@@ -264,4 +264,45 @@ class JobsTest < Minitest::Test
 
     assert_equal 'finished', JSON.parse(last_response.body)['status']
   end
+
+  # --- Finding 4 (2026-09-24 final review): GET /jobs/:id/log's 404 and 503
+  # must be JSON like every sibling route, not a plain-string halt body that
+  # routes/pages.rb's `not_found` handler then replaces with the site's HTML
+  # 404 page (it only leaves a halt's body alone when it is already JSON). ---
+
+  def test_log_route_404s_with_json_when_the_log_is_not_available_yet
+    stub_module_method(ChipAtlas::ServiceMonitor, :status, true) do
+      stub_module_method(ChipAtlas::ComputeRouter, :log, nil) do
+        get '/jobs/wabi_chipatlas_ID/log?backend=wabi'
+      end
+    end
+
+    assert_equal 404, last_response.status
+    assert_equal 'application/json', last_response.content_type.to_s.split(';').first
+    assert_equal 'Log not available yet', JSON.parse(last_response.body)['error']
+  end
+
+  def test_log_route_503s_with_json_when_the_backend_is_down
+    stub_module_method(ChipAtlas::ServiceMonitor, :status, false) do
+      get '/jobs/wabi_chipatlas_ID/log?backend=wabi'
+    end
+
+    assert_equal 503, last_response.status
+    assert_equal 'application/json', last_response.content_type.to_s.split(';').first
+    data = JSON.parse(last_response.body)
+    assert_equal 'Backend unavailable', data['error']
+    assert_equal false, data['retry']
+  end
+
+  def test_log_route_returns_the_log_as_plain_text_when_available
+    stub_module_method(ChipAtlas::ServiceMonitor, :status, true) do
+      stub_module_method(ChipAtlas::ComputeRouter, :log, "line one\nline two\n") do
+        get '/jobs/wabi_chipatlas_ID/log?backend=wabi'
+      end
+    end
+
+    assert_equal 200, last_response.status
+    assert_equal 'text/plain;charset=utf-8', last_response.content_type
+    assert_equal "line one\nline two\n", last_response.body
+  end
 end

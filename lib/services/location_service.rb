@@ -37,7 +37,15 @@ module ChipAtlas
         trackname = ChipAtlas::Bedfile.get_trackname(condition_with_all).gsub(', ', '_')
         "#{igv}/load?genome=#{@genome}&file=#{ARCHIVE_BASE}/annotations/#{@genome}/#{filename}&name=#{trackname}"
       else
-        "#{igv}/load?genome=#{@genome}&file=#{bed_url}"
+        # Finding 1 (2026-09-24 final review): bed_url rescues
+        # Bedfile::NotFound internally and returns nil on no match (see
+        # below), so interpolating it directly here produced a URL with an
+        # empty `file=` param instead of igv_browsing_url returning nil --
+        # the same contract archive_url already has via download_url. Read
+        # it once and bail out before building the string.
+        url = bed_url
+        return nil unless url
+        "#{igv}/load?genome=#{@genome}&file=#{url}"
       end
     rescue ChipAtlas::Bedfile::NotFound
       nil

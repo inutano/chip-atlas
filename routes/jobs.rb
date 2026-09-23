@@ -123,8 +123,17 @@ module ChipAtlas
           id = validated_job_id
           backend = validated_backend
 
+          # Finding 4 (2026-09-24 final review): a plain-string halt body
+          # here (unlike every other error in this file) has its content
+          # type default to text/html, which routes/pages.rb's `not_found`
+          # handler then replaces outright with the site's HTML 404 page for
+          # the 404 case (it only leaves a halt's body alone when it is
+          # already JSON) -- so a client asking for this log over JSON got
+          # an HTML page back. json_response matches the sibling routes
+          # above (:status, :result) and keeps the not_found guard's
+          # content-type check satisfied.
           unless backend_available?(backend)
-            halt 503, 'Backend unavailable'
+            halt 503, json_response({ error: 'Backend unavailable', retry: false })
           end
 
           log = ChipAtlas::ComputeRouter.log(backend, id)
@@ -132,7 +141,7 @@ module ChipAtlas
             content_type 'text/plain'
             log
           else
-            halt 404, 'Log not available yet'
+            halt 404, json_response({ error: 'Log not available yet' })
           end
         end
 

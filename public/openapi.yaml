@@ -1693,12 +1693,12 @@ paths:
             `{"error": "Invalid backend"}`.
         "404":
           description: >-
-            Log not available yet. Currently rendered as the site's
-            generic HTML 404 page rather than plain text or JSON.
+            Log not available yet. Body is
+            `{"error": "Log not available yet"}`.
         "503":
           description: >-
             The requested backend is not currently reachable. Body is
-            the plain text "Backend unavailable".
+            `{"error": "Backend unavailable", "retry": false}`.
 
   /jobs/estimated_time:
     post:

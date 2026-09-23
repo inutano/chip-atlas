@@ -280,6 +280,13 @@ module ChipAtlas
         # === Internal endpoints (not in OpenAPI) ===
 
         app.get '/api/remote_url_status' do
+          # Finding 5 (2026-09-24 final review): this route never set a
+          # content type, so Sinatra defaulted it to text/html even though
+          # the body is always a bare status-code string and public/
+          # openapi.yaml documents text/plain -- set it up front so both the
+          # 400 path below and the 200/synthetic-500 path after it agree
+          # with the spec.
+          content_type 'text/plain'
           url = params[:url]
           unless url && ChipAtlas::Routes::Api.allowed_remote_url?(url)
             halt 400, 'Invalid or disallowed URL'

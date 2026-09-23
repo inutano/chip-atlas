@@ -225,6 +225,20 @@ class ApiTest < Minitest::Test
     assert_nil data['url']
   end
 
+  # Finding 1 (2026-09-24 final review): GET /api/igv_url must have the same
+  # {"url":null} contract as POST and as /api/download_url for a
+  # non-Annotation track class with no matching bedfile -- not a URL with an
+  # empty file= parameter (LocationService#igv_browsing_url's `else` branch
+  # used to interpolate bed_url, which had already rescued NotFound to nil).
+  def test_get_igv_url_returns_null_url_when_no_bedfile_matches
+    get '/api/igv_url', genome: 'hg38', track_class: 'Histone', track_subclass: 'NONEXISTENT',
+                         cell_type_class: 'Blood', cell_type_subclass: '-', qval: '05'
+
+    assert_equal 200, last_response.status
+    data = JSON.parse(last_response.body)
+    assert_nil data['url']
+  end
+
   def test_get_download_url
     get '/api/download_url', genome: 'hg38', track_class: 'Histone', track_subclass: 'H3K4me3',
                              cell_type_class: 'Blood', cell_type_subclass: '-', qval: '05'
@@ -628,6 +642,27 @@ class ApiTest < Minitest::Test
     ensure
       Net::HTTP.define_method(:request_head, original)
     end
+  end
+
+  # Finding 5 (2026-09-24 final review): the route never set a content type,
+  # so it defaulted to text/html even though the body is always a bare
+  # status-code string and public/openapi.yaml documents text/plain.
+  def test_remote_url_status_content_type_is_text_plain
+    original = Net::HTTP.instance_method(:request_head)
+    fake_response = Net::HTTPOK.new('1.1', '200', 'OK')
+    Net::HTTP.define_method(:request_head) { |*| fake_response }
+    begin
+      get '/api/remote_url_status', url: 'https://chip-atlas.dbcls.jp/data/probe.png'
+      assert_equal 'text/plain', last_response.content_type.to_s.split(';').first
+    ensure
+      Net::HTTP.define_method(:request_head, original)
+    end
+  end
+
+  def test_remote_url_status_content_type_is_text_plain_on_the_400_path_too
+    get '/api/remote_url_status', url: 'https://evil.example.com/probe.png'
+    assert_equal 400, last_response.status
+    assert_equal 'text/plain', last_response.content_type.to_s.split(';').first
   end
   # --- /api/colo_index: both directions, and no literal "-" in either ---
 
