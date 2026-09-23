@@ -11,12 +11,18 @@
 // ERB: each result anchor carries `data-result-key`, naming the key it wants
 // out of GET /jobs/:id/result. Nothing here needs to know which page it is on.
 
-import { getJobStatus, getJobResult, getJobLog, type JobResult } from '../api/client'
+import { getJobStatus, getJobResult, getJobLog, ApiError, type JobResult } from '../api/client'
 
 const POLL_INTERVAL_MS = 10_000
 const CLOCK_INTERVAL_MS = 1000
 
 const FINISHED_STATUSES = new Set(['finished', 'completed', 'success'])
+// 'backend_unavailable' never actually reaches the FAILED_STATUSES check in
+// poll()'s try block below -- the backend only ever reports it via the 503
+// that statusFromPollError translates in the catch block, which always
+// reschedules regardless of this set's contents (see poll()'s comment). It
+// stays in this set purely so setStatus's className lookup paints it the same
+// red as a real failure; recovery still polls normally either way.
 const FAILED_STATUSES = new Set(['error', 'failed', 'backend_unavailable'])
 
 export type JobType = 'enrichment_analysis' | 'diff_analysis'
@@ -115,6 +121,37 @@ export function estimatedFinish(submittedAt: Date, calcm: string): Date | null {
   const minutes = parseEstimateMinutes(calcm)
   if (minutes === null) return null
   return new Date(submittedAt.getTime() + minutes * 60_000)
+}
+
+/**
+ * Reads a poll() failure back into the status word it represents, when it
+ * represents one at all.
+ *
+ * `/jobs/:id/status` 503s for exactly one reason -- routes/jobs.rb's
+ * backend_available? gate -- always with a JSON body shaped like
+ * `{..., status: 'backend_unavailable', retry: false}`. This reads that
+ * shape when the body parses, and still calls it `backend_unavailable` when
+ * the body does not parse at all: a 503 from this route only ever means the
+ * backend is down, parseable body or not. Anything that is not a 503 from
+ * this app's own API -- a network failure, a 400 from a malformed id, a body
+ * that parsed but positively said something else -- returns null, and the
+ * caller leaves the status cell showing whatever it last showed rather than
+ * guess.
+ *
+ * Production's equivalent condition (old-app/app.rb:460-473) is the plain
+ * string "server unavailable" returned over a 200, so its JS never throws on
+ * this path; this app reports the same fact as an HTTP error instead, so
+ * poll()'s catch needs this translation back into a status word.
+ */
+export function statusFromPollError(err: unknown): string | null {
+  if (!(err instanceof ApiError) || err.status !== 503) return null
+  try {
+    const body: unknown = JSON.parse(err.body)
+    const status = body && typeof body === 'object' ? (body as Record<string, unknown>).status : undefined
+    return status === 'backend_unavailable' ? 'backend_unavailable' : null
+  } catch {
+    return 'backend_unavailable'
+  }
 }
 
 // ===== DOM wiring =====
@@ -219,6 +256,12 @@ async function poll(inst: Instance): Promise<void> {
       return
     }
   } catch (err) {
+    // A down backend does not stop the page: production keeps polling
+    // "server unavailable" so the page recovers on its own once the
+    // supercomputer comes back, and this app does the same for the status
+    // word that means the same thing here.
+    const s = statusFromPollError(err)
+    if (s) setStatus(inst, s)
     console.warn('Status poll failed:', err)
   }
   inst.pollHandle = window.setTimeout(() => void poll(inst), POLL_INTERVAL_MS)

@@ -215,6 +215,23 @@ class JobsTest < Minitest::Test
     assert_equal 'Invalid job type', JSON.parse(last_response.body)['error']
   end
 
+  # --- task 5: GET /jobs/:id/result does not gate on backend availability --
+  # the URLs are built from the id and backend name alone (ComputeRouter
+  # .result_urls makes no network call), and production always shows this
+  # text so a user can note the URL down even while the supercomputer is
+  # unreachable (DA-31/EA-41). Unlike /status and /log, this route has no
+  # `unless backend_available?` check at all. ---
+
+  def test_result_route_succeeds_even_when_the_backend_is_down
+    stub_module_method(ChipAtlas::ServiceMonitor, :status, false) do
+      get '/jobs/abc/result?backend=wabi&type=diff_analysis'
+    end
+
+    assert_equal 200, last_response.status
+    urls = JSON.parse(last_response.body)['urls']
+    assert_includes urls['zip'], 'format=zip'
+  end
+
   # --- GET /jobs/:id/status: nil from the backend is "unknown", not "running" ---
 
   def test_status_route_reports_unknown_when_the_backend_status_cannot_be_determined

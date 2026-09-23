@@ -12,7 +12,7 @@ function init(): void {
   if (!params) {
     const err = document.getElementById('error-state')
     if (err) {
-      err.textContent = 'Missing id or backend parameter in URL.'
+      err.textContent = 'Missing id parameter in URL.'
       err.hidden = false
     }
     container.hidden = true

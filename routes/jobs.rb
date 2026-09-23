@@ -90,14 +90,15 @@ module ChipAtlas
           json_response({ backend: backend, job_id: id, status: status || 'unknown', retry: true })
         end
 
-        # Get result URLs
+        # Get result URLs -- no backend-availability gate, unlike :status and
+        # :log below. ComputeRouter.result_urls builds these from the id and
+        # backend name alone (no network call), so they are exactly as
+        # available when the backend is down as when it is up, and production
+        # always shows this text so a user can note the URL down while the
+        # supercomputer is unreachable (DA-31/EA-41).
         app.get '/jobs/:id/result' do
           id = validated_job_id
           backend = validated_backend
-
-          unless backend_available?(backend)
-            halt 503, json_response({ error: 'Backend unavailable', retry: false })
-          end
 
           urls = ChipAtlas::ComputeRouter.result_urls(backend, id, validated_job_type)
           json_response({ backend: backend, job_id: id, urls: urls })

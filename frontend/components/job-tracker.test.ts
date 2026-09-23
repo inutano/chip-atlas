@@ -11,8 +11,9 @@ import {
   formatStamp,
   parseEstimateMinutes,
   parseWabiSubmitTime,
+  statusFromPollError,
 } from './job-tracker'
-import { readResultPageParams } from './result-page-params'
+import { ApiError } from '../api/client'
 
 // ===== parseWabiSubmitTime =====
 //
@@ -153,28 +154,51 @@ test('formatStamp: an em dash for a date that names no instant', () => {
   assert.equal(formatStamp(new Date('nope')), '—')
 })
 
-// ===== readResultPageParams =====
+// ===== statusFromPollError =====
+//
+// /jobs/:id/status (the only caller of this function, in poll() below) 503s
+// for exactly one reason -- routes/jobs.rb's backend_available? gate -- and
+// always answers with a JSON body shaped like
+// {backend, job_id, status: 'backend_unavailable', retry: false}. This reads
+// that shape when it parses, and still reports the backend as down when the
+// body doesn't parse at all: a 503 from this route only ever means one thing,
+// parseable body or not.
+//
+// Production's equivalent (old-app/app.rb:460-473) returns the plain string
+// "server unavailable" over a 200, so its JS never throws on this path at
+// all; this app surfaces the same fact as an HTTP error instead, so the poll
+// loop needs this translation back into a status word.
 
-test('readResultPageParams: reads the four values the submit pages send', () => {
-  assert.deepEqual(
-    readResultPageParams('?id=wabi_chipatlas_ID&backend=wabi&title=My%20project&calcm=13%20mins'),
-    { jobId: 'wabi_chipatlas_ID', backend: 'wabi', title: 'My project', calcm: '13 mins' },
-  )
+test('statusFromPollError: a 503 from /jobs/:id/status maps to backend_unavailable', () => {
+  const body = JSON.stringify({ backend: 'wabi', job_id: 'x', status: 'backend_unavailable', retry: false })
+  const err = new ApiError(503, 'Service Unavailable', body)
+  assert.equal(statusFromPollError(err), 'backend_unavailable')
 })
 
-test('readResultPageParams: title and calcm are optional, id and backend are not', () => {
-  // A URL bookmarked before those were carried — or typed by hand — still
-  // tracks the job; the two cells just show an em dash.
-  assert.deepEqual(readResultPageParams('?id=X&backend=wabi'), {
-    jobId: 'X', backend: 'wabi', title: '', calcm: '',
-  })
-  assert.equal(readResultPageParams('?backend=wabi'), null)
-  assert.equal(readResultPageParams('?id=X'), null)
-  assert.equal(readResultPageParams(''), null)
+test('statusFromPollError: a 503 whose body is not JSON is still read as backend_unavailable', () => {
+  const err = new ApiError(503, 'Service Unavailable', 'Service Unavailable')
+  assert.equal(statusFromPollError(err), 'backend_unavailable')
 })
 
-test('readResultPageParams: a title with & or = in it survives the round trip', () => {
-  const title = 'A&B = my "project"'
-  const search = `?id=X&backend=wabi&title=${encodeURIComponent(title)}&calcm=13%20mins`
-  assert.equal(readResultPageParams(search)?.title, title)
+test('statusFromPollError: a 503 with an empty body is still read as backend_unavailable', () => {
+  const err = new ApiError(503, 'Service Unavailable', '')
+  assert.equal(statusFromPollError(err), 'backend_unavailable')
+})
+
+test('statusFromPollError: null for a 503 whose parsed body does not claim backend_unavailable', () => {
+  // Never produced by routes/jobs.rb today, but a body that positively
+  // disagrees with the guess should not be overridden by it.
+  const err = new ApiError(503, 'Service Unavailable', JSON.stringify({ error: 'Something else entirely' }))
+  assert.equal(statusFromPollError(err), null)
+})
+
+test('statusFromPollError: null for a non-503 ApiError', () => {
+  const err = new ApiError(400, 'Bad Request', JSON.stringify({ error: 'Invalid job ID' }))
+  assert.equal(statusFromPollError(err), null)
+})
+
+test('statusFromPollError: null for an error that is not an ApiError at all', () => {
+  assert.equal(statusFromPollError(new TypeError('Failed to fetch')), null)
+  assert.equal(statusFromPollError('nope'), null)
+  assert.equal(statusFromPollError(undefined), null)
 })
