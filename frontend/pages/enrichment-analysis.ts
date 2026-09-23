@@ -73,16 +73,26 @@ const HELP_TEXT: Record<string, string> = {
 // would land as threshold=50, which is actually WABI's LOOSEST threshold
 // setting (q < 1E-05) — the opposite end of the range from what was meant.
 //
+// EA-08: Bisulfite-Seq is a third encoding, not a fifth numeric code — the
+// significance threshold does not apply to methylation calls, so
+// qvalOptionsFor (facet-filter.ts) offers a single fixed "bs" option there
+// instead of a /api/qval_range code, and production sends the fixed
+// threshold 999 for it (enrichment_analysis.js:970-999) rather than any
+// -10*Log10[Q] figure. Handled as its own branch below, ahead of the numeric
+// parse. "anno" (Annotation tracks) gets no such branch: Enrichment Analysis
+// excludes Annotation tracks from its experiment-type list entirely (see
+// enrichmentFacetFilterOptions below), so qval should never resolve to
+// "anno" here — if it somehow did, it falls through to the numeric parse and
+// throws, same as any other unrecognized code.
+//
 // Unlike qvalLabel (display-only — the worst case there is a mislabeled
 // dropdown), this feeds a live submission to WABI. An unparseable code has
 // no safe fallback to guess at, so this throws rather than silently
 // forwarding the raw (wrong-encoding) code as if it were already a
 // threshold — the same trap that put the file-suffix code on the wire as
-// `qval` in the first place. In practice the facet is always populated
-// from /api/qval_range's four fixed codes ("05"/"10"/"20"/"50"), so this is
-// unreachable today; but "unreachable today" is exactly the assumption
-// that let that original bug ship, so this does not rely on it silently.
+// `qval` in the first place.
 export function qvalCodeToThreshold(code: string): string {
+  if (code === 'bs') return '999'
   const n = parseInt(code, 10)
   if (Number.isNaN(n)) {
     throw new Error(`qvalCodeToThreshold: unparseable qval code "${code}" — refusing to guess a WABI threshold`)

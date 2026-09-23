@@ -160,6 +160,20 @@ class PagesTest < Minitest::Test
     assert_includes body, 'class="card"'
   end
 
+  def test_peak_browser_has_a_subclass_warning_container_above_the_panels
+    get '/peak_browser'
+    assert_includes last_response.body, '<div class="panel-message" id="subclass-warning"></div>'
+  end
+
+  def test_peak_browser_igv_help_link_is_an_info_popover_not_a_wiki_link
+    get '/peak_browser'
+    body = last_response.body
+    assert_includes body, 'Error connecting to IGV?'
+    assert_includes body, 'data-info="igv"'
+    assert_includes body, 'class="info-btn igv-help"'
+    refute_includes body, 'chip-atlas/wiki#igv_doc', 'PB-21: the dead wiki anchor link must be gone'
+  end
+
   EA_PANELS = [
     '1. Experiment type', '2. Cell type Class', '3. Threshold for Significance',
     '4. Enter dataset A', '5. Enter dataset B', '6. Analysis description'

@@ -19,6 +19,8 @@
 
 <div id="genome-tabs"></div>
 
+<div class="panel-message" id="subclass-warning"></div>
+
 <div class="row">
   <div class="col-md-4">
     <div class="card">
@@ -61,8 +63,7 @@
 
     <div class="button-submit">
       <button type="button" id="view-igv" class="btn btn-primary btn-lg btn-block">View on IGV</button>
-      <a class="igv-help" href="https://github.com/inutano/chip-atlas/wiki#igv_doc"
-         target="_blank" rel="noopener noreferrer">Error connecting to IGV?</a>
+      <a class="info-btn igv-help" href="#" data-info="igv" role="button">Error connecting to IGV?</a>
       <button type="button" id="download-bed" class="btn btn-primary btn-lg btn-block">Download BED file</button>
     </div>
     <div id="action-status" class="text-muted small mt-2" aria-live="polite"></div>

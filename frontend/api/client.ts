@@ -76,12 +76,16 @@ export interface TargetGenesIndex {
   [genome: string]: string[]  // genome -> tracks
 }
 
+// `url` is null when no precomputed bedfile matches the condition (PB-23) —
+// e.g. bedfiles has no rows with both track_subclass and cell_type_subclass
+// set, so an antigen+cell-type combination that looks selectable resolves to
+// no file. Callers must check before navigating (see peak-browser.ts).
 export interface IgvUrlResponse {
-  url: string
+  url: string | null
 }
 
 export interface DownloadUrlResponse {
-  url: string
+  url: string | null
 }
 
 // Shape returned by GET /api/colo (see lib/services/colo_tsv.rb#result).

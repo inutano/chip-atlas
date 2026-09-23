@@ -54,6 +54,23 @@ test('qvalCodeToThreshold: "50" (strictest file code, q < 1E-50) -> "500" (stric
   assert.equal(qvalCodeToThreshold('50'), '500')
 })
 
+// EA-08: Bisulfite-Seq is a third encoding, not a fifth numeric code — the
+// facet offers a single fixed "bs" option for it (facet-filter.ts's
+// qvalOptionsFor), and production sends the fixed threshold 999 for it
+// (enrichment_analysis.js:970-999) rather than any -10*Log10[Q] figure.
+test('qvalCodeToThreshold: "bs" (Bisulfite-Seq NA option) -> "999" (production\'s fixed WABI threshold)', () => {
+  assert.equal(qvalCodeToThreshold('bs'), '999')
+})
+
+test('qvalCodeToThreshold: "anno" (Annotation tracks) still throws — Enrichment Analysis never offers it', () => {
+  // Unlike "bs", "anno" gets no dedicated branch: enrichmentFacetFilterOptions
+  // excludes Annotation tracks from the experiment-type list entirely, so
+  // qval should never resolve to "anno" here. If it somehow did, falling
+  // through to the numeric parse and throwing is the same safe failure as
+  // any other unrecognized code.
+  assert.throws(() => qvalCodeToThreshold('anno'), /unparseable qval code/)
+})
+
 test('qvalCodeToThreshold: throws on an unparseable code rather than forwarding it as a threshold', () => {
   // Submission-time, not display-only (contrast facet-filter.ts's
   // qvalLabel, which falls back to the raw string): there is no safe guess

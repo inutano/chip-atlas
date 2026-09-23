@@ -19,9 +19,9 @@
 // narrows live, matching the paired-list-box affordance visually.
 
 import { GenomeTabs } from '../components/genome-tabs'
-import { FacetFilter, type FacetFilterOptions } from '../components/facet-filter'
+import { FacetFilter, type FacetFilterOptions, type FacetKey } from '../components/facet-filter'
 import { Autocomplete } from '../components/autocomplete'
-import { initInfoPopovers } from '../components/info-popover'
+import { initInfoPopovers, type HelpTopic } from '../components/info-popover'
 import { getIgvUrl, getDownloadUrl, type UrlCondition } from '../api/client'
 import { igvReachable, igvOriginOf, IGV_UNREACHABLE_MESSAGE } from '../components/igv'
 
@@ -29,11 +29,32 @@ interface PageData {
   genomes: Record<string, string>
 }
 
-// Copy lifted verbatim from production's js/pj/peak_browser.js helpText object.
-const HELP_TEXT: Record<string, string> = {
+// Copy lifted verbatim from production's js/pj/peak_browser.js helpText object
+// (viewOnIGV's text drops its last sentence — "Click OK to go to the IGV
+// website, or cancel to back to ChIP-Atlas." — which described a confirm()
+// dialog's OK/cancel buttons that the popover form of this help has no
+// equivalent of; the real link below replaces what that OK button did).
+const HELP_TEXT: Record<string, HelpTopic> = {
   threshold:
     'Set the threshold for statistical significance values calculated by peak-caller MACS2 (-10*Log10[MACS2 Q-value]). If 50 is set here, peaks with Q value < 1E-05 are shown on genome browser IGV. Colors shown in IGV indicate the statistical significance values as follows: blue (50), cyan (250), green (500), yellow (750), and red (> 1,000).',
+  igv: {
+    text:
+      'IGV must be running on your computer before clicking the button.\n\n' +
+      'If your browser shows "cannot open the page" error, launch IGV and allow an access via port 60151 ' +
+      '(from the menu bar of IGV, View > Preferences... > Advanced > "enable port" and set port number 60151) ' +
+      'to browse the data.',
+    link: { href: 'https://igv.org/doc/desktop/#DownloadPage/', label: 'IGV download page' },
+  },
 }
+
+// No precomputed bedfile exists for the selected combination (PB-23) — the
+// server can only report {"url": null}, it has no other combination to
+// suggest, so this names the fix in the user's own terms rather than a raw
+// null. Shown in #action-status instead of navigating to it (production and
+// this app's own pre-fix behaviour both land on window.location.href = null,
+// i.e. a same-origin "/null" 404 page).
+const NO_PRECOMPUTED_FILE_MESSAGE =
+  'No precomputed file exists for this combination. Try a different track type, cell type or threshold.'
 
 function $(id: string): HTMLElement {
   const el = document.getElementById(id)
@@ -110,6 +131,68 @@ function wireSubclassSearch(input: HTMLInputElement, mount: HTMLElement): Subcla
   return s
 }
 
+// ===== PB-16: antigen ⇄ cell-type mutual exclusion =====
+// Production (peak_browser.js:318-360) never lets both optional panels hold
+// a real ("-"-is-"All") selection at once: whichever one the user did NOT
+// just change gets reset back to "-", and a warning explains why. bedfiles
+// has no rows where both track_subclass and cell_type_subclass are set
+// (confirmed locally — see docs/review-2026-09-23/findings/ui-peak-browser.md
+// PB-16), so without this a combination that looks selectable resolves to a
+// null URL (PB-23) instead.
+
+// Pure decision step, kept separate from the DOM reads/writes below so it can
+// be unit-tested without a DOM — see peak-browser.test.ts.
+export function resolveSubclassExclusion(
+  changed: 'track_subclass' | 'cell_type_subclass',
+  track: string,
+  cell: string,
+): { resetFacet: 'track_subclass' | 'cell_type_subclass' | null } {
+  if (track === '-' || cell === '-') return { resetFacet: null }
+  return { resetFacet: changed === 'track_subclass' ? 'cell_type_subclass' : 'track_subclass' }
+}
+
+const SUBCLASS_WARNING_TEXT = 'Either an "Antigen" or a "Cell type" is selectable.'
+
+function buildSubclassWarning(): HTMLDivElement {
+  const div = document.createElement('div')
+  div.className = 'alert alert-warning alert-dismissible fade show'
+  div.setAttribute('role', 'alert')
+  div.textContent = SUBCLASS_WARNING_TEXT
+  const closeButton = document.createElement('button')
+  closeButton.type = 'button'
+  closeButton.className = 'btn-close'
+  closeButton.dataset.bsDismiss = 'alert'
+  closeButton.setAttribute('aria-label', 'Close')
+  div.appendChild(closeButton)
+  return div
+}
+
+// Applies the exclusion for one facet-change event. No-op unless the facet
+// that just changed is one of the two optional subclass facets themselves —
+// every other facet-change (track_class, cell_type_class, qval, init) leaves
+// both alone. The reset goes through the facet's own <select> (native
+// `change`, not FacetFilter's internal state directly) so FacetFilter's own
+// cascade and counts stay consistent; the resulting second facet-change sees
+// one side as "-" and does nothing (resolveSubclassExclusion returns null).
+function applySubclassExclusion(
+  changedFacet: FacetKey | 'init',
+  trackSelect: HTMLSelectElement,
+  cellSelect: HTMLSelectElement,
+  warningContainer: HTMLElement,
+): void {
+  if (changedFacet !== 'track_subclass' && changedFacet !== 'cell_type_subclass') return
+
+  const { resetFacet } = resolveSubclassExclusion(changedFacet, trackSelect.value, cellSelect.value)
+  if (!resetFacet) return
+
+  const select = resetFacet === 'track_subclass' ? trackSelect : cellSelect
+  select.value = '-'
+  select.dispatchEvent(new Event('change', { bubbles: true }))
+
+  // Only one warning at a time: replace rather than append.
+  warningContainer.replaceChildren(buildSubclassWarning())
+}
+
 // Task D2: the FacetFilterOptions this page's genome-change handler passes
 // to FacetFilter.init, pulled out into its own exported function (mirroring
 // enrichmentFacetFilterOptions in enrichment-analysis.ts) so it can be
@@ -126,6 +209,7 @@ async function init(): Promise<void> {
   const data = readPageData()
   const tabs = $('genome-tabs')
   const status = $('action-status')
+  const subclassWarning = $('subclass-warning')
 
   // Anchor element for FacetFilter's internal registry / facet-change event.
   // In list-box mode the five facets render into their own mount points
@@ -143,12 +227,22 @@ async function init(): Promise<void> {
   const trackSearch = wireSubclassSearch($('track-subclass-input') as HTMLInputElement, mount.track_subclass)
   const cellSearch = wireSubclassSearch($('cell-type-subclass-input') as HTMLInputElement, mount.cell_type_subclass)
 
-  facet.addEventListener('facet-change', () => {
+  facet.addEventListener('facet-change', (e: Event) => {
     refreshSubclassSearch(trackSearch)
     refreshSubclassSearch(cellSearch)
-    // Production shows five rows for the significance threshold, not eight.
+    // Production shows five rows for the significance threshold, not eight —
+    // but never fewer rows than there are options (Bisulfite-Seq/Annotation
+    // tracks offer a single fixed "NA" row; clamping to the real option count
+    // avoids trailing blank rows in the list box for those).
     const qvalSelect = subclassSelect(mount.qval)
-    if (qvalSelect) qvalSelect.size = 5
+    if (qvalSelect) qvalSelect.size = Math.max(2, Math.min(5, qvalSelect.options.length))
+
+    const trackSubclassSelect = subclassSelect(mount.track_subclass)
+    const cellTypeSubclassSelect = subclassSelect(mount.cell_type_subclass)
+    if (trackSubclassSelect && cellTypeSubclassSelect) {
+      const changedFacet = (e as CustomEvent<{ facet: FacetKey | 'init' }>).detail.facet
+      applySubclassExclusion(changedFacet, trackSubclassSelect, cellTypeSubclassSelect, subclassWarning)
+    }
   })
 
   tabs.addEventListener('genome-change', async (e: Event) => {
@@ -169,6 +263,14 @@ async function init(): Promise<void> {
     status.textContent = 'Building IGV link…'
     try {
       const res = await getIgvUrl(condition)
+      // PB-23: no precomputed bedfile for this combination, so stay on the
+      // page rather than navigate to `window.location.href = null` (a
+      // same-origin "/null" 404), and skip the reachability probe below:
+      // there is no URL for it to check.
+      if (!res.url) {
+        status.textContent = NO_PRECOMPUTED_FILE_MESSAGE
+        return
+      }
       // Check IGV is actually listening first. Navigating blind lands the user
       // on the browser's connection-error page, which explains nothing.
       status.textContent = 'Contacting IGV\u2026'
@@ -190,6 +292,11 @@ async function init(): Promise<void> {
     status.textContent = 'Building download link…'
     try {
       const res = await getDownloadUrl(condition)
+      // PB-23: see the matching check in the View on IGV handler above.
+      if (!res.url) {
+        status.textContent = NO_PRECOMPUTED_FILE_MESSAGE
+        return
+      }
       status.textContent = ''
       window.location.href = res.url
     } catch (err) {

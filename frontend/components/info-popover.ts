@@ -23,22 +23,54 @@ declare global {
   }
 }
 
+// PB-21: production's "Error connecting to IGV?" help (viewOnIGV's
+// confirm()) ends with a real link to the IGV download page, which a plain
+// help string can't carry. A topic can be either: a plain string (every
+// existing topic, rendered as text — `html: false`), or `{ text, link }`,
+// rendered as one DocumentFragment (a text node plus a real `<a>`) with
+// `html: false` left off for that popover alone. The content is still never
+// built from an HTML *string* — see buildLinkedContent — so this does not
+// reopen the door to rendering untrusted data as markup.
+export interface HelpLink {
+  href: string
+  label: string
+}
+
+export type HelpTopic = string | { text: string; link: HelpLink }
+
+function buildLinkedContent(topic: { text: string; link: HelpLink }): DocumentFragment {
+  const fragment = document.createDocumentFragment()
+  fragment.appendChild(document.createTextNode(topic.text))
+  const a = document.createElement('a')
+  a.href = topic.link.href
+  a.target = '_blank'
+  a.rel = 'noopener noreferrer'
+  a.textContent = topic.link.label
+  fragment.appendChild(a)
+  return fragment
+}
+
 // Bootstrap 5's Popover constructor, resolved lazily so pages that never
 // call initInfoPopovers() don't need window.bootstrap to exist at all.
-export function initInfoPopovers(root: ParentNode, helpText: Record<string, string>): void {
+export function initInfoPopovers(root: ParentNode, helpText: Record<string, HelpTopic>): void {
   const Popover = window.bootstrap?.Popover
   if (!Popover) return
 
   root.querySelectorAll<HTMLAnchorElement>('.info-btn[data-info]').forEach((btn) => {
     const key = btn.dataset.info
-    const text = key ? helpText[key] : undefined
-    if (!text) return
+    const topic = key ? helpText[key] : undefined
+    if (!topic) return
 
     new Popover(btn, {
-      content: text,
+      content: typeof topic === 'string' ? topic : buildLinkedContent(topic),
       trigger: 'focus click',
       placement: 'top',
-      html: false,
+      // Bootstrap treats a DocumentFragment/Element `content` as already
+      // trusted markup regardless of this flag (it is appended directly, not
+      // parsed via innerHTML — see TemplateFactory#_setContent), so this only
+      // ever governs the plain-string case; a raw HTML *string* built from
+      // data is never passed here for either topic shape.
+      html: typeof topic !== 'string',
     })
 
     // The anchors have no real href target; keep them keyboard-focusable
