@@ -209,7 +209,11 @@ class PagesTest < Minitest::Test
     get '/enrichment_analysis'
     body = last_response.body
     assert_includes body, 'id="dataB-panel-body"'
-    assert_includes body, 'id="count-mode-note"'
+    # Pins the `hidden` attribute alongside the id in the server-rendered
+    # markup, not just the id's presence - #count-mode-note must start
+    # hidden (syncDatasetBVisibility only reveals it once JS runs and
+    # confirms count mode).
+    assert_includes body, '<p id="count-mode-note" class="text-muted small mb-0" hidden>'
     assert_includes body, 'Not required for gene count table analysis'
     assert_includes body, 'id="dataset-titles"'
   end

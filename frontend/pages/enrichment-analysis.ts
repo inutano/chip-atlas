@@ -243,24 +243,44 @@ export function distanceDefaultFor(aType: string): string {
   return aType === 'bed' ? '0' : '5000'
 }
 
+/**
+ * Pure decision logic behind EA-15's count-mode panel toggle, kept separate
+ * from the DOM reads/writes in syncDatasetBVisibility below — the same
+ * separation distanceDefaultFor/applyDatasetBGateTransition use, so this can
+ * be unit-tested without a DOM (see enrichment-analysis.test.ts).
+ *
+ * A gene count table has no dataset B at all. Production's positionCount()
+ * hides panel 5's radios/permutation/textarea/file picker behind a single
+ * "Not required..." message, and hides panel 6's Dataset A/B title inputs
+ * outright (their values are replaced by fixed internal strings in
+ * buildEnrichmentParams instead, since the inputs a user could edit are no
+ * longer on screen).
+ */
+export function countModeVisibility(aType: string): {
+  panelBodyHidden: boolean
+  noteHidden: boolean
+  titlesHidden: boolean
+} {
+  const isCountMode = aType === 'count'
+  return {
+    panelBodyHidden: isCountMode,
+    noteHidden: !isCountMode,
+    titlesHidden: isCountMode,
+  }
+}
+
 function syncDatasetBVisibility(): void {
   const aType = getCheckedValue('dataA-type')
   const isGeneMode = aType === 'gene'
 
-  // EA-15: a gene count table has no dataset B at all. Production's
-  // positionCount() hides panel 5's radios/permutation/textarea/file picker
-  // behind a single "Not required..." message, and hides panel 6's Dataset
-  // A/B title inputs outright (their values are replaced by fixed internal
-  // strings in buildEnrichmentParams instead, since the inputs a user could
-  // edit are no longer on screen). This wraps rather than replaces the
-  // gene-mode gating below: #dataB-panel-body's own children keep getting
-  // their visibility computed exactly as before, and the whole group simply
-  // becomes invisible — or visible again on leaving count mode — alongside
-  // the static note.
-  const isCountMode = aType === 'count'
-  ;($('dataB-panel-body') as HTMLElement).hidden = isCountMode
-  ;($('count-mode-note') as HTMLElement).hidden = !isCountMode
-  ;($('dataset-titles') as HTMLElement).hidden = isCountMode
+  // This wraps rather than replaces the gene-mode gating below:
+  // #dataB-panel-body's own children keep getting their visibility computed
+  // exactly as before, and the whole group simply becomes invisible — or
+  // visible again on leaving count mode — alongside the static note.
+  const countVisibility = countModeVisibility(aType)
+  ;($('dataB-panel-body') as HTMLElement).hidden = countVisibility.panelBodyHidden
+  ;($('count-mode-note') as HTMLElement).hidden = countVisibility.noteHidden
+  ;($('dataset-titles') as HTMLElement).hidden = countVisibility.titlesHidden
 
   const transition = applyDatasetBGateTransition(
     prevDatasetBGateOpen,
@@ -645,7 +665,13 @@ export function buildEnrichmentParams(
     distanceUp: form.distanceUp,
     distanceDown: form.distanceDown,
   }
-  if (!isCount && form.bType === 'rnd') params.permTime = form.permTime
+  // permTime is untouched by the count-mode special case: production sets it
+  // unconditionally (enrichment_analysis.js:605), before the typeA ===
+  // "count" branch (613-619) even runs, so it stays governed by the same
+  // `bType === 'rnd'` gate as every other dataset A mode — switching
+  // straight from BED's default to "Gene count table" leaves dataset B's
+  // radio on its own default ("rnd"), and permTime must still ride along.
+  if (form.bType === 'rnd') params.permTime = form.permTime
   // bedBFile is ALWAYS sent. Production's retrieveInputData() substitutes the
   // literal string "empty" for a blank textarea, and its own validation then
   // requires the field to be present unless typeA is "count" - so omitting it

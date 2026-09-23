@@ -26,6 +26,7 @@ import {
   bedSizeKey,
   buildEnrichmentParams,
   countLines,
+  countModeVisibility,
   distanceDefaultFor,
   enrichmentFacetFilterOptions,
   exampleFileFor,
@@ -190,8 +191,9 @@ test('buildEnrichmentParams: bedBFile is always sent, "empty" when dataset B has
 // two title inputs with fixed internal values, because panel 5/6 hide the
 // real dataset B controls and the title inputs in this mode (EA-15). This
 // previously sent whatever dataset B radio/textarea/title happened to be
-// selected — the exact regression EA-16 flagged.
-test('buildEnrichmentParams: count mode forces typeB/bedBFile to "empty", drops permTime, and substitutes production\'s internal descriptions', () => {
+// selected — the exact regression EA-16 flagged. permTime is deliberately
+// NOT part of this special case — see the dedicated test below.
+test('buildEnrichmentParams: count mode forces typeB/bedBFile to "empty" and substitutes production\'s internal descriptions', () => {
   const params = buildEnrichmentParams(baseCondition, {
     ...baseForm,
     aType: 'count',
@@ -203,9 +205,24 @@ test('buildEnrichmentParams: count mode forces typeB/bedBFile to "empty", drops 
   })
   assert.equal(params.typeB, 'empty')
   assert.equal(params.bedBFile, 'empty')
-  assert.equal('permTime' in params, false)
   assert.equal(params.descriptionA, 'Dataset A from count table header')
   assert.equal(params.descriptionB, 'Dataset B not applicable for count table')
+})
+
+// Review round 1, finding 1: production sets permTime unconditionally
+// (enrichment_analysis.js:605), before the typeA === "count" special case
+// (613-619) even runs — count mode does not remove it. An earlier version
+// of this task's brief called for dropping permTime in count mode, which
+// was wrong: switching dataset A straight from BED's default to "Gene
+// count table" leaves dataset B's radio on its own default ("rnd"), so
+// permTime must still ride along exactly as it does for every other mode —
+// governed by the same plain `bType === 'rnd'` gate, not by aType.
+test('buildEnrichmentParams: count mode still gates permTime on bType === "rnd", same as every other mode', () => {
+  const rnd = buildEnrichmentParams(baseCondition, { ...baseForm, aType: 'count', bType: 'rnd', permTime: '10' })
+  assert.equal(rnd.permTime, '10')
+
+  const bed = buildEnrichmentParams(baseCondition, { ...baseForm, aType: 'count', bType: 'bed', dataBText: 'chr2\t1\t100' })
+  assert.equal('permTime' in bed, false)
 })
 
 test('buildEnrichmentParams: count mode forces "empty" even when dataset B is BED with real content', () => {
@@ -257,6 +274,33 @@ test('distanceDefaultFor: the value reaches the payload as a string, not a numbe
   })
   assert.strictEqual(params.distanceUp, '0')
   assert.strictEqual(params.distanceDown, '0')
+})
+
+// ===== countModeVisibility — Task 7 review round 1, finding 2 (EA-15) =====
+//
+// Pure decision logic behind syncDatasetBVisibility's count-mode branch,
+// extracted the same way applyDatasetBGateTransition/distanceDefaultFor are
+// above, so the panel-visibility rule is pinned by a test without a DOM.
+
+test('countModeVisibility: count mode hides panel 5\'s body and the dataset titles, and shows the note', () => {
+  assert.deepEqual(countModeVisibility('count'), {
+    panelBodyHidden: true,
+    noteHidden: false,
+    titlesHidden: true,
+  })
+})
+
+test('countModeVisibility: bed and gene modes show panel 5\'s body and the dataset titles, and hide the note', () => {
+  assert.deepEqual(countModeVisibility('bed'), {
+    panelBodyHidden: false,
+    noteHidden: true,
+    titlesHidden: false,
+  })
+  assert.deepEqual(countModeVisibility('gene'), {
+    panelBodyHidden: false,
+    noteHidden: true,
+    titlesHidden: false,
+  })
 })
 
 // ===== applyDatasetBGateTransition — Task C5 =====
