@@ -371,7 +371,7 @@ function dispatchFacetChange(inst: Instance, facet: FacetKey | 'init'): void {
 
 function attachHandlers(inst: Instance): void {
   inst.trackClass.onChange(async () => {
-    // bidirectional: refresh cell types and both subclass lists
+    // bidirectional: refresh cell types, both subclass lists, and qval
     await reloadOnTrackChange(inst)
     dispatchFacetChange(inst, 'track_class')
   })
