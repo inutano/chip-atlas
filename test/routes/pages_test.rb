@@ -227,6 +227,28 @@ class PagesTest < Minitest::Test
     assert_includes last_response.body, 'white-space: pre-line'
   end
 
+  # EA-26: the setup page's node-status link had drifted to a 404
+  # (.../guides/software/GridEngine/) while the result page kept production's
+  # working link. Both must point at the same, live URL.
+  def test_enrichment_analysis_node_status_link_matches_production
+    get '/enrichment_analysis'
+    body = last_response.body
+    assert_includes body, 'node status (epyc.q)'
+    assert_includes body, 'href="https://sc.ddbj.nig.ac.jp/en/operation/job_queue_status/"'
+    refute_includes body, 'GridEngine'
+  end
+
+  # EA-36/SHELL-39: production disabled its submit button and alerted when
+  # the compute backend was down, checked on page load. This page had no
+  # equivalent - restored via frontend/pages/enrichment-analysis.ts's
+  # checkJobAvailability + this notice element, the same mechanism
+  # views/diff_analysis.erb already uses.
+  def test_enrichment_analysis_has_unavailable_notice
+    get '/enrichment_analysis'
+    assert_includes last_response.body,
+                     '<div id="unavailable-notice" class="alert alert-warning small mb-2" role="alert" hidden></div>'
+  end
+
   def test_target_genes_has_an_antigen_list_box
     get '/target_genes'
     body = last_response.body

@@ -12,7 +12,7 @@ import { GenomeTabs } from '../components/genome-tabs'
 import { FacetFilter, type FacetCondition, type FacetFilterOptions } from '../components/facet-filter'
 import { Autocomplete } from '../components/autocomplete'
 import { initInfoPopovers } from '../components/info-popover'
-import { submitJob, getBedSizes, type BedSizes } from '../api/client'
+import { submitJob, getBedSizes, checkJobAvailability, type BedSizes, type JobAvailability } from '../api/client'
 
 interface PageData {
   genomes: Record<string, string>
@@ -27,10 +27,18 @@ interface PageData {
 // Copy lifted verbatim from production's js/pj/enrichment_analysis.js
 // helpText object (the note1/note2 fragments are appended exactly as
 // production's own $(".infoBtn").click handler concatenates them).
+// TODO(owner): A. thaliana identifier convention pending backend confirmation (2026-09-24)
 const NOTE1 =
   'Acceptable identifiers:\n  Official gene symbols (e.g. POU5F1)\n  Ensembl IDs (e.g. ENSG00000204531)\n  Uniprot IDs (e.g. Q01860)\n  RefSeq gene IDs (e.g. NM_002701)\n\nOfficial gene symbols must be entered according to following nomenclatures:\n  H. sapiens: HGNC\n  M. musculus: MGI\n  R. norvegicus: RGD\n  D. melanogaster: FlyBase\n  C. elegans: WormBase\n  S. cerevisiae: SGD\n\nAcceptable example:\n  POU5F1\n  TP53\n\nBad example:\n  OCT4\n  p53'
-const NOTE2 =
-  'Example:\n  chr1<tab>531435<tab>543845\n  chr2<tab>738543<tab>742321\n\nAcceptable genome assemblies:\n    hg19, hg38 (H. sapiens)\n    mm9, mm10 (M. musculus)\n    rn6 (R. norvegicus)\n    dm3, dm6 (D. melanogaster)\n    ce10, ce11 (C. elegans)\n    sacCer3 (S. cerevisiae)\n\n'
+
+// EA-22: production's note2 listed all ten assemblies its own genome tabs
+// offered (hg19/hg38, mm9/mm10, rn6, dm3/dm6, ce10/ce11, sacCer3). This app
+// offers a different seven (config/genomes.yml) — the newer half of each
+// production pair, plus TAIR12, which production never had a tab for — so
+// the list is corrected to match rather than left as a stale copy. Exported
+// so a test can pin its assembly list against drift without a DOM.
+export const NOTE2 =
+  'Example:\n  chr1<tab>531435<tab>543845\n  chr2<tab>738543<tab>742321\n\nAcceptable genome assemblies:\n    hg38 (H. sapiens)\n    mm10 (M. musculus)\n    rn6 (R. norvegicus)\n    dm6 (D. melanogaster)\n    ce11 (C. elegans)\n    sacCer3 (S. cerevisiae)\n    TAIR12 (A. thaliana)\n\n'
 
 const HELP_TEXT: Record<string, string> = {
   threshold:
@@ -226,6 +234,44 @@ export function prefillSelection(prefill: PageData['prefill']): {
     return { aType: 'gene', bType: 'userlist', aText: prefill.genesetA, bText: prefill.genesetB }
   }
   return null
+}
+
+/**
+ * Production's taxidMap (enrichment_analysis.js:31-62), collapsed from its
+ * per-species `genomeVersions` list (each species' *older* assembly first —
+ * hg19, mm9, dm3, ce10) down to the single assembly this app actually
+ * offers for that species (config/genomes.yml / GenomeTabs) — EA-35.
+ * Arabidopsis thaliana (3702) has no production entry at all; TAIR12 is
+ * this app's own addition (SHELL-37), included here so the same external
+ * POST-prefill mechanism reaches it too.
+ */
+const TAXONOMY_GENOME: Record<string, string> = {
+  '9606': 'hg38',
+  '10090': 'mm10',
+  '10116': 'rn6',
+  '7227': 'dm6',
+  '6239': 'ce11',
+  '4932': 'sacCer3',
+  '3702': 'TAIR12',
+}
+
+/**
+ * Resolves a POST prefill's `taxonomy` (an NCBI taxid) to the one genome tab
+ * this app offers for that species, or null when the taxid is missing or
+ * unrecognized. Trims the taxid the way every other PageData['prefill']
+ * field is read.
+ *
+ * Declared to accept `string | undefined`, but checked with a plain
+ * falsy test rather than `=== undefined`: a GET request never sets
+ * `@taxonomy` server-side, and Ruby's `nil` becomes JSON `null`, not an
+ * absent key — so the value that actually reaches this function at runtime
+ * is `null`, not `undefined`, even though the static type says otherwise.
+ * prefillSelection's own `if (prefill.genes)` checks above absorb that same
+ * mismatch the same way.
+ */
+export function genomeForTaxonomy(taxid: string | undefined): string | null {
+  if (!taxid) return null
+  return TAXONOMY_GENOME[taxid.trim()] ?? null
 }
 
 /**
@@ -778,6 +824,72 @@ export function enrichmentFacetFilterOptions(
   }
 }
 
+// ===== Availability (EA-36 / SHELL-39) =====
+// GET /jobs/available?type=enrichment_analysis (routes/jobs.rb ->
+// ComputeRouter, see lib/services/compute_router.rb) is the honest source of
+// truth for whether a compute backend currently serves this job type.
+// Copied from diff-analysis.ts's resolveAvailabilityUiState/applyAvailability
+// verbatim but for this page's own job type and message text — per-page
+// duplication is this codebase's convention (see colo-result.ts's header
+// comment for why frontend/pages/*.ts each keep their own small copies
+// instead of importing across page bundles, since esbuild bundles every
+// page as its own independent entry point). This restores the page-load
+// check production's window.onload performed against /wabi_endpoint_status
+// (disabling its submit button and alerting when the response wasn't
+// "chipatlas"), which this page had no equivalent of at all before this task.
+export const UNAVAILABLE_MESSAGE =
+  'Enrichment analysis is currently unavailable due to the backend server issue. See the maintenance schedule on the top page.'
+
+export interface AvailabilityUiState {
+  submitDisabled: boolean
+  noticeHidden: boolean
+  noticeText: string
+}
+
+// Pure so it can be unit-tested without a DOM (enrichment-analysis.test.ts)
+// and so the fail-safe decision below is made in exactly one place.
+//
+// `availability === null` means the availability check itself failed (a
+// network error, a non-2xx response, or a malformed body) — not that the
+// backend reported itself unavailable. This deliberately fails OPEN, for
+// the same reasons as diff-analysis.ts's resolveAvailabilityUiState: a
+// flaky /jobs/available request is not evidence the backend can't work, and
+// failing open cannot make a submission silently wrong — POST /jobs/submit
+// independently re-checks ComputeRouter and returns 503 when the backend
+// genuinely isn't available, and the existing submit handler already turns
+// that into a visible "Submit failed" message. The worst case of failing
+// open is a failed submit attempt the user can see and retry, not a job
+// that silently goes nowhere or a working feature hidden behind a banner
+// because one fetch hiccuped.
+export function resolveAvailabilityUiState(availability: JobAvailability | null): AvailabilityUiState {
+  if (availability === null || availability.available) {
+    return { submitDisabled: false, noticeHidden: true, noticeText: '' }
+  }
+  return { submitDisabled: true, noticeHidden: false, noticeText: UNAVAILABLE_MESSAGE }
+}
+
+// Tracks *why* the submit button is currently disabled, so the submit
+// handler's own disable-during-request/re-enable-on-failure cycle (EA-24)
+// can never re-enable a button this check disabled out from under it — see
+// the guard in the submit handler's catch block below.
+let submitBlockedByAvailability = false
+
+async function applyAvailability(): Promise<void> {
+  let availability: JobAvailability | null = null
+  try {
+    availability = await checkJobAvailability('enrichment_analysis')
+  } catch (err) {
+    console.error(err)
+    availability = null
+  }
+  const ui = resolveAvailabilityUiState(availability)
+  submitBlockedByAvailability = ui.submitDisabled
+  const notice = $('unavailable-notice')
+  notice.textContent = ui.noticeText
+  notice.hidden = ui.noticeHidden
+  ;($('submit-job') as HTMLButtonElement).disabled = ui.submitDisabled
+}
+
 async function init(): Promise<void> {
   const data = readPageData()
   const tabs = $('genome-tabs')
@@ -821,6 +933,24 @@ async function init(): Promise<void> {
     void refreshEstimate(facet)
   })
 
+  // EA-35: a POST prefill's `taxonomy` should select that species' genome
+  // tab before GenomeTabs.init runs — production's window.onload does the
+  // equivalent with `$('[href="#'+taxonomy+'-tab-content"]').tab("show")`,
+  // but after its own (pre-rendered) tabs already exist. This page builds
+  // its tabs from scratch inside GenomeTabs.init, and GenomeTabs exposes no
+  // select(container, genome) API to call afterwards (see genome-tabs.ts).
+  // Its own initial-tab choice already reads `#genome=<id>` from
+  // location.hash (pickInitialGenome/readGenomeFromHash), so writing the
+  // hash first is the supported way in, not a simulated click. A resolved
+  // taxonomy always overwrites whatever hash the page happened to load
+  // with: that hash can only be stale state left over from a previous visit
+  // to this same URL, and an external service's POST prefill is the more
+  // specific of the two.
+  const taxonomyGenome = genomeForTaxonomy(data.prefill.taxonomy)
+  if (taxonomyGenome && taxonomyGenome in data.genomes) {
+    window.location.hash = `#genome=${taxonomyGenome}`
+  }
+
   GenomeTabs.init(tabs, data.genomes)
   initInfoPopovers(document, HELP_TEXT)
 
@@ -855,6 +985,7 @@ async function init(): Promise<void> {
   })
 
   void refreshEstimate(facet)
+  void applyAvailability()
 
   const submitBtn = $('submit-job') as HTMLButtonElement
   submitBtn.addEventListener('click', async () => {
@@ -928,7 +1059,11 @@ async function init(): Promise<void> {
         `&calcm=${encodeURIComponent(calcm)}`
     } catch (err) {
       console.error(err)
-      submitBtn.disabled = false
+      // Task 8 (EA-36/SHELL-39): do not re-enable a button applyAvailability
+      // disabled — a submit that fails while the backend is known
+      // unavailable must not undo that notice and make the form look usable
+      // again right after telling the user it isn't.
+      if (!submitBlockedByAvailability) submitBtn.disabled = false
       status.textContent = 'Submit failed. Try again or check the service status.'
     }
   })

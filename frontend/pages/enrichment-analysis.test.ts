@@ -30,11 +30,15 @@ import {
   distanceDefaultFor,
   enrichmentFacetFilterOptions,
   exampleFileFor,
+  genomeForTaxonomy,
   prefillSelection,
   estimateSeconds,
   formatEstimate,
   getSeconds,
+  NOTE2,
   qvalCodeToThreshold,
+  resolveAvailabilityUiState,
+  UNAVAILABLE_MESSAGE,
   validateDistance,
   validateTitleText,
   type EnrichmentFormState,
@@ -772,4 +776,98 @@ test('validateDistance: rejects anything that is not all digits, with production
   assert.notEqual(validateDistance('5000.5'), null)
   assert.notEqual(validateDistance(''), null)
   assert.notEqual(validateDistance('abc'), null)
+})
+
+// ===== genomeForTaxonomy — EA-35 =====
+//
+// A POST prefill's `taxonomy` (an NCBI taxid) is production's mechanism for
+// an external service — Target Genes, the gene search — to hand over a gene
+// list already scoped to one species. Production's taxidMap
+// (enrichment_analysis.js:31-62) points each taxid at that species'
+// *older* assembly (hg19, mm9, dm3, ce10 — genomeVersions[0]); this app
+// offers only one assembly per species (config/genomes.yml), so the map is
+// remapped to whichever one this app actually has a tab for.
+
+test('genomeForTaxonomy: maps each of production\'s six taxids, plus A. thaliana, to the assembly this app offers', () => {
+  assert.equal(genomeForTaxonomy('9606'), 'hg38')
+  assert.equal(genomeForTaxonomy('10090'), 'mm10')
+  assert.equal(genomeForTaxonomy('10116'), 'rn6')
+  assert.equal(genomeForTaxonomy('7227'), 'dm6')
+  assert.equal(genomeForTaxonomy('6239'), 'ce11')
+  assert.equal(genomeForTaxonomy('4932'), 'sacCer3')
+  assert.equal(genomeForTaxonomy('3702'), 'TAIR12')
+})
+
+test('genomeForTaxonomy: trims surrounding whitespace before looking up the taxid', () => {
+  assert.equal(genomeForTaxonomy(' 10090 '), 'mm10')
+})
+
+test('genomeForTaxonomy: an unknown, empty, or missing taxid is null, never a guess', () => {
+  assert.equal(genomeForTaxonomy('1234567'), null)
+  assert.equal(genomeForTaxonomy(''), null)
+  assert.equal(genomeForTaxonomy(undefined), null)
+})
+
+// ===== resolveAvailabilityUiState / UNAVAILABLE_MESSAGE — EA-36 / SHELL-39 =====
+//
+// Copied from diff-analysis.ts's resolveAvailabilityUiState (per-page
+// duplication - see colo-result.ts's header comment) with this page's own
+// message text, restoring the page-load "is the compute backend up" check
+// production's window.onload performed (fetching /wabi_endpoint_status and
+// disabling its submit button + alerting when it wasn't "chipatlas"), which
+// this page had no equivalent of before this task.
+
+test('resolveAvailabilityUiState: available leaves the form usable and the notice hidden', () => {
+  assert.deepEqual(resolveAvailabilityUiState({ backend: 'wabi', available: true }), {
+    submitDisabled: false,
+    noticeHidden: true,
+    noticeText: '',
+  })
+})
+
+test('resolveAvailabilityUiState: a failed check (null) fails open, same as diff-analysis.ts', () => {
+  assert.deepEqual(resolveAvailabilityUiState(null), {
+    submitDisabled: false,
+    noticeHidden: true,
+    noticeText: '',
+  })
+})
+
+test('resolveAvailabilityUiState: unavailable disables submit and shows this page\'s own message', () => {
+  assert.deepEqual(resolveAvailabilityUiState({ backend: null, available: false }), {
+    submitDisabled: true,
+    noticeHidden: false,
+    noticeText: UNAVAILABLE_MESSAGE,
+  })
+})
+
+test('UNAVAILABLE_MESSAGE: matches the task brief\'s exact wording', () => {
+  assert.equal(
+    UNAVAILABLE_MESSAGE,
+    'Enrichment analysis is currently unavailable due to the backend server issue. See the maintenance schedule on the top page.',
+  )
+})
+
+// ===== NOTE2 — EA-22 =====
+//
+// The A:BED / B:BED ⓘ help text's "Acceptable genome assemblies" list must
+// match the seven tabs this app actually offers (config/genomes.yml), not
+// production's ten. NOTE1's nomenclature table is left as-is - see the
+// TODO(owner) comment above NOTE1 in enrichment-analysis.ts; the
+// A. thaliana identifier convention is not yet confirmed.
+
+test('NOTE2: lists every offered assembly, including the newly-added TAIR12', () => {
+  assert.match(NOTE2, /hg38 \(H\. sapiens\)/)
+  assert.match(NOTE2, /mm10 \(M\. musculus\)/)
+  assert.match(NOTE2, /rn6 \(R\. norvegicus\)/)
+  assert.match(NOTE2, /dm6 \(D\. melanogaster\)/)
+  assert.match(NOTE2, /ce11 \(C\. elegans\)/)
+  assert.match(NOTE2, /sacCer3 \(S\. cerevisiae\)/)
+  assert.match(NOTE2, /TAIR12 \(A\. thaliana\)/)
+})
+
+test('NOTE2: does not list the retired assemblies this app no longer offers', () => {
+  for (const retired of ['hg19', 'mm9', 'dm3', 'ce10']) {
+    assert.equal(NOTE2.includes(retired), false, `NOTE2 should not mention retired assembly "${retired}"`)
+  }
 })
