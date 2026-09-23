@@ -9,6 +9,12 @@ interface PageData {
   genomes: Record<string, string>
 }
 
+// TG-15 (same pattern applied to Colo's two download buttons): not every
+// primary/secondary pair has a precomputed file on the data server. Blindly
+// navigating there landed the browser on a raw `{"error":"File not found"}`
+// JSON response, away from this page entirely.
+const NO_DATA_MESSAGE = 'No data found for this combination.'
+
 let currentGenome = ''
 let currentPrimary = ''
 let currentSecondary = ''
@@ -66,6 +72,28 @@ export function secondaryItemsFor(
   const keys = forward ? Object.keys(entry.cell_type) : Object.keys(entry.track)
   const all = [...keys].sort()
   return (primary && index[primary]) || all
+}
+
+// TG-15: probe the download URL with HEAD before navigating, so a
+// combination with no precomputed file shows an inline message and leaves
+// this page in place, rather than navigating the whole browser to a raw
+// `{"error":"File not found"}` JSON response (see routes/api.rb's
+// /api/colo/download, which 404s in exactly this case).
+async function downloadIfExists(url: string): Promise<void> {
+  const status = $('action-status')
+  status.textContent = ''
+  try {
+    const res = await fetch(url, { method: 'HEAD' })
+    if (!res.ok) {
+      status.textContent = NO_DATA_MESSAGE
+      return
+    }
+  } catch (err) {
+    console.error(err)
+    status.textContent = NO_DATA_MESSAGE
+    return
+  }
+  window.location.href = url
 }
 
 function getDirection(): ColoDirection {
@@ -186,18 +214,18 @@ async function init(): Promise<void> {
     window.location.href = `/colo_result?${params.toString()}`
   })
 
-  $('download-tsv').addEventListener('click', () => {
+  $('download-tsv').addEventListener('click', async () => {
     const params = buildLinkParams()
     if (!params) { alert('Select a primary and secondary type first.'); return }
     params.set('format', 'tsv')
-    window.location.href = `/api/colo/download?${params.toString()}`
+    await downloadIfExists(`/api/colo/download?${params.toString()}`)
   })
 
-  $('download-gml').addEventListener('click', () => {
+  $('download-gml').addEventListener('click', async () => {
     const params = buildLinkParams()
     if (!params) { alert('Select a primary and secondary type first.'); return }
     params.set('format', 'gml')
-    window.location.href = `/api/colo/download?${params.toString()}`
+    await downloadIfExists(`/api/colo/download?${params.toString()}`)
   })
 }
 

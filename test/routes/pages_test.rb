@@ -29,10 +29,56 @@ class PagesTest < Minitest::Test
     assert_includes last_response.body, 'class="container container-narrow"'
   end
 
+  # SHELL-20: kramdown's GFM mode has no bare-URL autolink option (unlike
+  # production's redcarpet, which used `autolink: true`), so the "To cite"
+  # DOIs and web-tool URL in publications.markdown were rewritten as
+  # `<http://...>` autolinks rather than left as inert plain text.
+  def test_publications_citation_dois_are_clickable_links
+    get '/publications'
+    body = last_response.body
+    assert_includes body, 'href="http://dx.doi.org/10.1093/nar/gkae358"'
+    assert_includes body, 'href="http://dx.doi.org/10.1093/nar/gkac199"'
+    assert_includes body, 'href="http://dx.doi.org/10.15252/embr.201846255"'
+    assert_includes body, 'href="https://chip-atlas.org"'
+  end
+
+  def test_demo_llms_txt_url_is_a_clickable_link
+    get '/demo'
+    assert_includes last_response.body, 'href="https://chip-atlas.org/llms.txt"'
+  end
+
+  # SHELL-20: production hand-edits its deployed updates.markdown, so this
+  # repo's copy still carried an old maintenance notice as a dead HTML
+  # comment (invisible on the rendered page, but present in the response
+  # body) - stale content with no reason to still ship.
+  def test_updates_markdown_stale_maintenance_comment_is_gone
+    get '/'
+    refute_includes last_response.body, 'Enrichment analysis will be temporarily unavailable'
+  end
+
+  # SHELL-02: the home page has no way to announce a feature outage now that
+  # production's hand-edited red notice has no equivalent workflow here (see
+  # frontend/pages/homepage.ts). The container starts hidden and empty;
+  # homepage.ts fills and unhides it from GET /status client-side.
+  def test_homepage_has_a_service_notice_container
+    get '/'
+    assert_includes last_response.body, '<div id="service-notice" hidden></div>'
+  end
+
   def test_stylesheet_uses_bootstrap3_primary
     css = File.read(File.join(__dir__, '..', '..', 'public', 'css', 'style.css'))
     assert_includes css, '#428bca', 'primary colour must match Bootstrap 3.2'
     refute_includes css, '#337ab7', 'Bootstrap 3.3 primary must not be used'
+  end
+
+  # SHELL-34: Bootstrap 5's .popover-body defaults to white-space: normal, so
+  # a multi-line ⓘ helpText string (e.g. Enrichment Analysis's "Gene list"
+  # bullet list) collapsed into one run-on paragraph. --bs-popover-max-width
+  # is the CSS variable Bootstrap 5.3's own .popover reads for its width.
+  def test_stylesheet_preserves_popover_line_breaks_and_widens_them
+    css = File.read(File.join(__dir__, '..', '..', 'public', 'css', 'style.css'))
+    assert_includes css, '--bs-popover-max-width: 24rem'
+    assert_includes css, 'white-space: pre-line'
   end
 
   SPRITE_SYMBOLS = %w[
@@ -149,6 +195,17 @@ class PagesTest < Minitest::Test
     assert_includes body, 'id="statistics-panel"'
   end
 
+  # SV-27: experiment.ts hides this whole button group client-side for
+  # Bisulfite-Seq experiments (no Colo/Target Genes data exists for them) —
+  # this just pins that the server-rendered markup still gives it something
+  # to find and hide, regardless of which experiment is loaded.
+  def test_experiment_page_analyze_button_group_has_an_id_hook
+    seed_experiments
+    seed_sra_cache
+    get '/view?id=SRX018625'
+    assert_includes last_response.body, 'id="analyze-dropdown"'
+  end
+
   def test_peak_browser_has_five_numbered_panels
     get '/peak_browser'
     body = last_response.body
@@ -258,6 +315,15 @@ class PagesTest < Minitest::Test
     assert_includes body, 'class="card"'
   end
 
+  # TG-15: before navigating to the download endpoint, target-genes.ts
+  # probes it with HEAD and, if it 404s, reports it here instead of
+  # navigating the browser to a raw JSON error body.
+  def test_target_genes_has_an_action_status_container
+    get '/target_genes'
+    assert_includes last_response.body,
+                     '<div id="action-status" class="text-muted small mt-2" aria-live="polite"></div>'
+  end
+
   def test_target_genes_result_has_distance_switch_legend_and_download_link
     get '/target_genes_result'
     body = last_response.body
@@ -352,6 +418,15 @@ class PagesTest < Minitest::Test
     assert_includes body, 'id="secondary-list"'
     assert_includes body, 'col-md-3'
     refute_includes body, 'col-md-4', '/colo panels must match production col-md-3, not col-md-4'
+  end
+
+  # TG-15 (same pattern applied to Colo's two download buttons): colo.ts
+  # probes each download endpoint with HEAD first and reports a 404 here
+  # instead of navigating the browser to a raw JSON error body.
+  def test_colo_has_an_action_status_container
+    get '/colo'
+    assert_includes last_response.body,
+                     '<div id="action-status" class="text-muted small mt-2" aria-live="polite"></div>'
   end
 
   def test_colo_ships_a_live_picker_with_no_unavailable_notice

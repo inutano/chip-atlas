@@ -507,6 +507,18 @@ select.list-box option {
   cursor: pointer;
 }
 
+/* ===== ⓘ help popovers (SHELL-34) =====
+   Bootstrap 5's own .popover-body defaults to white-space: normal, so a
+   multi-line helpText string (e.g. Enrichment Analysis's "Gene list" help,
+   several bullet lines joined by \n - see info-popover.ts's own \n\n
+   separator comment) collapsed into one run-on paragraph instead of showing
+   its line breaks. --bs-popover-max-width is the CSS custom property
+   Bootstrap 5.3's .popover reads for its width (verified live); 24rem gives
+   that longer help text room to use its now-preserved line breaks instead of
+   wrapping into a tall, narrow column. */
+.popover { --bs-popover-max-width: 24rem; }
+.popover-body { white-space: pre-line; }
+
 /* ===== Experiment Comparative Profile (Task 18) ===== */
 .profile-img {
   max-width: 100%;

@@ -9,6 +9,13 @@ interface PageData {
   genomes: Record<string, string>
 }
 
+// TG-15: some antigen/genome/distance combinations (e.g. ce11's dead
+// `wdr-5` index entry) have no precomputed file on the data server. Blindly
+// navigating there landed the browser on a raw `{"error":"File not found"}`
+// JSON response, away from this page entirely - matching production's own
+// alert (target_genes.js:64-77), just shown inline instead of blocking.
+const NO_DATA_MESSAGE = 'No data found for this combination.'
+
 let currentGenome = ''
 let currentTrack = ''
 let allTracks: TargetGenesIndex = {}
@@ -69,7 +76,7 @@ async function init(): Promise<void> {
     window.location.href = `/target_genes_result?${params.toString()}`
   })
 
-  $('download-tsv').addEventListener('click', () => {
+  $('download-tsv').addEventListener('click', async () => {
     if (!currentGenome || !currentTrack) {
       alert('Select a genome and antigen first.')
       return
@@ -77,7 +84,21 @@ async function init(): Promise<void> {
     const params = new URLSearchParams({
       genome: currentGenome, track: currentTrack, distance: getDistance(), format: 'tsv',
     })
-    window.location.href = `/api/target_genes/download?${params.toString()}`
+    const url = `/api/target_genes/download?${params.toString()}`
+    const status = $('action-status')
+    status.textContent = ''
+    try {
+      const res = await fetch(url, { method: 'HEAD' })
+      if (!res.ok) {
+        status.textContent = NO_DATA_MESSAGE
+        return
+      }
+    } catch (err) {
+      console.error(err)
+      status.textContent = NO_DATA_MESSAGE
+      return
+    }
+    window.location.href = url
   })
 }
 

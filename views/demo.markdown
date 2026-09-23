@@ -18,7 +18,7 @@ https://chip-atlas.org/llms.txt
 
 **Step 2:** Paste it into your preferred LLM (ChatGPT, Claude, Gemini, etc.) along with a question:
 
-> Here is the documentation for ChIP-Atlas: https://chip-atlas.org/llms.txt
+> Here is the documentation for ChIP-Atlas: <https://chip-atlas.org/llms.txt>
 >
 > What histone modification data is available for human blood cells?
 

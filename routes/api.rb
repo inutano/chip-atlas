@@ -204,6 +204,19 @@ module ChipAtlas
                 when 'gml' then svc.colo_gml_url
                 else halt 400, json_response({ error: "Unknown format: #{params[:format]}. Available: tsv, gml" })
                 end
+
+          # TG-15: the frontend probes this URL with HEAD before navigating,
+          # purely to ask "does this exist?" - GML files run up to ~33 MB, so
+          # answer that with a HEAD to the data server (DataProxy.exists?)
+          # rather than pulling the whole body through `fetch` just to
+          # discard it. Same status/body shape as the GET 404 below, so a
+          # caller sees identical semantics from either verb.
+          if request.head?
+            halt 404, json_response({ error: 'File not found' }) unless ChipAtlas::DataProxy.exists?(url)
+            content_type params[:format] == 'tsv' ? 'text/tab-separated-values' : 'application/xml'
+            halt 200
+          end
+
           body = ChipAtlas::DataProxy.fetch(url)
           halt 404, json_response({ error: 'File not found' }) unless body
           content_type params[:format] == 'tsv' ? 'text/tab-separated-values' : 'application/xml'
@@ -248,6 +261,15 @@ module ChipAtlas
                 when 'tsv' then svc.target_genes_tsv_url
                 else halt 400, json_response({ error: "Unknown format: #{params[:format]}. Available: tsv" })
                 end
+
+          # TG-15: see the matching HEAD short-circuit in /api/colo/download
+          # above.
+          if request.head?
+            halt 404, json_response({ error: 'File not found' }) unless ChipAtlas::DataProxy.exists?(url)
+            content_type 'text/tab-separated-values'
+            halt 200
+          end
+
           body = ChipAtlas::DataProxy.fetch(url)
           halt 404, json_response({ error: 'File not found' }) unless body
           content_type 'text/tab-separated-values'

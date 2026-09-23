@@ -114,6 +114,8 @@
   </div>
 </div>
 
+<div id="service-notice" hidden></div>
+
 <div class="row">
   <div class="col-md-10 offset-md-1 markdown-content">
     <%== Kramdown::Document.new(File.read(File.join(settings.views, 'updates.markdown')), input: 'GFM', hard_wrap: false).to_html %>

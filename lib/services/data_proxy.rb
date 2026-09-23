@@ -26,6 +26,7 @@ module ChipAtlas
     LiveFetchNotStubbed = Class.new(StandardError)
 
     @fetcher = nil
+    @exists_fetcher = nil
 
     module_function
 
@@ -36,11 +37,32 @@ module ChipAtlas
       @fetcher = callable
     end
 
+    # Test-only hook for `exists?` below (TG-15's HEAD existence probe).
+    # Deliberately a separate stub from `fetcher=`: it lets a test prove a
+    # HEAD request only ever exercises this light path and never falls
+    # through to the full `fetch`/`fetcher` seam - if it did, `fetch` would
+    # find `@fetcher` nil under RACK_ENV=test and raise
+    # LiveFetchNotStubbed, failing the test loudly (see api_test.rb).
+    def exists_fetcher=(callable)
+      @exists_fetcher = callable
+    end
+
     def fetch(url)
       return @fetcher.call(url) if @fetcher
 
       raise_if_unstubbed_under_test!(url)
       fetch_live(url)
+    end
+
+    # Lightweight existence probe for HEAD requests (TG-15): a HEAD to the
+    # data server rather than the full GET `fetch` does, so a combination's
+    # ~33 MB GML file is never pulled into memory just to answer "does this
+    # exist?" for a client that only asked for headers.
+    def exists?(url)
+      return @exists_fetcher.call(url) if @exists_fetcher
+
+      raise_if_unstubbed_under_test!(url)
+      exists_live?(url)
     end
 
     def raise_if_unstubbed_under_test!(url)
@@ -68,6 +90,20 @@ module ChipAtlas
       nil
     end
 
-    private_class_method :raise_if_unstubbed_under_test!, :fetch_live
+    def exists_live?(url)
+      uri = URI.parse(url)
+      return false unless uri.host == DATA_HOST
+
+      http = Net::HTTP.new(uri.host, uri.port)
+      http.use_ssl = true
+      http.open_timeout = 10
+      http.read_timeout = 30
+      response = http.request_head(uri.request_uri)
+      response.code == '200'
+    rescue SocketError, Timeout::Error, Errno::ECONNREFUSED, Net::HTTPError
+      false
+    end
+
+    private_class_method :raise_if_unstubbed_under_test!, :fetch_live, :exists_live?
   end
 end

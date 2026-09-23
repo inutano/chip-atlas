@@ -526,6 +526,64 @@ class ApiTest < Minitest::Test
     assert_equal 400, last_response.status
   end
 
+  # --- HEAD requests (TG-15) ---
+  #
+  # The frontend probes these download URLs with HEAD before navigating, to
+  # show an inline "No data found" message instead of navigating the whole
+  # browser to a 404 JSON body. Sinatra maps HEAD to GET automatically, but a
+  # GML file can run to ~33 MB, so both routes short-circuit a HEAD request
+  # to a HEAD-only existence probe (DataProxy.exists?) rather than pulling
+  # the whole body through DataProxy.fetch first (see routes/api.rb).
+  #
+  # These stub only `exists_fetcher=`, leaving `fetcher=` unset. If a route
+  # ever regressed to falling through to the full `fetch` path for a HEAD
+  # request, DataProxy.fetch would find no fetcher stubbed under
+  # RACK_ENV=test and raise LiveFetchNotStubbed (Sinatra's test-mode
+  # raise_errors is on by default - see jobs_test.rb's note on the same
+  # behaviour) - failing these loudly rather than passing by accident.
+
+  def test_colo_download_head_returns_200_via_the_lightweight_existence_probe
+    ChipAtlas::DataProxy.exists_fetcher = ->(_url) { true }
+
+    head '/api/colo/download', genome: 'mm10', track: 'Stat3', cell_type: 'CellA', format: 'gml'
+
+    assert_equal 200, last_response.status
+    assert_empty last_response.body
+  ensure
+    ChipAtlas::DataProxy.exists_fetcher = nil
+  end
+
+  def test_colo_download_head_missing_file_returns_404_without_the_full_fetch
+    ChipAtlas::DataProxy.exists_fetcher = ->(_url) { false }
+
+    head '/api/colo/download', genome: 'mm10', track: 'NoSuchTrack', cell_type: 'NoSuchCellType', format: 'tsv'
+
+    assert_equal 404, last_response.status
+  ensure
+    ChipAtlas::DataProxy.exists_fetcher = nil
+  end
+
+  def test_target_genes_download_head_returns_200_via_the_lightweight_existence_probe
+    ChipAtlas::DataProxy.exists_fetcher = ->(_url) { true }
+
+    head '/api/target_genes/download', genome: 'mm10', track: 'Stat3', distance: '1', format: 'tsv'
+
+    assert_equal 200, last_response.status
+    assert_empty last_response.body
+  ensure
+    ChipAtlas::DataProxy.exists_fetcher = nil
+  end
+
+  def test_target_genes_download_head_missing_file_returns_404_without_the_full_fetch
+    ChipAtlas::DataProxy.exists_fetcher = ->(_url) { false }
+
+    head '/api/target_genes/download', genome: 'ce11', track: 'wdr-5', distance: '1', format: 'tsv'
+
+    assert_equal 404, last_response.status
+  ensure
+    ChipAtlas::DataProxy.exists_fetcher = nil
+  end
+
   # /api/remote_url_status must rescue the fuller set of transient upstream
   # failures (matching lib/services/service_monitor.rb, plus ECONNRESET and
   # EHOSTUNREACH) rather than let them escape as an uncaught Sinatra 500 -

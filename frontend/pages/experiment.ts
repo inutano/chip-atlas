@@ -115,6 +115,14 @@ function buildVisualizeMenu(data: PageData): HTMLElement[] {
   return items
 }
 
+// SV-27: production hides the whole Analyze button group for Bisulfite-Seq
+// experiments (experiment.js:126-131) because neither Colocalization nor
+// Target Genes has Bisulfite-Seq data - the menu this page built for one
+// linked to HTML that doesn't exist on the data server.
+export function showAnalyzeMenu(trackClass: string): boolean {
+  return trackClass !== 'Bisulfite-Seq'
+}
+
 function buildAnalyzeMenu(data: PageData): HTMLElement[] {
   const items: HTMLElement[] = []
   data.records.forEach((record, i) => {
@@ -295,11 +303,21 @@ function init(): void {
   const data = readData()
   if (!data || data.records.length === 0) return
   fill('visualize-menu', buildVisualizeMenu(data))
-  fill('analyze-menu', buildAnalyzeMenu(data))
+  if (showAnalyzeMenu(data.records[0].track_class)) {
+    fill('analyze-menu', buildAnalyzeMenu(data))
+  } else {
+    const analyzeGroup = document.getElementById('analyze-dropdown')
+    if (analyzeGroup) analyzeGroup.hidden = true
+  }
   fill('download-menu', buildDownloadMenu(data))
   fill('linkout-menu', buildLinkOutMenu(data))
   wireIgvLinks()
   initComparativeProfile()
 }
 
-document.addEventListener('DOMContentLoaded', init)
+// Guarded so showAnalyzeMenu can be imported and unit-tested under plain
+// Node, which has no `document` — see experiment.test.ts, and
+// enrichment-analysis.ts / colo.ts / peak-browser.ts for the same pattern.
+if (typeof document !== 'undefined') {
+  document.addEventListener('DOMContentLoaded', init)
+}
