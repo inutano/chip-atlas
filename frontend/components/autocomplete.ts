@@ -112,13 +112,29 @@ export function exactMatch(items: string[], text: string): string | null {
 // exact match is always a member of it, since filtering is substring
 // inclusion and a string always contains itself, and "still among the
 // filtered items" only means something for the set currently shown.
+//
+// `force` (2026-09-24 fix round 2): skips the "keep current" branch
+// entirely, straight to the first item. Autocomplete.setItems uses this for
+// a wholesale item replacement (a new genome, a new primary's partners...),
+// which has no relationship to whatever was selected before -- unlike a
+// single typing session narrowing the *same* list (open()'s case, `force`
+// left at its default `false`), where staying on a still-matching row avoids
+// visible flicker. Without it, a coincidental shared member (e.g. "Others"
+// being a valid partner of two different antigens) made setItems wrongly
+// carry the old antigen's secondary selection over to the new one instead of
+// resetting like a fresh list should -- verified live on /colo: picking
+// STAT3 left the secondary panel on "Others" (inherited from the initial
+// antigen, AATF, whose only partner is "Others") instead of resetting to
+// STAT3's own first partner.
 export function resolvePairedSelection(
   items: string[],
   query: string,
   current: string | null,
+  force = false,
 ): { selected: string | null; changed: boolean } {
   const exact = exactMatch(items, query)
-  const selected = exact ?? (current !== null && items.includes(current) ? current : (items[0] ?? null))
+  const keepCurrent = !force && current !== null && items.includes(current)
+  const selected = exact ?? (keepCurrent ? current : (items[0] ?? null))
   return { selected, changed: selected !== current }
 }
 
@@ -245,8 +261,8 @@ export const Autocomplete = {
       })
       // `items` is always [] for every caller in this codebase (colo.ts,
       // target-genes.ts) — nothing to select yet. The Autocomplete.setItems
-      // call every page makes right after init does the real sync, boolean
-      // return and all (see below).
+      // call every page makes right after init does the real sync (see
+      // below).
     }
 
     input.addEventListener('focus', () => open(inst))
@@ -271,18 +287,21 @@ export const Autocomplete = {
     if (!inst) return
     inst.items = items
     if (inst.listBox) {
-      // Prefer the page's last approved selection over whatever the box
-      // happens to be showing, same as open(); consume the boolean Task 1
-      // added so a genuinely new list (e.g. a different genome's antigens,
-      // no longer containing it) tells the page about the row it lands on
-      // instead of leaving that only on screen.
-      const autoSelected = inst.listBox.setOptions(toOptions(items), inst.selected ?? undefined)
-      if (autoSelected) {
-        const value = inst.listBox.value
-        if (value != null) {
-          inst.selected = value
-          inst.onSelect(value)
-        }
+      // 2026-09-24 fix round 2: force=true -- a wholesale item replacement,
+      // not the same list narrowing under one typing session, so any
+      // previous `inst.selected` is irrelevant here even when, by
+      // coincidence, it is still technically present in the new items (see
+      // resolvePairedSelection's comment). Always announce the result,
+      // unconditionally: the *page's* own state can be stale independent of
+      // whether this component's own bookkeeping thinks anything changed --
+      // colo.ts, e.g., zeroes its own currentSecondary right before calling
+      // this, so a resolved value that happens to equal the component's
+      // last-known `inst.selected` still needs telling to the page.
+      const { selected } = resolvePairedSelection(items, '', inst.selected, true)
+      inst.listBox.setOptions(toOptions(items), selected ?? undefined)
+      if (selected != null) {
+        inst.selected = selected
+        inst.onSelect(selected)
       }
     }
     if (document.activeElement === input) open(inst)

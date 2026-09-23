@@ -84,3 +84,34 @@ test('resolvePairedSelection: an empty item list reports a change when something
     { selected: null, changed: true },
   )
 })
+
+// force (2026-09-24 fix round 2): Autocomplete.setItems' contract for a
+// wholesale item replacement. "Others" is a valid partner of more than one
+// antigen in the real /api/colo_index data (AATF's only partner, and one of
+// STAG1's/STAT3's ten) -- without `force`, setItems wrongly kept "Others"
+// selected for a brand new antigen's partner list just because the string
+// happened to still be present, instead of resetting like a fresh list
+// should. Verified live: picking STAT3 left the secondary panel on "Others"
+// (carried over from the initial antigen, AATF) rather than resetting to
+// STAT3's own first partner, Blood.
+
+test('resolvePairedSelection: force=true skips "keep current" and always defaults to the first item', () => {
+  assert.deepEqual(
+    resolvePairedSelection(['Blood', 'Bone', 'Others'], '', 'Others', true),
+    { selected: 'Blood', changed: true },
+  )
+})
+
+test('resolvePairedSelection: force=true still lets an exact query match win (setItems never passes a query, but the priority still holds)', () => {
+  assert.deepEqual(
+    resolvePairedSelection(['Blood', 'Bone'], 'bone', 'Blood', true),
+    { selected: 'Bone', changed: true },
+  )
+})
+
+test('resolvePairedSelection: force defaults to false, leaving open()\'s existing "keep current" behaviour unchanged', () => {
+  assert.deepEqual(
+    resolvePairedSelection(['Blood', 'Bone', 'Others'], '', 'Others'),
+    { selected: 'Others', changed: false },
+  )
+})
