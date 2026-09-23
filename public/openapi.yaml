@@ -2,7 +2,7 @@ openapi: 3.1.0
 
 info:
   title: ChIP-Atlas API
-  version: "2.0.1"
+  version: "2.0.2"
   description: >-
     REST API for ChIP-Atlas, a comprehensive database of public ChIP-seq,
     ATAC-seq, DNase-seq, and Bisulfite-seq experiments.
@@ -38,6 +38,10 @@ tags:
     description: Colocalization and target gene analysis indices
   - name: Jobs
     description: Submit and monitor enrichment/differential analysis jobs
+  - name: Internal
+    description: >-
+      Endpoints the web UI uses internally. Not designed for external
+      agents, but real and reachable, so documented rather than omitted.
 
 components:
   parameters:
@@ -903,6 +907,69 @@ paths:
           description: >-
             Missing genome/track_class, or genome is not a recognised
             assembly. Body is `{"error": "..."}`.
+    post:
+      operationId: postDownloadUrl
+      tags: [URL Generation]
+      summary: Get download URL for peak-call BED data (POST form)
+      description: >-
+        Same as the GET form, with the condition in a JSON body instead of
+        query parameters - this is what the web UI itself submits. Only
+        condition.genome is validated here: an omitted track_class (or
+        other field) is not rejected with 400 the way the GET form
+        requires it - it simply resolves to url: null, same as any other
+        non-matching condition.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [condition]
+              properties:
+                condition:
+                  type: object
+                  required: [genome]
+                  properties:
+                    genome:
+                      $ref: "#/components/schemas/GenomeAssembly"
+                    track_class:
+                      type: string
+                    track_subclass:
+                      type: string
+                    cell_type_class:
+                      type: string
+                    cell_type_subclass:
+                      type: string
+                    qval:
+                      type: string
+            example:
+              condition:
+                genome: hg38
+                track_class: Histone
+                track_subclass: H3K4me3
+                cell_type_class: Blood
+                cell_type_subclass: "-"
+                qval: "05"
+      responses:
+        "200":
+          description: Object containing the download URL
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  url:
+                    type:
+                      - string
+                      - "null"
+                    format: uri
+              example:
+                url: "https://chip-atlas.dbcls.jp/data/hg38/assembled/His.Bld.05.H3K4me3.AllCell.bed"
+        "400":
+          description: >-
+            condition is missing or not an object, condition.genome is
+            missing or not a recognised assembly, or the JSON body itself
+            is malformed/non-object/absent. Body is `{"error": "..."}`.
 
   /api/igv_url:
     get:
@@ -939,6 +1006,76 @@ paths:
           description: >-
             Missing genome/track_class, or genome is not a recognised
             assembly. Body is `{"error": "..."}`.
+    post:
+      operationId: postIgvUrl
+      tags: [URL Generation]
+      summary: Get IGV browser URL (POST form)
+      description: >-
+        Same as the GET form, with the condition in a JSON body instead of
+        query parameters - this is what the web UI itself submits. An
+        optional top-level igv field overrides the base URL the returned
+        link is built against (the local IGV desktop app's listener,
+        default http://localhost:60151). Like POST /api/download_url,
+        only condition.genome is validated - an omitted track_class is
+        not rejected with 400.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [condition]
+              properties:
+                igv:
+                  type: string
+                  description: >-
+                    Base URL for the local IGV desktop app's HTTP
+                    listener. Defaults to http://localhost:60151.
+                  example: http://localhost:60151
+                condition:
+                  type: object
+                  required: [genome]
+                  properties:
+                    genome:
+                      $ref: "#/components/schemas/GenomeAssembly"
+                    track_class:
+                      type: string
+                    track_subclass:
+                      type: string
+                    cell_type_class:
+                      type: string
+                    cell_type_subclass:
+                      type: string
+                    qval:
+                      type: string
+            example:
+              condition:
+                genome: hg38
+                track_class: Histone
+                track_subclass: H3K4me3
+                cell_type_class: Blood
+                cell_type_subclass: "-"
+                qval: "05"
+      responses:
+        "200":
+          description: Object containing the IGV browser URL
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  url:
+                    type:
+                      - string
+                      - "null"
+                    format: uri
+              example:
+                url: "http://localhost:60151/load?genome=hg38&file=https://chip-atlas.dbcls.jp/data/hg38/assembled/His.Bld.05.H3K4me3.AllCell.bed"
+        "400":
+          description: >-
+            condition is missing or not an object, condition.genome is
+            missing or not a recognised assembly, or the JSON body itself
+            is malformed/non-object/absent. Body is `{"error": "..."}`.
 
   /api/colo:
     get:
@@ -1562,3 +1699,174 @@ paths:
           description: >-
             The requested backend is not currently reachable. Body is
             the plain text "Backend unavailable".
+
+  /jobs/estimated_time:
+    post:
+      operationId: getEstimatedTime
+      tags: [Jobs]
+      summary: Estimate differential analysis runtime
+      description: >-
+        Estimates runtime, in minutes, for a differential analysis job
+        from its total read count, using a fitted regression specific to
+        analysis. Used by the Diff Analysis UI to show an estimate before
+        submission; independent of /jobs/submit - no job is created and
+        no id is returned.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                analysis:
+                  type: string
+                  description: >-
+                    Differential analysis type. Any other value (or an
+                    absent field) makes the estimate null.
+                  enum: [dmr, diffbind]
+                ids:
+                  type: array
+                  items:
+                    type: string
+                  description: >-
+                    Experiment accession IDs (SRX/GSM) whose total read
+                    count feeds the estimate. An absent or empty array is
+                    treated as 0 reads.
+              example:
+                analysis: dmr
+                ids: ["SRX018625", "SRX018626"]
+      responses:
+        "200":
+          description: Estimated runtime
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  minutes:
+                    type:
+                      - integer
+                      - "null"
+                    description: >-
+                      Estimated minutes, or null when analysis is not one
+                      of dmr/diffbind, or when analysis is dmr and the
+                      total read count is 0 (dmr's formula is logarithmic
+                      and undefined at 0 reads). diffbind's formula is
+                      linear and never returns null, even at 0 reads.
+              example:
+                minutes: 9
+        "400":
+          description: >-
+            Malformed, non-object, or absent JSON body. Body is
+            `{"error": "Invalid JSON"}`, `{"error": "JSON body must be
+            an object"}`, or `{"error": "No JSON body"}`.
+
+  # ── Internal ────────────────────────────────────────────────────────
+  # Used by the web UI itself, not designed for external agents - listed
+  # here only so the spec doesn't silently omit real, reachable routes
+  # (see the drift-guard test, test/routes/openapi_test.rb).
+
+  /health:
+    get:
+      operationId: getHealth
+      tags: [Internal]
+      summary: Internal health check
+      x-internal: true
+      description: >-
+        Liveness check for load balancers and deployment scripts - not
+        part of the public agent-facing surface (see /status for that,
+        which covers external service reachability instead). 200 when
+        the database is reachable, 503 otherwise.
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    enum: [ok]
+                  checks:
+                    type: object
+                    properties:
+                      database:
+                        type: string
+                        enum: [ok]
+                      experiments:
+                        type: string
+                        enum: [ok, empty]
+                        description: >-
+                          "empty" means the experiments table has zero
+                          rows - reported for visibility only; it does not
+                          affect the 200/503 status.
+              example:
+                status: ok
+                checks:
+                  database: ok
+                  experiments: ok
+        "503":
+          description: The database is unreachable.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    enum: [error]
+                  checks:
+                    type: object
+                    properties:
+                      database:
+                        type: string
+                        enum: [error]
+                      database_error:
+                        type: string
+                        description: The rescued exception's message.
+              example:
+                status: error
+                checks:
+                  database: error
+                  database_error: "..."
+
+  /api/remote_url_status:
+    get:
+      operationId: getRemoteUrlStatus
+      tags: [Internal]
+      summary: Check an upstream URL's HTTP status (internal helper)
+      x-internal: true
+      description: >-
+        Used by the experiment page to probe whether a data-backend image
+        (a distribution/correlation PNG) exists before showing it, via a
+        HEAD request. Not a general-purpose URL checker: url must be on
+        an allowlisted host (chip-atlas.dbcls.jp, dtn1.ddbj.nig.ac.jp, or
+        a subdomain of either) or the request is rejected with 400.
+        Agents should not rely on this endpoint.
+      parameters:
+        - name: url
+          in: query
+          required: true
+          description: Absolute http(s) URL on an allowlisted host to probe.
+          schema:
+            type: string
+          example: https://chip-atlas.dbcls.jp/data/metadata/experimentList.tab
+      responses:
+        "200":
+          description: >-
+            Always 200, even when the probe itself fails - the plain-text
+            body carries the outcome instead: the upstream response's own
+            HTTP status code (e.g. "200", "404"), or "500" if the probe
+            raised (timeout, connection refused, TLS error, etc). Only a
+            genuine upstream response is cached (Cache-Control: public,
+            max-age=3600); a synthetic "500" is not.
+          content:
+            text/plain:
+              schema:
+                type: string
+              example: "200"
+        "400":
+          description: >-
+            url is missing, or not on an allowlisted host. Body is the
+            plain text "Invalid or disallowed URL".
