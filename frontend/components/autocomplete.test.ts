@@ -10,7 +10,7 @@
 
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { exactMatch } from './autocomplete'
+import { exactMatch, resolvePairedSelection } from './autocomplete'
 
 const ITEMS = ['AATF', 'STAT3']
 
@@ -32,4 +32,55 @@ test('exactMatch: whitespace-only text returns null', () => {
 
 test('exactMatch: a substring match is not an exact match', () => {
   assert.equal(exactMatch(ITEMS, 'AAT'), null)
+})
+
+// resolvePairedSelection: the paired ListBox's selection after a keystroke
+// or a fresh item list, as one decision (2026-09-24 review, finding 3) —
+// exact match, then a still-present current selection, then the first item.
+// See autocomplete.ts's comment above the function for the bug this
+// replaces: a partial query's auto-selected first row never used to reach
+// the page's own state.
+
+test('resolvePairedSelection: an exact match wins even over a still-valid current selection', () => {
+  assert.deepEqual(
+    resolvePairedSelection(['STAG1', 'STAT3'], 'stat3', 'STAG1'),
+    { selected: 'STAT3', changed: true },
+  )
+})
+
+test('resolvePairedSelection: keeps the current selection when it is still among the filtered items', () => {
+  // STAG1 is not alphabetically first (STAG2 is), so this only passes if
+  // "keep current" is actually checked before "default to first".
+  assert.deepEqual(
+    resolvePairedSelection(['STAG2', 'STAG1'], 'stag', 'STAG1'),
+    { selected: 'STAG1', changed: false },
+  )
+})
+
+test('resolvePairedSelection: falls back to the first filtered item when current is no longer present', () => {
+  assert.deepEqual(
+    resolvePairedSelection(['STAG1', 'STAT3'], 'sta', 'AATF'),
+    { selected: 'STAG1', changed: true },
+  )
+})
+
+test('resolvePairedSelection: falls back to the first item when there is no current selection yet', () => {
+  assert.deepEqual(
+    resolvePairedSelection(['AATF', 'STAT3'], '', null),
+    { selected: 'AATF', changed: true },
+  )
+})
+
+test('resolvePairedSelection: an empty item list resolves to no selection', () => {
+  assert.deepEqual(
+    resolvePairedSelection([], '', null),
+    { selected: null, changed: false },
+  )
+})
+
+test('resolvePairedSelection: an empty item list reports a change when something was previously selected', () => {
+  assert.deepEqual(
+    resolvePairedSelection([], 'zz', 'AATF'),
+    { selected: null, changed: true },
+  )
 })

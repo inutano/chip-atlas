@@ -69,14 +69,29 @@ export function initInfoPopovers(root: ParentNode, helpText: Record<string, Help
     if (!topic) return
 
     new Popover(btn, {
-      content: typeof topic === 'string' ? topic : buildLinkedContent(topic),
+      // A function, not the built fragment itself (2026-09-24 review): a
+      // Bootstrap popover disposes its tip on every hide and rebuilds it on
+      // the next show by re-resolving this same `content` value
+      // (TemplateFactory#_resolvePossibleFunction calls a function value
+      // fresh each time, but returns anything else, including a
+      // DocumentFragment, unchanged). A DocumentFragment's children move out
+      // of it the moment it is first appended into the DOM
+      // (TemplateFactory#_putElementInTemplate's `html` branch does
+      // `element.append(fragment)`), so handing over one already-built
+      // fragment left it empty for every show after the first — verified
+      // headless: `.popover-body` was `""` on re-open. A function gets each
+      // show its own fragment.
+      content: typeof topic === 'string' ? topic : () => buildLinkedContent(topic),
       trigger: 'focus click',
       placement: 'top',
-      // Bootstrap treats a DocumentFragment/Element `content` as already
-      // trusted markup regardless of this flag (it is appended directly, not
-      // parsed via innerHTML — see TemplateFactory#_setContent), so this only
-      // ever governs the plain-string case; a raw HTML *string* built from
-      // data is never passed here for either topic shape.
+      // `html` does govern element/fragment content, not only markup
+      // strings, contrary to what this comment used to claim:
+      // TemplateFactory#_putElementInTemplate's non-html branch does
+      // `templateElement.textContent = element.textContent`, which reads the
+      // fragment's flattened text and drops the real `<a>` element entirely.
+      // A linked topic needs `html: true` to keep that link instead of just
+      // its text; a raw HTML *string* built from data is still never passed
+      // here for either topic shape.
       html: typeof topic !== 'string',
     })
 

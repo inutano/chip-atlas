@@ -19,6 +19,13 @@ interface Instance {
   active: number
   onSelect: (value: string) => void
   listBox?: ListBox
+  // The last value handed to onSelect, so a later re-render (a keystroke's
+  // filtered set, a fresh Autocomplete.setItems list) can tell a value it
+  // already told the page about from a brand new auto-selection. Not the
+  // same thing as the paired ListBox's own `.value`: that reflects whatever
+  // is merely highlighted right now, including a row nothing has approved
+  // yet (see resolvePairedSelection).
+  selected: string | null
 }
 
 const MAX_RESULTS = 50
@@ -89,23 +96,30 @@ export function exactMatch(items: string[], text: string): string | null {
   return null
 }
 
-// After the paired ListBox (re)populates, ListBox.setOptions — absent a
-// `selected` it can match, which Autocomplete never passes — always lands on
-// row one (list-box.ts), the same way production's appendOptions always gave
-// the first <option> selected="selected" outright (colo.js:107-125,
-// target_genes.js:113-120). Nothing fired onChange for that, so the page's
-// own state (currentPrimary, currentTrack, ...) does not know about it yet.
-// Tell it, the same way a user's own click would — but only when the input
-// agrees with that row, so a value the user is still typing (not yet an
-// exact match) is not silently overridden by whatever now sits on top.
-function syncListBoxSelection(inst: Instance): void {
-  const { listBox, input, items, onSelect } = inst
-  if (!listBox) return
-  const value = listBox.value
-  if (value == null) return
-  if (input.value === '' || exactMatch(items, input.value) === value) {
-    onSelect(value)
-  }
+// The paired ListBox's selection after a keystroke, as one decision instead
+// of two competing ones (2026-09-24 review, COLO-04/TG-09 follow-up).
+// Before this, open() repopulated the box with the filtered set on every
+// keystroke and let ListBox.setOptions auto-select its first row — with no
+// `selected` to match, since Autocomplete never passed one — while a
+// separate `input` listener forced the box to an exact text match. Neither
+// told the page about the other's outcome in any defined order: typing "sta"
+// visibly highlighted STAG1 while the page's own state still held the very
+// first antigen loaded at page load, so "View" navigated with the wrong
+// track.
+//
+// `items` is whatever set is actually on screen (the paired list's filtered
+// options — see filterForPairedList — not the full unfiltered item list): an
+// exact match is always a member of it, since filtering is substring
+// inclusion and a string always contains itself, and "still among the
+// filtered items" only means something for the set currently shown.
+export function resolvePairedSelection(
+  items: string[],
+  query: string,
+  current: string | null,
+): { selected: string | null; changed: boolean } {
+  const exact = exactMatch(items, query)
+  const selected = exact ?? (current !== null && items.includes(current) ? current : (items[0] ?? null))
+  return { selected, changed: selected !== current }
 }
 
 function render(inst: Instance): void {
@@ -146,6 +160,8 @@ function select(inst: Instance, index: number): void {
   const value = inst.filtered[index]
   if (value == null) return
   inst.input.value = value
+  inst.selected = value
+  if (inst.listBox) inst.listBox.value = value
   inst.onSelect(value)
   close(inst)
 }
@@ -154,7 +170,15 @@ function open(inst: Instance): void {
   inst.filtered = filter(inst.items, inst.input.value)
   inst.active = inst.filtered.length > 0 ? 0 : -1
   render(inst)
-  if (inst.listBox) inst.listBox.setOptions(toOptions(filterForPairedList(inst.items, inst.input.value)))
+  if (inst.listBox) {
+    const pairedItems = filterForPairedList(inst.items, inst.input.value)
+    const { selected, changed } = resolvePairedSelection(pairedItems, inst.input.value, inst.selected)
+    inst.listBox.setOptions(toOptions(pairedItems), selected ?? undefined)
+    if (changed) {
+      inst.selected = selected
+      if (selected != null) inst.onSelect(selected)
+    }
+  }
 }
 
 function close(inst: Instance): void {
@@ -197,7 +221,7 @@ function attachKeyboard(inst: Instance): void {
 export const Autocomplete = {
   init(input: HTMLInputElement, items: string[], onSelect: (value: string) => void, opts?: AutocompleteOptions): void {
     const menu = buildMenu()
-    const inst: Instance = { input, menu, items, filtered: [], active: -1, onSelect }
+    const inst: Instance = { input, menu, items, filtered: [], active: -1, onSelect, selected: null }
     registry.set(input, inst)
 
     input.setAttribute('autocomplete', 'off')
@@ -214,29 +238,26 @@ export const Autocomplete = {
         options: toOptions(items),
         onChange: (value) => {
           input.value = value
+          inst.selected = value
           onSelect(value)
           close(inst)
         },
       })
-      syncListBoxSelection(inst)
+      // `items` is always [] for every caller in this codebase (colo.ts,
+      // target-genes.ts) — nothing to select yet. The Autocomplete.setItems
+      // call every page makes right after init does the real sync, boolean
+      // return and all (see below).
     }
 
     input.addEventListener('focus', () => open(inst))
+    // 2026-09-24 review: this used to be two separate `input` listeners —
+    // this one (filtering, and repopulating the paired list box) and a
+    // second one forcing the box to an exact text match — with no defined
+    // order between them. open() now resolves the paired box's selection
+    // itself (exact match first: see resolvePairedSelection), so one
+    // listener is enough and "exact match wins" is guaranteed by that
+    // function's own branch order rather than by listener registration order.
     input.addEventListener('input', () => open(inst))
-    // Production's typeahead:select/keyup handler kept the <select> in sync
-    // with whatever the input named exactly, even without Enter or a
-    // suggestion click (colo.js:151-159, target_genes.js:152-157). This must
-    // run after the open() listener above: open() repopulates the paired
-    // list box to the filtered set (and, absent a match, re-lands it on that
-    // set's first row) on every keystroke, which would otherwise clobber the
-    // forced selection made here.
-    input.addEventListener('input', () => {
-      const m = exactMatch(inst.items, input.value)
-      if (m && inst.listBox) {
-        inst.listBox.value = m
-        onSelect(m)
-      }
-    })
     input.addEventListener('blur', () => {
       // Delay close so a click on the menu can fire first.
       setTimeout(() => close(inst), 100)
@@ -250,8 +271,19 @@ export const Autocomplete = {
     if (!inst) return
     inst.items = items
     if (inst.listBox) {
-      inst.listBox.setOptions(toOptions(items))
-      syncListBoxSelection(inst)
+      // Prefer the page's last approved selection over whatever the box
+      // happens to be showing, same as open(); consume the boolean Task 1
+      // added so a genuinely new list (e.g. a different genome's antigens,
+      // no longer containing it) tells the page about the row it lands on
+      // instead of leaving that only on screen.
+      const autoSelected = inst.listBox.setOptions(toOptions(items), inst.selected ?? undefined)
+      if (autoSelected) {
+        const value = inst.listBox.value
+        if (value != null) {
+          inst.selected = value
+          inst.onSelect(value)
+        }
+      }
     }
     if (document.activeElement === input) open(inst)
   },
