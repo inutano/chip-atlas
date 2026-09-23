@@ -52,7 +52,21 @@ module ChipAtlas
           data = parsed_json
           job_type = data['type'] || 'enrichment_analysis'
 
-          result = ChipAtlas::ComputeRouter.submit(job_type, data['params'] || data)
+          result = begin
+            ChipAtlas::ComputeRouter.submit(job_type, data['params'] || data)
+          rescue ChipAtlas::WabiService::UnknownAntigenClass => e
+            # Diff analysis's antigenClass selects a fixed threshold
+            # (WabiService::DIFF_ANALYSIS_THRESHOLD_BY_ANTIGEN_CLASS), and
+            # WabiService deliberately raises rather than guessing one for a
+            # value it doesn't recognise -- the right place to refuse (see
+            # wabi_service.rb). But this is a public HTTP endpoint, and the
+            # request supplied the bad value, so it gets an ordinary 400
+            # here instead of an unhandled exception reaching Sinatra's own
+            # error handling (an interactive backtrace page in development,
+            # a bare 500 in production).
+            halt 400, json_response({ error: e.message, retry: false })
+          end
+
           case result[:error]
           when nil
             log_activity('job_submit', { type: job_type, backend: result[:backend], job_id: result[:job_id] })

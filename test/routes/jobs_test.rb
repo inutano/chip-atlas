@@ -130,18 +130,28 @@ class JobsTest < Minitest::Test
     assert_equal 'Unexpected compute router response', data['error']
   end
 
-  # --- review round (D12 minor #2): pin what an unrecognized antigenClass
-  # does on the full route, not just inside WabiService (see
-  # wabi_service_test.rb for the unit-level assertions on the message
-  # itself). ---
+  # --- review round (D12 minor #2), corrected in Task 6 fix round 1: pin
+  # what an unrecognized antigenClass does on the full route, not just
+  # inside WabiService (see wabi_service_test.rb for the unit-level
+  # assertions on the message itself). This used to assert
+  # `assert_raises(ChipAtlas::WabiService::UnknownAntigenClass)`, which only
+  # pinned Sinatra's test-mode `raise_errors` behaviour (on by default under
+  # RACK_ENV=test) -- outside of tests, with diff_analysis now routed to
+  # WABI, the same raise would have gone unhandled and reached Sinatra's own
+  # error handling (an interactive backtrace page in development, a bare 500
+  # in production) on a documented public endpoint. routes/jobs.rb now
+  # rescues this and halts 400, so this asserts the real HTTP response. ---
 
-  def test_jobs_submit_raises_for_diff_analysis_with_an_unrecognized_antigen_class
+  def test_jobs_submit_400s_for_diff_analysis_with_an_unrecognized_antigen_class
     ChipAtlas::WabiService.poster = ->(_params) { flunk 'must not reach the poster -- the raise happens before posting' }
     stub_module_method(ChipAtlas::ServiceMonitor, :status, true) do
-      assert_raises(ChipAtlas::WabiService::UnknownAntigenClass) do
-        post_json '/jobs/submit', { type: 'diff_analysis', params: { genome: 'hg38', antigenClass: 'bogus' } }
-      end
+      post_json '/jobs/submit', { type: 'diff_analysis', params: { genome: 'hg38', antigenClass: 'bogus' } }
     end
+    assert_equal 400, last_response.status
+    assert_equal 'application/json', last_response.content_type.to_s.split(';').first
+    data = JSON.parse(last_response.body)
+    assert_includes data['error'], 'diffbind'
+    assert_includes data['error'], 'dmr'
   end
 
   def test_jobs_submit_succeeds_and_the_server_merged_enrichment_analysis_operational_fields_only

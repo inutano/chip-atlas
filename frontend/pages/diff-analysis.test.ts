@@ -107,15 +107,21 @@ test('createGenomeDatasetStore: clear blanks only the given genome', () => {
 })
 
 // ===== Availability UI state (Task C4 part 2, relocated from C3/D12) =====
-// GET /jobs/available?type=diff_analysis is now honest (ComputeRouter maps
-// diff_analysis to no backends), but nothing called it, so the page still
-// showed a complete, fillable form that could never submit. These tests pin
-// resolveAvailabilityUiState's decision table, in particular the fail-safe
-// choice for a failed check (availability === null): fail OPEN (leave the
-// form enabled), because POST /jobs/submit independently re-checks
-// ComputeRouter and fails a genuinely-unavailable submission on its own, so
-// nothing can be silently wrong -- see the function's own comment in
-// diff-analysis.ts for the full reasoning.
+// GET /jobs/available?type=diff_analysis (routes/jobs.rb -> ComputeRouter,
+// see lib/services/compute_router.rb) is the honest source of truth for
+// whether a compute backend currently serves this job type. From launch
+// until 2026-09-24, ComputeRouter mapped diff_analysis to no backends at
+// all (WABI was believed not to serve it), and nothing on this page even
+// called this endpoint, so the page showed a complete, fillable form that
+// could never submit; the project owner then confirmed WABI serves
+// diff-analysis jobs again and had the routing map updated (see
+// docs/review-2026-09-23/findings/ui-diff-analysis.md, DA-01). These tests
+// pin resolveAvailabilityUiState's decision table, in particular the
+// fail-safe choice for a failed check (availability === null): fail OPEN
+// (leave the form enabled), because POST /jobs/submit independently
+// re-checks ComputeRouter and fails a genuinely-unavailable submission on
+// its own, so nothing can be silently wrong -- see the function's own
+// comment in diff-analysis.ts for the full reasoning.
 
 test('resolveAvailabilityUiState: available -> submit enabled, notice hidden', () => {
   const ui = resolveAvailabilityUiState({ backend: 'wabi', available: true })
