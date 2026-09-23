@@ -39,7 +39,55 @@ function qvalLabel(value: string): string {
   return Number.isNaN(n) ? value : String(n * 10)
 }
 
-type FacetKey = 'track_class' | 'track_subclass' | 'cell_type_class' | 'cell_type_subclass' | 'qval'
+type QvalOption = { id: string; label: string }
+
+// Production (old-app/public/js/pj/peak_browser.js:245-262) does not send the
+// four /qvalue_range codes for these two track classes — the significance
+// threshold does not apply to methylation calls or to annotation tracks, so
+// it sends a single fixed "NA" option instead: value "bs" for Bisulfite-Seq,
+// "anno" for Annotation tracks (both values matter: they are what
+// bedfiles.qval actually contains for these rows, confirmed via the local
+// API/sqlite — see docs/review-2026-09-23/findings/ui-peak-browser.md PB-18,
+// PB-19). Every other track class keeps the real codes from /api/qval_range,
+// labelled exactly as before.
+export function qvalOptionsFor(trackClass: string, apiValues: string[]): QvalOption[] {
+  if (trackClass === 'Bisulfite-Seq') return [{ id: 'bs', label: 'NA' }]
+  if (trackClass === 'Annotation tracks') return [{ id: 'anno', label: 'NA' }]
+  return apiValues.map((v) => ({ id: v, label: qvalLabel(v) }))
+}
+
+// The four track classes whose "Track type (optional)" (track_subclass) panel
+// production hardcodes to a single "NA" row instead of calling the API
+// (peak_browser.js:98-109). These are the API's own ids — check casing via
+// `curl 'http://localhost:9292/api/track_classes?genome=hg38'` rather than
+// production's display labels ("DNase-Seq"); "DNase-seq" (lower-case "seq")
+// is what the id actually is.
+export const NA_ONLY_TRACK_CLASSES: readonly string[] = ['Input control', 'ATAC-Seq', 'DNase-seq', 'Bisulfite-Seq']
+
+// Pure filter/substitution step (PB-14, PB-19), mirroring qvalOptionsFor:
+// kept separate from the async fetch in loadTrackSubclasses so it can be
+// unit-tested without a DOM or network — see facet-filter.test.ts.
+//
+// NA_ONLY_TRACK_CLASSES classes: production never calls the API for these -
+// loadTrackSubclasses skips the fetch entirely and this returns the fixed
+// "NA" row regardless of what (if anything) is passed as apiItems.
+// 'Annotation tracks': production does call the API but drops the "All"
+// (id "-") entry so only real annotations are offered (peak_browser.js:127-
+// 138); the existing "preserve selection, else first row" logic in
+// DropdownControl/ListBoxControl then leaves the first annotation selected,
+// same as production's `i == 1` special case (index 0 was "All").
+// Everything else: apiItems unchanged.
+export function trackSubclassItemsFor(trackClass: string, apiItems: ClassificationItem[]): ClassificationItem[] {
+  if (NA_ONLY_TRACK_CLASSES.includes(trackClass)) {
+    return [{ id: '-', label: 'NA', count: null }]
+  }
+  if (trackClass === 'Annotation tracks') {
+    return apiItems.filter((it) => it.id !== '-')
+  }
+  return apiItems
+}
+
+export type FacetKey = 'track_class' | 'track_subclass' | 'cell_type_class' | 'cell_type_subclass' | 'qval'
 
 export interface FacetFilterOptions {
   render?: FacetRenderMode
@@ -58,8 +106,14 @@ export interface FacetFilterOptions {
 // care whether it is backed by a plain <select> or a ListBox.
 interface FacetControl {
   readonly value: string
-  setLabeledItems(items: ClassificationItem[]): void
-  setPlainValues(values: string[]): void
+  // Returns whether it fell back to selecting the first row because
+  // `items` didn't offer the control's previous value (mirrors
+  // ListBox.setOptions's own return value) — PB-11 uses this to notice when
+  // a retained cell-type-class selection didn't survive a genome switch, so
+  // it can refresh the track-class counts that were fetched with the
+  // now-stale value.
+  setLabeledItems(items: ClassificationItem[]): boolean
+  setQvalOptions(options: QvalOption[]): void
   onChange(handler: () => void): void
 }
 
@@ -72,6 +126,10 @@ interface Instance {
   cellTypeSubclass: FacetControl
   qval: FacetControl
   excludeTrackClassIds: string[]
+  // Cached /api/qval_range codes, fetched once by loadQvalRange. null until
+  // that first load resolves; renderQval no-ops until then rather than
+  // rendering an empty list from a not-yet-populated cache.
+  qvalApiValues: string[] | null
 }
 
 const registry = new WeakMap<HTMLElement, Instance>()
@@ -105,7 +163,7 @@ class DropdownControl implements FacetControl {
     return this.select.value
   }
 
-  setLabeledItems(items: ClassificationItem[]): void {
+  setLabeledItems(items: ClassificationItem[]): boolean {
     const previous = this.select.value
     this.select.replaceChildren(...items.map((it) => {
       const opt = document.createElement('option')
@@ -113,18 +171,28 @@ class DropdownControl implements FacetControl {
       opt.textContent = labelWithCount(it)
       return opt
     }))
-    if (items.some((it) => it.id === previous)) {
+    const matched = items.some((it) => it.id === previous)
+    if (matched) {
       this.select.value = previous
     }
+    // A plain <select> auto-selects its first <option> when none carries
+    // `selected` explicitly — so when nothing matched, the browser has
+    // already fallen back to the first row (if there is one), mirroring
+    // ListBox.setOptions's own fallback below.
+    return !matched && items.length > 0
   }
 
-  setPlainValues(values: string[]): void {
-    this.select.replaceChildren(...values.map((v) => {
-      const opt = document.createElement('option')
-      opt.value = v
-      opt.textContent = qvalLabel(v)
-      return opt
+  setQvalOptions(options: QvalOption[]): void {
+    const previous = this.select.value
+    this.select.replaceChildren(...options.map((opt) => {
+      const el = document.createElement('option')
+      el.value = opt.id
+      el.textContent = opt.label
+      return el
     }))
+    if (options.some((opt) => opt.id === previous)) {
+      this.select.value = previous
+    }
   }
 
   onChange(handler: () => void): void {
@@ -149,18 +217,18 @@ class ListBoxControl implements FacetControl {
     return this.box.value ?? ''
   }
 
-  setLabeledItems(items: ClassificationItem[]): void {
+  setLabeledItems(items: ClassificationItem[]): boolean {
     const previous = this.box.value ?? undefined
     const selected = items.some((it) => it.id === previous) ? previous : undefined
     const options: ListBoxOption[] = items.map((it) => ({ id: it.id, label: it.label, count: it.count }))
-    this.box.setOptions(options, selected)
+    return this.box.setOptions(options, selected)
   }
 
-  setPlainValues(values: string[]): void {
+  setQvalOptions(options: QvalOption[]): void {
     const previous = this.box.value ?? undefined
-    const selected = previous != null && values.includes(previous) ? previous : undefined
-    const options: ListBoxOption[] = values.map((v) => ({ id: v, label: qvalLabel(v), count: null }))
-    this.box.setOptions(options, selected)
+    const selected = options.some((opt) => opt.id === previous) ? previous : undefined
+    const boxOptions: ListBoxOption[] = options.map((opt) => ({ id: opt.id, label: opt.label, count: null }))
+    this.box.setOptions(boxOptions, selected)
   }
 
   onChange(handler: () => void): void {
@@ -173,8 +241,8 @@ class ListBoxControl implements FacetControl {
 // "All" sentinel, so an omitted facet simply does not narrow the query.
 class AbsentControl implements FacetControl {
   get value(): string { return '-' }
-  setLabeledItems(_items: ClassificationItem[]): void { /* nothing to render */ }
-  setPlainValues(_values: string[]): void { /* nothing to render */ }
+  setLabeledItems(_items: ClassificationItem[]): boolean { return false }
+  setQvalOptions(_options: QvalOption[]): void { /* nothing to render */ }
   onChange(_handler: () => void): void { /* never fires */ }
 }
 
@@ -199,20 +267,41 @@ export function excludeTrackClasses(items: ClassificationItem[], excludeIds: str
   return excludeIds.length === 0 ? items : items.filter((it) => !excludeIds.includes(it.id))
 }
 
+// Re-renders the qval facet from the cached /api/qval_range codes for the
+// currently-resolved track class. A no-op until loadQvalRange's first fetch
+// populates the cache (init kicks that fetch off in parallel with the rest
+// of the cascade — see FacetFilter.init — so it may not have landed yet the
+// first time a track class resolves; loadQvalRange renders once it does).
+function renderQval(inst: Instance): void {
+  if (inst.qvalApiValues === null) return
+  inst.qval.setQvalOptions(qvalOptionsFor(inst.trackClass.value, inst.qvalApiValues))
+}
+
 async function loadTrackClasses(inst: Instance): Promise<void> {
   const cell = inst.cellTypeClass.value || undefined
   const items = await listTrackClasses(inst.genome, cell)
   inst.trackClass.setLabeledItems(excludeTrackClasses(items, inst.excludeTrackClassIds))
+  // The qval list depends only on which track class is now selected, so
+  // every place a track class resolves (user change, cell-type-class change,
+  // genome switch) must re-render it — see qvalOptionsFor.
+  renderQval(inst)
 }
 
-async function loadCellTypeClasses(inst: Instance): Promise<void> {
+// Returns whether cell_type_class fell back to its first row because the
+// instance's previous value wasn't offered for this genome/track_class -
+// see FacetFilter.setGenome (PB-11).
+async function loadCellTypeClasses(inst: Instance): Promise<boolean> {
   const items = await listCellTypeClasses(inst.genome, inst.trackClass.value)
-  inst.cellTypeClass.setLabeledItems(items)
+  return inst.cellTypeClass.setLabeledItems(items)
 }
 
 async function loadTrackSubclasses(inst: Instance): Promise<void> {
-  const items = await listTrackSubclasses(inst.genome, inst.trackClass.value, inst.cellTypeClass.value || undefined)
-  inst.trackSubclass.setLabeledItems(items)
+  const trackClass = inst.trackClass.value
+  // PB-14: production never calls the API for these four classes.
+  const apiItems = NA_ONLY_TRACK_CLASSES.includes(trackClass)
+    ? []
+    : await listTrackSubclasses(inst.genome, trackClass, inst.cellTypeClass.value || undefined)
+  inst.trackSubclass.setLabeledItems(trackSubclassItemsFor(trackClass, apiItems))
 }
 
 async function loadCellTypeSubclasses(inst: Instance): Promise<void> {
@@ -222,14 +311,20 @@ async function loadCellTypeSubclasses(inst: Instance): Promise<void> {
 
 async function loadQvalRange(inst: Instance): Promise<void> {
   try {
-    const values = await getQvalRange()
-    inst.qval.setPlainValues(values)
+    inst.qvalApiValues = await getQvalRange()
   } catch (err) {
     console.warn('Failed to load qval range:', err)
+    return
   }
+  renderQval(inst)
 }
 
-async function initialLoad(inst: Instance): Promise<void> {
+// Returns whether cell_type_class fell back to its first row (see
+// loadCellTypeClasses) — only FacetFilter.setGenome acts on this; FacetFilter.
+// init discards it, since on a fresh instance every facet starts empty and
+// "falling back" there is the normal seeding behaviour, not a PB-11 staleness
+// signal.
+async function initialLoad(inst: Instance): Promise<boolean> {
   // Sequential: cell_type_classes requires a non-empty track_class, and the two
   // subclass facets need a *resolved* cell_type_class before they fetch — an
   // empty cell_type_class value is not treated as "any" server-side, it's
@@ -237,36 +332,61 @@ async function initialLoad(inst: Instance): Promise<void> {
   // selects start empty, so track_class must seed first, then cell_type_class
   // must resolve, and only then can both subclass facets load (in parallel).
   await loadTrackClasses(inst)
-  await loadCellTypeClasses(inst)
+  const cellTypeClassFellBack = await loadCellTypeClasses(inst)
   await Promise.all([loadTrackSubclasses(inst), loadCellTypeSubclasses(inst)])
+  return cellTypeClassFellBack
 }
 
 async function reloadOnTrackChange(inst: Instance): Promise<void> {
-  await Promise.all([loadCellTypeClasses(inst), loadTrackSubclasses(inst), loadCellTypeSubclasses(inst)])
+  // Sequential: both subclass facets read cell_type_class.value, so it must
+  // finish resolving (and may itself fall back to a different value under the
+  // new track class) before either subclass fetch reads it (PB-11 — a
+  // Promise.all here would race the subclass fetches against a
+  // cell_type_class that has not resolved for the new track class yet).
+  await loadCellTypeClasses(inst)
+  await Promise.all([loadTrackSubclasses(inst), loadCellTypeSubclasses(inst)])
+  // The user just picked a new track_class directly (that's what triggered
+  // this reload) — unlike the other reload paths, nothing above calls
+  // loadTrackClasses, so this is the one place that must re-render qval
+  // itself for the newly-picked class.
+  renderQval(inst)
 }
 
 async function reloadOnCellChange(inst: Instance): Promise<void> {
-  await Promise.all([loadTrackClasses(inst), loadTrackSubclasses(inst), loadCellTypeSubclasses(inst)])
+  // Sequential for the same reason as reloadOnTrackChange, mirrored: both
+  // subclass facets also read track_class.value, so loadTrackClasses (which
+  // can change it) must resolve first.
+  await loadTrackClasses(inst)
+  await Promise.all([loadTrackSubclasses(inst), loadCellTypeSubclasses(inst)])
+}
+
+// Every 'facet-change' dispatch site funnels through here so the event
+// always carries which facet just settled — pages (Task 3) use this to tell
+// which side of a paired change (e.g. antigen vs. cell type) the user
+// actually touched. Existing listeners take no argument and so ignore
+// `detail` entirely; adding it is not a behaviour change for them.
+function dispatchFacetChange(inst: Instance, facet: FacetKey | 'init'): void {
+  inst.container.dispatchEvent(new CustomEvent('facet-change', { detail: { facet } }))
 }
 
 function attachHandlers(inst: Instance): void {
   inst.trackClass.onChange(async () => {
     // bidirectional: refresh cell types and both subclass lists
     await reloadOnTrackChange(inst)
-    inst.container.dispatchEvent(new CustomEvent('facet-change'))
+    dispatchFacetChange(inst, 'track_class')
   })
   inst.cellTypeClass.onChange(async () => {
     await reloadOnCellChange(inst)
-    inst.container.dispatchEvent(new CustomEvent('facet-change'))
+    dispatchFacetChange(inst, 'cell_type_class')
   })
   inst.trackSubclass.onChange(() => {
-    inst.container.dispatchEvent(new CustomEvent('facet-change'))
+    dispatchFacetChange(inst, 'track_subclass')
   })
   inst.cellTypeSubclass.onChange(() => {
-    inst.container.dispatchEvent(new CustomEvent('facet-change'))
+    dispatchFacetChange(inst, 'cell_type_subclass')
   })
   inst.qval.onChange(() => {
-    inst.container.dispatchEvent(new CustomEvent('facet-change'))
+    dispatchFacetChange(inst, 'qval')
   })
 }
 
@@ -338,13 +458,14 @@ export const FacetFilter = {
       cellTypeSubclass: controls.cellTypeSubclass,
       qval: controls.qval,
       excludeTrackClassIds: options.excludeTrackClassIds ?? [],
+      qvalApiValues: null,
     }
     registry.set(container, inst)
 
     attachHandlers(inst)
 
     await Promise.all([initialLoad(inst), loadQvalRange(inst)])
-    container.dispatchEvent(new CustomEvent('facet-change'))
+    dispatchFacetChange(inst, 'init')
   },
 
   getCondition(container: HTMLElement): FacetCondition | null {
@@ -364,7 +485,16 @@ export const FacetFilter = {
     const inst = registry.get(container)
     if (!inst) return
     inst.genome = genome
-    await initialLoad(inst)
-    container.dispatchEvent(new CustomEvent('facet-change'))
+    const cellTypeClassFellBack = await initialLoad(inst)
+    // PB-11: cell_type_class didn't offer the value retained from the old
+    // genome, so loadTrackClasses's earlier call (the first step of
+    // initialLoad, run before cell_type_class had resolved for this genome)
+    // fetched track-class counts filtered by a value that no longer applies.
+    // Now that cell_type_class has resolved to a real value for this genome,
+    // redo it so the displayed counts match.
+    if (cellTypeClassFellBack) {
+      await loadTrackClasses(inst)
+    }
+    dispatchFacetChange(inst, 'init')
   },
 }
