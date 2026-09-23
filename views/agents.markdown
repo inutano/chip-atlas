@@ -1,6 +1,6 @@
 ## ChIP-Atlas for AI Agents
 
-ChIP-Atlas is a comprehensive database of public ChIP-seq, ATAC-seq, DNase-seq, Bisulfite-seq, CUT&Tag, and CUT&RUN experiments. This page describes how AI agents and scripts can query ChIP-Atlas programmatically via its HTTP API.
+ChIP-Atlas is a comprehensive database of public ChIP-seq, ATAC-seq, DNase-seq, and Bisulfite-seq experiments. This page describes how AI agents and scripts can query ChIP-Atlas programmatically via its HTTP API.
 
 **New here?** Check out the [hands-on demo tutorial](/demo) for step-by-step scenarios you can try with your preferred LLM.
 
@@ -23,8 +23,8 @@ ChIP-Atlas organizes data along these dimensions:
 
 | Dimension | Field | Examples |
 |-----------|-------|----------|
-| **Genome** | `genome` | hg38, mm10, rn6, dm6, ce11, sacCer3, TAIR10 |
-| **Track class** | `track_class` | Histone, TFs and others, RNA polymerase, Input control, ATAC-Seq, DNase-seq, Bisulfite-Seq, CUT&Tag, CUT&RUN |
+| **Genome** | `genome` | hg38, mm10, rn6, dm6, ce11, sacCer3, TAIR12 |
+| **Track class** | `track_class` | Histone, TFs and others, RNA polymerase, Input control, ATAC-Seq, DNase-seq, Bisulfite-Seq, Annotation tracks |
 | **Track subclass** | `track_subclass` | H3K4me3, CTCF, p300 (the specific antigen/target) |
 | **Cell type class** | `cell_type_class` | Blood, Brain, Liver, All cell types (broad category) |
 | **Cell type subclass** | `cell_type_subclass` | K-562, HeLa, GM12878 (specific cell line/tissue) |
@@ -71,12 +71,14 @@ Start broad and drill down. Each returns an array of `{id, label, count}`.
 |--------|----------|-------------|
 | GET | `/api/download_url?genome=…&track_class=…&track_subclass=…&cell_type_class=…&cell_type_subclass=-&qval=05` | BED file download URL for a peak-call dataset |
 | GET | `/api/igv_url?genome=…&track_class=…&…` | IGV genome-browser URL (same parameters as `download_url`) |
-| GET | `/api/colo?genome=hg38&track=CTCF&cell_type=K-562` | Colocalization result data (JSON), proxied from the data backend |
-| GET | `/api/colo/download?genome=hg38&track=CTCF&cell_type=K-562&format=tsv` | Download colocalization result (`format=tsv` or `gml`) |
+| GET | `/api/colo?genome=hg38&track=CTCF&cell_type=Blood` | Colocalization result data (JSON), proxied from the data backend |
+| GET | `/api/colo/download?genome=hg38&track=CTCF&cell_type=Blood&format=tsv` | Download colocalization result (`format=tsv` or `gml`) |
 | GET | `/api/target_genes?genome=hg38&track=CTCF&distance=5` | Target-gene result data (JSON) |
 | GET | `/api/target_genes/download?genome=hg38&track=CTCF&distance=5&format=tsv` | Download target-gene result (tsv) |
 
 For `download_url` / `igv_url`, supply `-` for any unspecified `track_subclass` / `cell_type_subclass`. A combination with no precomputed file returns `{"url": null}`.
+
+For `colo`, `cell_type` must be a cell-type **class** as returned by `/api/colo_index` (e.g. `Blood`, `Liver`) — not a specific cell line/subclass. A subclass value like `K-562` is not in the index and returns 404.
 
 ### Jobs — enrichment & differential analysis
 
@@ -127,7 +129,7 @@ GET /api/colo_index?genome=hg38
 ## Tips
 
 - **Start with `/api/genomes`** if the user hasn't specified a genome.
-- **`track_class` values are fixed strings:** "Histone", "TFs and others", "RNA polymerase", "Input control", "ATAC-Seq", "DNase-seq", "Bisulfite-Seq", "CUT&Tag", "CUT&RUN". Use `/api/track_classes` to confirm.
+- **`track_class` values are fixed strings:** "Histone", "TFs and others", "RNA polymerase", "Input control", "ATAC-Seq", "DNase-seq", "Bisulfite-Seq", "Annotation tracks". Use `/api/track_classes` to confirm.
 - **Classification values are case-sensitive.** Use the classification endpoints to discover valid values rather than guessing.
 - **Search is paginated** (`limit` ≤ 100, `offset`). It replaces the previous bulk JSON experiment dump.
 - **Q-value** controls peak-call stringency: lower = stricter. "05" or "10" are reasonable defaults; `/api/qval_range` lists valid values.

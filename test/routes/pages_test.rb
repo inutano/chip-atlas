@@ -508,4 +508,33 @@ class PagesTest < Minitest::Test
     assert_equal 'Not found', data['error']
     refute_includes last_response.body, '<html', 'an unmatched /api/* path must not fall back to the HTML page'
   end
+
+  # SHELL-25: these four agent-facing documents drifted to say the arabidopsis
+  # assembly is "TAIR10" (config/genomes.yml and /api/genomes both say
+  # TAIR12 - TAIR10 does not exist in this app at all), so an agent that
+  # trusted the docs and requested genome=TAIR10 got an empty result or a
+  # 400. /llms.txt and /openapi.yaml are static files under public/, served
+  # by Sinatra's default static middleware rather than an explicit route,
+  # but Rack::Test drives that the same as any other GET.
+  TAIR10_FREE_DOCS = %w[/agents /demo /llms.txt /openapi.yaml].freeze
+
+  def test_agent_docs_do_not_mention_the_nonexistent_tair10_assembly
+    TAIR10_FREE_DOCS.each do |path|
+      get path
+      assert_equal 200, last_response.status, "#{path} did not return 200"
+      refute_includes last_response.body, 'TAIR10', "#{path} still mentions TAIR10"
+    end
+  end
+
+  # SHELL-27: these docs' colocalization example used cell_type=K-562, which
+  # 404s - /api/colo's cell_type is keyed by cell-type *class* (as listed by
+  # /api/colo_index), and K-562 is a subclass/cell line, not a class. Blood
+  # is a real class and returns 200.
+  def test_agent_docs_colo_example_uses_a_cell_type_class_not_a_cell_line
+    %w[/agents /demo /llms.txt].each do |path|
+      get path
+      assert_includes last_response.body, 'cell_type=Blood', "#{path} is missing the corrected colo example"
+      refute_includes last_response.body, 'cell_type=K-562', "#{path} still has the 404ing colo example"
+    end
+  end
 end

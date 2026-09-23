@@ -2,10 +2,10 @@ openapi: 3.1.0
 
 info:
   title: ChIP-Atlas API
-  version: "2.0.0"
+  version: "2.0.1"
   description: >-
     REST API for ChIP-Atlas, a comprehensive database of public ChIP-seq,
-    ATAC-seq, DNase-seq, Bisulfite-seq, CUT&Tag, and CUT&RUN experiments.
+    ATAC-seq, DNase-seq, and Bisulfite-seq experiments.
     Provides programmatic access to experiment metadata, peak-call data,
     colocalization analysis, target gene predictions, enrichment analysis,
     and differential analysis across seven genome assemblies.
@@ -64,8 +64,7 @@ components:
           - ATAC-Seq
           - DNase-seq
           - Bisulfite-Seq
-          - CUT&Tag
-          - CUT&RUN
+          - Annotation tracks
       example: Histone
     CellTypeClass:
       name: cell_type_class
@@ -123,7 +122,7 @@ components:
         - dm6
         - ce11
         - sacCer3
-        - TAIR10
+        - TAIR12
       example: hg38
 
     ClassificationItem:
@@ -196,18 +195,49 @@ components:
     ServiceStatus:
       type: object
       properties:
-        data_server:
-          type: boolean
-          description: Whether the data backend is reachable
-        wabi:
-          type: boolean
-          description: Whether the WABI job backend is available
-        wes:
-          type: boolean
-          description: Whether the WES job backend is available
-        feature_status:
+        services:
           type: object
-          description: Per-feature availability flags
+          description: >-
+            Reachability of each backing service. wes is only probed on
+            demand (when wabi is down), so it reads "not_checked" the
+            rest of the time.
+          properties:
+            data_server:
+              type: string
+              enum: [ok, down]
+            wabi:
+              type: string
+              enum: [ok, down]
+            wes:
+              type: string
+              enum: [ok, down, not_checked]
+        features:
+          type: object
+          description: >-
+            Per-feature availability derived from services above.
+            enrichment_analysis can also read "ok (backup)" when wabi is
+            down but the wes fallback is reachable; search is always
+            "ok" (it runs against the local database, not an external
+            service).
+          properties:
+            peak_browser:
+              type: string
+              enum: [ok, unavailable]
+            colo:
+              type: string
+              enum: [ok, unavailable]
+            target_genes:
+              type: string
+              enum: [ok, unavailable]
+            search:
+              type: string
+              enum: [ok]
+            enrichment_analysis:
+              type: string
+              enum: [ok, "ok (backup)", unavailable]
+            diff_analysis:
+              type: string
+              enum: [ok, unavailable]
 
     JobSubmission:
       type: object
@@ -375,20 +405,27 @@ components:
     JobStatus:
       type: object
       properties:
-        id:
+        backend:
+          type: string
+          description: Compute backend handling the job
+        job_id:
           type: string
           description: Job identifier
         status:
           type: string
-          description: Current job state
-          enum:
-            - queued
-            - running
-            - completed
-            - failed
-        backend:
-          type: string
-          description: Compute backend handling the job
+          description: >-
+            The backend's own status word (e.g. "finished", "running" -
+            WABI's vocabulary, not a fixed enum this API controls), or
+            "unknown" if the backend doesn't recognise the job id. A 503
+            response (backend unavailable) uses "backend_unavailable"
+            here instead.
+          example: finished
+        retry:
+          type: boolean
+          description: >-
+            Whether the caller should poll again. False only when the
+            backend itself is unavailable (503 responses); true
+            otherwise, including for an unrecognised job id.
 
 paths:
   # ── Classification ──────────────────────────────────────────────────
@@ -398,24 +435,27 @@ paths:
       operationId: listGenomes
       tags: [Classification]
       summary: List available genome assemblies
-      description: Returns all genome assembly identifiers available in ChIP-Atlas.
+      description: >-
+        Returns all genome assemblies available in ChIP-Atlas, as an
+        object mapping each assembly id to a human-readable label (not
+        an array).
       responses:
         "200":
-          description: Array of genome assembly identifiers
+          description: Object mapping genome assembly id to human-readable label
           content:
             application/json:
               schema:
-                type: array
-                items:
+                type: object
+                additionalProperties:
                   type: string
               example:
-                - hg38
-                - mm10
-                - rn6
-                - dm6
-                - ce11
-                - sacCer3
-                - TAIR10
+                hg38: "H. sapiens (hg38)"
+                mm10: "M. musculus (mm10)"
+                rn6: "R. norvegicus (rn6)"
+                dm6: "D. melanogaster (dm6)"
+                ce11: "C. elegans (ce11)"
+                sacCer3: "S. cerevisiae (sacCer3)"
+                TAIR12: "A. thaliana (TAIR12)"
 
   /api/track_classes:
     get:
@@ -452,16 +492,16 @@ paths:
               example:
                 - id: Histone
                   label: "ChIP: Histone"
-                  count: 12345
+                  count: 9246
                 - id: TFs and others
                   label: "ChIP: TFs and others"
-                  count: 8765
+                  count: 7515
                 - id: ATAC-Seq
                   label: ATAC-Seq
-                  count: 3456
-                - id: CUT&Tag
-                  label: CUT&Tag
-                  count: 1234
+                  count: 21577
+                - id: Annotation tracks
+                  label: Annotation tracks
+                  count: null
 
   /api/cell_type_classes:
     get:
@@ -558,7 +598,10 @@ paths:
       summary: Get metadata for a single experiment
       description: >-
         Returns full metadata for an experiment by its SRX, ERX, or DRX
-        accession ID.
+        accession ID, as an array (one record per genome assembly the
+        accession maps to - typically a single record). An unrecognised
+        accession (including a GEO GSM id, which this endpoint does not
+        resolve) returns 200 with an empty array, not 404.
       parameters:
         - name: experiment_id
           in: query
@@ -569,20 +612,26 @@ paths:
           example: SRX018625
       responses:
         "200":
-          description: Experiment metadata object
+          description: Array of experiment metadata records
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ExperimentMetadata"
+                type: array
+                items:
+                  $ref: "#/components/schemas/ExperimentMetadata"
               example:
-                experiment_id: SRX018625
-                genome: hg38
-                track_class: Histone
-                track_subclass: H3K4me3
-                cell_type_class: Blood
-                cell_type_subclass: K-562
-                title: "H3K4me3 ChIP-seq in K-562"
-                attributes: "cell line=K-562; tissue=Blood"
+                - experiment_id: SRX018625
+                  genome: hg38
+                  track_class: TFs and others
+                  track_subclass: HNF4A
+                  cell_type_class: Liver
+                  cell_type_subclass: Hep G2
+                  title: "GSM469863: HNF4a Fdomain ChIPSeq"
+                  attributes: "source_name=HNF4a_Fdomain_ChIPSeq\tcell line=HepG2\tcell type=hepatocellular carcinoma\tchip antibody=HNF4a F domain"
+                  read_info: "9231367,94.3,3.1,6122"
+                  cell_type_subclass_info: "Primary Tissue=Liver|Tissue Diagnosis=Carcinoma Hepatocellular"
+        "400":
+          description: Missing experiment_id parameter
 
   /api/search:
     get:
@@ -592,12 +641,15 @@ paths:
       description: >-
         Searches the experiment database by keyword, accession ID, or
         classification terms. Supports pagination via limit and offset.
-        Replaces the bulk JSON experiment list endpoint.
+        Replaces the bulk JSON experiment list endpoint. q is optional -
+        an omitted, empty, or whitespace-only q returns the full,
+        unfiltered experiment list (still paginated by limit/offset).
       parameters:
         - name: q
           in: query
-          required: true
-          description: Search query string
+          required: false
+          description: >-
+            Search query string. Omit for the full experiment list.
           schema:
             type: string
           example: H3K4me3
@@ -635,13 +687,15 @@ paths:
                 returned: 20
                 experiments:
                   - experiment_id: SRX018625
+                    sra_id: SRA012331
+                    geo_id: GSM469863
                     genome: hg38
-                    track_class: Histone
-                    track_subclass: H3K4me3
-                    cell_type_class: Blood
-                    cell_type_subclass: K-562
-                    title: "H3K4me3 ChIP-seq in K-562"
-                    attributes: "cell line=K-562"
+                    track_class: TFs and others
+                    track_subclass: HNF4A
+                    cell_type_class: Liver
+                    cell_type_subclass: Hep G2
+                    title: "HNF4a Fdomain ChIPSeq"
+                    attributes: "source_name=HNF4a_Fdomain_ChIPSeq__TAB__cell line=HepG2"
 
   /api/genome_index:
     get:
@@ -726,14 +780,14 @@ paths:
                     additionalProperties:
                       type: integer
               example:
-                total_experiments: 432640
-                total_experiments_formatted: "432,000"
+                total_experiments: 454476
+                total_experiments_formatted: "454,000"
                 by_genome:
                   hg38: 197044
                   mm10: 194162
                 by_track_class:
-                  Histone: 88496
-                  TFs and others: 66602
+                  Histone: 91822
+                  TFs and others: 68849
 
   /api/colo_index:
     get:
@@ -844,7 +898,11 @@ paths:
                       Direct download URL for the BED file, or null if no
                       matching file exists.
               example:
-                url: "https://chip-atlas.dbcls.jp/data/hg38/assembled/Histone.H3K4me3.Blood.-.05.bed"
+                url: "https://chip-atlas.dbcls.jp/data/hg38/assembled/His.Bld.05.H3K4me3.AllCell.bed"
+        "400":
+          description: >-
+            Missing genome/track_class, or genome is not a recognised
+            assembly. Body is `{"error": "..."}`.
 
   /api/igv_url:
     get:
@@ -876,7 +934,11 @@ paths:
                     format: uri
                     description: IGV browser URL, or null if no matching data exists.
               example:
-                url: "https://igv.org/app/?sessionURL=..."
+                url: "http://localhost:60151/load?genome=hg38&file=https://chip-atlas.dbcls.jp/data/hg38/assembled/His.Bld.05.H3K4me3.AllCell.bed"
+        "400":
+          description: >-
+            Missing genome/track_class, or genome is not a recognised
+            assembly. Body is `{"error": "..."}`.
 
   /api/colo:
     get:
@@ -904,10 +966,14 @@ paths:
         - name: cell_type
           in: query
           required: true
-          description: Cell type name (e.g. "K-562")
+          description: >-
+            Cell type **class** (e.g. "Blood", "Liver"), as returned by
+            /api/colo_index - not a specific cell line/subclass. A
+            subclass value (e.g. "K-562") is not in the index and
+            returns 404.
           schema:
             type: string
-          example: K-562
+          example: Blood
       responses:
         "200":
           description: Colocalization result data, sorted descending by average score
@@ -954,7 +1020,9 @@ paths:
                 track: STAT3
                 cell_type: Blood
         "400":
-          description: Missing required parameters
+          description: >-
+            Missing genome/track/cell_type, or genome is not a
+            recognised assembly.
         "404":
           description: No pre-computed colocalization data for this combination
         "502":
@@ -983,10 +1051,12 @@ paths:
         - name: cell_type
           in: query
           required: true
-          description: Cell type name (e.g. "K-562")
+          description: >-
+            Cell type **class** (e.g. "Blood", "Liver"), as returned by
+            /api/colo_index - not a specific cell line/subclass.
           schema:
             type: string
-          example: K-562
+          example: Blood
         - name: format
           in: query
           required: true
@@ -1007,6 +1077,10 @@ paths:
             application/xml:
               schema:
                 type: string
+        "400":
+          description: >-
+            Missing genome/track/cell_type/format, unknown format, or
+            genome is not a recognised assembly.
         "404":
           description: No pre-computed colocalization data for this combination
 
@@ -1148,7 +1222,10 @@ paths:
                 offset: 0
                 limit: 50
         "400":
-          description: Missing required parameters, or `sort` names a column not present in this file
+          description: >-
+            Missing genome/track/distance, genome is not a recognised
+            assembly, distance is not one of the valid options, or
+            `sort` names a column not present in this file
         "404":
           description: No pre-computed target gene data for this combination
         "502":
@@ -1199,6 +1276,11 @@ paths:
             text/tab-separated-values:
               schema:
                 type: string
+        "400":
+          description: >-
+            Missing genome/track/distance/format, genome is not a
+            recognised assembly, or distance is not one of the valid
+            options.
         "404":
           description: No pre-computed target gene data for this combination
 
@@ -1211,7 +1293,8 @@ paths:
       summary: Check service availability
       description: >-
         Returns the availability status of the data server and compute
-        backends (WABI, WES). Check this before submitting jobs.
+        backends (WABI, WES), plus per-feature availability derived from
+        them. Check this before submitting jobs or generating URLs.
       responses:
         "200":
           description: Service status object
@@ -1220,12 +1303,17 @@ paths:
               schema:
                 $ref: "#/components/schemas/ServiceStatus"
               example:
-                data_server: true
-                wabi: true
-                wes: false
-                feature_status:
-                  enrichment_analysis: true
-                  diff_analysis: true
+                services:
+                  data_server: ok
+                  wabi: ok
+                  wes: not_checked
+                features:
+                  peak_browser: ok
+                  colo: ok
+                  target_genes: ok
+                  search: ok
+                  enrichment_analysis: ok
+                  diff_analysis: ok
 
   /jobs/available:
     get:
@@ -1238,13 +1326,14 @@ paths:
       parameters:
         - name: type
           in: query
-          required: true
-          description: Analysis type to check
+          required: false
+          description: Analysis type to check. Defaults to enrichment_analysis.
           schema:
             type: string
             enum:
               - enrichment_analysis
               - diff_analysis
+            default: enrichment_analysis
           example: enrichment_analysis
       responses:
         "200":
@@ -1283,12 +1372,21 @@ paths:
               schema:
                 type: object
                 properties:
-                  id:
-                    type: string
-                    description: Job identifier for status polling
                   backend:
                     type: string
                     description: Compute backend handling the job
+                  job_id:
+                    type: string
+                    description: Job identifier for status polling
+              example:
+                backend: wabi
+                job_id: wabi_chipatlas_2026-0922-1049-51-290-755138
+        "400":
+          description: >-
+            Malformed or non-object JSON body (`{"error": "Invalid
+            JSON"}` / `{"error": "JSON body must be an object"}`), or -
+            for type=diff_analysis only - params.antigenClass is not
+            "diffbind" or "dmr" (`{"error": "...", "retry": false}`).
         "503":
           description: >-
             No compute backend serves this job type right now (either none
@@ -1318,9 +1416,10 @@ paths:
         - name: backend
           in: query
           required: true
-          description: Compute backend handling the job
+          description: Compute backend handling the job (wabi or wes)
           schema:
             type: string
+            enum: [wabi, wes]
           example: wabi
       responses:
         "200":
@@ -1329,6 +1428,21 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/JobStatus"
+              example:
+                backend: wabi
+                job_id: wabi_chipatlas_2026-0922-1049-51-290-755138
+                status: finished
+                retry: true
+        "400":
+          description: >-
+            Invalid job id, or backend is missing/not one of wabi, wes.
+            Body is `{"error": "Invalid job ID"}` or
+            `{"error": "Invalid backend"}`.
+        "503":
+          description: >-
+            The requested backend is not currently reachable. Body is
+            `{"backend": ..., "job_id": ..., "status":
+            "backend_unavailable", "retry": false}`.
 
   /jobs/{id}/result:
     get:
@@ -1336,8 +1450,11 @@ paths:
       tags: [Jobs]
       summary: Get job result URLs
       description: >-
-        Returns URLs to the result files of a completed job. Only available
-        after the job status is "completed".
+        Builds result URLs from the job id and backend alone - there is
+        no existence or completion check, so this always returns 200
+        (even for an unknown or still-running job id). Check
+        /jobs/{id}/status first and only follow the URLs once the job
+        has reached a terminal status.
       parameters:
         - name: id
           in: path
@@ -1348,10 +1465,24 @@ paths:
         - name: backend
           in: query
           required: true
-          description: Compute backend handling the job
+          description: Compute backend handling the job (wabi or wes)
           schema:
             type: string
+            enum: [wabi, wes]
           example: wabi
+        - name: type
+          in: query
+          required: false
+          description: >-
+            Analysis type, which determines the result URL shape.
+            Defaults to enrichment_analysis.
+          schema:
+            type: string
+            enum:
+              - enrichment_analysis
+              - diff_analysis
+            default: enrichment_analysis
+          example: enrichment_analysis
       responses:
         "200":
           description: Result URLs
@@ -1360,16 +1491,42 @@ paths:
               schema:
                 type: object
                 properties:
-                  result_url:
+                  backend:
                     type: string
-                    format: uri
+                  job_id:
+                    type: string
+                  urls:
+                    type: object
+                    description: >-
+                      `{html, tsv}` for enrichment_analysis (or wes);
+                      `{zip}` for diff_analysis.
+                    properties:
+                      html:
+                        type: string
+                        format: uri
+                      tsv:
+                        type: string
+                        format: uri
+                      zip:
+                        type: string
+                        format: uri
+              example:
+                backend: wabi
+                job_id: bogus
+                urls:
+                  html: "https://dtn1.ddbj.nig.ac.jp/wabi/chipatlas/bogus?info=result&format=html"
+                  tsv: "https://dtn1.ddbj.nig.ac.jp/wabi/chipatlas/bogus?info=result&format=tsv"
+        "400":
+          description: >-
+            Invalid job id, backend is missing/not one of wabi, wes, or
+            type is not one of enrichment_analysis, diff_analysis.
 
   /jobs/{id}/log:
     get:
       operationId: getJobLog
       tags: [Jobs]
       summary: Get job execution log
-      description: Returns the execution log for a job.
+      description: Returns the execution log for a job, as plain text.
       parameters:
         - name: id
           in: path
@@ -1380,18 +1537,28 @@ paths:
         - name: backend
           in: query
           required: true
-          description: Compute backend handling the job
+          description: Compute backend handling the job (wabi or wes)
           schema:
             type: string
+            enum: [wabi, wes]
           example: wabi
       responses:
         "200":
-          description: Job log
+          description: Job execution log
           content:
-            application/json:
+            text/plain:
               schema:
-                type: object
-                properties:
-                  log:
-                    type: string
-                    description: Execution log text
+                type: string
+        "400":
+          description: >-
+            Invalid job id, or backend is missing/not one of wabi, wes.
+            Body is `{"error": "Invalid job ID"}` or
+            `{"error": "Invalid backend"}`.
+        "404":
+          description: >-
+            Log not available yet. Currently rendered as the site's
+            generic HTML 404 page rather than plain text or JSON.
+        "503":
+          description: >-
+            The requested backend is not currently reachable. Body is
+            the plain text "Backend unavailable".

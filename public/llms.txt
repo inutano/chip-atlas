@@ -1,6 +1,6 @@
 # ChIP-Atlas
 
-> ChIP-Atlas is a comprehensive database of public epigenomic data (ChIP-seq, ATAC-seq, DNase-seq, Bisulfite-seq, CUT&Tag, CUT&RUN) covering over 1M experiments across seven genome assemblies. It provides peak browsing, colocalization analysis, target gene prediction, enrichment analysis, and differential analysis.
+> ChIP-Atlas is a comprehensive database of public epigenomic data (ChIP-seq, ATAC-seq, DNase-seq, Bisulfite-seq) covering over 450,000 experiments across seven genome assemblies. It provides peak browsing, colocalization analysis, target gene prediction, enrichment analysis, and differential analysis.
 
 ChIP-Atlas integrates data from NCBI SRA, GEO, and other public repositories. All experiments are uniformly processed and classified by genome, track class, track subclass, cell type class, and cell type subclass.
 
@@ -24,7 +24,7 @@ All endpoints are under the `/api/` prefix, return JSON, and use snake_case fiel
 
 ### Classification (cacheable)
 
-- [List Genomes](https://chip-atlas.org/api/genomes): GET — available genome assemblies: hg38, mm10, rn6, dm6, ce11, sacCer3, TAIR10
+- [List Genomes](https://chip-atlas.org/api/genomes): GET — available genome assemblies (object mapping id to label): hg38, mm10, rn6, dm6, ce11, sacCer3, TAIR12
 - [List Track Classes](https://chip-atlas.org/api/track_classes): GET — static list of track types; with `?genome=hg38&cell_type_class=Blood` returns types with experiment counts
 - [List Cell Type Classes](https://chip-atlas.org/api/cell_type_classes?genome=hg38&track_class=Histone): GET — cell type classes with counts for a genome and track class
 - [List Track Subclasses](https://chip-atlas.org/api/track_subclasses?genome=hg38&track_class=Histone&cell_type_class=Blood): GET — specific targets (H3K4me3, CTCF, etc.) with counts
@@ -44,8 +44,8 @@ All endpoints are under the `/api/` prefix, return JSON, and use snake_case fiel
 
 - [Download URL](https://chip-atlas.org/api/download_url?genome=hg38&track_class=Histone&track_subclass=H3K4me3&cell_type_class=Blood&cell_type_subclass=-&qval=05): GET — BED file download URL
 - [IGV URL](https://chip-atlas.org/api/igv_url?genome=hg38&track_class=Histone&track_subclass=H3K4me3&cell_type_class=Blood&cell_type_subclass=-&qval=05): GET — IGV genome browser URL
-- [Colocalization Data](https://chip-atlas.org/api/colo?genome=hg38&track=CTCF&cell_type=K-562): GET — colocalization result data (JSON), proxied from the data backend
-- [Colocalization Download](https://chip-atlas.org/api/colo/download?genome=hg38&track=CTCF&cell_type=K-562&format=tsv): GET — download colocalization result (format=tsv or gml)
+- [Colocalization Data](https://chip-atlas.org/api/colo?genome=hg38&track=CTCF&cell_type=Blood): GET — colocalization result data (JSON), proxied from the data backend
+- [Colocalization Download](https://chip-atlas.org/api/colo/download?genome=hg38&track=CTCF&cell_type=Blood&format=tsv): GET — download colocalization result (format=tsv or gml)
 - [Target Genes Data](https://chip-atlas.org/api/target_genes?genome=hg38&track=CTCF&distance=5): GET — target gene result data (JSON)
 - [Target Genes Download](https://chip-atlas.org/api/target_genes/download?genome=hg38&track=CTCF&distance=5&format=tsv): GET — download target gene result (tsv)
 
@@ -60,7 +60,7 @@ All endpoints are under the `/api/` prefix, return JSON, and use snake_case fiel
 
 ## Data Model
 
-Experiments are classified along these dimensions: genome assembly (hg38, mm10, rn6, dm6, ce11, sacCer3, TAIR10), track class (Histone, TFs and others, RNA polymerase, Input control, ATAC-Seq, DNase-seq, Bisulfite-Seq, CUT&Tag, CUT&RUN), track subclass (H3K4me3, CTCF, etc.), cell type class (Blood, Brain, Liver, etc.), and cell type subclass (K-562, HeLa, etc.). Each experiment has an SRX, ERX, or DRX accession ID.
+Experiments are classified along these dimensions: genome assembly (hg38, mm10, rn6, dm6, ce11, sacCer3, TAIR12), track class (Histone, TFs and others, RNA polymerase, Input control, ATAC-Seq, DNase-seq, Bisulfite-Seq, Annotation tracks), track subclass (H3K4me3, CTCF, etc.), cell type class (Blood, Brain, Liver, etc.), and cell type subclass (K-562, HeLa, etc.). Each experiment has an SRX, ERX, or DRX accession ID.
 
 All field names use snake_case: experiment_id, genome, track_class, track_subclass, cell_type_class, cell_type_subclass, cell_type_subclass_info, read_info, title, attributes.
 
@@ -74,7 +74,7 @@ ChIP-Atlas consists of two components: the **app server** (chip-atlas.org) servi
 
 ### Service status
 
-Before submitting jobs or generating URLs, check `GET /status` to verify the data server and compute backends are reachable. The response includes `data_server`, `wabi`, `wes` booleans and a `feature_status` map. If a backend is down, the corresponding analysis features will be unavailable.
+Before submitting jobs or generating URLs, check `GET /status` to verify the data server and compute backends are reachable. The response has two string-valued maps: `services` (`data_server`, `wabi`, `wes`, each `"ok"`, `"down"`, or `"not_checked"` — `wes` is only probed when `wabi` is down) and `features` (`peak_browser`, `colo`, `target_genes`, `search`, `enrichment_analysis`, `diff_analysis`, each `"ok"` or `"unavailable"`, except `enrichment_analysis` which can also read `"ok (backup)"` when WABI is down but the WES fallback is reachable). Example: `{"services":{"data_server":"ok","wabi":"ok","wes":"not_checked"},"features":{"peak_browser":"ok","colo":"ok","target_genes":"ok","search":"ok","enrichment_analysis":"ok","diff_analysis":"ok"}}`. If a backend is down, the corresponding analysis features will be unavailable.
 
 ### Peak Browser download
 

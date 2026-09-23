@@ -2,7 +2,7 @@
 
 This tutorial walks you through querying ChIP-Atlas using AI agents. You'll learn two integration methods — **llms.txt** and the **HTTP API** — through hands-on scenarios with real data.
 
-**What is ChIP-Atlas?** A comprehensive database of over 1 million public ChIP-seq, ATAC-seq, DNase-seq, Bisulfite-seq, CUT&Tag, and CUT&RUN experiments across seven genome assemblies (hg38, mm10, rn6, dm6, ce11, sacCer3, TAIR10). All data is uniformly processed and classified by genome, track class, track subclass, cell type class, and cell type subclass.
+**What is ChIP-Atlas?** A comprehensive database of over 450,000 public ChIP-seq, ATAC-seq, DNase-seq, and Bisulfite-seq experiments across seven genome assemblies (hg38, mm10, rn6, dm6, ce11, sacCer3, TAIR12). All data is uniformly processed and classified by genome, track class, track subclass, cell type class, and cell type subclass.
 
 ---
 
@@ -107,11 +107,11 @@ curl "https://chip-atlas.org/api/colo_index?genome=hg38"
 curl "https://chip-atlas.org/api/target_genes_index"
 
 # Then fetch a specific result:
-curl "https://chip-atlas.org/api/colo?genome=hg38&track=CTCF&cell_type=K-562"
+curl "https://chip-atlas.org/api/colo?genome=hg38&track=CTCF&cell_type=Blood"
 curl "https://chip-atlas.org/api/target_genes?genome=hg38&track=CTCF&distance=5"
 ```
 
-Not every track / cell-type combination has precomputed results — check the index endpoints first.
+Not every track / cell-type combination has precomputed results — check the index endpoints first. For `colo`, `cell_type` must be a cell-type **class** as returned by `/api/colo_index` (e.g. `Blood`, `Liver`), not a specific cell line — a subclass like `K-562` isn't in the index and returns 404.
 
 ---
 
@@ -183,7 +183,7 @@ curl "https://chip-atlas.org/api/target_genes_index"
 ## 9. Tips & Troubleshooting
 
 - **Start with `/api/genomes`** if you're unsure which genome to use.
-- **`track_class` values are fixed strings:** "Histone", "TFs and others", "RNA polymerase", "Input control", "ATAC-Seq", "DNase-seq", "Bisulfite-Seq", "CUT&Tag", "CUT&RUN".
+- **`track_class` values are fixed strings:** "Histone", "TFs and others", "RNA polymerase", "Input control", "ATAC-Seq", "DNase-seq", "Bisulfite-Seq", "Annotation tracks".
 - **Classification values are case-sensitive.** Use the classification endpoints to discover valid values rather than guessing.
 - **Q-value** controls peak-call stringency: lower = stricter. Use "05" or "10" as defaults; `/api/qval_range` lists valid values.
 - **URL-encode** spaces in parameter values (e.g. "All cell types", "TFs and others") as `%20`.
