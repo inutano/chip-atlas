@@ -60,3 +60,34 @@ $ sudo /etc/init.d/nginx restart
 # Stop the app server
 $ cat /home/ubuntu/chip-atlas/tmp/pids/unicorn.pid | xargs kill
 ```
+
+## Local development on Docker Desktop
+
+`lib/db.rb` applies its SQLite PRAGMAs (`journal_mode=WAL`, `synchronous=NORMAL`,
+`cache_size`, `mmap_size`) through Sequel's `after_connect` hook, so every
+connection the pool opens gets them -- not just the first. Two of them can be
+overridden with environment variables:
+
+- `SQLITE_MMAP_SIZE` -- memory-mapped I/O size in bytes (default `268435456`,
+  i.e. 256MB; `0` disables mmap).
+- `SQLITE_LOCKING_MODE` -- `NORMAL` (default) or `EXCLUSIVE`.
+
+A single-process local instance that bind-mounts the repo into a container
+(Docker Desktop on macOS, via virtiofs) should set both:
+
+```
+-e SQLITE_LOCKING_MODE=EXCLUSIVE -e SQLITE_MMAP_SIZE=0
+```
+
+Without this, a review of the sengu rebuild found the local container
+SIGBUS-crashing inside sqlite3's `step` while handling `/api/search`, with the
+fault address inside the mmap of the WAL's `-shm` file on the bind mount
+(finding API-54). `PRAGMA locking_mode=EXCLUSIVE` avoids the problem at the
+source: SQLite never creates the `-shm` file in exclusive locking mode, since
+it guarantees no other connection will ever need to coordinate through it.
+That guarantee only holds for a single-process, effectively single-connection
+instance -- exclusive mode makes a second *simultaneous* connection fail with
+`SQLite3::BusyException: database is locked`, so do not set it where more than
+one process (or a Puma instance with `WEB_CONCURRENCY` > 0) shares the same
+database file. Production leaves both variables unset and keeps the original
+defaults (`NORMAL` locking, 256MB mmap).
