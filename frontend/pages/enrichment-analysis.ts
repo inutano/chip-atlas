@@ -27,9 +27,11 @@ interface PageData {
 // Copy lifted verbatim from production's js/pj/enrichment_analysis.js
 // helpText object (the note1/note2 fragments are appended exactly as
 // production's own $(".infoBtn").click handler concatenates them).
-// TODO(owner): A. thaliana identifier convention pending backend confirmation (2026-09-24)
-const NOTE1 =
-  'Acceptable identifiers:\n  Official gene symbols (e.g. POU5F1)\n  Ensembl IDs (e.g. ENSG00000204531)\n  Uniprot IDs (e.g. Q01860)\n  RefSeq gene IDs (e.g. NM_002701)\n\nOfficial gene symbols must be entered according to following nomenclatures:\n  H. sapiens: HGNC\n  M. musculus: MGI\n  R. norvegicus: RGD\n  D. melanogaster: FlyBase\n  C. elegans: WormBase\n  S. cerevisiae: SGD\n\nAcceptable example:\n  POU5F1\n  TP53\n\nBad example:\n  OCT4\n  p53'
+// A. thaliana (TAIR12) additions per the pipeline team's instruction of
+// 2026-09-24: its Ensembl-style identifiers are AGI locus codes (AT1G01010),
+// and its official gene symbols follow TAIR.
+export const NOTE1 =
+  'Acceptable identifiers:\n  Official gene symbols (e.g. POU5F1)\n  Ensembl IDs (e.g. ENSG00000204531; AT1G01010 for A. thaliana)\n  Uniprot IDs (e.g. Q01860)\n  RefSeq gene IDs (e.g. NM_002701)\n\nOfficial gene symbols must be entered according to following nomenclatures:\n  H. sapiens: HGNC\n  M. musculus: MGI\n  R. norvegicus: RGD\n  D. melanogaster: FlyBase\n  C. elegans: WormBase\n  S. cerevisiae: SGD\n  A. thaliana: TAIR\n\nAcceptable example:\n  POU5F1\n  TP53\n\nBad example:\n  OCT4\n  p53'
 
 // EA-22: production's note2 listed all ten assemblies its own genome tabs
 // offered (hg19/hg38, mm9/mm10, rn6, dm3/dm6, ce10/ce11, sacCer3). This app

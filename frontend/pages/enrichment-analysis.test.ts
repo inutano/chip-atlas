@@ -35,6 +35,7 @@ import {
   estimateSeconds,
   formatEstimate,
   getSeconds,
+  NOTE1,
   NOTE2,
   qvalCodeToThreshold,
   resolveAvailabilityUiState,
@@ -852,9 +853,9 @@ test('UNAVAILABLE_MESSAGE: matches the task brief\'s exact wording', () => {
 //
 // The A:BED / B:BED ⓘ help text's "Acceptable genome assemblies" list must
 // match the seven tabs this app actually offers (config/genomes.yml), not
-// production's ten. NOTE1's nomenclature table is left as-is - see the
-// TODO(owner) comment above NOTE1 in enrichment-analysis.ts; the
-// A. thaliana identifier convention is not yet confirmed.
+// production's ten. NOTE1's identifier and nomenclature lines gained the
+// A. thaliana entries the pipeline team specified on 2026-09-24 (see the
+// NOTE1 test at the end of this file).
 
 test('NOTE2: lists every offered assembly, including the newly-added TAIR12', () => {
   assert.match(NOTE2, /hg38 \(H\. sapiens\)/)
@@ -870,4 +871,10 @@ test('NOTE2: does not list the retired assemblies this app no longer offers', ()
   for (const retired of ['hg19', 'mm9', 'dm3', 'ce10']) {
     assert.equal(NOTE2.includes(retired), false, `NOTE2 should not mention retired assembly "${retired}"`)
   }
+})
+
+// ===== NOTE1 — A. thaliana identifiers (pipeline team, 2026-09-24) =====
+test('NOTE1: names the AGI locus code as the A. thaliana Ensembl-style ID and TAIR as its nomenclature', () => {
+  assert.match(NOTE1, /Ensembl IDs \(e\.g\. ENSG00000204531; AT1G01010 for A\. thaliana\)/)
+  assert.match(NOTE1, /\n  S\. cerevisiae: SGD\n  A\. thaliana: TAIR\n/)
 })
