@@ -1,0 +1,26 @@
+# 総括者によるブラウザ検証記録 (headless Chromium + CDP, 2026-09-23)
+- DA-01/02: 新 /diff_analysis で警告 "Diff analysis is currently unavailable: ..." が常時表示、Submit disabled — 確認済み
+- DA-06: mm10 タブクリックで location.hash = #genome=mm10 — 確認済み
+- DA-07/11: ラジオ (DMR) はゲノム間で共有 (hg38 に戻っても DMR のまま) — 確認済み
+- DA-13: hg38 で Try with example → SRX4099758/SRX4099759 (A) / 2 件 (B)、Estimated 21 mins。TAIR12 では "No example data available for this genome and experiment type." — 確認済み
+- DA-14: ⓘ クリックで Bootstrap popover 表示 (本文は改行が潰れて 1 段落) — 確認済み
+- DA-26: /diff_analysis_result?id=bogus123 → 赤 alert "Missing id or backend parameter in URL."。&backend=wabi 付きなら Status "unknown"、Download Result URL 表示 — 確認済み
+- PB-18: Bisulfite-Seq 選択 → Download BED file → /null へ遷移し 404 ページ — 確認済み (qval=05 送信)
+- PB-19: Annotation tracks 選択 → View on IGV → POST /api/igv_url が HTTP 500 (ChipAtlas::Bedfile::NotFound)、画面 "Failed to build IGV link." — 確認済み
+- PB-16: TFs/CTCF + Blood/K-562 の両方選択 → Download → /null 404 — 確認済み
+- TG-09: /target_genes でリストに触れず View → alert "Select a genome and antigen first." (先頭 AATF はハイライトのみ) — 確認済み
+- COLO-04: /colo でリストに触れず View → alert "Select a primary and secondary type first." — 確認済み
+- COLO-03: Cell Type Class リストの順序 Others, Prostate, Neural, Breast, Liver, Blood, ... (非アルファベット順) — 確認済み
+- EA-08: 新: Bisulfite-Seq 選択後も閾値 50/100/200/500 のまま。旧 (本番): 閾値リストが "NA" (value 999) に切替 — 確認済み
+- EA-26: 新 EA 設定ページの node status リンク https://sc.ddbj.nig.ac.jp/en/guides/software/GridEngine/ は 404、本番のリンク .../operation/job_queue_status/ は 200 — 確認済み
+- EA-36: 新 EA 設定ページは /jobs/available を呼ばない、Submit は常に有効 — 確認済み
+- SHELL-20: /publications "To cite" の DOI URL: 本番は <a> リンク、新版はプレーンテキスト — 確認済み
+- SHELL-34: ⓘ popover の white-space: normal (改行が潰れる) — 確認済み
+- SHELL-02: 本番ホームの赤字 "Diff Analysis is temporarily unavailable..." は新版に無い — スクリーンショットで確認
+- SHELL-14: 新版はリンクに下線 (footer/publications) — スクリーンショットで確認
+- SHELL-07: 新版ナビに Agents 無し — スクリーンショットで確認
+- モバイル (400px): 本番はホーム (scrollWidth 599) と Search (713)、/agents (504) で横スクロール発生。新版はホーム/PB/EA/DA/TG/Colo/Search/view/publications/demo で横スクロール無し、/agents のみ 774px に広がる — CDP 計測
+- SV (視認): 新 Search の既定一覧は DRX000201 (mm10, Unclassified) から始まる。本番は SRX019491 から。Copy/TSV ボタンは両方にあり
+- /view (視認): 本番は hg38+hg19 の 2 列パイプライン統計、新版 hg38 のみ。"Where can I get the processing logs?" → "Pipeline docs"。"Download Correlation Data" → "Download correlation TSV"。新版は Read and Peak Distribution / Correlation-Based Clustering 見出しの ⓘ が無い
+- 文言 (視認): Submit ボタン "submit" → "Submit"、DA 実験タイプ "ChIP/ATAC/DNase-seq" → "ChIP / ATAC / DNase-seq"、EA dataset A placeholder "Click info buttons above to show the description format." → "Paste content or use the file picker below."、Estimated run time "-" → "—"
+- Agents/Demo ページ: 新版本文が "TAIR10" と記載 (実際は TAIR12) — スクリーンショットで確認

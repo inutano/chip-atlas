@@ -1,0 +1,10 @@
+<!DOCTYPE html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>ChIP-Atlas 新版レビュー 2026-09-23</title>
+<style>body{margin:0;font:15px/1.7 -apple-system,"Hiragino Sans","Noto Sans JP",sans-serif;color:#222;background:#fff}.wrap{max-width:900px;margin:0 auto;padding:32px 20px}h1{font-size:24px;border-bottom:2px solid #222;padding-bottom:10px}a.card{display:block;border:1px solid #e3e3e3;border-radius:10px;padding:16px 20px;margin:14px 0;text-decoration:none;color:inherit}a.card:hover{border-color:#2b6cb0}a.card b{color:#2b6cb0;font-size:17px}p.meta{color:#666;font-size:13px}</style></head><body><div class="wrap">
+<h1>ChIP-Atlas 新版 (sengu) レビュー — 2026-09-23</h1>
+<p class="meta">比較対象: 旧 https://chip-atlas.org (本番, git master) / 新 http://localhost:9292 (sengu ブランチ作業ツリー, database.sqlite.verify)。15 の担当エージェントによる調査を総括者が実機検証・統合したもの。各レポートは単体の HTML で、絞り込み・全文検索ができる。</p>
+<div style="background:#eef8f1;border:1px solid #9fd3b1;border-radius:8px;padding:12px 16px;margin:14px 0"><strong>2026-09-24 更新:</strong> 新旧比較の「退行 (要修正)」40 件をすべて修正し、Diff Analysis を復旧、TAIR12 の example データを追加しました (sengu ブランチ 71cc650..968bd1d、push 済み)。各レポートの項目に「対応状況」を追記しています。脆弱性・10 年レポートの高リスク項目は原則未対応です。</div>
+<a class="card" href="01-ui-changes.html"><b>1. 新旧比較: ユーザから見える変更点</b><br>ページ・操作・API の差分 338 項目を 改良 / 単なる変更 / 機能削除 / 退行 (要修正) / データ差分 / 新機能 に分類。冒頭の「総括」にリリース前に直すべき退行をまとめた。</a>
+<a class="card" href="02-security.html"><b>2. 脆弱性スキャン結果</b><br>Ruby バックエンド / テンプレート・フロントエンド / インフラ・デプロイ・CI / 解析パイプラインの 53 指摘 (Critical 1, High 11)。本番 (AWS EC2 + nginx + ALB) を前提に深刻度を評価。</a>
+<a class="card" href="03-longevity.html"><b>3. 10 年メンテナンスフリー観点レビュー</b><br>外部依存不変を仮定した上で、時間経過・再起動・再デプロイ・データ更新で壊れる要因 65 項目を顕在化時期付きで列挙。</a>
+<p class="meta">生成物と根拠 (担当エージェントの元レポート、スクリーンショット、検証スクリプト) はセッションのスクラッチ領域にあり、必要なら docs/ へ移せる。</p>
+</div></body></html>
