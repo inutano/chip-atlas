@@ -41,4 +41,13 @@ class HealthTest < Minitest::Test
     data = JSON.parse(last_response.body)
     assert_equal 'unavailable', data['features']['diff_analysis']
   end
+
+  # CHIP_ATLAS_PERMITTED_HOSTS widens production's host authorization for a
+  # test instance reached by IP (the production block itself only runs under
+  # RACK_ENV=production, so the parsing helper is what gets pinned here).
+  def test_permitted_hosts_default_and_env_override
+    assert_equal ['.chip-atlas.org'], ChipAtlasApp.permitted_hosts_from(nil)
+    assert_equal ['.chip-atlas.org'], ChipAtlasApp.permitted_hosts_from(' , ')
+    assert_equal ['.chip-atlas.org', '203.0.113.10'], ChipAtlasApp.permitted_hosts_from('.chip-atlas.org, 203.0.113.10')
+  end
 end

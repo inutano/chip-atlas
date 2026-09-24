@@ -67,7 +67,20 @@ class ChipAtlasApp < Sinatra::Base
     set :access_logger, access_log
   end
 
+  # Production answers only for its own hostnames. CHIP_ATLAS_PERMITTED_HOSTS
+  # (comma-separated, e.g. ".chip-atlas.org,203.0.113.10") widens that for a
+  # test instance reached by IP without editing the code; a leading dot
+  # matches the domain and its subdomains, as Sinatra's host_authorization
+  # documents.
+  DEFAULT_PERMITTED_HOSTS = ['.chip-atlas.org'].freeze
+
+  # Comma-separated env value -> list of hosts; blank/unset -> the default.
+  def self.permitted_hosts_from(value)
+    hosts = value.to_s.split(',').map(&:strip).reject(&:empty?)
+    hosts.empty? ? DEFAULT_PERMITTED_HOSTS : hosts
+  end
+
   configure :production do
-    set :host_authorization, { permitted_hosts: ['.chip-atlas.org'] }
+    set :host_authorization, { permitted_hosts: permitted_hosts_from(ENV['CHIP_ATLAS_PERMITTED_HOSTS']) }
   end
 end
