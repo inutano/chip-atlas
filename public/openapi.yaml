@@ -653,7 +653,9 @@ paths:
           in: query
           required: false
           description: >-
-            Search query string. Omit for the full experiment list.
+            Search query string. Omit for the full experiment list. Each
+            term matches as a prefix (K56 finds K562); quote a phrase to
+            match it whole.
           schema:
             type: string
           example: H3K4me3

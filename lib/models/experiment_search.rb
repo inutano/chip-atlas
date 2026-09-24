@@ -94,7 +94,7 @@ module ChipAtlas
     def search(query, genome: nil, limit: 20, offset: 0)
       return list_all(genome: genome, limit: limit, offset: offset) if query.nil? || query.strip.empty?
 
-      sanitized = fts5_sanitize(query)
+      sanitized = match_expression(query)
       return { total: 0, returned: 0, experiments: [] } if sanitized.empty?
 
       if genome && !genome.empty?
@@ -147,15 +147,23 @@ module ChipAtlas
       { total: total, returned: rows.size, experiments: rows }
     end
 
-    def fts5_sanitize(query)
-      tokens = query.strip.split(/\s+/).map do |token|
-        cleaned = token.gsub(/["'()*^{}:]/, '')
-        next nil if cleaned.empty?
-        "\"#{cleaned}\""
-      end.compact
-      tokens.join(' ')
-    end
+    MIN_PREFIX_LENGTH = 2
 
-    private_class_method :fts5_sanitize
+    # Turn a user query into an FTS5 MATCH expression.
+    #   bare term of >= MIN_PREFIX_LENGTH chars -> "term"*   (prefix match)
+    #   shorter term                            -> "term"    (exact; a 1-char
+    #                                              prefix scans the whole index)
+    #   "quoted phrase"                         -> "quoted phrase"*  (phrase prefix)
+    # Every term stays inside double quotes, which is what keeps FTS5 operator
+    # keywords (AND/OR/NOT/NEAR) and metacharacters from being parsed as syntax.
+    def match_expression(query)
+      terms = []
+      query.to_s.strip.scan(/"([^"]*)"|(\S+)/) do |phrase, bare|
+        cleaned = (phrase || bare).to_s.gsub(/["'()*^{}:]/, '').strip
+        next if cleaned.empty?
+        terms << (cleaned.length >= MIN_PREFIX_LENGTH ? %("#{cleaned}"*) : %("#{cleaned}"))
+      end
+      terms.join(' ')
+    end
   end
 end

@@ -59,6 +59,58 @@ class ExperimentSearchTest < Minitest::Test
     assert result.key?(:total)
   end
 
+  # --- match_expression: turning a user query into an FTS5 MATCH string ---
+
+  def test_match_expression_prefixes_a_bare_term
+    assert_equal '"K56"*', ChipAtlas::ExperimentSearch.match_expression('K56')
+  end
+
+  def test_match_expression_prefixes_each_space_separated_term
+    assert_equal '"K562"* "chip"*', ChipAtlas::ExperimentSearch.match_expression('K562 chip')
+  end
+
+  def test_match_expression_keeps_a_term_below_min_prefix_length_exact
+    assert_equal '"a"', ChipAtlas::ExperimentSearch.match_expression('a')
+  end
+
+  def test_match_expression_keeps_a_quoted_phrase_whole
+    assert_equal '"chip antibody"* "K56"*',
+                 ChipAtlas::ExperimentSearch.match_expression('"chip antibody" K56')
+  end
+
+  def test_match_expression_absorbs_the_users_own_star
+    assert_equal '"K56"*', ChipAtlas::ExperimentSearch.match_expression('K56*')
+  end
+
+  def test_match_expression_neutralises_operator_keywords
+    assert_equal '"a" "AND"* "b"', ChipAtlas::ExperimentSearch.match_expression('a AND b')
+  end
+
+  def test_match_expression_is_empty_for_metacharacter_only_input
+    assert_equal '', ChipAtlas::ExperimentSearch.match_expression('***')
+    assert_equal '', ChipAtlas::ExperimentSearch.match_expression('""')
+    assert_equal '', ChipAtlas::ExperimentSearch.match_expression('   ')
+  end
+
+  # A shorter prefix must never lose hits the longer one finds. The shared
+  # setup only ever writes the hyphenated "K-562" (which FTS5 tokenizes as
+  # the adjacent pair "k" "562", not a single "k562" token - see
+  # test_search_by_keyword), so an unhyphenated literal is added here,
+  # local to this test, to give 'K562' a real single-token hit to compare
+  # against without disturbing the row counts other tests depend on.
+  def test_search_with_a_shorter_prefix_finds_a_superset
+    DB.run <<-SQL
+      INSERT INTO experiments_fts (experiment_id, sra_id, geo_id, genome, track_class, track_subclass, cell_type_class, cell_type_subclass, title, attributes)
+      VALUES ('SRX018627', 'SRA125', 'GSM458', 'hg38', 'Histone', 'H3K4me3', 'Blood', 'K562', 'H3K4me3 ChIP-seq in K562 cells', 'leukemia cell line');
+    SQL
+
+    narrow_ids = ChipAtlas::ExperimentSearch.search('K562')[:experiments].map { |e| e[:experiment_id] }
+    wide_ids   = ChipAtlas::ExperimentSearch.search('K56')[:experiments].map { |e| e[:experiment_id] }
+
+    refute_empty narrow_ids, 'fixture setup should give K562 at least one literal hit'
+    assert_empty narrow_ids - wide_ids, 'every K562 hit must also be a K56 hit'
+  end
+
   def test_blank_query_lists_all_experiments
     result = ChipAtlas::ExperimentSearch.search('', limit: 2, offset: 0)
     assert_operator result[:total], :>, 0, 'blank query must list everything'

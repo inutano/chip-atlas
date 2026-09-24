@@ -110,6 +110,12 @@ class ApiTest < Minitest::Test
     assert last_response.ok?
     data = JSON.parse(last_response.body)
     assert data['total'] >= 1
+
+    # Prefix case (R10): a truncated term must still hit the seeded row.
+    get '/api/search', q: 'K-56', genome: 'hg38', limit: '10'
+    assert last_response.ok?
+    data = JSON.parse(last_response.body)
+    assert data['total'] >= 1
   end
 
   def test_search_without_query_lists_experiments
