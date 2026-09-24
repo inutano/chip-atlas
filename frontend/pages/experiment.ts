@@ -3,7 +3,7 @@
 // for the experiment detail page. Reads experiment records from a JSON island.
 
 import { checkRemoteUrlStatus, type ExperimentRecord } from '../api/client'
-import { igvReachable, igvOriginOf, IGV_UNREACHABLE_MESSAGE, IGV_ORIGIN } from '../components/igv'
+import { igvReachable, igvOriginOf, IGV_UNREACHABLE_MESSAGE, IGV_ORIGIN, igvGenomeParam } from '../components/igv'
 
 interface PageData {
   expid: string
@@ -67,7 +67,7 @@ function igvName(record: ExperimentRecord, suffix: string): string {
   return encodeURIComponent(base)
 }
 
-function buildVisualizeMenu(data: PageData): HTMLElement[] {
+export function buildVisualizeMenu(data: PageData): HTMLElement[] {
   const items: HTMLElement[] = []
   const isBisulfite = data.records[0].track_class === 'Bisulfite-Seq'
 
@@ -78,35 +78,35 @@ function buildVisualizeMenu(data: PageData): HTMLElement[] {
 
     if (!isBisulfite) {
       items.push(item(
-        `${IGV_BASE}/${g}/eachData/bw/${expid}.bw&genome=${g}&name=${igvName(record, '')}`,
+        `${IGV_BASE}/${g}/eachData/bw/${expid}.bw&genome=${igvGenomeParam(g)}&name=${igvName(record, '')}`,
         'BigWig',
       ))
       for (const q of QVALS) {
         items.push(item(
-          `${IGV_BASE}/${g}/eachData/bb${q}/${expid}.${q}.bb&genome=${g}&name=${igvName(record, ` (1E-${q})`)}`,
+          `${IGV_BASE}/${g}/eachData/bb${q}/${expid}.${q}.bb&genome=${igvGenomeParam(g)}&name=${igvName(record, ` (1E-${q})`)}`,
           `Peak-call (q < 1E-${q})`,
         ))
       }
     } else {
       const cl = record.cell_type_subclass
       items.push(item(
-        `${IGV_BASE}/${g}/eachData/bs/methyl/${expid}.methyl.bw&genome=${g}&name=${encodeURIComponent(`Methylation rate (@ ${cl}) ${expid}`)}`,
+        `${IGV_BASE}/${g}/eachData/bs/methyl/${expid}.methyl.bw&genome=${igvGenomeParam(g)}&name=${encodeURIComponent(`Methylation rate (@ ${cl}) ${expid}`)}`,
         'BigWig (Methylation rate)',
       ))
       items.push(item(
-        `${IGV_BASE}/${g}/eachData/bs/cover/${expid}.cover.bw&genome=${g}&name=${encodeURIComponent(`Coverage rate (@ ${cl}) ${expid}`)}`,
+        `${IGV_BASE}/${g}/eachData/bs/cover/${expid}.cover.bw&genome=${igvGenomeParam(g)}&name=${encodeURIComponent(`Coverage rate (@ ${cl}) ${expid}`)}`,
         'BigWig (Coverage)',
       ))
       items.push(item(
-        `${IGV_BASE}/${g}/eachData/bs/hmr/BigBed/${expid}.hmr.bb&genome=${g}&name=${encodeURIComponent(`Hypo MR (@ ${cl}) ${expid}`)}`,
+        `${IGV_BASE}/${g}/eachData/bs/hmr/BigBed/${expid}.hmr.bb&genome=${igvGenomeParam(g)}&name=${encodeURIComponent(`Hypo MR (@ ${cl}) ${expid}`)}`,
         'Hypo MR',
       ))
       items.push(item(
-        `${IGV_BASE}/${g}/eachData/bs/pmd/BigBed/${expid}.pmd.bb&genome=${g}&name=${encodeURIComponent(`Partial MR (@ ${cl}) ${expid}`)}`,
+        `${IGV_BASE}/${g}/eachData/bs/pmd/BigBed/${expid}.pmd.bb&genome=${igvGenomeParam(g)}&name=${encodeURIComponent(`Partial MR (@ ${cl}) ${expid}`)}`,
         'Partial MR',
       ))
       items.push(item(
-        `${IGV_BASE}/${g}/eachData/bs/hypermr/BigBed/${expid}.hypermr.bb&genome=${g}&name=${encodeURIComponent(`Hyper MR (@ ${cl}) ${expid}`)}`,
+        `${IGV_BASE}/${g}/eachData/bs/hypermr/BigBed/${expid}.hypermr.bb&genome=${igvGenomeParam(g)}&name=${encodeURIComponent(`Hyper MR (@ ${cl}) ${expid}`)}`,
         'Hyper MR',
       ))
     }

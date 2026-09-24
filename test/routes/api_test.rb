@@ -144,6 +144,29 @@ class ApiTest < Minitest::Test
     assert last_response.ok?
     data = JSON.parse(last_response.body)
     assert_match(/localhost:60151/, data['url'])
+    assert_match(%r{genome=https://chip-atlas\.dbcls\.jp/data/genome/hg38/hg38\.json}, data['url'])
+  end
+
+  # The owner's report: IGV desktop has no bundled TAIR12 genome, so the
+  # bare code (genome=TAIR12) silently fails to resolve. Every assembly's
+  # genome= value must be the genome's own JSON URL end-to-end through the
+  # route, not just at the LocationService unit level.
+  def test_post_igv_url_for_tair12_uses_the_genome_json_url
+    DB[:bedfiles].insert(
+      filename: 'His.ALL.05.H3K4me3.AllCell', genome: 'TAIR12', track_class: 'Histone',
+      track_subclass: 'H3K4me3', cell_type_class: 'All cell types', cell_type_subclass: '-',
+      qval: '05', experiments: 'SRX000001', created_at: Time.now
+    )
+    ChipAtlas::BedExtensionResolver.prober = ->(url) { url.end_with?('.bed.gz') }
+
+    post '/api/igv_url', JSON.generate({
+      condition: { genome: 'TAIR12', track_class: 'Histone', track_subclass: 'H3K4me3',
+                   cell_type_class: 'All cell types', cell_type_subclass: '-', qval: '05' }
+    }), 'CONTENT_TYPE' => 'application/json'
+
+    assert last_response.ok?
+    data = JSON.parse(last_response.body)
+    assert_match(%r{genome=https://chip-atlas\.dbcls\.jp/data/genome/TAIR12/TAIR12\.json}, data['url'])
   end
 
   def test_post_download_url_without_condition_returns_400
@@ -210,6 +233,7 @@ class ApiTest < Minitest::Test
 
     assert last_response.ok?
     data = JSON.parse(last_response.body)
+    assert_match %r{genome=https://chip-atlas\.dbcls\.jp/data/genome/hg38/hg38\.json}, data['url']
     assert_match %r{annotations/hg38/}, data['url']
     assert_match(/&name=/, data['url'])
   end

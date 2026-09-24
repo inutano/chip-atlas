@@ -1001,7 +1001,7 @@ paths:
                     format: uri
                     description: IGV browser URL, or null if no matching data exists.
               example:
-                url: "http://localhost:60151/load?genome=hg38&file=https://chip-atlas.dbcls.jp/data/hg38/assembled/His.Bld.05.H3K4me3.AllCell.bed"
+                url: "http://localhost:60151/load?genome=https://chip-atlas.dbcls.jp/data/genome/hg38/hg38.json&file=https://chip-atlas.dbcls.jp/data/hg38/assembled/His.Bld.05.H3K4me3.AllCell.bed"
         "400":
           description: >-
             Missing genome/track_class, or genome is not a recognised
@@ -1070,7 +1070,7 @@ paths:
                       - "null"
                     format: uri
               example:
-                url: "http://localhost:60151/load?genome=hg38&file=https://chip-atlas.dbcls.jp/data/hg38/assembled/His.Bld.05.H3K4me3.AllCell.bed"
+                url: "http://localhost:60151/load?genome=https://chip-atlas.dbcls.jp/data/genome/hg38/hg38.json&file=https://chip-atlas.dbcls.jp/data/hg38/assembled/His.Bld.05.H3K4me3.AllCell.bed"
         "400":
           description: >-
             condition is missing or not an object, condition.genome is

@@ -51,7 +51,29 @@ class LocationServiceTest < Minitest::Test
       'cell_type_class' => 'Blood', 'cell_type_subclass' => '-', 'qval' => '05'
     }}
     svc = ChipAtlas::LocationService.new(data)
-    assert_match %r{http://localhost:60151/load\?genome=hg38}, svc.igv_browsing_url
+    assert_match %r{genome=https://chip-atlas\.dbcls\.jp/data/genome/hg38/hg38\.json}, svc.igv_browsing_url
+  end
+
+  # The owner's report: IGV desktop has no bundled TAIR12 genome, so handing
+  # it the bare code (genome=TAIR12) leaves the load silently unresolved.
+  # Every assembly's genome= value must instead be the genome's own JSON URL
+  # (https://chip-atlas.dbcls.jp/data/genome/<g>/<g>.json), which is also
+  # that JSON's own `id` field -- see SCRATCH/investigation/igv.md.
+  def test_igv_browsing_url_for_tair12_uses_the_genome_json_url
+    DB[:bedfiles].insert(
+      filename: 'His.ALL.05.H3K4me3.AllCell', genome: 'TAIR12', track_class: 'Histone',
+      track_subclass: 'H3K4me3', cell_type_class: 'All cell types', cell_type_subclass: '-',
+      qval: '05', experiments: 'SRX000001', created_at: Time.now
+    )
+    ChipAtlas::BedExtensionResolver.prober = ->(url) { url.end_with?('.bed.gz') }
+
+    data = { 'condition' => {
+      'genome' => 'TAIR12', 'track_class' => 'Histone', 'track_subclass' => 'H3K4me3',
+      'cell_type_class' => 'All cell types', 'cell_type_subclass' => '-', 'qval' => '05'
+    }}
+    svc = ChipAtlas::LocationService.new(data)
+    assert_match %r{genome=https://chip-atlas\.dbcls\.jp/data/genome/TAIR12/TAIR12\.json},
+                 svc.igv_browsing_url
   end
 
   def test_colo_urls
@@ -158,6 +180,7 @@ class LocationServiceTest < Minitest::Test
     }}
     svc = ChipAtlas::LocationService.new(data)
     url = svc.igv_browsing_url
+    assert_match %r{genome=https://chip-atlas\.dbcls\.jp/data/genome/hg38/hg38\.json}, url
     assert_match %r{file=https://chip-atlas\.dbcls\.jp/data/annotations/hg38/cpg_island\.hg38\.bed}, url
     assert_match(/name=CpG Islands/, url)
   end

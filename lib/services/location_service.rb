@@ -35,7 +35,7 @@ module ChipAtlas
         condition_with_all = @condition.merge(cell_type_class: 'All cell types')
         filename  = ChipAtlas::Bedfile.get_filename(condition_with_all)
         trackname = ChipAtlas::Bedfile.get_trackname(condition_with_all).gsub(', ', '_')
-        "#{igv}/load?genome=#{@genome}&file=#{ARCHIVE_BASE}/annotations/#{@genome}/#{filename}&name=#{trackname}"
+        "#{igv}/load?genome=#{igv_genome_url}&file=#{ARCHIVE_BASE}/annotations/#{@genome}/#{filename}&name=#{trackname}"
       else
         # Finding 1 (2026-09-24 final review): bed_url rescues
         # Bedfile::NotFound internally and returns nil on no match (see
@@ -45,7 +45,7 @@ module ChipAtlas
         # it once and bail out before building the string.
         url = bed_url
         return nil unless url
-        "#{igv}/load?genome=#{@genome}&file=#{url}"
+        "#{igv}/load?genome=#{igv_genome_url}&file=#{url}"
       end
     rescue ChipAtlas::Bedfile::NotFound
       nil
@@ -100,6 +100,16 @@ module ChipAtlas
 
     def target_genes_base
       "#{ARCHIVE_BASE}/#{@genome}/target"
+    end
+
+    # The owner's report: IGV desktop resolves genome= against its own
+    # bundled registry, which has no TAIR12 (ChIP-Atlas's Arabidopsis
+    # build) -- so a bare genome code silently fails to load for it. Every
+    # genome's own JSON (its `id` field is this same URL) resolves this for
+    # all seven assemblies uniformly, not just TAIR12 -- see
+    # SCRATCH/investigation/igv.md.
+    def igv_genome_url
+      "#{ARCHIVE_BASE}/genome/#{@genome}/#{@genome}.json"
     end
 
     def bed_url

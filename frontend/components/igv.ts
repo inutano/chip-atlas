@@ -19,6 +19,18 @@
 
 export const IGV_ORIGIN = 'http://localhost:60151'
 
+// The owner's report: IGV desktop resolves genome= against its own bundled
+// registry, which has no TAIR12 (ChIP-Atlas's Arabidopsis build) - so a bare
+// genome code silently fails to load for it. Every genome's own JSON (its
+// `id` field is this same URL) resolves this for all seven assemblies
+// uniformly, not just TAIR12 - see SCRATCH/investigation/igv.md. This is the
+// client-side counterpart of LocationService#igv_genome_url (Ruby).
+const GENOME_JSON_BASE = 'https://chip-atlas.dbcls.jp/data/genome'
+
+export function igvGenomeParam(genome: string): string {
+  return `${GENOME_JSON_BASE}/${genome}/${genome}.json`
+}
+
 export const IGV_UNREACHABLE_MESSAGE =
   'Could not reach IGV on localhost:60151. Start IGV on this machine and make ' +
   'sure "Enable port" is on under View › Preferences › Advanced, then try again.'
