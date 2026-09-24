@@ -25,11 +25,14 @@ import {
   applyDatasetBGateTransition,
   bedSizeKey,
   buildEnrichmentParams,
+  clearedTextareaFor,
   countLines,
   countModeVisibility,
+  datasetBRadioVisibility,
   distanceDefaultFor,
   enrichmentFacetFilterOptions,
   exampleFileFor,
+  exampleFileForB,
   genomeForTaxonomy,
   prefillSelection,
   estimateSeconds,
@@ -100,6 +103,21 @@ test('exampleFileFor: maps each dataset A mode to its own example file', () => {
   assert.equal(exampleFileFor('bed'), 'bedA.txt')
   assert.equal(exampleFileFor('gene'), 'geneA.txt')
   assert.equal(exampleFileFor('count'), 'countA.txt')
+})
+
+// ===== exampleFileForB — Task 8 (R4/EA-17) =====
+//
+// Dataset B has its own "Try with example" link on production
+// (enrichment_analysis.haml:194-197), sitting in the same wrapper as
+// dataset B's textarea and file input. Its putComparedWith()
+// (enrichment_analysis.js:372-382) switches on the checked comparedWith
+// value and loads bedB.txt or geneB.txt. There is deliberately no case for
+// rnd/refseq: neither takes input, so the whole wrapper — link included —
+// is hidden in those two modes.
+
+test('exampleFileForB: maps each dataset B input mode to its own example file', () => {
+  assert.equal(exampleFileForB('bed'), 'bedB.txt')
+  assert.equal(exampleFileForB('userlist'), 'geneB.txt')
 })
 
 // ===== buildEnrichmentParams — full WABI field-name payload =====
@@ -316,6 +334,61 @@ test('countModeVisibility: bed and gene modes show panel 5\'s body and the datas
     noteHidden: true,
     titlesHidden: false,
   })
+})
+
+// ===== datasetBRadioVisibility — Task 8 (R3/EA-14) =====
+//
+// Production hides the dataset B choices that do not apply to dataset A's
+// mode rather than greying them out: positionBed()/positionGene()/
+// positionCount() (enrichment_analysis.js:394-486) run show()/hide() over
+// the .panel-input wrappers, so the rows really leave the layout. This page
+// used to toggle `disabled` on Refseq/Gene list and never gate Random/BED
+// at all, which is what the owner reported as "panel 5 does not change".
+
+test('datasetBRadioVisibility: BED mode shows Random and BED, hides the gene-list-only rows', () => {
+  assert.deepEqual(datasetBRadioVisibility('bed'), {
+    rndHidden: false,
+    bedHidden: false,
+    refseqHidden: true,
+    userlistHidden: true,
+  })
+})
+
+test('datasetBRadioVisibility: gene-list mode shows Refseq and Gene list, hides Random and BED', () => {
+  assert.deepEqual(datasetBRadioVisibility('gene'), {
+    rndHidden: true,
+    bedHidden: true,
+    refseqHidden: false,
+    userlistHidden: false,
+  })
+})
+
+// Count mode has no dataset B at all — countModeVisibility above already
+// hides the whole #dataB-panel-body — but the four rows still report
+// hidden so the two rules can never disagree about a row's state.
+test('datasetBRadioVisibility: count mode hides all four rows', () => {
+  assert.deepEqual(datasetBRadioVisibility('count'), {
+    rndHidden: true,
+    bedHidden: true,
+    refseqHidden: true,
+    userlistHidden: true,
+  })
+})
+
+// ===== clearedTextareaFor — Task 8 (R5) =====
+//
+// Production's eraseTextarea() (enrichment_analysis.js:76-90, 93-110) is
+// group-scoped: the dataset A radio handler erases dataset A's textarea and
+// the dataset B radio handler erases dataset B's, each unconditionally and
+// neither touching the other. That asymmetry is load-bearing — switching
+// dataset A force-reassigns dataset B's radio through a programmatic
+// checked = true, which fires no `change` event, so dataset B's text
+// survives a dataset A switch (verified live on production, both
+// directions). Hence the mapping below has no "clear both" case.
+
+test('clearedTextareaFor: each radio group clears only its own dataset\'s textarea', () => {
+  assert.equal(clearedTextareaFor('dataA-type'), 'dataA-text')
+  assert.equal(clearedTextareaFor('dataB-type'), 'dataB-text')
 })
 
 // ===== applyDatasetBGateTransition — Task C5 =====

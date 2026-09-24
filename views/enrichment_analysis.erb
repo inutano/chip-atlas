@@ -84,10 +84,16 @@
             <span class="form-check form-check-inline"><input class="form-check-input" type="radio" name="dataB-perm" id="perm-100" value="100"><label class="form-check-label" for="perm-100">×100</label></span>
           </div>
           <div class="form-check"><input class="form-check-input" type="radio" name="dataB-type" id="dataB-bed" value="bed"><label class="form-check-label" for="dataB-bed">Genomic regions (BED)</label><a class="info-btn" href="#" data-info="dataset-b-bed" role="button" aria-label="About genomic regions (BED) for dataset B">&#x24D8;</a></div>
-          <div class="form-check"><input class="form-check-input" type="radio" name="dataB-type" id="dataB-refseq" value="refseq" disabled><label class="form-check-label" for="dataB-refseq">Refseq coding genes (gene-list mode only)</label></div>
-          <div class="form-check mb-2"><input class="form-check-input" type="radio" name="dataB-type" id="dataB-userlist" value="userlist" disabled><label class="form-check-label" for="dataB-userlist">Gene list (gene-list mode only)</label></div>
+          <div class="form-check" hidden><input class="form-check-input" type="radio" name="dataB-type" id="dataB-refseq" value="refseq"><label class="form-check-label" for="dataB-refseq">Refseq coding genes (excluding dataset A)</label></div>
+          <div class="form-check mb-2" hidden><input class="form-check-input" type="radio" name="dataB-type" id="dataB-userlist" value="userlist"><label class="form-check-label" for="dataB-userlist">Gene list (symbols or IDs)</label></div>
           <textarea class="form-control mb-2" id="dataB-text" rows="6" placeholder="Paste content or use the file picker below." hidden></textarea>
-          <input type="file" id="dataB-file" class="form-control form-control-sm" hidden>
+          <div id="dataB-file-row" hidden>
+            <input type="file" id="dataB-file" class="form-control form-control-sm">
+            <div class="mt-2 d-flex justify-content-between align-items-center">
+              <label class="text-muted small mb-0" for="dataB-file">Choose local file</label>
+              <a class="linkExample" href="#" id="try-example-b">Try with example</a>
+            </div>
+          </div>
           <p id="dataB-note" class="text-muted small mb-0">Random permutation needs no input.</p>
         </div>
         <p id="count-mode-note" class="text-muted small mb-0" hidden>Not required for gene count table analysis</p>

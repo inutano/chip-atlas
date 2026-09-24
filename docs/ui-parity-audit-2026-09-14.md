@@ -170,7 +170,7 @@ Below 1375px production swaps full labels for: `PB`, `EA`, `DA`, `TG`, `Colo`, `
 - Renumbering breaks the PDF manual's step references. — resolved by the above.
 - Missing: seven ⓘ info buttons, "Try with example", "Choose local file" caption, "Estimated run time", "node status (epyc.q)" link. — fixed (Task 14), all present and keyboard-reachable; "Estimated run time" itself stays an em-dash, see open questions.
 - Production seeds titles with `My project` / `Dataset A` / `Dataset B`; sengu leaves them empty. — fixed, contact sheet confirms seeded values.
-- sengu adds two disabled radios ("gene-list mode only") — an improvement; keep. — kept.
+- sengu adds two disabled radios ("gene-list mode only") — an improvement; keep. — kept. **Reversed on 2026-09-24 at the owner's request:** panel 5 now hides the dataset B choices that do not apply to dataset A's mode — Random permutation/BED in gene-list mode, RefSeq/Gene list in BED mode — exactly as production does, instead of leaving two of them on screen greyed out.
 
 ### 9. Dataset Search — interaction model — **INTENTIONAL**
 - Production opens as a browsable DataTables view of all 432,319 rows; sengu shows nothing until queried. — fixed, sengu now lists all experiments by default.

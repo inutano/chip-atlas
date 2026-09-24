@@ -317,6 +317,55 @@ export function countModeVisibility(aType: string): {
   }
 }
 
+/**
+ * Which of dataset B's four choices belong to dataset A's current mode.
+ *
+ * Production hides the rest outright — positionBed()/positionGene()/
+ * positionCount() (enrichment_analysis.js:394-486) run show()/hide() over
+ * the `.panel-input` wrappers, so a choice that cannot apply leaves the
+ * layout instead of sitting there greyed out. BED keeps Random permutation
+ * and BED; a gene list keeps RefSeq and Gene list; a gene count table has
+ * no dataset B at all, so all four go (countModeVisibility above hides the
+ * whole panel body in that mode anyway, and reporting `true` here keeps the
+ * two rules from ever disagreeing about a row).
+ */
+export function datasetBRadioVisibility(aType: 'bed' | 'gene' | 'count'): {
+  rndHidden: boolean
+  bedHidden: boolean
+  refseqHidden: boolean
+  userlistHidden: boolean
+} {
+  const isBedMode = aType === 'bed'
+  const isGeneMode = aType === 'gene'
+  return {
+    rndHidden: !isBedMode,
+    bedHidden: !isBedMode,
+    refseqHidden: !isGeneMode,
+    userlistHidden: !isGeneMode,
+  }
+}
+
+/**
+ * Which textarea a change to the given radio group clears.
+ *
+ * Production's two radio handlers (enrichment_analysis.js:76-90, 93-110)
+ * each end in eraseTextarea() for their own dataset and never the other's.
+ * That asymmetry matters: switching dataset A force-reassigns dataset B's
+ * radio through a programmatic `checked = true`, which fires no `change`
+ * event, so dataset B's text survives a dataset A switch. Binding this per
+ * group therefore reproduces production exactly, with no extra state.
+ */
+export function clearedTextareaFor(changedGroup: 'dataA-type' | 'dataB-type'): 'dataA-text' | 'dataB-text' {
+  return changedGroup === 'dataA-type' ? 'dataA-text' : 'dataB-text'
+}
+
+/** Hide or show a dataset B choice by its `.form-check` row, so the radio's
+ * label goes with it (production hides the equivalent `.panel-input` div). */
+function setDatasetBRowHidden(radioId: string, hidden: boolean): void {
+  const row = $(radioId).closest('.form-check')
+  if (row instanceof HTMLElement) row.hidden = hidden
+}
+
 function syncDatasetBVisibility(): void {
   const aType = getCheckedValue('dataA-type')
   const isGeneMode = aType === 'gene'
@@ -344,17 +393,24 @@ function syncDatasetBVisibility(): void {
     (document.getElementById(`dataB-${bType}`) as HTMLInputElement).checked = true
   }
 
-  // Refseq + userlist are gene-list-mode only
-  ;(document.getElementById('dataB-refseq') as HTMLInputElement).disabled = !isGeneMode
-  ;(document.getElementById('dataB-userlist') as HTMLInputElement).disabled = !isGeneMode
+  // Only the choices that belong to dataset A's mode stay on screen (R3) —
+  // production hides the others rather than greying them out.
+  const rows = datasetBRadioVisibility(aType as 'bed' | 'gene' | 'count')
+  setDatasetBRowHidden('dataB-rnd', rows.rndHidden)
+  setDatasetBRowHidden('dataB-bed', rows.bedHidden)
+  setDatasetBRowHidden('dataB-refseq', rows.refseqHidden)
+  setDatasetBRowHidden('dataB-userlist', rows.userlistHidden)
 
   // Random permutation row visible only when dataset B = rnd
   ;($('permutation-row') as HTMLElement).hidden = bType !== 'rnd'
 
-  // Textarea + file picker visible when dataset B needs content (bed or userlist)
+  // Textarea + file row visible when dataset B needs content (bed or
+  // userlist). The file row carries dataset B's own "Try with example" link
+  // (R4), which production keeps in the same wrapper as the textarea — so it
+  // appears and disappears with the input it fills, never on its own.
   const needsInput = bType === 'bed' || bType === 'userlist'
   ;(document.getElementById('dataB-text') as HTMLElement).hidden = !needsInput
-  ;(document.getElementById('dataB-file') as HTMLElement).hidden = !needsInput
+  ;($('dataB-file-row') as HTMLElement).hidden = !needsInput
 
   // Helper note
   const note = $('dataB-note')
@@ -379,6 +435,18 @@ function syncDatasetBVisibility(): void {
     ;($('distance-up') as HTMLInputElement).value = distance
     ;($('distance-down') as HTMLInputElement).value = distance
   }
+}
+
+/**
+ * Production's eraseTextarea (R5): a user click that changes a dataset's
+ * radio empties that dataset's textarea, whichever value it lands on. The
+ * `input` event is the one the example loader and the file reader already
+ * dispatch, so the run-time estimate recomputes off the now-empty box.
+ */
+function clearDatasetTextarea(changedGroup: 'dataA-type' | 'dataB-type'): void {
+  const textarea = $(clearedTextareaFor(changedGroup)) as HTMLTextAreaElement
+  textarea.value = ''
+  textarea.dispatchEvent(new Event('input', { bubbles: true }))
 }
 
 // ===== Estimated run time =====
@@ -780,6 +848,16 @@ export function exampleFileFor(aType: 'bed' | 'gene' | 'count'): 'bedA.txt' | 'g
   return 'countA.txt'
 }
 
+/**
+ * Which example file dataset B's own "Try with example" loads (R4).
+ * Production's putComparedWith() (enrichment_analysis.js:372-382) has cases
+ * for exactly these two modes: rnd and refseq take no input, so the link is
+ * hidden along with the textarea it would fill.
+ */
+export function exampleFileForB(bType: 'bed' | 'userlist'): 'bedB.txt' | 'geneB.txt' {
+  return bType === 'bed' ? 'bedB.txt' : 'geneB.txt'
+}
+
 async function loadExample(): Promise<void> {
   if (!currentGenome) return
   const status = $('submit-status')
@@ -801,6 +879,29 @@ async function loadExample(): Promise<void> {
     const text = await res.text()
     ;($('dataA-text') as HTMLTextAreaElement).value = text
     ;($('dataA-text') as HTMLTextAreaElement).dispatchEvent(new Event('input', { bubbles: true }))
+  } catch (err) {
+    console.error(err)
+    status.textContent = 'Failed to load example data.'
+  }
+}
+
+async function loadExampleB(): Promise<void> {
+  if (!currentGenome) return
+  const status = $('submit-status')
+  // Same shape as loadExample above, reading dataset B's radio instead:
+  // the link is only reachable while dataset B is bed or userlist, and it
+  // fills the box without touching the radio.
+  const bType = getCheckedValue('dataB-type') as 'bed' | 'userlist'
+  try {
+    const res = await fetch(`/examples/${encodeURIComponent(currentGenome)}/${exampleFileForB(bType)}`)
+    if (res.status === 404) {
+      status.textContent = 'No example data available for this genome and experiment type.'
+      return
+    }
+    if (!res.ok) throw new Error(`example fetch: ${res.status}`)
+    const text = await res.text()
+    ;($('dataB-text') as HTMLTextAreaElement).value = text
+    ;($('dataB-text') as HTMLTextAreaElement).dispatchEvent(new Event('input', { bubbles: true }))
   } catch (err) {
     console.error(err)
     status.textContent = 'Failed to load example data.'
@@ -971,7 +1072,15 @@ async function init(): Promise<void> {
   }
 
   document.querySelectorAll<HTMLInputElement>('input[name="dataA-type"], input[name="dataB-type"]').forEach((r) => {
-    r.addEventListener('change', syncDatasetBVisibility)
+    r.addEventListener('change', () => {
+      // Clear before syncing, so the sync (and the estimate listening for
+      // the `input` event below) sees the final state. Only a genuine user
+      // change lands here — the gate transition inside syncDatasetBVisibility
+      // reassigns dataset B's radio with `checked = true`, which fires no
+      // `change`, so switching dataset A leaves dataset B's text alone.
+      clearDatasetTextarea(r.name as 'dataA-type' | 'dataB-type')
+      syncDatasetBVisibility()
+    })
   })
   syncDatasetBVisibility()
 
@@ -987,6 +1096,11 @@ async function init(): Promise<void> {
   $('try-example').addEventListener('click', (e) => {
     e.preventDefault()
     void loadExample()
+  })
+
+  $('try-example-b').addEventListener('click', (e) => {
+    e.preventDefault()
+    void loadExampleB()
   })
 
   void refreshEstimate(facet)

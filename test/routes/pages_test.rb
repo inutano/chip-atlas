@@ -264,6 +264,25 @@ class PagesTest < Minitest::Test
     assert_includes body, 'Try with example'
   end
 
+  # Task 8 (R3/R4, EA-14/EA-17): panel 5 follows production again. The two
+  # gene-list-only choices are hidden rows rather than disabled radios, so
+  # their labels go back to production's wording instead of carrying a
+  # "(gene-list mode only)" explanation of a greyed-out control that no
+  # longer exists; and dataset B gets its own "Try with example" link, in
+  # the same row as its file picker so both appear exactly when dataset B
+  # takes input. frontend/pages/enrichment-analysis.ts's
+  # syncDatasetBVisibility toggles #dataB-file-row and the four .form-check
+  # wrappers - this pins that the ERB still ships them.
+  def test_enrichment_analysis_dataset_b_choices_and_example_link
+    get '/enrichment_analysis'
+    body = last_response.body
+    assert_includes body, 'id="try-example-b"'
+    assert_includes body, 'id="dataB-file-row"'
+    assert_includes body, 'Refseq coding genes (excluding dataset A)'
+    refute_includes body, 'gene-list mode only',
+                    'R3: the gene-list-only rows are hidden now, not disabled-and-labelled'
+  end
+
   # Task 7 (EA-15): count-table mode hides panel 5's radios/permutation/
   # textarea/file picker behind #dataB-panel-body and shows the single
   # #count-mode-note line instead; panel 6's Dataset A/B title inputs are
