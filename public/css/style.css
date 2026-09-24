@@ -250,6 +250,16 @@ footer .acknowledgement {
   white-space: normal;
 }
 
+/* R9: the collapsed <summary> shows a window centred on the search hit
+   (search-attrs-window) and "Show less" (search-attrs-less), never both at
+   once — opening the <details> swaps one for the other so the full text
+   below is not a duplicate of what was already on screen. See
+   renderAttributesCell in search.ts. */
+#search-tbody td.search-attrs-cell .search-attrs-less { display: none; }
+#search-tbody td.search-attrs-cell details[open] .search-attrs-window { display: none; }
+#search-tbody td.search-attrs-cell details[open] .search-attrs-less { display: inline; }
+#search-tbody td.search-attrs-cell mark { padding: 0; background: #fff3cd; }
+
 /* ===== Experiment detail page ===== */
 .dropdown-menu .dropdown-header {
   font-weight: 600;
