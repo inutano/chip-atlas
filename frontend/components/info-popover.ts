@@ -57,6 +57,18 @@ function buildLinkedContent(topic: { text: string; link: HelpLink }): DocumentFr
   return fragment
 }
 
+// Pure predicate behind the click-outside-to-dismiss wiring below (owner
+// feedback round 2, R6): a click/tap is "outside" unless it has no target,
+// or lands inside the trigger itself, or inside the currently-open popover
+// tip. Takes plain `Node`s and only ever calls `.contains`, so it needs no
+// DOM to unit-test — see info-popover.test.ts.
+export function isOutsideClick(target: Node | null, trigger: Node, tip: Node | null): boolean {
+  if (target === null) return false
+  if (trigger.contains(target)) return false
+  if (tip !== null && tip.contains(target)) return false
+  return true
+}
+
 // Bootstrap 5's Popover constructor, resolved lazily so pages that never
 // call initInfoPopovers() don't need window.bootstrap to exist at all.
 export function initInfoPopovers(root: ParentNode, helpText: Record<string, HelpTopic>): void {
@@ -68,7 +80,7 @@ export function initInfoPopovers(root: ParentNode, helpText: Record<string, Help
     const topic = key ? helpText[key] : undefined
     if (!topic) return
 
-    new Popover(btn, {
+    const popover = new Popover(btn, {
       // A function, not the built fragment itself (2026-09-24 review): a
       // Bootstrap popover disposes its tip on every hide and rebuilds it on
       // the next show by re-resolving this same `content` value
@@ -93,6 +105,33 @@ export function initInfoPopovers(root: ParentNode, helpText: Record<string, Help
       // its text; a raw HTML *string* built from data is still never passed
       // here for either topic shape.
       html: typeof topic !== 'string',
+    })
+
+    // Close on a click/tap anywhere outside this popover (owner feedback
+    // round 2, R6): `trigger: 'focus click'` above only makes Bootstrap
+    // hide the popover when the *trigger* itself loses focus or is clicked
+    // again — there is no document-level listener anywhere in Bootstrap's
+    // Tooltip/Popover base for an outside click, so one is added here,
+    // scoped to each popover's own open lifetime via Bootstrap's
+    // shown/hidden events (self-cleans; never leaves a stale listener once
+    // this trigger's popover is closed). `pointerdown` in the capture phase
+    // runs before a handler further down the tree could stop the event's
+    // propagation, and fires before Bootstrap's own trigger-click handler.
+    // The tip is re-resolved via aria-describedby on every event rather
+    // than captured once, because Bootstrap tears down and rebuilds the tip
+    // element on every show (the same fact the `content` comment above
+    // documents) — a cached reference would go stale after the first
+    // close/reopen.
+    const onDocPointerDown = (e: PointerEvent) => {
+      const tipId = btn.getAttribute('aria-describedby')
+      const tip = tipId ? document.getElementById(tipId) : null
+      if (isOutsideClick(e.target as Node | null, btn, tip)) popover.hide()
+    }
+    btn.addEventListener('shown.bs.popover', () => {
+      document.addEventListener('pointerdown', onDocPointerDown, true)
+    })
+    btn.addEventListener('hidden.bs.popover', () => {
+      document.removeEventListener('pointerdown', onDocPointerDown, true)
     })
 
     // The anchors have no real href target; keep them keyboard-focusable
