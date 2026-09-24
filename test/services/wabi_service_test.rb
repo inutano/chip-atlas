@@ -140,13 +140,23 @@ class WabiServiceTest < Minitest::Test
 
   def test_submit_job_returns_nil_when_the_response_has_no_request_id
     ChipAtlas::WabiService.poster = ->(_params) { "error\tsomething went wrong\n" }
-    job_id = ChipAtlas::WabiService.submit_job('enrichment_analysis', { 'genome' => 'hg38' })
+    job_id = nil
+    _, stderr = capture_io do
+      job_id = ChipAtlas::WabiService.submit_job('enrichment_analysis', { 'genome' => 'hg38' })
+    end
     assert_nil job_id
+    # Pins the rejection log line's format: field *names* only (never the
+    # values -- bedAFile/bedBFile can carry megabytes of user data), plus the
+    # HTTP status and a truncated body, on stderr where Puma already logs.
+    assert_match(/\[wabi\] submission rejected: status=.* fields=\[.*\] body=/, stderr)
   end
 
   def test_submit_job_returns_nil_when_the_response_body_is_nil
     ChipAtlas::WabiService.poster = ->(_params) { nil }
-    job_id = ChipAtlas::WabiService.submit_job('enrichment_analysis', { 'genome' => 'hg38' })
+    job_id = nil
+    capture_io do
+      job_id = ChipAtlas::WabiService.submit_job('enrichment_analysis', { 'genome' => 'hg38' })
+    end
     assert_nil job_id
   end
 

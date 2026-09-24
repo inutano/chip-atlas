@@ -70,7 +70,11 @@ class ComputeRouterTest < Minitest::Test
   def test_submit_reports_submission_rejected_when_the_backend_is_reachable_but_wabi_service_cannot_parse_a_request_id
     ChipAtlas::WabiService.poster = ->(_params) { nil }
     stub_module_method(ChipAtlas::ServiceMonitor, :status, true) do
-      result = ChipAtlas::ComputeRouter.submit('enrichment_analysis', { 'genome' => 'hg38' })
+      # WabiService.submit_job warns on stderr when it cannot parse a
+      # requestId (see wabi_service_test.rb for the log-format assertion) --
+      # captured here so the test run stays pristine.
+      result = nil
+      capture_io { result = ChipAtlas::ComputeRouter.submit('enrichment_analysis', { 'genome' => 'hg38' }) }
       assert_equal({ error: :submission_rejected, backend: 'wabi' }, result)
     end
   end
@@ -88,7 +92,8 @@ class ComputeRouterTest < Minitest::Test
         ChipAtlas::SapporoService, :submit_job,
         ->(_params) { flunk 'must not fall back to WES once WABI has already rejected the submission' }
       ) do
-        result = ChipAtlas::ComputeRouter.submit('enrichment_analysis', { 'genome' => 'hg38' })
+        result = nil
+        capture_io { result = ChipAtlas::ComputeRouter.submit('enrichment_analysis', { 'genome' => 'hg38' }) }
         assert_equal({ error: :submission_rejected, backend: 'wabi' }, result)
       end
     end

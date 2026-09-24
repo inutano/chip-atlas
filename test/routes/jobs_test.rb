@@ -79,8 +79,13 @@ class JobsTest < Minitest::Test
 
   def test_jobs_submit_502s_with_a_distinct_message_when_the_backend_rejects_the_submission
     ChipAtlas::WabiService.poster = ->(_params) { nil } # backend reachable, but no requestId parsed
-    stub_module_method(ChipAtlas::ServiceMonitor, :status, true) do
-      post_json '/jobs/submit', { type: 'enrichment_analysis', params: { genome: 'hg38' } }
+    # WabiService.submit_job warns on stderr when it cannot parse a requestId
+    # (see wabi_service_test.rb for the log-format assertion) -- captured
+    # here so the test run stays pristine rather than asserting on it again.
+    capture_io do
+      stub_module_method(ChipAtlas::ServiceMonitor, :status, true) do
+        post_json '/jobs/submit', { type: 'enrichment_analysis', params: { genome: 'hg38' } }
+      end
     end
     assert_equal 502, last_response.status
     data = JSON.parse(last_response.body)
