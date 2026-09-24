@@ -74,6 +74,7 @@ module ChipAtlas
           when :backend_unavailable
             halt 503, json_response({ error: 'No compute backend available', retry: false })
           when :submission_rejected
+            log_activity('job_submit_rejected', { type: job_type, backend: result[:backend] })
             halt 502, json_response({ error: 'Compute backend rejected the submission', retry: false })
           else
             # ComputeRouter.submit's contract only ever returns nil,

@@ -180,6 +180,42 @@ class JobsTest < Minitest::Test
     assert_equal 'rnd', captured['typeB']
     assert_equal '50', captured['threshold']
   end
+
+  # --- gene-list mode: clicking "Gene list" force-checks dataset B = RefSeq
+  # (frontend/pages/enrichment-analysis.ts's applyDatasetBGateTransition), so
+  # bType is never 'rnd' here -- this is the exact payload shape
+  # buildEnrichmentParams now sends for aType: 'gene', bType: 'refseq'
+  # (frontend/pages/enrichment-analysis.test.ts's "sends every field
+  # production sends"). Gating permTime on bType === 'rnd' made every one of
+  # these submissions get a 502 from WABI; see genelist-502.md. ---
+
+  def test_jobs_submit_succeeds_for_a_gene_list_submission_and_forwards_permtime
+    captured = nil
+    ChipAtlas::WabiService.poster = lambda { |params|
+      captured = params
+      "requestId\tGENE123\n"
+    }
+    stub_module_method(ChipAtlas::ServiceMonitor, :status, true) do
+      post_json '/jobs/submit', {
+        type: 'enrichment_analysis',
+        params: {
+          genome: 'hg38', antigenClass: 'Histone', cellClass: 'All cell types',
+          threshold: '50', typeA: 'gene', bedAFile: "ADI1\nAGO1\nAHCYL2",
+          typeB: 'refseq', title: 'My project', descriptionA: 'Dataset A',
+          descriptionB: 'Dataset B', distanceUp: '5000', distanceDown: '5000',
+          permTime: '1', bedBFile: 'empty',
+        },
+      }
+    end
+
+    assert last_response.ok?
+    data = JSON.parse(last_response.body)
+    assert_equal 'wabi', data['backend']
+    assert_equal 'GENE123', data['job_id']
+    assert captured.key?('permTime'),
+           'gene-list submissions must forward permTime to WABI -- omitting it is what caused the 502'
+    assert_equal '1', captured['permTime']
+  end
   # --- GET /jobs/:id/result: the job type selects the URL shape ---
 
   def test_result_route_returns_html_and_tsv_for_an_enrichment_job

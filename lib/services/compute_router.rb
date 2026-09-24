@@ -49,9 +49,11 @@ module ChipAtlas
     # Submit a job. Returns one of:
     #   { backend:, job_id: }            success
     #   { error: :backend_unavailable }  no backend serves this job type / is up
-    #   { error: :submission_rejected }  a backend was reached but rejected the job
-    #                                     (e.g. WabiService couldn't parse a
-    #                                     requestId out of the response)
+    #   { error: :submission_rejected, backend: }  a backend was reached but
+    #                                     rejected the job (e.g. WabiService
+    #                                     couldn't parse a requestId out of
+    #                                     the response) -- backend is named so
+    #                                     the caller can log which one
     # These two error cases used to both collapse into a bare nil, making
     # "the backend is down" indistinguishable from "the backend rejected
     # this job" to both the caller and whoever is debugging it.
@@ -64,7 +66,7 @@ module ChipAtlas
                when 'wes'  then ChipAtlas::SapporoService.submit_job(params)
                end
 
-      job_id ? { backend: route[:backend], job_id: job_id } : { error: :submission_rejected }
+      job_id ? { backend: route[:backend], job_id: job_id } : { error: :submission_rejected, backend: route[:backend] }
     end
 
     # Check job status. Returns the backend's own status word ("finished",

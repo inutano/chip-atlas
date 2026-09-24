@@ -42,14 +42,22 @@ class WabiServiceTest < Minitest::Test
     assert_equal '50', captured['threshold']
   end
 
-  def test_enrichment_analysis_does_not_gain_diff_only_fields_it_never_sent
+  def test_enrichment_analysis_does_not_gain_diff_only_fields_it_never_sent_but_permtime_gets_a_default
     captured = capture_submission('enrichment_analysis', { 'genome' => 'hg38' })
 
     refute captured.key?('cellClass'), 'cellClass is user-facing on enrichment; WabiService must not invent it'
     refute captured.key?('typeA')
     refute captured.key?('typeB')
-    refute captured.key?('permTime')
     refute captured.key?('threshold')
+    # Unlike the fields above, permTime is required by every enrichment job
+    # regardless of dataset B's type (enrichment-analysis.cwl declares it
+    # `type: int`, not `int?`) -- see ENRICHMENT_ANALYSIS_DEFAULT_PARAMS.
+    assert_equal 1, captured['permTime'], 'enrichment jobs get permTime=1 when the caller omits it'
+  end
+
+  def test_enrichment_analysis_permtime_default_does_not_override_a_caller_supplied_value
+    captured = capture_submission('enrichment_analysis', { 'genome' => 'hg38', 'permTime' => '10' })
+    assert_equal '10', captured['permTime']
   end
 
   def test_diff_analysis_gets_the_four_common_operational_fields

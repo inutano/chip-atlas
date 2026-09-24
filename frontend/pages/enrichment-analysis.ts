@@ -713,13 +713,16 @@ export function buildEnrichmentParams(
     distanceUp: form.distanceUp,
     distanceDown: form.distanceDown,
   }
-  // permTime is untouched by the count-mode special case: production sets it
-  // unconditionally (enrichment_analysis.js:605), before the typeA ===
-  // "count" branch (613-619) even runs, so it stays governed by the same
-  // `bType === 'rnd'` gate as every other dataset A mode — switching
-  // straight from BED's default to "Gene count table" leaves dataset B's
-  // radio on its own default ("rnd"), and permTime must still ride along.
-  if (form.bType === 'rnd') params.permTime = form.permTime
+  // permTime is ALWAYS sent, exactly like bedBFile below and for the same
+  // reason. Production's retrievePostData() sets it unconditionally
+  // (enrichment_analysis.js:605) — its `numShuf` radios are hidden, never
+  // unchecked, when dataset B is refseq/userlist, so "1" still rides along.
+  // Gating it on bType === 'rnd' made WABI reject every gene-list submission
+  // (clicking "Gene list" force-checks dataset B = RefSeq, so bType is never
+  // 'rnd' there) and every BED + dataset-B-BED submission: 502 from
+  // routes/jobs.rb:77. permTime is a required input of
+  // script/enrichment-analysis/enrichment-analysis.cwl (`type: int`).
+  params.permTime = form.permTime || '1'
   // bedBFile is ALWAYS sent. Production's retrieveInputData() substitutes the
   // literal string "empty" for a blank textarea, and its own validation then
   // requires the field to be present unless typeA is "count" - so omitting it

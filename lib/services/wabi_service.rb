@@ -23,6 +23,12 @@ module ChipAtlas
       'sbatchOptions' => '-p epyc -t 180',
     }.freeze
 
+    # Enrichment analysis: WABI/CWL require permTime on every submission
+    # regardless of dataset B's type (enrichment-analysis.cwl declares it
+    # `type: int`, not `int?`). The user-facing value wins; this only fills a
+    # gap. See DIFF_ANALYSIS_OPERATIONAL_PARAMS for the diff-job equivalent.
+    ENRICHMENT_ANALYSIS_DEFAULT_PARAMS = { 'permTime' => 1 }.freeze
+
     # Diff Analysis only. cellClass/typeA/typeB/permTime/threshold are
     # *user-facing* fields on Enrichment Analysis (they come straight through
     # from that page's form — see enrichment-analysis.ts's
@@ -88,10 +94,17 @@ module ChipAtlas
 
     def submit_job(job_type, params)
       merged = merge_operational_params(job_type, params)
-      body = post(merged)
-      return nil unless body
-
-      body.split("\n").find { |l| l.start_with?('requestId') }&.split(/\s/)&.last
+      status, body = post(merged)
+      request_id = body && body.split("\n").find { |l| l.start_with?('requestId') }&.split(/\s/)&.last
+      unless request_id
+        # Field *names* only, never values -- bedAFile/bedBFile can carry
+        # megabytes of user data, and the response body is truncated for the
+        # same reason. `warn` goes to stderr, which is where Puma already
+        # writes, so this needs no new logging configuration to show up.
+        warn "[wabi] submission rejected: status=#{status.inspect} " \
+             "fields=#{merged.keys.sort.inspect} body=#{body.to_s[0, 500].inspect}"
+      end
+      request_id
     end
 
     # WABI's own status endpoint. Returns the status word it reports
@@ -150,7 +163,7 @@ module ChipAtlas
 
     def merge_operational_params(job_type, params)
       merged = params.merge(COMMON_OPERATIONAL_PARAMS)
-      return merged unless job_type == 'diff_analysis'
+      return ENRICHMENT_ANALYSIS_DEFAULT_PARAMS.merge(merged) unless job_type == 'diff_analysis'
 
       merged = merged.merge(DIFF_ANALYSIS_OPERATIONAL_PARAMS)
       merged['threshold'] = DIFF_ANALYSIS_THRESHOLD_BY_ANTIGEN_CLASS.fetch(params['antigenClass']) do
@@ -161,13 +174,16 @@ module ChipAtlas
       merged
     end
 
+    # Returns [status, body]. The test stub (#poster=) only ever supplies a
+    # body (see its own docstring), so it is wrapped here with a nil status
+    # rather than changing that stub's contract for every existing caller.
     def post(params)
-      return @poster.call(params) if @poster
+      return [nil, @poster.call(params)] if @poster
 
       raise_if_unstubbed_under_test!
 
       response = Net::HTTP.post_form(URI.parse(ENDPOINT), params)
-      response.body
+      [response.code, response.body]
     end
 
     def raise_if_unstubbed_under_test!

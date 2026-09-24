@@ -159,12 +159,24 @@ test('buildEnrichmentParams: the submitted threshold matches production\'s label
   }
 })
 
-test('buildEnrichmentParams: permTime is included only when dataset B is random permutation', () => {
-  const rnd = buildEnrichmentParams(baseCondition, { ...baseForm, bType: 'rnd', permTime: '10' })
-  assert.equal(rnd.permTime, '10')
+test('buildEnrichmentParams: permTime is always sent, whatever dataset B is', () => {
+  // Gating this on bType === 'rnd' made WABI reject every gene-list
+  // submission (gene-list mode force-checks dataset B = RefSeq) — 502 from
+  // routes/jobs.rb. Production sends it unconditionally.
+  for (const bType of ['rnd', 'bed', 'refseq', 'userlist']) {
+    const p = buildEnrichmentParams(baseCondition, { ...baseForm, bType, permTime: '10' })
+    assert.equal(p.permTime, '10', `permTime missing for dataset B = ${bType}`)
+  }
+  const blank = buildEnrichmentParams(baseCondition, { ...baseForm, bType: 'refseq', permTime: '' })
+  assert.equal(blank.permTime, '1') // production's `permTime > 0 ? permTime : 1`
+})
 
-  const bed = buildEnrichmentParams(baseCondition, { ...baseForm, bType: 'bed', dataBText: 'chr1\t1\t100' })
-  assert.equal('permTime' in bed, false)
+test('buildEnrichmentParams: gene-list mode sends every field production sends', () => {
+  const p = buildEnrichmentParams(baseCondition, { ...baseForm, aType: 'gene', bType: 'refseq' })
+  assert.deepEqual(Object.keys(p).sort(), [
+    'antigenClass', 'bedAFile', 'bedBFile', 'cellClass', 'descriptionA', 'descriptionB',
+    'distanceDown', 'distanceUp', 'genome', 'permTime', 'threshold', 'title', 'typeA', 'typeB',
+  ])
 })
 
 test('buildEnrichmentParams: bedBFile is always sent, "empty" when dataset B has no content', () => {
@@ -216,18 +228,16 @@ test('buildEnrichmentParams: count mode forces typeB/bedBFile to "empty" and sub
 
 // Review round 1, finding 1: production sets permTime unconditionally
 // (enrichment_analysis.js:605), before the typeA === "count" special case
-// (613-619) even runs — count mode does not remove it. An earlier version
-// of this task's brief called for dropping permTime in count mode, which
-// was wrong: switching dataset A straight from BED's default to "Gene
-// count table" leaves dataset B's radio on its own default ("rnd"), so
-// permTime must still ride along exactly as it does for every other mode —
-// governed by the same plain `bType === 'rnd'` gate, not by aType.
-test('buildEnrichmentParams: count mode still gates permTime on bType === "rnd", same as every other mode', () => {
+// (613-619) even runs — count mode does not remove it. permTime is now sent
+// unconditionally regardless of bType (see the "always sent" test above), so
+// count mode is not a special case for it either, unlike typeB/bedBFile just
+// below, which count mode DOES force to "empty" regardless of dataset B.
+test('buildEnrichmentParams: count mode sends permTime unconditionally too, same as every other mode', () => {
   const rnd = buildEnrichmentParams(baseCondition, { ...baseForm, aType: 'count', bType: 'rnd', permTime: '10' })
   assert.equal(rnd.permTime, '10')
 
   const bed = buildEnrichmentParams(baseCondition, { ...baseForm, aType: 'count', bType: 'bed', dataBText: 'chr2\t1\t100' })
-  assert.equal('permTime' in bed, false)
+  assert.equal(bed.permTime, '1')
 })
 
 test('buildEnrichmentParams: count mode forces "empty" even when dataset B is BED with real content', () => {

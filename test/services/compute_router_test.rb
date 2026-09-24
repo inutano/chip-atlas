@@ -71,7 +71,26 @@ class ComputeRouterTest < Minitest::Test
     ChipAtlas::WabiService.poster = ->(_params) { nil }
     stub_module_method(ChipAtlas::ServiceMonitor, :status, true) do
       result = ChipAtlas::ComputeRouter.submit('enrichment_analysis', { 'genome' => 'hg38' })
-      assert_equal({ error: :submission_rejected }, result)
+      assert_equal({ error: :submission_rejected, backend: 'wabi' }, result)
+    end
+  end
+
+  # routes/jobs.rb logs the rejecting backend's name alongside the request
+  # (job_submit_rejected) so a 502 is debuggable from the access log without
+  # re-running ComputeRouter.available_backend (which would re-check the
+  # network). This also pins the truth found in genelist-502.md §4: WABI
+  # rejecting a submission is not a failover trigger -- there is no retry
+  # onto WES once a backend has already been reached and has answered.
+  def test_submit_does_not_fall_back_to_wes_when_wabi_rejects_the_submission
+    ChipAtlas::WabiService.poster = ->(_params) { nil }
+    stub_module_method(ChipAtlas::ServiceMonitor, :status, true) do
+      stub_module_method(
+        ChipAtlas::SapporoService, :submit_job,
+        ->(_params) { flunk 'must not fall back to WES once WABI has already rejected the submission' }
+      ) do
+        result = ChipAtlas::ComputeRouter.submit('enrichment_analysis', { 'genome' => 'hg38' })
+        assert_equal({ error: :submission_rejected, backend: 'wabi' }, result)
+      end
     end
   end
 
