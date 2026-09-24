@@ -38,6 +38,19 @@ footer{margin-top:40px;color:var(--muted);font-size:12.5px;border-top:1px solid 
 </style></head><body><div class="wrap">
 <header class="top"><h1>ChIP-Atlas 新旧比較レポート: ユーザから見える変更点</h1><p class="sub">旧: https://chip-atlas.org (本番, master) vs 新: sengu ブランチ — 調査 2026-09-23、修正反映 2026-09-24</p><nav class="parts"><a href="01-ui-changes.html" class="cur">1. 新旧比較 (UI/機能)</a><a href="02-security.html" class="">2. 脆弱性スキャン</a><a href="03-longevity.html" class="">3. 10年メンテナンスフリー</a></nav></header>
 <div class="note" style="background:#eef8f1;border-color:#9fd3b1;padding:14px 18px;margin:0 0 18px">
+<p style="margin:0 0 8px"><strong>2026-09-24 更新 (第 2 ラウンド): オーナーがテスト用 EC2 で確認した指摘 12 件 (R1–R12) のうち R1–R11 を実装しました。</strong> <code>sengu</code> ブランチのコミット 88f34ff..f52381b (GitHub に push 済み、テスト用 EC2 にもデプロイ済み)。該当する既存項目の「対応状況」も更新しています (EA-32 は 退行/高 に再分類)。</p>
+<ul style="margin:0 0 8px">
+<li><strong>R1 IGV (1d4d1c1):</strong> 全アセンブリで <code>genome=https://chip-atlas.dbcls.jp/data/genome/&lt;g&gt;/&lt;g&gt;.json</code> を IGV に渡す (Peak Browser と /view の両方)。TAIR12 が IGV で開けなかった原因。</li>
+<li><strong>R2 Enrichment Analysis の Gene list で 502 (b3d9bc2, 23e983e):</strong> 原因は <code>permTime</code> の省略 (dataset B が Random permutation 以外だと送っていなかった)。本番同様に常時送信し、WABI 拒否時のログも追加 (EA-32)。</li>
+<li><strong>R3–R5 Enrichment Analysis の dataset B (50eb844, f52381b):</strong> 選択肢を dataset A のモードに応じて非表示 (disabled ではなく)、dataset B の「Try with example」を復活、ラジオ変更でそのデータセットのテキスト欄をクリア (本番と同じ非対称: A の変更で B は消えない)。Refseq / Gene list 行に ⓘ も追加。</li>
+<li><strong>R6 ⓘ (76310f6):</strong> 吹き出しの外側クリックで閉じる。</li>
+<li><strong>R7・R8 見た目 (71f88a8):</strong> ファセットリストの文字サイズ 16px → 14px と余白を本番と一致 (行高 17px)、ホームの 6 カードでアイコンとラベルを上揃え。</li>
+<li><strong>R9 Search の attributes (55e08f2):</strong> ヒット箇所を中心に 100 文字の窓を表示し、ヒット語をハイライト。展開は「click to expand」1 つで全文に置き換わり (重複表示なし)、「Show less」で戻る。</li>
+<li><strong>R10 Search の前方一致 (287ca94):</strong> 各語を前方一致に (<code>K56</code> → 7,075 件、従来 4 件)。クエリのみの変更で再ロード不要。2 文字の前方一致 (例 <code>se</code>) は 45 万件近くヒットして 0.7 秒程度かかるため、気になる場合は <code>MIN_PREFIX_LENGTH</code> を 3 に。</li>
+<li><strong>R11 navbar (e2d6d76):</strong> ID 入力欄と Go ボタンを削除、Search を枠付きリンクに。</li>
+<li><strong>R12 GSE / BioProject / BioSample 検索 (調査のみ):</strong> GSM は既に検索可能 (85.8% の実験に付与)。BioProject / BioSample はロード時に NCBI の SRA_Accessions.tab (32.6 GB) を結合すれば付与でき (FTS スキーマ変更と全 DB の再ロードが必要)、GSE は一括ソースが存在せず eutils を実験ごとに叩く必要がある (約 45 万件、数十時間)。実装するかはオーナー判断。</li>
+<li><strong>検証:</strong> タスクごとのレビューと最終のブランチ全体レビュー、Ruby 333 / frontend 259 テスト、UI parity checklist 34/34、主要フローは headless Chromium で本番と再照合。IGV デスクトップ実機での TAIR12 読み込みのみ未確認 (環境に IGV が無い)。</li>
+</ul>
 <p style="margin:0 0 8px"><strong>2026-09-24 更新: 「退行 (要修正)」40 件をすべて修正し、Diff Analysis を復旧しました。</strong> 修正は <code>sengu</code> ブランチの 22 コミット (71cc650..968bd1d、GitHub に push 済み) で、各項目の「対応状況」列にコミットと内容を記しています。「対応状況」フィルタで <span class="tag 修正済み">修正済み</span> / <span class="tag 対応済み">対応済み</span> の項目だけを表示できます。</p>
 <ul style="margin:0 0 8px">
 <li><strong>復旧・追加:</strong> Diff Analysis のジョブ投入 (WABI 復旧をオーナーが確認、DA-01/API-27)、TAIR12 の example データ (パイプラインチーム提供、EA-13/DA-13)、A. thaliana の遺伝子 ID 規則をヘルプに追記 (EA-22)、ホームの自動サービス通知 (SHELL-02)。</li>
@@ -71,17 +84,18 @@ footer{margin-top:40px;color:var(--muted);font-size:12.5px;border-top:1px solid 
 
 <div class="stats">
 <div class="stat"><b>338</b><span>指摘項目 合計</span></div>
-<div class="stat"><b>28</b><span>影響度: 高</span></div>
+<div class="stat"><b>29</b><span>影響度: 高</span></div>
 <div class="stat"><b>97</b><span>影響度: 中</span></div>
-<div class="stat"><b>213</b><span>影響度: 低</span></div>
-<div class="stat"><b>150</b><span>分類: 単なる変更</span></div>
+<div class="stat"><b>212</b><span>影響度: 低</span></div>
+<div class="stat"><b>149</b><span>分類: 単なる変更</span></div>
 <div class="stat"><b>83</b><span>分類: 改良</span></div>
-<div class="stat"><b>40</b><span>分類: 退行</span></div>
+<div class="stat"><b>41</b><span>分類: 退行</span></div>
 <div class="stat"><b>31</b><span>分類: 機能削除</span></div>
 <div class="stat"><b>18</b><span>分類: 新機能</span></div>
 <div class="stat"><b>16</b><span>分類: データ差分</span></div>
-<div class="stat" style="border-color:#1b7f4a"><b>40</b><span>対応状況: 修正済み</span></div>
-<div class="stat" style="border-color:#1b7f4a"><b>4</b><span>対応状況: 対応済み</span></div>
+<div class="stat" style="border-color:#1b7f4a"><b>42</b><span>対応状況: 修正済み</span></div>
+<div class="stat" style="border-color:#1b7f4a"><b>7</b><span>対応状況: 対応済み</span></div>
+<div class="stat" style="border-color:#1b7f4a"><b>2</b><span>対応状況: 一部対応</span></div>
 </div>
 <h2 id="summaries">担当範囲ごとの要約</h2>
 <h3>共通/ホーム/静的ページ</h3><div class="lead"><ul>
@@ -149,19 +163,20 @@ footer{margin-top:40px;color:var(--muted);font-size:12.5px;border-top:1px solid 
 <p>証跡ファイル: <code>SCR/api/prod/&lt;name&gt;.{h,b}</code> (本番のヘッダ/本文)、<code>SCR/api/local/&lt;name&gt;.{h,b}</code> (ローカル)、<code>SCR/api/container-crash-stderr.log</code> (ローカル新版のクラッシュログ)</p></div>
 <h2 id="items">指摘項目一覧</h2><div class="filters" data-filter-group="ui">
 <span>影響度:</span>
-<button data-key="level" data-val="高">高 (28)</button>
+<button data-key="level" data-val="高">高 (29)</button>
 <button data-key="level" data-val="中">中 (97)</button>
-<button data-key="level" data-val="低">低 (213)</button>
+<button data-key="level" data-val="低">低 (212)</button>
 <span style="margin-left:8px">分類:</span>
-<button data-key="cls" data-val="単なる変更">単なる変更 (150)</button>
+<button data-key="cls" data-val="単なる変更">単なる変更 (149)</button>
 <button data-key="cls" data-val="改良">改良 (83)</button>
-<button data-key="cls" data-val="退行">退行 (40)</button>
+<button data-key="cls" data-val="退行">退行 (41)</button>
 <button data-key="cls" data-val="機能削除">機能削除 (31)</button>
 <button data-key="cls" data-val="新機能">新機能 (18)</button>
 <button data-key="cls" data-val="データ差分">データ差分 (16)</button>
 <span style="margin-left:8px">対応状況:</span>
-<button data-key="status" data-val="修正済み">修正済み (40)</button>
-<button data-key="status" data-val="対応済み">対応済み (4)</button>
+<button data-key="status" data-val="修正済み">修正済み (42)</button>
+<button data-key="status" data-val="対応済み">対応済み (7)</button>
+<button data-key="status" data-val="一部対応">一部対応 (2)</button>
 <span style="margin-left:8px">担当:</span>
 <button data-key="group" data-val="共通/ホーム/静的ページ">共通/ホーム/静的ページ</button>
 <button data-key="group" data-val="Peak Browser">Peak Browser</button>
@@ -281,14 +296,14 @@ footer{margin-top:40px;color:var(--muted);font-size:12.5px;border-top:1px solid 
 <td><span class="tag 高">高</span></td>
 <td></td>
 <td><details><summary>詳細</summary><dl><dt>根拠</dt><dd>旧: old-app/public/js/pj/search.js:48-49, 70, 138; old-app/app.rb:113-145 (<code>/data/:data.json</code>), 80-81; curl 計測 (<code>SCR/sv/fetch.log</code>)。新: frontend/pages/search.ts:6, 176-190, 246-248; routes/api.rb:94-101</dd><dt>確認方法</dt><dd><code>curl+ソース確認済み</code> (ブラウザ上の実所要時間・メモリは要ブラウザ確認)</dd><dt>備考</dt><dd>旧はスマホ・低速回線ではほぼ使えないレベルの転送量。</dd></dl><div class="src">ui-search-view.md</div></details></td></tr>
-<tr data-item="ui" data-level="高" data-cls="単なる変更" data-group="Dataset Search / 実験詳細 (/view)" data-status="" id="SV-07"><td class="id">SV-07</td>
+<tr data-item="ui" data-level="高" data-cls="単なる変更" data-group="Dataset Search / 実験詳細 (/view)" data-status="一部対応" id="SV-07"><td class="id">SV-07</td>
 <td><strong>検索の意味論: 部分文字列 AND → FTS5 トークン完全一致 AND (前方一致なし</strong></td>
 <td>Dataset Search &gt; 検索結果の一致条件</td>
 <td></td>
 <td></td>
 <td><span class="tag 単なる変更">単なる変更</span></td>
 <td><span class="tag 高">高</span></td>
-<td></td>
+<td><span class="tag 一部対応">一部対応</span> (2026-09-24, 287ca94): 各語を前方一致 ("K56"* → K562 にヒット) に変更。FTS5 のクエリのみの変更でスキーマ変更・メタデータ再ロードは不要。任意位置の部分文字列一致 (SRX0186 など) と列ソート・件数・エクスポートは未対応。</td>
 <td><details><summary>詳細</summary><dl><dt>旧</dt><dd>DataTables smart search。クエリを空白で分割 (二重引用符で囲めば 1 語)、<strong>各語が行内のどこかに部分文字列として含まれる</strong> (大小無視) 行だけ残す。対象は表示中タブの全列 (Simple: 8 列、Detailed: 10 列。Attributes は <code>key: value</code> 形式に整形後の文字列)。</dd><dt>新</dt><dd><code>fts5_sanitize</code> がクエリを空白で分割し、各トークンから <code>" ' ( ) * ^ { } :</code> を除去して <code>"token"</code> に包み、空白結合 (= 暗黙 AND)。FTS5 テーブルは既定 <code>unicode61</code> トークナイザ (記号 <code>- + . / _ , :</code> などは区切り)。<strong>トークン単位の完全一致</strong>のみで、前方一致 (<code>*</code>) は除去されるため使えない。順位は bm25 <code>rank</code>。</dd><dt>根拠</dt><dd>旧: dt.js:4443 (<code>search.match(/"[^"]+"|[^ ]+/g)</code>) と 9453-9476 / 新: lib/models/experiment_search.rb:94-124, 150-157; <code>sqlite3 .schema experiments_fts</code> (tokenize 指定なし); localhost <code>/api/search</code> 実測</dd><dt>確認方法</dt><dd><code>curl+ソース確認済み</code> (旧側は本番 JSON をローカルで DataTables と同じ規則でシミュレーション: <code>SCR/sv/oldfilter.py</code>)</dd><dt>備考</dt><dd>主な実測 (旧 = 本番 JSON 432,319 行に対する Simple タブ / Detailed タブの一致行数、新 = <code>/api/search</code> の <code>total</code>。新 DB は 453,932 行で TAIR12 を含むため絶対数は完全には比較できない):<br>| クエリ | 旧 Simple | 旧 Detailed | 新 | 差の理由 |<br>|---|---:|---:|---:|---|<br>| <code>H3K4me3</code> | 13,366 | 18,592 | 19,170 | ほぼ同等 |<br>| <code>H3K4</code> | 21,999 | 30,018 | <strong>228</strong> | 新は前方一致しない (<code>H3K4me3</code> に当たらない) |<br>| <code>CTCF</code> | 3,786 | 6,252 | 6,022 | 新は <code>CTCFL</code> に当たらない |<br>| <code>SRX0186</code> | 33 | 33 | <strong>0</strong> | 部分アクセッション不可 |<br>| <code>SRX</code> / <code>GSE</code> | 390,424 / 0 | 390,424 / 888 | <strong>0 / 0</strong> | 同上 |<br>| <code>NFkB</code> | 110 | 726 | 158 | 旧は <code>NFKB1</code>,<code>NFKBIA</code> 等にも一致 |<br>| <code>hep</code> | 4,375 | 7,556 | 3,150 | 旧は <code>HepG2</code> にも一致 |<br>| <code>K562 H3K4me3</code> | 0 | 180 | 180 | curated 名は <code>K-562</code> (旧 Simple は不一致) |<br>| <code>HepG2</code> | 0 | 2,943 | 2,941 | 旧 Simple は Title/Attributes を持たない |<br>| <code>Hep G2</code> | 2,894 | 2,949 | 2,893 | |<br>| <code>MCF7</code> / <code>MCF-7</code> | 0 / 5,434 | 3,814 / 5,493 | 3,690 / 5,493 | |<br>| <code>CD4</code> | 6,029 | 12,367 | 9,312 | 旧は <code>CD40</code>,<code>CD45</code> 等にも一致 |<br>| <code>T cells</code> | 86,838 | 158,426 | 18,308 | 旧は <code>t</code> の部分一致でほぼ全行 |<br>| <code>p53</code> / <code>TP53</code> | 539 / 405 | 2,588 / 698 | 1,595 / 661 | |<br>| <code>sample_name=DRS000203</code> | 0 | 0 | 1 | 旧は <code>=</code> を <code>: </code> に整形して検索 |<br>| <code>K562 OR HepG2</code> | 0 | 0 | 0 | 両版とも <code>OR</code> は演算子でない |<br>| <code>hg19</code> | 196,907 | 196,907 | 0 | データ差分 (hg19 廃止) |<br>ユーザが気付く差: 「途中まで打つと減っていく」体験が無くなり、ID の一部・遺伝子名の語幹 (<code>H3K4</code>, <code>Sox</code>, <code>NFkB</code>) で <strong>0 件または激減</strong>する。改善案: 最後のトークンだけ <code>"token"*</code> の前方一致にする、または FTS5 <code>tokenize='trigram'</code> (3 文字以上の部分一致) を検討。</dd></dl><div class="src">ui-search-view.md</div></details></td></tr>
 <tr data-item="ui" data-level="高" data-cls="改良" data-group="Dataset Search / 実験詳細 (/view)" data-status="" id="SV-33"><td class="id">SV-33</td>
 <td><strong>NCBI メタデータのキャッシュ (初回のみ同期取得</strong></td>
@@ -325,7 +340,16 @@ footer{margin-top:40px;color:var(--muted);font-size:12.5px;border-top:1px solid 
 <td><span class="tag 退行">退行 (要修正)</span></td>
 <td><span class="tag 高">高</span></td>
 <td><span class="tag 修正済み">修正済み</span> (2026-09-24, ad79181, 83f0902): count モードの送信値を typeB=empty / bedBFile=empty / descriptionA="Dataset A from count table header" / descriptionB="Dataset B not applicable for count table" に (permTime は本番同様 bType=rnd のとき送信)。</td>
-<td><details><summary>詳細</summary><dl><dt>根拠</dt><dd>旧: old-app/public/js/pj/enrichment_analysis.js:613-619 / 新: frontend/pages/enrichment-analysis.ts:594-623 (<code>typeB: form.bType</code>, 615 <code>permTime</code>), frontend/pages/enrichment-analysis.test.ts:153-159 (count でも B 由来の値を送る前提)</dd><dt>確認方法</dt><dd><code>ソース推定</code></dd><dt>備考</dt><dd>WABI 側がカウント表ジョブで <code>typeB=rnd</code> をどう扱うかは未検証 (ジョブ投入禁止のため)。本番コードが明示的に "empty" を要求している以上、同じ値を送るよう修正すべき。</dd></dl><div class="src">ui-enrichment.md</div></details></td></tr>
+<td><details><summary>詳細</summary><dl><dt>根拠</dt><dd>旧: old-app/public/js/pj/enrichment_analysis.js:613-619 / 新: frontend/pages/enrichment-analysis.ts:594-623 (<code>typeB: form.bType</code>, 615 <code>permTime</code>), frontend/pages/enrichment-analysis.test.ts:153-159 (count でも B 由来の値を送る前提)</dd><dt>確認方法</dt><dd><code>ソース推定</code></dd><dt>備考</dt><dd>WABI 側がカウント表ジョブで <code>typeB=rnd</code> をどう扱うかは未検証 (ジョブ投入禁止のため)。本番コードが明示的に "empty" を要求している以上、同じ値を送るよう修正すべき。</dd></dl><div class="note">2026-09-24 追記: 「permTime は本番同様 bType=rnd のとき送信」の記述は誤り。本番は常時送信しており、新版も b3d9bc2 で常時送信に修正した (EA-32 参照)。</div><div class="src">ui-enrichment.md</div></details></td></tr>
+<tr data-item="ui" data-level="高" data-cls="退行" data-group="Enrichment Analysis" data-status="修正済み" id="EA-32"><td class="id">EA-32</td>
+<td><strong>permTime の送信条件</strong></td>
+<td>Enrichment Analysis &gt; 送信パラメータ</td>
+<td>常に送信 (未選択なら 1)。</td>
+<td>B が Random permutation のときだけ送信。BED/Refseq/Gene list/Count では省略。</td>
+<td><span class="tag 退行">退行 (要修正)</span></td>
+<td><span class="tag 高">高</span></td>
+<td><span class="tag 修正済み">修正済み</span> (2026-09-24, b3d9bc2, 23e983e): permTime を本番同様に常時送信 (省略すると WABI が投入を拒否し routes/jobs.rb が 502 を返していた。オーナー報告「4. Gene list を選ぶと 502」の原因)。サーバ側にも permTime=1 の既定値を追加し、WABI 拒否時は status / フィールド名 / 本文先頭 500 文字をログに残すようにした。</td>
+<td><details><summary>詳細</summary><dl><dt>根拠</dt><dd>旧: old-app/public/js/pj/enrichment_analysis.js:583-586, 605 / 新: frontend/pages/enrichment-analysis.ts:615, frontend/pages/enrichment-analysis.test.ts:174-180</dd><dt>確認方法</dt><dd><code>ソース推定</code></dd><dt>備考</dt><dd>WABI が <code>permTime</code> 必須かどうかは未確認。本番と同じく常に送る方が安全。</dd></dl><div class="src">ui-enrichment.md</div></details></td></tr>
 <tr data-item="ui" data-level="高" data-cls="データ差分" data-group="Peak Browser" data-status="" id="PB-04"><td class="id">PB-04</td>
 <td><strong>ゲノムタブ: 10 → 7 (hg19/mm9/dm3/ce10 削除、TAIR12 追加</strong></td>
 <td>Peak Browser &gt; ゲノムタブ</td>
@@ -748,7 +772,7 @@ footer{margin-top:40px;color:var(--muted);font-size:12.5px;border-top:1px solid 
 <td><span class="tag 改良">改良</span></td>
 <td><span class="tag 中">中</span></td>
 <td></td>
-<td><details><summary>詳細</summary><dl><dt>旧</dt><dd>先頭にヘッダ「Install and launch IGV before selecting data to visualize」、末尾に「Error connecting to IGV?」(クリックで <code>alert</code>: 「IGV must be running on your computer before clicking the button. If your browser shows "cannot open the page" error, launch IGV and allow an access via port 60151 (from the menu bar of IGV, View &gt; Preferences... &gt; Advanced &gt; "enable port" and set port number 60151) …」)。項目クリックは <code>http://localhost:60151/load?...</code> へそのまま遷移 (IGV 未起動だとブラウザの接続エラー画面に飛ぶ)。</dd><dt>新</dt><dd>ヘッダ/ヘルプ項目なし。項目クリックを横取りして <code>fetch(localhost:60151/echo, no-cors)</code> で到達確認。確認中「Contacting IGV…」、未到達なら「Could not reach IGV on localhost:60151. Start IGV on this machine and make sure "Enable port" is on under View › Preferences › Advanced, then try again.」をボタン下に表示してページに留まる。到達時は旧と同じ URL に遷移。</dd><dt>根拠</dt><dd>旧: experiment.haml:40-41, 79-81; experiment.js:20-21, 116-123 / 新: frontend/pages/experiment.ts:70-116, 270-292; frontend/components/igv.ts:20-42; views/experiment.erb:35</dd><dt>確認方法</dt><dd><code>ソース推定</code> (実 IGV での動作は要ブラウザ確認)</dd><dt>備考</dt><dd>旧の <code>title="Click to see visualize options"</code> (experiment.js:346-352) も無くなった。</dd></dl><div class="src">ui-search-view.md</div></details></td></tr>
+<td><details><summary>詳細</summary><dl><dt>旧</dt><dd>先頭にヘッダ「Install and launch IGV before selecting data to visualize」、末尾に「Error connecting to IGV?」(クリックで <code>alert</code>: 「IGV must be running on your computer before clicking the button. If your browser shows "cannot open the page" error, launch IGV and allow an access via port 60151 (from the menu bar of IGV, View &gt; Preferences... &gt; Advanced &gt; "enable port" and set port number 60151) …」)。項目クリックは <code>http://localhost:60151/load?...</code> へそのまま遷移 (IGV 未起動だとブラウザの接続エラー画面に飛ぶ)。</dd><dt>新</dt><dd>ヘッダ/ヘルプ項目なし。項目クリックを横取りして <code>fetch(localhost:60151/echo, no-cors)</code> で到達確認。確認中「Contacting IGV…」、未到達なら「Could not reach IGV on localhost:60151. Start IGV on this machine and make sure "Enable port" is on under View › Preferences › Advanced, then try again.」をボタン下に表示してページに留まる。到達時は旧と同じ URL に遷移。</dd><dt>根拠</dt><dd>旧: experiment.haml:40-41, 79-81; experiment.js:20-21, 116-123 / 新: frontend/pages/experiment.ts:70-116, 270-292; frontend/components/igv.ts:20-42; views/experiment.erb:35</dd><dt>確認方法</dt><dd><code>ソース推定</code> (実 IGV での動作は要ブラウザ確認)</dd><dt>備考</dt><dd>旧の <code>title="Click to see visualize options"</code> (experiment.js:346-352) も無くなった。</dd></dl><div class="note">2026-09-24 追記: Visualize メニューの IGV リンクも 1d4d1c1 で genome JSON URL 方式に変更 (PB-20 参照)。</div><div class="src">ui-search-view.md</div></details></td></tr>
 <tr data-item="ui" data-level="中" data-cls="退行" data-group="Dataset Search / 実験詳細 (/view)" data-status="修正済み" id="SV-27"><td class="id">SV-27</td>
 <td><strong>Bisulfite-Seq 実験でも Analyze メニューが表示される</strong></td>
 <td>/view &gt; Analyze (例: <code>SRX11233737</code>, hg38 Bisulfite-Seq)</td>
@@ -893,14 +917,14 @@ footer{margin-top:40px;color:var(--muted);font-size:12.5px;border-top:1px solid 
 <td><span class="tag 中">中</span></td>
 <td><span class="tag 修正済み">修正済み</span> (2026-09-24, ad79181, fabb9eb): 404 時は「No example data available for this genome and experiment type.」を表示する実装に加え、パイプラインチーム提供の TAIR12 example (bedA/bedB/geneA/geneB/countA) を配置。TAIR12 タブで 3 モードとも読み込めることを実機確認。</td>
 <td><details><summary>詳細</summary><dl><dt>根拠</dt><dd>新: <code>ls public/examples</code> (ce10 ce11 dm3 dm6 hg19 hg38 mm10 mm9 rn6 sacCer3 のみ), curl <code>http://localhost:9292/examples/TAIR12/bedA.txt</code> → 404, frontend/pages/enrichment-analysis.ts:635-645</dd><dt>確認方法</dt><dd><code>curl+ソース確認済み</code></dd><dt>備考</dt><dd>public/examples には使われない hg19/mm9/dm3/ce10 が残り、必要な TAIR12 が無い。<br>---</dd></dl><div class="src">ui-enrichment.md</div></details></td></tr>
-<tr data-item="ui" data-level="中" data-cls="単なる変更" data-group="Enrichment Analysis" data-status="" id="EA-14"><td class="id">EA-14</td>
+<tr data-item="ui" data-level="中" data-cls="単なる変更" data-group="Enrichment Analysis" data-status="対応済み" id="EA-14"><td class="id">EA-14</td>
 <td><strong>dataset B の選択肢の出し分け方式</strong></td>
 <td>Enrichment Analysis &gt; 5. Enter dataset B</td>
 <td>A のモードで表示を切り替える。BED: <code>Random permutation of dataset A</code> (既定) + <code>Genomic regions (BED)</code> のみ表示。Gene list: <code>Refseq coding genes (excluding dataset A)</code> (強制選択) + <code>Gene list (Gene symbols or IDs)</code> のみ表示 (Random/BED は非表示)。Count: 4 ラジオとも非表示で <code>Not required for gene count table analysis</code> のみ。</td>
 <td>4 ラジオを常時表示。Gene list モード以外では <code>Refseq coding genes (gene-list mode only)</code> / <code>Gene list (gene-list mode only)</code> を disabled 表示。Gene list モードでは Random/BED も選択可能 (旧 UI では選べない <code>gene + rnd</code> / <code>gene + bed</code> が投入できる。推定実行時間はこの組合せで <code>—</code>)。Refseq 選択時は補足 <code>All Refseq coding genes (excluding dataset A) are used.</code>、Random 選択時は <code>Random permutation needs no input.</code> を表示。</td>
 <td><span class="tag 単なる変更">単なる変更</span></td>
 <td><span class="tag 中">中</span></td>
-<td></td>
+<td><span class="tag 対応済み">対応済み</span> (2026-09-24, 50eb844): オーナー指示 (第2ラウンド R3) で本番同様の非表示方式に戻した (disabled 表示は撤回)。ラベルも本番準拠 (Refseq coding genes (excluding dataset A) / Gene list (symbols or IDs))。</td>
 <td><details><summary>詳細</summary><dl><dt>根拠</dt><dd>旧: old-app/views/enrichment_analysis.haml:151-201, old-app/public/js/pj/enrichment_analysis.js:394-486 / 新: views/enrichment_analysis.erb:79-90, frontend/pages/enrichment-analysis.ts:236-289, 484-522</dd><dt>確認方法</dt><dd><code>curl+ソース確認済み</code> (表示切替は要ブラウザ確認)</dd><dt>備考</dt><dd>docs/ui-parity-audit-2026-09-14.md:174 は disabled ラジオを「改良として維持」と記録。<code>gene + rnd</code> の WABI 側の受け入れは未確認 (「未確認・不確実事項」参照)。</dd></dl><div class="src">ui-enrichment.md</div></details></td></tr>
 <tr data-item="ui" data-level="中" data-cls="退行" data-group="Enrichment Analysis" data-status="修正済み" id="EA-15"><td class="id">EA-15</td>
 <td><strong>カウント表モードのパネル 5/6 表示</strong></td>
@@ -911,23 +935,23 @@ footer{margin-top:40px;color:var(--muted);font-size:12.5px;border-top:1px solid 
 <td><span class="tag 中">中</span></td>
 <td><span class="tag 修正済み">修正済み</span> (2026-09-24, ad79181, 83f0902): count モードではパネル 5 が「Not required for gene count table analysis」のみ、Dataset A/B title 欄は非表示。countModeVisibility() で状態を決定。</td>
 <td><details><summary>詳細</summary><dl><dt>根拠</dt><dd>旧: old-app/public/js/pj/enrichment_analysis.js:452-486, old-app/views/enrichment_analysis.haml:198-201 / 新: frontend/pages/enrichment-analysis.ts:236-289 (count 分岐無し), views/enrichment_analysis.erb:79-91, 104-111</dd><dt>確認方法</dt><dd><code>ソース推定</code> (要ブラウザ確認)</dd><dt>備考</dt><dd>利用者に「カウント表でも permutation を選ぶ必要がある」と誤解させる。送信値の差は EA-16。</dd></dl><div class="src">ui-enrichment.md</div></details></td></tr>
-<tr data-item="ui" data-level="中" data-cls="機能削除" data-group="Enrichment Analysis" data-status="" id="EA-17"><td class="id">EA-17</td>
+<tr data-item="ui" data-level="中" data-cls="機能削除" data-group="Enrichment Analysis" data-status="修正済み" id="EA-17"><td class="id">EA-17</td>
 <td><strong>dataset B の「Try with example」と「Choose local file」が無い</strong></td>
 <td>Enrichment Analysis &gt; 5. Enter dataset B</td>
 <td>B 側にもファイル選択 (<code>Choose local file</code> キャプション付き) と <code>Try with example</code> があり、BED なら <code>bedB.txt</code> (1,997 行)、Gene list なら <code>geneB.txt</code> (150 行) を読み込む。</td>
 <td>B 側はファイル入力 (<code>#dataB-file</code>, hidden 切替) のみ。キャプション <code>Choose local file</code> も <code>Try with example</code> も無い。<code>bedB.txt</code>/<code>geneB.txt</code> は配信されているが UI から辿れない。</td>
 <td><span class="tag 機能削除">機能削除</span></td>
 <td><span class="tag 中">中</span></td>
-<td></td>
+<td><span class="tag 修正済み">修正済み</span> (2026-09-24, 50eb844): dataset B の「Try with example」と「Choose local file」を復活 (bedB.txt / geneB.txt)。dataset B のテキスト欄と同じ条件で表示。</td>
 <td><details><summary>詳細</summary><dl><dt>根拠</dt><dd>旧: old-app/views/enrichment_analysis.haml:185-197, old-app/public/js/pj/enrichment_analysis.js:372-382 / 新: views/enrichment_analysis.erb:88-90 (link/caption 無し), frontend/pages/enrichment-analysis.ts:741-744 (<code>try-example</code> 1 箇所のみ)</dd><dt>確認方法</dt><dd><code>curl+ソース確認済み</code></dd><dt>備考</dt><dd>parity 記録 (docs/ui-parity-audit-2026-09-14.md:171) は A 側の復元のみ記載しており、B 側の欠落は意図的かどうか不明。</dd></dl><div class="src">ui-enrichment.md</div></details></td></tr>
-<tr data-item="ui" data-level="中" data-cls="機能削除" data-group="Enrichment Analysis" data-status="" id="EA-20"><td class="id">EA-20</td>
+<tr data-item="ui" data-level="中" data-cls="機能削除" data-group="Enrichment Analysis" data-status="一部対応" id="EA-20"><td class="id">EA-20</td>
 <td><strong>ⓘ ボタンの数 (12 → 8) と失われた説明文</strong></td>
 <td>Enrichment Analysis &gt; 各パネルの ⓘ</td>
 <td>1 ゲノム分で 12 個: 3.Threshold / A:BED / A:Gene list / A:Count / B:Random / B:BED / B:Refseq / B:Gene list / Analysis title / Dataset A title / Dataset B title / Distance range from TSS。</td>
 <td>8 個: 3.Threshold / A:BED / A:Gene list / A:Count / B:Random / B:BED / Analysis title / Distance range from TSS。残した 8 件の本文は本番の <code>helpText</code> と逐語一致 (note1/note2 の連結順も一致)。失われた 4 件の本文 (原文):<br>- B:Refseq — <code>Check this to compare 'dataset A' with RefSeq coding genes, excluding those listed in 'dataset A'.</code><br>- B:Gene list — <code>Check this to compare 'dataset A' with another gene list.</code> + note1 (Acceptable identifiers …)<br>- Dataset A title — <code>Enter a title for the data selected in "4. Enter dataset A".\nAcceptable letters are alphanumeric (a-Z, 0-9), space ( ), underscore (_), period (.) and hyphen (-).</code><br>- Dataset B title — 同文で <code>"5. Enter dataset B"</code></td>
 <td><span class="tag 機能削除">機能削除</span></td>
 <td><span class="tag 中">中</span></td>
-<td></td>
+<td><span class="tag 一部対応">一部対応</span> (2026-09-24, f52381b): dataset B の Refseq / Gene list 行に本番文言の ⓘ を追加 (8 → 10)。</td>
 <td><details><summary>詳細</summary><dl><dt>根拠</dt><dd>旧: old-app/views/enrichment_analysis.haml:97, 115, 121, 127, 155, 170, 177, 183, 213, 219, 225, 231; old-app/public/js/pj/enrichment_analysis.js:183-226, 1007-1037 / 新: views/enrichment_analysis.erb:49, 62-64, 79, 85, 101, 115; frontend/pages/enrichment-analysis.ts:35-61</dd><dt>確認方法</dt><dd><code>curl+ソース確認済み</code></dd><dt>備考</dt><dd>docs/ui-parity-audit-2026-09-14.md:171 の「seven ⓘ」は本番の実数 (12) と合わない。B:Refseq の説明は新版では選択時の補足文 (EA-14) で一部代替されている。</dd></dl><div class="src">ui-enrichment.md</div></details></td></tr>
 <tr data-item="ui" data-level="中" data-cls="単なる変更" data-group="Enrichment Analysis" data-status="" id="EA-21"><td class="id">EA-21</td>
 <td><strong>ⓘ の表示方式 (alert → popover) と改行</strong></td>
@@ -937,7 +961,7 @@ footer{margin-top:40px;color:var(--muted);font-size:12.5px;border-top:1px solid 
 <td><span class="tag 単なる変更">単なる変更</span></td>
 <td><span class="tag 中">中</span></td>
 <td></td>
-<td><details><summary>詳細</summary><dl><dt>根拠</dt><dd>旧: old-app/public/js/pj/enrichment_analysis.js:183-226 / 新: frontend/components/info-popover.ts:28-48, public/css/style.css:503-508 (.info-btn のみ), public/css/bootstrap5.min.css <code>.popover-body{padding…;color…}</code> (white-space 無し)</dd><dt>確認方法</dt><dd><code>ソース推定</code> (要ブラウザ確認)</dd><dt>備考</dt><dd><code>.popover-body { white-space: pre-line }</code> を足せば本番の見た目に近づく。</dd></dl><div class="src">ui-enrichment.md</div></details></td></tr>
+<td><details><summary>詳細</summary><dl><dt>根拠</dt><dd>旧: old-app/public/js/pj/enrichment_analysis.js:183-226 / 新: frontend/components/info-popover.ts:28-48, public/css/style.css:503-508 (.info-btn のみ), public/css/bootstrap5.min.css <code>.popover-body{padding…;color…}</code> (white-space 無し)</dd><dt>確認方法</dt><dd><code>ソース推定</code> (要ブラウザ確認)</dd><dt>備考</dt><dd><code>.popover-body { white-space: pre-line }</code> を足せば本番の見た目に近づく。</dd></dl><div class="note">2026-09-24 追記: 76310f6 で popover 外クリックによる閉じ方を追加 (SHELL-35 参照)。</div><div class="src">ui-enrichment.md</div></details></td></tr>
 <tr data-item="ui" data-level="中" data-cls="退行" data-group="Enrichment Analysis" data-status="修正済み" id="EA-22"><td class="id">EA-22</td>
 <td><strong>ⓘ 本文が新版のゲノム構成と合っていない</strong></td>
 <td>Enrichment Analysis &gt; A:BED / B:BED / A:Gene list / A:Count の ⓘ</td>
@@ -1090,7 +1114,7 @@ footer{margin-top:40px;color:var(--muted);font-size:12.5px;border-top:1px solid 
 <td><span class="tag 改良">改良</span></td>
 <td><span class="tag 中">中</span></td>
 <td></td>
-<td><details><summary>詳細</summary><dl><dt>根拠</dt><dd>旧: old-app/public/js/pj/peak_browser.js:371-416 (:406) / 新: frontend/pages/peak-browser.ts:166-185、frontend/components/igv.ts:20-42</dd><dt>確認方法</dt><dd>ソース推定 (要ブラウザ確認: 下記)</dd><dt>備考</dt><dd>到達確認は「公開 https サイト → loopback への cross-origin fetch」であり、Chrome の Local Network Access 許可プロンプト (拒否時は fetch 失敗) や Safari の mixed content 扱いによっては IGV 起動中でも "Could not reach IGV" になり得る (推定)。旧版の top-level 遷移はこの制約を受けない。実ブラウザでの確認が必須。IGV 起動中に "OK" ページへ遷移して ChIP-Atlas を離れる点は新旧同じ。旧版の <code>button.prop("disable", true)</code> は typo で無効化されておらず、新版もボタンは無効化しない。</dd></dl><div class="src">ui-peak-browser.md</div></details></td></tr>
+<td><details><summary>詳細</summary><dl><dt>根拠</dt><dd>旧: old-app/public/js/pj/peak_browser.js:371-416 (:406) / 新: frontend/pages/peak-browser.ts:166-185、frontend/components/igv.ts:20-42</dd><dt>確認方法</dt><dd>ソース推定 (要ブラウザ確認: 下記)</dd><dt>備考</dt><dd>到達確認は「公開 https サイト → loopback への cross-origin fetch」であり、Chrome の Local Network Access 許可プロンプト (拒否時は fetch 失敗) や Safari の mixed content 扱いによっては IGV 起動中でも "Could not reach IGV" になり得る (推定)。旧版の top-level 遷移はこの制約を受けない。実ブラウザでの確認が必須。IGV 起動中に "OK" ページへ遷移して ChIP-Atlas を離れる点は新旧同じ。旧版の <code>button.prop("disable", true)</code> は typo で無効化されておらず、新版もボタンは無効化しない。</dd></dl><div class="note">2026-09-24 追記: TAIR12 で IGV が genome を解決できない問題 (本番にもある) を 1d4d1c1 で修正: 全アセンブリで genome=<a href="https://chip-atlas.dbcls.jp/data/genome/&lt;g&gt;/&lt;g&gt;.json" target="_blank" rel="noopener">https://chip-atlas.dbcls.jp/data/genome/&lt;g&gt;/&lt;g&gt;.json</a> を渡す (Peak Browser の /api/igv_url と /view の Visualize メニューの両方)。</div><div class="src">ui-peak-browser.md</div></details></td></tr>
 <tr data-item="ui" data-level="中" data-cls="退行" data-group="Peak Browser" data-status="修正済み" id="PB-21"><td class="id">PB-21</td>
 <td><strong>"Error connecting to IGV?" の内容とリンク先</strong></td>
 <td>Peak Browser &gt; View on IGV 下のリンク</td>
@@ -2009,14 +2033,14 @@ footer{margin-top:40px;color:var(--muted);font-size:12.5px;border-top:1px solid 
 <td><span class="tag 低">低</span></td>
 <td></td>
 <td><details><summary>詳細</summary><dl><dt>旧</dt><dd>404 + <code>Location: <a href="https://chip-atlas.org/not_found" target="_blank" rel="noopener">https://chip-atlas.org/not_found</a></code> ヘッダ + 404 ページ本文「ChIP-Atlas: 404 / Sorry, could not find the requested resource. Try with different data or contact us.」+ Giphy のランダム gif (<code>http://api.giphy.com</code>、https ページからの混在コンテンツで恐らくブロック)。</dd><dt>新</dt><dd>同じステータス/ヘッダ/文言。gif の代わりに「Back to Home」「Report Issue」ボタン。</dd><dt>根拠</dt><dd>旧: app.rb:265, 447-449; old-app/views/not_found.haml:34-71; curl ヘッダ実測 / 新: routes/pages.rb:34, 152-164; views/not_found.erb; curl 実測</dd><dt>確認方法</dt><dd><code>curl+ソース確認済み</code> (404 ページ自体は他担当)</dd></dl><div class="src">ui-search-view.md</div></details></td></tr>
-<tr data-item="ui" data-level="低" data-cls="単なる変更" data-group="Dataset Search / 実験詳細 (/view)" data-status="" id="SV-45"><td class="id">SV-45</td>
+<tr data-item="ui" data-level="低" data-cls="単なる変更" data-group="Dataset Search / 実験詳細 (/view)" data-status="対応済み" id="SV-45"><td class="id">SV-45</td>
 <td><strong>navbar「ID → Go」の初期値とエンコード</strong></td>
 <td>navbar &gt; ID 入力 + Go</td>
 <td></td>
 <td></td>
 <td><span class="tag 単なる変更">単なる変更</span></td>
 <td><span class="tag 低">低</span></td>
-<td></td>
+<td><span class="tag 対応済み">対応済み</span> (2026-09-24, e2d6d76): チーム判断で navbar の ID フォームと Go ボタン自体を削除 (Search を目立たせるため)。/view?id= は従来どおり。</td>
 <td><details><summary>詳細</summary><dl><dt>旧</dt><dd>初期値は <code>GSM469863</code> / <code>SRX018625</code> からページ表示ごとにランダム。<code>window.open("/view?id=" + 値)</code> (エンコード無し) を新規タブで開く。空でも <code>/view?id=</code> を開く (→404)。</dd><dt>新</dt><dd>初期値は常に <code>SRX018625</code>。<code>window.open('/view?id=' + encodeURIComponent(値))</code>、新規タブ。空でも同様に開く。</dd><dt>根拠</dt><dd>旧: old-app/views/_navigation.haml:58-65; old-app/public/js/pj/pj.js:21-27, 49-58 / 新: views/_navbar.erb:62-68</dd><dt>確認方法</dt><dd><code>curl+ソース確認済み</code> (window.open の挙動は要ブラウザ確認)</dd><dt>備考</dt><dd>ランダム例が無くなり、GSM でも入力できることが伝わりにくくなった。</dd></dl><div class="src">ui-search-view.md</div></details></td></tr>
 <tr data-item="ui" data-level="低" data-cls="改良" data-group="Dataset Search / 実験詳細 (/view)" data-status="" id="SV-46"><td class="id">SV-46</td>
 <td><strong>実験ページの &lt;html lang</strong></td>
@@ -2423,15 +2447,6 @@ footer{margin-top:40px;color:var(--muted);font-size:12.5px;border-top:1px solid 
 <td><span class="tag 低">低</span></td>
 <td></td>
 <td><details><summary>詳細</summary><dl><dt>根拠</dt><dd>旧: old-app/public/js/pj/enrichment_analysis.js:581-625, 758-803, old-app/app.rb:477-501 / 新: frontend/api/client.ts:410-416, routes/jobs.rb:51-75, lib/services/wabi_service.rb:19-24, 151-153, frontend/pages/enrichment-analysis.test.ts:88-121</dd><dt>確認方法</dt><dd><code>ソース推定</code> (JSON 不正 body を送って 400 <code>{"error":"Invalid JSON"}</code> になることのみ curl 確認可、実投入はしていない)</dd><dt>備考</dt><dd>不正な JSON は lib/middleware/json_body_parser.rb:22-27 で 400、JSON body 無しは app.rb:49-54 で 400。それ以外の検証は無く、<code>params</code> が空でも WABI に送られる (API 利用者向けの注意点)。</dd></dl><div class="src">ui-enrichment.md</div></details></td></tr>
-<tr data-item="ui" data-level="低" data-cls="単なる変更" data-group="Enrichment Analysis" data-status="" id="EA-32"><td class="id">EA-32</td>
-<td><strong>permTime の送信条件</strong></td>
-<td>Enrichment Analysis &gt; 送信パラメータ</td>
-<td>常に送信 (未選択なら 1)。</td>
-<td>B が Random permutation のときだけ送信。BED/Refseq/Gene list/Count では省略。</td>
-<td><span class="tag 単なる変更">単なる変更</span></td>
-<td><span class="tag 低">低</span></td>
-<td></td>
-<td><details><summary>詳細</summary><dl><dt>根拠</dt><dd>旧: old-app/public/js/pj/enrichment_analysis.js:583-586, 605 / 新: frontend/pages/enrichment-analysis.ts:615, frontend/pages/enrichment-analysis.test.ts:174-180</dd><dt>確認方法</dt><dd><code>ソース推定</code></dd><dt>備考</dt><dd>WABI が <code>permTime</code> 必須かどうかは未確認。本番と同じく常に送る方が安全。</dd></dl><div class="src">ui-enrichment.md</div></details></td></tr>
 <tr data-item="ui" data-level="低" data-cls="単なる変更" data-group="Enrichment Analysis" data-status="" id="EA-33"><td class="id">EA-33</td>
 <td><strong>送信失敗時のメッセージ</strong></td>
 <td>Enrichment Analysis &gt; 送信エラー</td>
@@ -3161,14 +3176,14 @@ footer{margin-top:40px;color:var(--muted);font-size:12.5px;border-top:1px solid 
 <td><span class="tag 低">低</span></td>
 <td></td>
 <td><details><summary>詳細</summary><dl><dt>根拠</dt><dd>旧: old-app/views/peak_browser.haml:42-56 ほか 5 ファイル / 新: views/_tutorial.erb:7-26, views/_page_header.erb:24-28, views/peak_browser.erb:12-17 ほか</dd><dt>確認方法</dt><dd><code>curl+ソース確認済み</code> (メニューの開閉位置は <code>要ブラウザ確認</code>)</dd><dt>備考</dt><dd>統合TV のリンクは新旧とも <code>http://doi.org/...</code> (https ではない)。</dd></dl><div class="src">ui-shell.md</div></details></td></tr>
-<tr data-item="ui" data-level="低" data-cls="改良" data-group="共通/ホーム/静的ページ" data-status="" id="SHELL-35"><td class="id">SHELL-35</td>
+<tr data-item="ui" data-level="低" data-cls="改良" data-group="共通/ホーム/静的ページ" data-status="対応済み" id="SHELL-35"><td class="id">SHELL-35</td>
 <td><strong>ⓘ ヘルプの表示方式: ブロッキング alert() → Bootstrap popover</strong></td>
 <td>同上 (Peak Browser の "Error connecting to IGV?" は別担当)</td>
 <td><code>&lt;a class="infoBtn"&gt;&amp;#x24D8;&lt;/a&gt;</code> クリックで <code>alert()</code>。ページ全体がブロックされる。</td>
 <td><code>&lt;a class="info-btn" href="#" role="button" aria-label="…"&gt;&amp;#x24D8;&lt;/a&gt;</code> に <code>new Popover(btn, { trigger: 'focus click', placement: 'top', html: false })</code>。click は <code>preventDefault</code>。</td>
 <td><span class="tag 改良">改良</span></td>
 <td><span class="tag 低">低</span></td>
-<td></td>
+<td><span class="tag 対応済み">対応済み</span> (2026-09-24, 76310f6): popover の外側をクリックすると閉じるようにした (第2ラウンド R6)。</td>
 <td><details><summary>詳細</summary><dl><dt>根拠</dt><dd>旧: old-app/views/peak_browser.haml:118-124, old-app/public/js/pj/peak_browser.js:430-434 / 新: views/enrichment_analysis.erb:49-79, views/diff_analysis.erb:66-76, frontend/components/info-popover.ts:28-48</dd><dt>確認方法</dt><dd><code>ソース推定</code> (<code>要ブラウザ確認</code>)</dd><dt>備考</dt><dd><code>trigger: 'focus click'</code> の併用は Bootstrap の想定外の組み合わせ。マウスクリックでは focusin (show を setTimeout 0 で予約) の直後に click (toggle) が走るため、ちらついて閉じる・二度押しが要る、といった挙動になり得る。要ブラウザ確認。安全なのは <code>trigger: 'focus'</code> 単独 (次のクリックで閉じる、Bootstrap 公式の dismissible パターン) か <code>'click'</code> 単独。</dd></dl><div class="src">ui-shell.md</div></details></td></tr>
 <tr data-item="ui" data-level="低" data-cls="単なる変更" data-group="共通/ホーム/静的ページ" data-status="" id="SHELL-36"><td class="id">SHELL-36</td>
 <td><strong>コードブロックの copy ボタン: アイコン → テキスト</strong></td>
