@@ -59,17 +59,10 @@
         </li>
       </ul>
       <div class="navbar-right-stack">
-        <form class="navbar-id-form" role="search"
-              onsubmit="event.preventDefault(); window.open('/view?id=' + encodeURIComponent(document.getElementById('jumpToExperiment').value));">
-          <span class="text-light me-2">ID:</span>
-          <input class="form-control form-control-sm me-2" type="text" id="jumpToExperiment"
-                 value="SRX018625" aria-label="Experiment ID">
-          <button class="btn btn-light btn-sm" type="submit">Go</button>
-        </form>
-        <a class="nav-link text-light" href="/search">
+        <a class="nav-link text-light nav-search-link" href="/search">
           <%== erb :_icon, locals: { name: 'search' } %>
           <span class="full-text">Search</span>
-          <span class="abbrev-text">?</span>
+          <span class="abbrev-text">Search</span>
         </a>
       </div>
     </div>

@@ -140,6 +140,14 @@ class PagesTest < Minitest::Test
     assert_includes css, '.navbar-right-stack .nav-link:hover,', 'navbar hover/focus state must stay pure white, not the dim Bootstrap default'
   end
 
+  def test_navbar_has_no_experiment_id_form
+    get '/'
+    body = last_response.body
+    refute_includes body, 'jumpToExperiment', 'R11: the navbar experiment-ID lookup form must be gone'
+    refute_includes body, 'navbar-id-form', 'R11: the navbar experiment-ID lookup form must be gone'
+    assert_includes body, 'nav-search-link', 'R11: the Search item must be styled as a standalone link'
+  end
+
   FEATURE_ICONS = {
     '/peak_browser'        => 'glasses',
     '/enrichment_analysis' => 'hand-holding-heart',

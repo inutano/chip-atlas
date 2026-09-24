@@ -83,10 +83,6 @@ body {
   margin-right: 5px;
 }
 
-#jumpToExperiment {
-  width: 8em;
-}
-
 /* ===== Footer ===== */
 footer {
   margin-top: 10em;
@@ -135,9 +131,6 @@ footer .acknowledgement {
   .navbar .nav-link {
     padding-left: 10px;
     padding-right: 10px;
-  }
-  #jumpToExperiment {
-    width: 80px;
   }
 }
 
@@ -327,10 +320,14 @@ h1 .icon, h3 .icon, h4 .icon { margin-right: 8px; }
   gap: 14px;
 }
 
-.navbar-id-form {
-  display: flex;
-  align-items: center;
+.navbar-right-stack .nav-search-link {
+  border: 1px solid rgba(255, 255, 255, .5);
+  border-radius: .25rem;
+  padding: 4px 12px;
 }
+
+.navbar-right-stack .nav-search-link:hover,
+.navbar-right-stack .nav-search-link:focus { background: rgba(255, 255, 255, .15); }
 
 /* Inside the collapsed menu there is no bar height to protect and the two
    controls would be cramped side by side, so they stack there instead. */
