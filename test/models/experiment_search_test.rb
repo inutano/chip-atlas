@@ -73,6 +73,10 @@ class ExperimentSearchTest < Minitest::Test
     assert_equal '"a"', ChipAtlas::ExperimentSearch.match_expression('a')
   end
 
+  def test_match_expression_prefixes_a_term_at_min_prefix_length_boundary
+    assert_equal '"ab"*', ChipAtlas::ExperimentSearch.match_expression('ab')
+  end
+
   def test_match_expression_keeps_a_quoted_phrase_whole
     assert_equal '"chip antibody"* "K56"*',
                  ChipAtlas::ExperimentSearch.match_expression('"chip antibody" K56')

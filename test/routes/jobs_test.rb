@@ -221,6 +221,7 @@ class JobsTest < Minitest::Test
            'gene-list submissions must forward permTime to WABI -- omitting it is what caused the 502'
     assert_equal '1', captured['permTime']
   end
+
   # --- GET /jobs/:id/result: the job type selects the URL shape ---
 
   def test_result_route_returns_html_and_tsv_for_an_enrichment_job

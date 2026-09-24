@@ -308,11 +308,12 @@ footer .acknowledgement {
 
 h1 .icon, h3 .icon, h4 .icon { margin-right: 8px; }
 
-/* ===== Navbar right cluster: Search and the ID form share one row =====
-   Production stacks these two vertically, which is what made its navbar two
-   rows tall. That was not a design decision over there - it is a wrapping
-   bug - so this deliberately does NOT reproduce it. Keeping them on one row
-   is what lets the whole bar sit at --ca-navbar-h instead of 72px. */
+/* ===== Navbar right cluster: the Search link's row =====
+   Production wraps its right-side nav controls onto a second row, which is
+   what makes its navbar two rows tall. That was not a design decision over
+   there - it is a wrapping bug - so this deliberately does NOT reproduce
+   it: the Search link stays on its own row, which is what lets the whole
+   bar sit at --ca-navbar-h instead of 72px. */
 .navbar-right-stack {
   display: flex;
   flex-direction: row;
@@ -329,8 +330,9 @@ h1 .icon, h3 .icon, h4 .icon { margin-right: 8px; }
 .navbar-right-stack .nav-search-link:hover,
 .navbar-right-stack .nav-search-link:focus { background: rgba(255, 255, 255, .15); }
 
-/* Inside the collapsed menu there is no bar height to protect and the two
-   controls would be cramped side by side, so they stack there instead. */
+/* Inside the collapsed menu the bar's fixed height no longer constrains
+   layout, so the Search link left-aligns under the stacked nav items
+   instead of sitting centered in a row. */
 @media (max-width: 991.98px) {
   .navbar-right-stack {
     flex-direction: column;

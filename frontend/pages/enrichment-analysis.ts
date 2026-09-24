@@ -56,6 +56,10 @@ const HELP_TEXT: Record<string, string> = {
     'Check this to compare ‘dataset A’ with a random background. In this case, each genomic location of ‘dataset A’ is permuted on a random chromosome at a random position for the specified times. Increasing the permutation times will provide a highly randomized background, or a high quality statistical test, but the calculation time will be longer.',
   'dataset-b-bed':
     "Check this to compare 'dataset A' with another dataset (UCSC BED format).\n\n" + NOTE2,
+  'dataset-b-refseq':
+    "Check this to compare 'dataset A' with RefSeq coding genes, excluding those listed in 'dataset A'.",
+  'dataset-b-userlist':
+    "Check this to compare 'dataset A' with another gene list.\n\n" + NOTE1,
   'analysis-title':
     'Enter a title for this submission.\nAcceptable letters are alphanumeric (a-Z, 0-9), space ( ), underscore (_), period (.) and hyphen (-).',
   // Both topics are lifted verbatim from production's helpText object. `tss`
