@@ -1,3 +1,5 @@
+require 'net/http'
+
 module PJ
   class Location
     # URL of the IGV genome JSON configuration prepared by ChIP-Atlas
@@ -19,12 +21,6 @@ module PJ
       "https://chip-atlas.dbcls.jp/data/"
     end
 
-    # Assembled BED files are served gzipped; plain .bed is kept only for
-    # backward compatibility and not available for newer genomes (e.g. TAIR12)
-    def fileformat
-      ".bed.gz"
-    end
-
     def archive_url
       case @condition["agClass"]
       when "Annotation tracks"
@@ -42,11 +38,25 @@ module PJ
       nil
     end
 
+    # Assembled BED files are served gzipped. Fall back to plain .bed for
+    # older entries that have no .bed.gz (some of hg19, mm9, dm3 and ce10)
     def archived_bed_url
       filename  = PJ::Bedfile.get_filename(@condition)
-      File.join(archive_base, @genome, "assembled", filename + fileformat)
+      bed_url   = File.join(archive_base, @genome, "assembled", filename + ".bed")
+      remote_file_missing?(bed_url + ".gz") ? bed_url : bed_url + ".gz"
     rescue NameError
       nil
+    end
+
+    # The data server occasionally stalls on connect, so retry with a short
+    # timeout. Assume the file exists if the server cannot be reached.
+    def remote_file_missing?(url, attempts: 3)
+      uri = URI(url)
+      Net::HTTP.start(uri.host, uri.port, use_ssl: uri.scheme == "https", open_timeout: 1, read_timeout: 3) do |http|
+        http.request_head(uri.path).code == "404"
+      end
+    rescue StandardError
+      (attempts -= 1) > 0 ? retry : false
     end
 
     def igv_url
