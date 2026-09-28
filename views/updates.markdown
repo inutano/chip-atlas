@@ -1,6 +1,8 @@
 ### What's new
 
 <!-- - <span style="color:red">**Enrichment analysis will be temporarily unavailable due to the backend server maintenance: June 28th 9am - July 1st 0am (GMT+9)**</span> -->
+- Added new genome assembly **A. thaliana**, welcome! (2026/09/26)
+- **ChIP-Atlas turns 10!** New publication in the NAR Web Server Issue. Happy to have supported so many researchers over the past decade! [https://doi.org/10.1093/nar/gkag378](https://doi.org/10.1093/nar/gkag378) (2026/04/29)
 - **New publication** on the NAR web server issue! [https://doi.org/10.1093/nar/gkae358](https://doi.org/10.1093/nar/gkae358) (2024/05/16)
 - Added **Annotation tracks** to Peak Browser, together with UI improvement (2023/10/25)
 - Launched **Diff Analysis** tool enabling to detect differential peaks or differentially methylated regions (2023/10/25)
