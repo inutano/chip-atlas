@@ -19,8 +19,11 @@ module PJ
       "https://chip-atlas.dbcls.jp/data/"
     end
 
+    # Genomes whose assembled BED files are served only in gzipped form
+    GZIPPED_BED_GENOMES = ["TAIR12"]
+
     def fileformat
-      ".bed"
+      GZIPPED_BED_GENOMES.include?(@genome) ? ".bed.gz" : ".bed"
     end
 
     def archive_url
