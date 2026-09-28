@@ -85,7 +85,10 @@ class PeakJohn < Sinatra::Base
   end
 
   configure :production do
-    set :host_authorization, { permitted_hosts: [".chip-atlas.org"] }
+    # CHIP_ATLAS_EXTRA_HOSTS: comma-separated hosts to permit in addition to
+    # .chip-atlas.org (e.g. the IP address of a review server)
+    extra_hosts = ENV.fetch("CHIP_ATLAS_EXTRA_HOSTS", "").split(",").map(&:strip).reject(&:empty?)
+    set :host_authorization, { permitted_hosts: [".chip-atlas.org"] + extra_hosts }
   end
 
   before do
