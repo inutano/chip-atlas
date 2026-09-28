@@ -68,12 +68,12 @@
   },
   "TAIR": {
     "diffbind": {
-      "dataSetA": ["SRX7293442", "SRX7293443", "SRX7293444"],
-      "dataSetB": ["SRX7293445", "SRX7293446", "SRX7293447"]
+      "dataSetA": ["SRX26741525", "SRX26741526"],
+      "dataSetB": ["SRX26741521", "SRX26741522"]
     },
     "dmr": {
-      "dataSetA": ["SRX1097210", "SRX1097211"],
-      "dataSetB": ["SRX1097222", "SRX1097223"]
+      "dataSetA": ["SRX10432648", "SRX10432649"],
+      "dataSetB": ["SRX10432652", "SRX10432653"]
     }
   }
 }
