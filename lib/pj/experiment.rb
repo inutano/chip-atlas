@@ -64,7 +64,8 @@ module PJ
           "dm3" => "D. melanogaster (dm3)",
           "ce11" => "C. elegans (ce11)",
           "ce10" => "C. elegans (ce10)",
-          "sacCer3" => "S. cerevisiae (sacCer3)"
+          "sacCer3" => "S. cerevisiae (sacCer3)",
+          "TAIR12" => "A. thaliana (TAIR12)"
         }
         # self.all.map{|r| r.genome }.uniq
       end

@@ -65,5 +65,15 @@
       "dataSetA": ["ERX4244102", "ERX4244103"],
       "dataSetB": ["ERX4244104", "ERX4244105", "ERX4244106", "ERX4244107"]
     }
+  },
+  "TAIR": {
+    "diffbind": {
+      "dataSetA": ["SRX26741525", "SRX26741526"],
+      "dataSetB": ["SRX26741521", "SRX26741522"]
+    },
+    "dmr": {
+      "dataSetA": ["SRX10432648", "SRX10432649"],
+      "dataSetB": ["SRX10432652", "SRX10432653"]
+    }
   }
 }

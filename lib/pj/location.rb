@@ -1,5 +1,10 @@
 module PJ
   class Location
+    # URL of the IGV genome JSON configuration prepared by ChIP-Atlas
+    def self.igv_genome_url(genome)
+      "https://chip-atlas.dbcls.jp/data/genome/#{genome}/#{genome}.json"
+    end
+
     def initialize(data)
       @data      = data
       @condition = data["condition"]
@@ -14,8 +19,11 @@ module PJ
       "https://chip-atlas.dbcls.jp/data/"
     end
 
+    # Genomes whose assembled BED files are served only in gzipped form
+    GZIPPED_BED_GENOMES = ["TAIR12"]
+
     def fileformat
-      ".bed"
+      GZIPPED_BED_GENOMES.include?(@genome) ? ".bed.gz" : ".bed"
     end
 
     def archive_url
@@ -56,11 +64,11 @@ module PJ
     end
 
     def igv_browse_annotations
-      "#{igv_url}/load?genome=#{@genome}&file=#{archived_annotation_url}&name=#{PJ::Bedfile.get_trackname(@condition).gsub(', ','_')}"
+      "#{igv_url}/load?genome=#{PJ::Location.igv_genome_url(@genome)}&file=#{archived_annotation_url}&name=#{PJ::Bedfile.get_trackname(@condition).gsub(', ','_')}"
     end
 
     def igv_browse_bedfile
-      "#{igv_url}/load?genome=#{@genome}&file=#{archived_bed_url}"
+      "#{igv_url}/load?genome=#{PJ::Location.igv_genome_url(@genome)}&file=#{archived_bed_url}"
     end
 
     #

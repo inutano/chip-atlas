@@ -13,6 +13,7 @@ const genomesize = {
   mm10: 2725765481,
   sacCer3: 12157105,
   rn6: 2870182909,
+  TAIR12: 142481245,
 };
 
 const numGenes = {
@@ -26,6 +27,7 @@ const numGenes = {
   mm10: 19909,
   sacCer3: 5809,
   rn6: 23425,
+  TAIR12: 26867,
 };
 
 const taxidMap = {
@@ -58,6 +60,11 @@ const taxidMap = {
     organismName: "Saccharomyces cerevisiae",
     displayName: "S. cerevisiae",
     genomeVersions: ["sacCer3"],
+  },
+  3702: {
+    organismName: "Arabidopsis thaliana",
+    displayName: "A. thaliana",
+    genomeVersions: ["TAIR12"],
   },
 };
 
@@ -1005,9 +1012,9 @@ const generateQvalOptions = async () => {
 // should be exported to json file
 var helpText = {
   note1:
-    "Acceptable identifiers:\n  Official gene symbols (e.g. POU5F1)\n  Ensembl IDs (e.g. ENSG00000204531)\n  Uniprot IDs (e.g. Q01860)\n  RefSeq gene IDs (e.g. NM_002701)\n\nOfficial gene symbols must be entered according to following nomenclatures:\n  H. sapiens: HGNC\n  M. musculus: MGI\n  R. norvegicus: RGD\n  D. melanogaster: FlyBase\n  C. elegans: WormBase\n  S. cerevisiae: SGD\n\nAcceptable example:\n  POU5F1\n  TP53\n\nBad example:\n  OCT4\n  p53",
+    "Acceptable identifiers:\n  Official gene symbols (e.g. POU5F1)\n  Ensembl IDs (e.g. ENSG00000204531; AT1G01010 for A. thaliana)\n  Uniprot IDs (e.g. Q01860)\n  RefSeq gene IDs (e.g. NM_002701)\n\nOfficial gene symbols must be entered according to following nomenclatures:\n  H. sapiens: HGNC\n  M. musculus: MGI\n  R. norvegicus: RGD\n  D. melanogaster: FlyBase\n  C. elegans: WormBase\n  S. cerevisiae: SGD\n  A. thaliana: TAIR\n\nAcceptable example:\n  POU5F1\n  TP53\n\nBad example:\n  OCT4\n  p53",
   note2:
-    "Example:\n  chr1<tab>531435<tab>543845\n  chr2<tab>738543<tab>742321\n\nAcceptable genome assemblies:\n    hg19, hg38 (H. sapiens)\n    mm9, mm10 (M. musculus)\n    rn6 (R. norvegicus)\n    dm3, dm6 (D. melanogaster)\n    ce10, ce11 (C. elegans)\n    sacCer3 (S. cerevisiae)\n\n",
+    "Example:\n  chr1<tab>531435<tab>543845\n  chr2<tab>738543<tab>742321\n\nAcceptable genome assemblies:\n    hg19, hg38 (H. sapiens)\n    mm9, mm10 (M. musculus)\n    rn6 (R. norvegicus)\n    dm3, dm6 (D. melanogaster)\n    ce10, ce11 (C. elegans)\n    sacCer3 (S. cerevisiae)\n    TAIR12 (A. thaliana)\n\n",
   userdatabed:
     "Check this to search for common epigenetic features within given genomic regions (UCSC BED format).\n\n",
   userdatagenes:

@@ -29,8 +29,11 @@ const getUrlParameters = () => {
     localIgvUrl:
       "http://localhost:60151/load?file=https://chip-atlas.dbcls.jp/data/query/" +
       reqId +
-      ".igv.bed&genome=" +
-      genome,
+      ".igv.bed&genome=https://chip-atlas.dbcls.jp/data/genome/" +
+      genome +
+      "/" +
+      genome +
+      ".json",
     zipUrl:
       "https://dtn1.ddbj.nig.ac.jp/wabi/chipatlas/" +
       reqId +

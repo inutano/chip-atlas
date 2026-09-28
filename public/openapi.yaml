@@ -87,6 +87,7 @@ components:
         - ce11
         - ce10
         - sacCer3
+        - TAIR12
       example: hg38
 
     ClassificationItem:
@@ -201,6 +202,7 @@ paths:
                 - ce11
                 - ce10
                 - sacCer3
+                - TAIR12
 
   /data/list_of_experiment_types.json:
     get:

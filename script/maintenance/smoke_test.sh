@@ -109,7 +109,7 @@ echo ""
 # 5. Peak browser form
 echo "Step 5: Peak browser (browse & download)"
 BROWSE_JSON='{"condition":{"genome":"sacCer3","agClass":"Histone","agSubClass":"H2A.Z","clClass":"All cell types","threshold":"50"}}'
-test_post_json "Browse" "/browse" "$BROWSE_JSON" "load?genome=sacCer3"
+test_post_json "Browse" "/browse" "$BROWSE_JSON" "load?genome=https://chip-atlas.dbcls.jp/data/genome/sacCer3/sacCer3.json"
 DOWNLOAD_JSON='{"condition":{"genome":"sacCer3","agClass":"Histone","agSubClass":"H2A.Z","clClass":"All cell types","clSubClass":"-","qval":"50"}}'
 test_post_json "Download" "/download" "$DOWNLOAD_JSON" "chip-atlas.dbcls.jp/data"
 echo ""
