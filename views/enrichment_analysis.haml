@@ -245,9 +245,12 @@
                         %a{ id: "#{genome}-estimated-run-time" }
                           \-
 
+                      %p.text-danger
+                        %strong Note:
+                        Jobs submitted before April 2026 may not complete due to a node switch. Please re-submit your job.
                       %p
                         %a{ href: "https://sc.ddbj.nig.ac.jp/en/operation/job_queue_status/", target: "_blank" }
-                          node status (short.q)
+                          node status (epyc.q)
 
     != haml :footer
 

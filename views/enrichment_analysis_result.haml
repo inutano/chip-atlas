@@ -73,11 +73,16 @@
         .container#executionLog
         %hr
 
+        %p.text-danger
+          %strong Note:
+          Jobs submitted before April 2026 may not complete due to a node switch. Please re-submit your job from the
+          %a{ href: "#{app_root}/enrichment_analysis" } Enrichment Analysis
+          page.
         %p
           As this function uses the NIG supercomputer system, it may take time to start your job when the nodes are busy. Please check computation node status
           %a{ href: "https://sc.ddbj.nig.ac.jp/en/operation/job_queue_status/", target: "_blank" }
             here
-          (short.q)
+          (epyc.q)
 
     != haml :footer
 
