@@ -618,9 +618,8 @@ function retrievePostData() {
     data.typeB = "empty";
   }
 
-  if (data.antigenClass == "Bisulfite-Seq") {
-    data.sbatchOptions = "-p epyc -t 180";
-  }
+  data.sbatchOptions = "-p epyc -t 180";
+
   return data;
 }
 

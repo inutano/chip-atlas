@@ -371,9 +371,16 @@ class PeakJohn < Sinatra::Base
     haml :diff_analysis_result
   end
 
+  # These two are polled every few seconds by the result pages. Without a
+  # timeout a hung DDBJ endpoint (it completes the TLS handshake but never
+  # answers) pins a worker until unicorn's 60s SIGKILL, which with 2 workers
+  # takes the whole site down. Timeout::Error is a StandardError, so the
+  # existing rescue turns it into the same "not ready yet" 404.
   get "/diff_analysis_log" do
     begin
-      URI.open("https://dtn1.ddbj.nig.ac.jp/wabi/chipatlas/#{params[:id]}?info=result&format=log").read
+      Timeout.timeout(3) do
+        URI.open("https://dtn1.ddbj.nig.ac.jp/wabi/chipatlas/#{params[:id]}?info=result&format=log").read
+      end
     rescue => e
       status 404
       "Log file not available yet"
@@ -382,7 +389,9 @@ class PeakJohn < Sinatra::Base
 
   get "/enrichment_analysis_log" do
     begin
-      URI.open("https://dtn1.ddbj.nig.ac.jp/wabi/chipatlas/#{params[:id]}?info=result&format=log").read
+      Timeout.timeout(3) do
+        URI.open("https://dtn1.ddbj.nig.ac.jp/wabi/chipatlas/#{params[:id]}?info=result&format=log").read
+      end
     rescue => e
       status 404
       "Log file not available yet"
