@@ -22,6 +22,10 @@ module PJ
           }
         end
 
+        # fileList.tab may contain identical duplicate lines (e.g. Annotation tracks),
+        # which break get_filename/get_trackname that expect a unique match
+        records.uniq!
+
         self.insert_all(records, returning: false) if records.any?
       end
 
