@@ -48,32 +48,32 @@
                     %li.dropdown-header{ role: "presentation" }= "For #{genome}"
                     - if metadata[:agClass] != 'Bisulfite-Seq'
                       %li
-                        %a{ href: "#{igv_linkout_base}/#{genome}/eachData/bw/#{@expid}.bw&genome=#{genome}&name=#{fname}" }= "BigWig"
+                        %a{ href: "#{igv_linkout_base}/#{genome}/eachData/bw/#{@expid}.bw&genome=#{PJ::Location.igv_genome_url(genome)}&name=#{fname}" }= "BigWig"
                       - ["05", "10", "20"].each do |dVal|
                         %li
-                          %a{ href: "#{igv_linkout_base}/#{genome}/eachData/bb#{dVal}/#{@expid}.#{dVal}.bb&genome=#{genome}&name=#{fname}%20(1E-#{dVal})" }= "Peak-call (q < 1E-#{dVal})"
+                          %a{ href: "#{igv_linkout_base}/#{genome}/eachData/bb#{dVal}/#{@expid}.#{dVal}.bb&genome=#{PJ::Location.igv_genome_url(genome)}&name=#{fname}%20(1E-#{dVal})" }= "Peak-call (q < 1E-#{dVal})"
                       %li.divider
                     - else
                       %li
                         - fname = URI.encode_www_form_component("Methylation rate (@ #{record[:clSubClass]}) #{@expid}".gsub(", ","_"))
 
-                        %a{ href: "#{igv_linkout_base}/#{genome}/eachData/bs/methyl/#{@expid}.methyl.bw&genome=#{genome}&name=#{fname}" }= "BigWig (Methylation rate)"
+                        %a{ href: "#{igv_linkout_base}/#{genome}/eachData/bs/methyl/#{@expid}.methyl.bw&genome=#{PJ::Location.igv_genome_url(genome)}&name=#{fname}" }= "BigWig (Methylation rate)"
                       %li
                         - fname = URI.encode_www_form_component("Coverage rate (@ #{record[:clSubClass]}) #{@expid}".gsub(", ","_"))
 
-                        %a{ href: "#{igv_linkout_base}/#{genome}/eachData/bs/cover/#{@expid}.cover.bw&genome=#{genome}&name=#{fname}" }= "BigWig (Coverage)"
+                        %a{ href: "#{igv_linkout_base}/#{genome}/eachData/bs/cover/#{@expid}.cover.bw&genome=#{PJ::Location.igv_genome_url(genome)}&name=#{fname}" }= "BigWig (Coverage)"
                       %li
                         - fname = URI.encode_www_form_component("Hypo MR (@ #{record[:clSubClass]}) #{@expid}".gsub(", ","_"))
 
-                        %a{ href: "#{igv_linkout_base}/#{genome}/eachData/bs/hmr/BigBed/#{@expid}.hmr.bb&genome=#{genome}&name=#{fname}" }= "Hypo MR"
+                        %a{ href: "#{igv_linkout_base}/#{genome}/eachData/bs/hmr/BigBed/#{@expid}.hmr.bb&genome=#{PJ::Location.igv_genome_url(genome)}&name=#{fname}" }= "Hypo MR"
                       %li
                         - fname = URI.encode_www_form_component("Partial MR (@ #{record[:clSubClass]}) #{@expid}".gsub(", ","_"))
 
-                        %a{ href: "#{igv_linkout_base}/#{genome}/eachData/bs/pmd/BigBed/#{@expid}.pmd.bb&genome=#{genome}&name=#{fname}" }= "Partial MR"
+                        %a{ href: "#{igv_linkout_base}/#{genome}/eachData/bs/pmd/BigBed/#{@expid}.pmd.bb&genome=#{PJ::Location.igv_genome_url(genome)}&name=#{fname}" }= "Partial MR"
                       %li
                         - fname = URI.encode_www_form_component("Hyper MR (@ #{record[:clSubClass]}) #{@expid}".gsub(", ","_"))
 
-                        %a{ href: "#{igv_linkout_base}/#{genome}/eachData/bs/hypermr/BigBed/#{@expid}.hypermr.bb&genome=#{genome}&name=#{fname}" }= "Hyper MR"
+                        %a{ href: "#{igv_linkout_base}/#{genome}/eachData/bs/hypermr/BigBed/#{@expid}.hypermr.bb&genome=#{PJ::Location.igv_genome_url(genome)}&name=#{fname}" }= "Hyper MR"
                       %li.divider
 
                   %li.dropdown-header{ role: "presentation" }
