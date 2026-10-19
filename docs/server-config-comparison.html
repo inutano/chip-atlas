@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ChIP-Atlas サーバー構成比較: 旧構成 vs 新構成 (遷宮)</title>
+<style>
+  :root { --old: #c0392b; --new: #27ae60; --primary: #2c3e50; --accent: #2980b9; --bg: #f8f9fa; --bdr: #dee2e6; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: "Hiragino Kaku Gothic ProN", "Noto Sans JP", sans-serif; color: #333; line-height: 1.7; max-width: 960px; margin: 0 auto; padding: 2rem 1.5rem; background: #fff; }
+  h1 { color: var(--primary); font-size: 1.7rem; border-bottom: 3px solid var(--accent); padding-bottom: .5rem; margin-bottom: .5rem; }
+  .subtitle { color: #666; font-size: .95rem; margin-bottom: 2rem; }
+  h2 { color: var(--primary); font-size: 1.25rem; margin: 2rem 0 .8rem; padding-left: .5rem; border-left: 4px solid var(--accent); }
+  p { margin-bottom: .7rem; }
+  table { width: 100%; border-collapse: collapse; margin: .8rem 0 1.5rem; font-size: .93rem; }
+  th, td { border: 1px solid var(--bdr); padding: .5rem .7rem; text-align: left; vertical-align: top; }
+  th { background: var(--primary); color: #fff; font-weight: 600; }
+  th.old { background: var(--old); }
+  th.new { background: var(--new); }
+  tr:nth-child(even) { background: var(--bg); }
+  .tag { display: inline-block; padding: .1rem .45rem; border-radius: 3px; font-size: .82rem; font-weight: 600; }
+  .tag-old { background: #fde8e8; color: var(--old); }
+  .tag-new { background: #e8f8ee; color: var(--new); }
+  .tag-same { background: #e8ecf0; color: #555; }
+  .better { color: var(--new); font-weight: 600; }
+  .worse { color: var(--old); }
+  .note { background: #fff3cd; border-left: 4px solid #ffc107; padding: .7rem 1rem; margin: 1rem 0; border-radius: 0 4px 4px 0; font-size: .92rem; }
+  .info { background: #e8f4f8; border-left: 4px solid var(--accent); padding: .7rem 1rem; margin: 1rem 0; border-radius: 0 4px 4px 0; font-size: .92rem; }
+  code { background: #f1f3f5; padding: .1rem .3rem; border-radius: 3px; font-size: .88rem; font-family: "SF Mono", "Menlo", monospace; }
+  .footer { margin-top: 3rem; padding-top: 1rem; border-top: 1px solid var(--bdr); font-size: .85rem; color: #888; }
+  ul { margin: .3rem 0 .8rem 1.3rem; }
+  li { margin-bottom: .2rem; }
+  .metric { font-family: "SF Mono", "Menlo", monospace; font-size: .9rem; }
+  .section-intro { color: #555; font-size: .93rem; margin-bottom: 1rem; }
+</style>
+</head>
+<body>
+
+<h1>ChIP-Atlas サーバー構成比較</h1>
+<p class="subtitle">旧構成 (本番AMIベース) vs 新構成 (遷宮 / Amazon Linux 2023) &mdash; 2026-09-24 実測値</p>
+
+<h2>1. インフラストラクチャ</h2>
+<p class="section-intro">ハードウェア・OS レイヤーの比較。新構成は ARM (Graviton) に移行し、コスト効率と OS の新しさの両方で改善。</p>
+
+<table>
+  <tr>
+    <th style="width:22%">項目</th>
+    <th class="old" style="width:39%">旧構成</th>
+    <th class="new" style="width:39%">新構成</th>
+  </tr>
+  <tr>
+    <td>OS</td>
+    <td>Ubuntu 22.04.5 LTS (Jammy)<br><span class="tag tag-old">EOL: 2027-04</span></td>
+    <td>Amazon Linux 2023<br><span class="tag tag-new">EOL: 2028</span></td>
+  </tr>
+  <tr>
+    <td>カーネル</td>
+    <td><code>6.8.0-1053-aws</code> (x86_64)</td>
+    <td><code>6.12.103</code> (aarch64) <span class="better">&uarr; 新しい</span></td>
+  </tr>
+  <tr>
+    <td>CPU</td>
+    <td>Intel Xeon Platinum 8259CL<br>2 vCPU (x86_64)</td>
+    <td>AWS Graviton (Neoverse-N1)<br>2 vCPU (ARM64) <span class="better">&uarr; 効率的</span></td>
+  </tr>
+  <tr>
+    <td>インスタンスタイプ</td>
+    <td><code>t3.medium</code></td>
+    <td><code>t4g.medium</code> <span class="better">&uarr; ~20% 安価</span></td>
+  </tr>
+  <tr>
+    <td>コスト (東京)</td>
+    <td class="metric">~$0.052/hr ($37.4/月)</td>
+    <td class="metric"><span class="better">~$0.034/hr ($24.5/月)</span></td>
+  </tr>
+  <tr>
+    <td>メモリ</td>
+    <td>3.8 GB <span class="tag tag-same">同等</span></td>
+    <td>3.7 GB</td>
+  </tr>
+  <tr>
+    <td>ストレージ</td>
+    <td>31 GB (gp2/gp3)<br>使用率 57%</td>
+    <td>32 GB gp3<br>使用率 10% <span class="better">&darr; クリーン</span></td>
+  </tr>
+  <tr>
+    <td>パッケージ管理</td>
+    <td><code>apt</code> (deb)</td>
+    <td><code>dnf</code> (rpm)</td>
+  </tr>
+  <tr>
+    <td>AMI 由来</td>
+    <td>本番の日次スナップショットAMI<br><span class="tag tag-old">累積変更あり</span></td>
+    <td>公式 Amazon Linux 2023 AMI<br><span class="tag tag-new">クリーンイメージ</span></td>
+  </tr>
+  <tr>
+    <td>OS ユーザー</td>
+    <td><code>ubuntu</code></td>
+    <td><code>ec2-user</code></td>
+  </tr>
+</table>
+
+<h2>2. Ruby ランタイム</h2>
+
+<table>
+  <tr>
+    <th style="width:22%">項目</th>
+    <th class="old" style="width:39%">旧構成</th>
+    <th class="new" style="width:39%">新構成</th>
+  </tr>
+  <tr>
+    <td>Ruby バージョン</td>
+    <td><code>3.2.2</code> (2023-03-30)<br>※ AMI に 2.7.8, 3.2.2, 4.0.5 が混在</td>
+    <td><code>4.0.5</code> (2026-05-20) <span class="better">&uarr;</span><br>rbenv でこのバージョンのみ</td>
+  </tr>
+  <tr>
+    <td>Ruby 管理</td>
+    <td>rbenv (複数バージョン残存)</td>
+    <td>rbenv (<code>.ruby-version</code> に固定) <span class="better">クリーン</span></td>
+  </tr>
+  <tr>
+    <td>アーキテクチャ</td>
+    <td><code>x86_64-linux</code></td>
+    <td><code>aarch64-linux</code></td>
+  </tr>
+  <tr>
+    <td>パーサー</td>
+    <td>旧パーサー</td>
+    <td>PRISM (Ruby 4.0 デフォルト) <span class="better">&uarr;</span></td>
+  </tr>
+  <tr>
+    <td>Gems (主要)</td>
+    <td colspan="2" style="text-align:center"><span class="tag tag-same">同一</span> Puma 7.2.0, Sinatra 4.2.1, Sequel 5.103.0, SQLite3 2.9.1</td>
+  </tr>
+  <tr>
+    <td>sqlite3 gem</td>
+    <td>ネイティブ拡張 (x86_64)</td>
+    <td>プリビルドバイナリ (aarch64-linux-gnu) <span class="better">&uarr; ビルド不要</span></td>
+  </tr>
+</table>
+
+<h2>3. Web サーバー (nginx)</h2>
+
+<table>
+  <tr>
+    <th style="width:22%">項目</th>
+    <th class="old" style="width:39%">旧構成</th>
+    <th class="new" style="width:39%">新構成</th>
+  </tr>
+  <tr>
+    <td>バージョン</td>
+    <td><code>1.18.0</code> (2020年リリースの系列)<br><span class="tag tag-old">Ubuntu のバックポート修正のみ</span></td>
+    <td><code>1.30.4</code> (2026年) <span class="better">&uarr; 最新</span></td>
+  </tr>
+  <tr>
+    <td>設定の場所</td>
+    <td><code>nginx.conf</code> にインライン<br>(upstream + server ブロックが直書き)</td>
+    <td><code>conf.d/chip-atlas.conf</code><br><span class="better">ドロップイン方式</span></td>
+  </tr>
+  <tr>
+    <td>upstream 設定</td>
+    <td>Unix ソケット<br><code>unicorn.sock</code></td>
+    <td>TCP <code>127.0.0.1:9292</code><br>keepalive 8 接続</td>
+  </tr>
+  <tr>
+    <td>gzip</td>
+    <td>有効 (基本的な設定)</td>
+    <td>有効 + <code>text/yaml</code> 追加 <span class="better">&uarr;</span></td>
+  </tr>
+  <tr>
+    <td>静的ファイル</td>
+    <td><code>try_files $uri @app</code></td>
+    <td><code>try_files $uri @app</code> + <br>JS/CSS/images 別に Cache-Control ヘッダ <span class="better">&uarr;</span></td>
+  </tr>
+  <tr>
+    <td>YAML MIME</td>
+    <td>未設定 → <code>application/octet-stream</code></td>
+    <td><code>text/yaml</code> <span class="better">&uarr;</span></td>
+  </tr>
+  <tr>
+    <td>キャッシュ</td>
+    <td>proxy_cache_path (旧 API 用)</td>
+    <td>なし (sengu では DB クエリが十分高速)</td>
+  </tr>
+</table>
+
+<h2>4. アプリケーションサーバー</h2>
+
+<table>
+  <tr>
+    <th style="width:22%">項目</th>
+    <th class="old" style="width:39%">旧構成 (本番AMI)</th>
+    <th class="new" style="width:39%">新構成</th>
+  </tr>
+  <tr>
+    <td>サーバー</td>
+    <td><span class="tag tag-old">Unicorn</span> (AMI 由来)<br>→ sengu テスト時は Puma に切替</td>
+    <td><span class="tag tag-new">Puma 7.2.0</span></td>
+  </tr>
+  <tr>
+    <td>ワーカーモデル</td>
+    <td>Unicorn: プリフォーク<br>(マスター + 2 ワーカー)</td>
+    <td>Puma: クラスターモード<br>(マスター + 2 ワーカー × 5 スレッド)</td>
+  </tr>
+  <tr>
+    <td>同時処理数</td>
+    <td>2 (Unicorn ワーカー数)</td>
+    <td><span class="better">10</span> (2 × 5 スレッド)</td>
+  </tr>
+  <tr>
+    <td>ホットリスタート</td>
+    <td><code>kill -USR2</code> (Unicorn)</td>
+    <td><code>systemctl reload</code> (Puma USR1)</td>
+  </tr>
+</table>
+
+<h2>5. プロセス管理</h2>
+
+<table>
+  <tr>
+    <th style="width:22%">項目</th>
+    <th class="old" style="width:39%">旧構成</th>
+    <th class="new" style="width:39%">新構成</th>
+  </tr>
+  <tr>
+    <td>起動方式</td>
+    <td><code>/etc/init.d/chip-atlas</code><br>(SysV init スクリプト)</td>
+    <td><code>systemd</code> ユニット<br>(<code>chip-atlas-puma.service</code>)</td>
+  </tr>
+  <tr>
+    <td>自動起動</td>
+    <td><code>update-rc.d</code></td>
+    <td><code>systemctl enable</code></td>
+  </tr>
+  <tr>
+    <td>自動再起動</td>
+    <td><span class="tag tag-old">なし</span> (クラッシュ時は手動)</td>
+    <td><span class="tag tag-new">Restart=always</span> (5 秒後に自動復旧)</td>
+  </tr>
+  <tr>
+    <td>ログ</td>
+    <td>ファイル出力のみ<br>(log/ 以下、ローテーション手動)</td>
+    <td>journald 統合<br><code>journalctl -u chip-atlas-puma -f</code></td>
+  </tr>
+  <tr>
+    <td>セキュリティ制限</td>
+    <td><span class="tag tag-old">なし</span></td>
+    <td>
+      <span class="tag tag-new">NoNewPrivileges=yes</span><br>
+      <span class="tag tag-new">ProtectSystem=strict</span><br>
+      <span class="tag tag-new">PrivateTmp=yes</span><br>
+      <span class="tag tag-new">LimitNOFILE=65536</span>
+    </td>
+  </tr>
+  <tr>
+    <td>ファイル書き込み</td>
+    <td>制限なし (ユーザー権限)</td>
+    <td><code>ReadWritePaths</code> で tmp/, log/, アプリ本体のみ許可</td>
+  </tr>
+</table>
+
+<h2>6. データベース</h2>
+
+<table>
+  <tr>
+    <th style="width:22%">項目</th>
+    <th class="old" style="width:39%">旧構成</th>
+    <th class="new" style="width:39%">新構成</th>
+  </tr>
+  <tr>
+    <td>DB エンジン</td>
+    <td colspan="2" style="text-align:center"><span class="tag tag-same">同一</span> SQLite3 (WAL モード)</td>
+  </tr>
+  <tr>
+    <td>DB ファイルサイズ</td>
+    <td>963 MB (本番 AMI 由来)<br>+ 650 MB (sengu 用コピー)</td>
+    <td>650 MB <span class="better">&darr; 1ファイルのみ</span></td>
+  </tr>
+  <tr>
+    <td>データの出所</td>
+    <td>AMI スナップショットに含まれるDB</td>
+    <td>開発環境からのコピー (検証済み)</td>
+  </tr>
+  <tr>
+    <td>PRAGMA 設定</td>
+    <td colspan="2" style="text-align:center"><span class="tag tag-same">同一</span> WAL / NORMAL同期 / 64MBキャッシュ / 256MB mmap</td>
+  </tr>
+</table>
+
+<h2>7. デプロイメント</h2>
+<p class="section-intro">最も大きな設計変更。AMI スナップショットの不透明さを排し、スクリプトで再現可能な構成に。</p>
+
+<table>
+  <tr>
+    <th style="width:22%">項目</th>
+    <th class="old" style="width:39%">旧構成</th>
+    <th class="new" style="width:39%">新構成</th>
+  </tr>
+  <tr>
+    <td>デプロイ方式</td>
+    <td>本番 AMI スナップショット →<br>Launch Template で起動</td>
+    <td>公式 AMI + <code>provision.sh</code> +<br><code>deploy-app.sh</code></td>
+  </tr>
+  <tr>
+    <td>再現性</td>
+    <td><span class="tag tag-old">低い</span><br>AMI に累積変更 (stash 3件、<br>Ruby 3バージョン、旧設定残存)</td>
+    <td><span class="tag tag-new">高い</span><br>スクリプトで 0 からビルド</td>
+  </tr>
+  <tr>
+    <td>コード更新</td>
+    <td>AMI 再作成 or SSH で手動</td>
+    <td><code>deploy-app.sh &lt;IP&gt;</code> で rsync + 再起動</td>
+  </tr>
+  <tr>
+    <td>JS バンドル</td>
+    <td>AMI に含まれる (更新時は手動コピー)</td>
+    <td><code>deploy-app.sh</code> が rsync で同期</td>
+  </tr>
+  <tr>
+    <td>DB 初期化</td>
+    <td>AMI に含まれる or <code>rake metadata:load</code><br>(10 分以上)</td>
+    <td>開発環境から rsync (数分) <span class="better">&uarr;</span></td>
+  </tr>
+  <tr>
+    <td>設定ファイル</td>
+    <td><code>nginx.conf</code> 直書き、init.d 手動コピー</td>
+    <td>リポジトリ管理 (<code>script/deploy/sengu/</code>)</td>
+  </tr>
+  <tr>
+    <td>残存物</td>
+    <td>旧 Unicorn ソケット、init.d スクリプト、<br>複数 Ruby バージョン、stash 3件</td>
+    <td><span class="tag tag-new">なし</span> (クリーンインストール)</td>
+  </tr>
+</table>
+
+<h2>8. セキュリティ</h2>
+
+<table>
+  <tr>
+    <th style="width:22%">項目</th>
+    <th class="old" style="width:39%">旧構成</th>
+    <th class="new" style="width:39%">新構成</th>
+  </tr>
+  <tr>
+    <td>systemd サンドボックス</td>
+    <td>なし (init.d)</td>
+    <td>NoNewPrivileges, ProtectSystem, PrivateTmp</td>
+  </tr>
+  <tr>
+    <td>SELinux</td>
+    <td>なし (Ubuntu)</td>
+    <td>Permissive (有効化可能) <span class="better">&uarr;</span></td>
+  </tr>
+  <tr>
+    <td>ホスト認証</td>
+    <td colspan="2" style="text-align:center"><span class="tag tag-same">同一</span> <code>CHIP_ATLAS_PERMITTED_HOSTS</code> で制御</td>
+  </tr>
+  <tr>
+    <td>OS セキュリティ更新</td>
+    <td>AMI 作成時点で固定<br><span class="tag tag-old">日次 AMI 再作成が必要</span></td>
+    <td><code>dnf update</code> で随時適用 <span class="better">&uarr;</span></td>
+  </tr>
+</table>
+
+<h2>9. パフォーマンス (実測)</h2>
+<p class="section-intro">各インスタンスの localhost からのレスポンス時間 (nginx → Puma)。コールドキャッシュ時の 1 回測定。</p>
+
+<table>
+  <tr>
+    <th>エンドポイント</th>
+    <th class="old">旧構成 (t3.medium)</th>
+    <th class="new">新構成 (t4g.medium)</th>
+  </tr>
+  <tr>
+    <td><code>/health</code></td>
+    <td class="metric">248 ms</td>
+    <td class="metric"><span class="better">9 ms</span></td>
+  </tr>
+  <tr>
+    <td><code>/</code> (ホームページ)</td>
+    <td class="metric">50 ms</td>
+    <td class="metric">50 ms <span class="tag tag-same">同等</span></td>
+  </tr>
+  <tr>
+    <td><code>/peak_browser</code></td>
+    <td class="metric">1.8 ms</td>
+    <td class="metric">2.0 ms <span class="tag tag-same">同等</span></td>
+  </tr>
+  <tr>
+    <td><code>/api/genomes</code></td>
+    <td class="metric">1.3 ms</td>
+    <td class="metric">1.4 ms <span class="tag tag-same">同等</span></td>
+  </tr>
+</table>
+
+<div class="info">
+  <strong>/health の差異について:</strong> 旧構成の 248 ms は Puma が起動直後のウォームアップ状態だった可能性があります。定常状態ではほぼ同等と予想されますが、新構成の Graviton CPU は整数演算で Intel Xeon に匹敵する性能を ~20% 低コストで実現します。
+</div>
+
+<h2>10. まとめ</h2>
+
+<table>
+  <tr>
+    <th>カテゴリ</th>
+    <th>改善点</th>
+  </tr>
+  <tr>
+    <td><span class="better">コスト</span></td>
+    <td>t4g.medium (Graviton) で月額 ~$13 削減 (37.4 → 24.5 USD)</td>
+  </tr>
+  <tr>
+    <td><span class="better">再現性</span></td>
+    <td>AMI の累積変更に依存せず、スクリプト 1 本で 0 から構築可能</td>
+  </tr>
+  <tr>
+    <td><span class="better">セキュリティ</span></td>
+    <td>systemd サンドボックス、SELinux 利用可能</td>
+  </tr>
+  <tr>
+    <td><span class="better">運用性</span></td>
+    <td>systemd による自動再起動・journald ログ統合・ワンコマンド再デプロイ</td>
+  </tr>
+  <tr>
+    <td><span class="better">同時処理</span></td>
+    <td>Unicorn 2 → Puma 10 (2 ワーカー × 5 スレッド)</td>
+  </tr>
+  <tr>
+    <td><span class="better">OS サポート</span></td>
+    <td>Ubuntu 22.04 (EOL 2027-04) → Amazon Linux 2023 (EOL 2028)</td>
+  </tr>
+  <tr>
+    <td><span class="better">クリーンさ</span></td>
+    <td>旧 Ruby バージョン・Unicorn 残骸・stash なし。ディスク使用率 57% → 10%</td>
+  </tr>
+</table>
+
+<div class="note">
+  <strong>注意:</strong> 旧構成の「本番 AMI」は Unicorn + init.d で運用されていたものであり、今回の旧インスタンスではその上に Puma + systemd を追加導入しています。本レポートの「旧構成」列は AMI 由来の設定を主に記載しています。
+</div>
+
+<div class="footer">
+  作成日: 2026-09-24 &nbsp;|&nbsp;
+  旧: t3.medium, Ubuntu 22.04 &nbsp;|&nbsp;
+  新: t4g.medium, Amazon Linux 2023
+</div>
+
+</body>
+</html>

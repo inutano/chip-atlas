@@ -1,0 +1,44 @@
+# systemd unit for ChIP-Atlas (Puma, sengu stack)
+# Install: sudo cp chip-atlas-puma.service /etc/systemd/system/
+#          sudo systemctl daemon-reload && sudo systemctl enable --now chip-atlas-puma
+[Unit]
+Description=ChIP-Atlas web app (Puma)
+After=network.target
+
+[Service]
+Type=simple
+User=ec2-user
+Group=ec2-user
+WorkingDirectory=/home/ec2-user/chip-atlas
+EnvironmentFile=/home/ec2-user/chip-atlas/config/chip-atlas.env
+Environment=RACK_ENV=production
+Environment=HOME=/home/ec2-user
+
+# rbenv shims must be on PATH for `bundle` to resolve
+Environment=PATH=/home/ec2-user/.rbenv/shims:/home/ec2-user/.rbenv/bin:/usr/local/bin:/usr/bin:/bin
+
+ExecStart=/home/ec2-user/.rbenv/shims/bundle exec puma -C config/puma.rb
+ExecReload=/bin/kill -USR1 $MAINPID
+
+Restart=always
+RestartSec=5
+TimeoutStartSec=120
+TimeoutStopSec=30
+
+# Security hardening
+NoNewPrivileges=yes
+ProtectSystem=strict
+ReadWritePaths=/home/ec2-user/chip-atlas/tmp /home/ec2-user/chip-atlas/log /home/ec2-user/chip-atlas
+ProtectHome=no
+PrivateTmp=yes
+
+# Resource limits
+LimitNOFILE=65536
+
+# Logging — goes to journald; view with: journalctl -u chip-atlas-puma -f
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=chip-atlas
+
+[Install]
+WantedBy=multi-user.target
