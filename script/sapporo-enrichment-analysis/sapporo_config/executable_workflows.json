@@ -1,0 +1,5 @@
+{
+  "workflows": [
+    "https://raw.githubusercontent.com/inutano/chip-atlas/master/script/enrichment-analysis/enrichment-analysis.cwl"
+  ]
+}

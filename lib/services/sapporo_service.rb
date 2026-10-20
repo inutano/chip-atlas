@@ -8,6 +8,11 @@ require 'timeout'
 module ChipAtlas
   module SapporoService
     ENDPOINT = 'https://ea.chip-atlas.org'
+    # The WES runs only the workflows listed in
+    # script/sapporo-enrichment-analysis/sapporo_config/executable_workflows.json,
+    # and since Sapporo 2.2.0 POST /runs requires workflow_url and workflow_type_version.
+    WORKFLOW_URL = 'https://raw.githubusercontent.com/inutano/chip-atlas/master/script/enrichment-analysis/enrichment-analysis.cwl'
+    WORKFLOW_TYPE_VERSION = '1.0.0'
 
     module_function
 
@@ -18,19 +23,25 @@ module ChipAtlas
       http.open_timeout = 10
       http.read_timeout = 30
 
-      form_data = {
-        'workflow_type'   => 'enrichment-analysis',
-        'workflow_engine' => 'enrichment-analysis',
-        'workflow_params' => JSON.generate(params),
-      }
-
-      response = http.post(uri.path, URI.encode_www_form(form_data))
+      response = http.post(uri.path, URI.encode_www_form(run_request_form(params)))
       return nil unless response.code == '200'
 
       body = JSON.parse(response.body)
       body['run_id']
     rescue SocketError, Timeout::Error, Errno::ECONNREFUSED, JSON::ParserError
       nil
+    end
+
+    # The form fields of POST /runs. workflow_engine_parameters is never sent:
+    # the WES rejects it while it runs only listed workflows.
+    def run_request_form(params)
+      {
+        'workflow_type'         => 'enrichment-analysis',
+        'workflow_type_version' => WORKFLOW_TYPE_VERSION,
+        'workflow_engine'       => 'enrichment-analysis',
+        'workflow_url'          => WORKFLOW_URL,
+        'workflow_params'       => JSON.generate(params),
+      }
     end
 
     def job_status(run_id)
