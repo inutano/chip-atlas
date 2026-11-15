@@ -7,6 +7,7 @@ $LOAD_PATH << File.join(__dir__, "lib")
 require 'open-uri'
 require 'timeout'
 require 'net/http'
+require 'openssl'
 require 'net/ping'
 require 'uri'
 require 'json'
@@ -509,7 +510,26 @@ class PeakJohn < Sinatra::Base
     redirect "not_found", 404
   end
 
+  # Hosts that recently failed to connect, so that an outage of the data
+  # storage does not tie up every unicorn worker waiting on it (the default
+  # Net::HTTP open timeout is 60s and each experiment page asks several times).
+  REMOTE_DOWN = {}
+  REMOTE_DOWN_TTL = 60
+
   get "/api/remoteUrlStatus" do
-    Net::HTTP.get_response(URI.parse(params[:url])).code.to_i
+    uri = URI.parse(params[:url].to_s)
+    halt 400 unless uri.is_a?(URI::HTTP) && uri.host
+
+    down_at = REMOTE_DOWN[uri.host]
+    halt 503 if down_at && Time.now - down_at < REMOTE_DOWN_TTL
+
+    begin
+      Net::HTTP.start(uri.host, uri.port, use_ssl: uri.scheme == "https", open_timeout: 3, read_timeout: 5) do |http|
+        http.request_get(uri.request_uri).code.to_i
+      end
+    rescue Timeout::Error, SocketError, SystemCallError, OpenSSL::SSL::SSLError
+      REMOTE_DOWN[uri.host] = Time.now
+      halt 504
+    end
   end
 end
