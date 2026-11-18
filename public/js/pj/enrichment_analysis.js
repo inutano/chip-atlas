@@ -719,7 +719,13 @@ function post2sapporo(button, data) {
 
     var formData = new FormData();
     formData.append("workflow_type", "enrichment-analysis");
+    formData.append("workflow_type_version", "1.0.0");
     formData.append("workflow_engine", "enrichment-analysis");
+    // must match script/sapporo-enrichment-analysis/sapporo_config/executable_workflows.json
+    formData.append(
+      "workflow_url",
+      "https://raw.githubusercontent.com/inutano/chip-atlas/master/script/enrichment-analysis/enrichment-analysis.cwl",
+    );
     formData.append("workflow_params", JSON.stringify(data));
     $.ajax({
       type: "post",
