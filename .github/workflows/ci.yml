@@ -8,7 +8,9 @@ on:
 
 jobs:
   ci:
-    runs-on: ubuntu-latest
+    # Pinned: on ubuntu-26.04 there is no prebuilt Ruby 3.2.2 (the version
+    # production runs) and google-protobuf fails to compile from source.
+    runs-on: ubuntu-24.04
 
     steps:
       - uses: actions/checkout@v4
@@ -27,30 +29,35 @@ jobs:
 
       - name: Boot app and verify endpoints
         run: |
-          bundle exec rackup -p 9292 -D -P tmp/rackup.pid
-          sleep 3
-
-          # Verify /health returns 200
-          health_status=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:9292/health)
-          if [ "$health_status" != "200" ]; then
-            echo "FAIL: /health returned $health_status"
-            curl -s http://localhost:9292/health
-            kill $(cat tmp/rackup.pid) 2>/dev/null || true
+          mkdir -p tmp
+          bundle exec rackup -p 9292 > tmp/rackup.log 2>&1 &
+          pid=$!
+          fail() {
+            echo "FAIL: $1"
+            echo "--- rackup log ---"
+            cat tmp/rackup.log
+            kill "$pid" 2>/dev/null || true
             exit 1
-          fi
+          }
+
+          # Booting downloads the experiment lists and builds the search
+          # index, so wait for the port instead of sleeping a fixed time.
+          for i in $(seq 1 60); do
+            curl -s -o /dev/null http://localhost:9292/health && break
+            kill -0 "$pid" 2>/dev/null || fail "rackup exited during boot"
+            sleep 3
+          done
+
+          health_status=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:9292/health || true)
+          [ "$health_status" = "200" ] || fail "/health returned $health_status"
           echo "OK: /health returned 200"
           curl -s http://localhost:9292/health | python3 -m json.tool
 
-          # Verify / returns 200
-          root_status=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:9292/)
-          if [ "$root_status" != "200" ]; then
-            echo "FAIL: / returned $root_status"
-            kill $(cat tmp/rackup.pid) 2>/dev/null || true
-            exit 1
-          fi
+          root_status=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:9292/ || true)
+          [ "$root_status" = "200" ] || fail "/ returned $root_status"
           echo "OK: / returned 200"
 
-          kill $(cat tmp/rackup.pid) 2>/dev/null || true
+          kill "$pid" 2>/dev/null || true
 
       - name: Validate nginx config syntax
         continue-on-error: true
