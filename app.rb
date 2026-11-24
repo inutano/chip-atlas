@@ -525,7 +525,9 @@ class PeakJohn < Sinatra::Base
 
     begin
       Net::HTTP.start(uri.host, uri.port, use_ssl: uri.scheme == "https", open_timeout: 3, read_timeout: 5) do |http|
-        http.request_get(uri.request_uri).code.to_i
+        # HEAD, not GET: a GET reads the whole body into memory, and the
+        # assembled BED files on the data storage are tens of gigabytes.
+        http.head(uri.request_uri).code.to_i
       end
     rescue Timeout::Error, SocketError, SystemCallError, OpenSSL::SSL::SSLError
       REMOTE_DOWN[uri.host] = Time.now
