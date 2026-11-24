@@ -8,16 +8,16 @@ on:
 
 jobs:
   ci:
-    runs-on: ubuntu-latest
+    # Pinned: on ubuntu-26.04 there is no prebuilt Ruby 3.2.2 (the version
+    # production runs) and google-protobuf fails to compile from source.
+    runs-on: ubuntu-24.04
 
     steps:
       - uses: actions/checkout@v4
 
       - uses: ruby/setup-ruby@v1
         with:
-          # Production runs 3.2.2, but ruby-builder only ships the latest
-          # patch release of each series for newer runner images.
-          ruby-version: "3.2"
+          ruby-version: "3.2.2"
           bundler-cache: true
 
       - name: Ruby syntax check
