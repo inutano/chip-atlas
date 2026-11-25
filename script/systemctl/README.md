@@ -54,3 +54,25 @@ case $ARG in
     ;;
 esac
 ```
+
+## Keep the app running after an OOM kill
+
+systemd wraps `/etc/init.d/chip-atlas` in a generated `chip-atlas.service`.
+Its default `OOMPolicy=stop` stops the whole app when the kernel OOM killer
+hits a single unicorn worker, and nothing starts it again
+(outage of 2026-11-25). Add a drop-in so that the unicorn master stays up and
+respawns the worker:
+
+```
+# /etc/systemd/system/chip-atlas.service.d/oom.conf
+[Service]
+OOMPolicy=continue
+```
+
+Then run `sudo systemctl daemon-reload`, and check with
+`systemctl show chip-atlas -p OOMPolicy`.
+
+This only matters when systemd started the app, that is, after a reboot.
+An app started by hand with `sudo /etc/init.d/chip-atlas start` runs outside
+the unit, and `systemctl status chip-atlas` may then show `failed` although
+the app is up.
