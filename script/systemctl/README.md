@@ -1,78 +1,49 @@
-# Startup script
+# Running the app under systemd
 
-- chkconfig no longer available
-	- https://askubuntu.com/questions/299371/correct-way-to-install-a-custom-upstart-service
-- rbenv init does not work
-	- https://gist.github.com/chsh/10739192
+`chip-atlas.service` starts the app with Puma (`puma.rb` in the repository
+root) as the `ubuntu` user and keeps it running:
 
-Use `update-rc.d`, the only option available by default:
-
-```
-1. Create the service file in /etc/init.d/<service name>
-2. chmod 700 /etc/init.d/<service name>
-3. update-rc.d <service name> defaults
-4. update-rc.d <service name> enable
-```
-
-Inside `/etc/init.d/chip-atlas`:
+- `Restart=always`: the app comes back by itself after a crash.
+- `OOMPolicy=continue`: if the kernel OOM killer hits one worker, the Puma
+  master stays up and starts a new one. With the default (`stop`) systemd
+  stopped the whole app and nothing started it again (outage of 2026-11-25).
 
 ```
-#!/bin/bash
-### BEGIN INIT INFO
-# Provides:          chip-atlas
-# Required-Start:    $local_fs $network $named $time $syslog
-# Required-Stop:     $local_fs $network $named $time $syslog
-# Default-Start:     2 3 4 5
-# Default-Stop:      0 1 6
-# Description:       Start ChIP-Atlas web application
-### END INIT INFO
-
-ARG=$1
-
-RBENV_HOME=/home/ubuntu/.rbenv
-WORKDIR=/home/ubuntu/chip-atlas
-
-
-start(){
-  PATH=${RBENV_HOME}/bin:${RBENV_HOME}/shims:${PATH}; cd ${WORKDIR}; bundle exe unicorn -c ${WORKDIR}/unicorn.rb -E production -D
-}
-
-stop(){
-  cat ${WORKDIR}/tmp/pids/unicorn.pid | xargs kill
-}
-
-case $ARG in
-  "start")
-    start
-    ;;
-  "stop")
-    stop
-    ;;
-  "restart")
-    stop
-    start
-    ;;
-esac
+sudo cp script/systemctl/chip-atlas.service /etc/systemd/system/
+sudo systemctl daemon-reload
+sudo systemctl enable --now chip-atlas
 ```
 
-## Keep the app running after an OOM kill
+| Task | Command |
+| --- | --- |
+| Start / stop | `sudo systemctl start chip-atlas` / `sudo systemctl stop chip-atlas` |
+| Restart after a deploy | `sudo systemctl restart chip-atlas` |
+| Status | `systemctl status chip-atlas` |
+| Logs | `log/puma.stdout.log`, `log/puma.stderr.log`, `journalctl -u chip-atlas` |
 
-systemd wraps `/etc/init.d/chip-atlas` in a generated `chip-atlas.service`.
-Its default `OOMPolicy=stop` stops the whole app when the kernel OOM killer
-hits a single unicorn worker, and nothing starts it again
-(outage of 2026-11-25). Add a drop-in so that the unicorn master stays up and
-respawns the worker:
+Booting takes about two minutes (the app loads the experiment lists and
+builds the search index before it opens the socket); nginx answers 502 until
+then.
 
-```
-# /etc/systemd/system/chip-atlas.service.d/oom.conf
-[Service]
-OOMPolicy=continue
-```
+## Moving a host from unicorn to Puma
 
-Then run `sudo systemctl daemon-reload`, and check with
-`systemctl show chip-atlas -p OOMPolicy`.
+Hosts set up before the move to Ruby 4.0 run unicorn as root from
+`/etc/init.d/chip-atlas`. unicorn 6.1.0 crashes on Ruby 4.0 (segmentation
+fault in its kgio extension), so the Ruby upgrade and this change go together.
+This procedure has not been run on a real host yet; rehearse it on an instance
+launched from the production AMI first.
 
-This only matters when systemd started the app, that is, after a reboot.
-An app started by hand with `sudo /etc/init.d/chip-atlas start` runs outside
-the unit, and `systemctl status chip-atlas` may then show `failed` although
-the app is up.
+1. Install the Ruby version in `.ruby-version` with rbenv, then
+   `bundle install` in the repository.
+2. Stop unicorn: `sudo /etc/init.d/chip-atlas stop`, and wait until
+   `pgrep -f "unicorn (master|worker)"` finds nothing.
+3. Remove the old init script, so that it cannot start unicorn at boot:
+   `sudo update-rc.d chip-atlas remove && sudo rm /etc/init.d/chip-atlas`.
+   Also remove `/etc/systemd/system/chip-atlas.service.d/oom.conf` if it
+   exists; the unit file now carries that setting.
+4. The app used to run as root. Hand its files to `ubuntu`:
+   `sudo chown -R ubuntu:ubuntu log tmp database.sqlite*`.
+5. Install and start the unit as shown above.
+
+nginx needs no change: Puma listens on the same socket,
+`tmp/sockets/unicorn.sock`.

@@ -253,12 +253,10 @@ echo "==> Loading metadata..."
 bundle exec rake pj:load_metadata
 
 echo "==> Restarting application..."
-if [ -f tmp/pids/unicorn.pid ] && kill -0 $(cat tmp/pids/unicorn.pid) 2>/dev/null; then
-    kill -USR2 $(cat tmp/pids/unicorn.pid)
-    sleep 5
-else
-    bundle exec unicorn -c unicorn.rb -D
-fi
+sudo cp script/systemctl/chip-atlas.service /etc/systemd/system/chip-atlas.service
+sudo systemctl daemon-reload
+sudo systemctl enable chip-atlas
+sudo systemctl restart chip-atlas
 
 echo "==> Provision complete"
 PROVISION_SCRIPT

@@ -1,5 +1,5 @@
 #!/bin/bash
-# Build the app image (Ruby 3.2.2, as in production), boot it on a fresh
+# Build the app image (the Ruby version of .ruby-version), boot it on a fresh
 # database and run the smoke test. Needs only Docker and curl on the host.
 #   bash script/test/docker-smoke.sh [host_port]     (default 9292)
 set -u
