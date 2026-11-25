@@ -1,0 +1,22 @@
+# Keep the build context small: the working tree holds many gigabytes of
+# local databases and downloaded data that the image does not need.
+.git
+.bundle
+vendor
+node_modules
+mcp/node_modules
+mcp/dist
+database.sqlite*
+db/*.sqlite*
+public/ExperimentList*.json*
+public/images/fastqc
+metadata
+data
+rdf/data
+log
+tmp
+.env
+.superpowers
+sapporo_run
+script/deploy/deploy.conf
+script/deploy/deploy-*.log
