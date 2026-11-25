@@ -1,0 +1,33 @@
+# systemd unit for the ChIP-Atlas web application (Puma)
+#
+#   sudo cp script/systemctl/chip-atlas.service /etc/systemd/system/
+#   sudo systemctl daemon-reload
+#   sudo systemctl enable --now chip-atlas
+#
+# See README.md in this directory before installing it on a host that still
+# runs the old /etc/init.d/chip-atlas script.
+[Unit]
+Description=ChIP-Atlas web application (Puma)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=ubuntu
+Group=ubuntu
+WorkingDirectory=/home/ubuntu/chip-atlas
+# rbenv shims must be on PATH for bundle to find the right Ruby
+Environment=PATH=/home/ubuntu/.rbenv/shims:/home/ubuntu/.rbenv/bin:/usr/local/bin:/usr/bin:/bin
+ExecStart=/home/ubuntu/.rbenv/shims/bundle exec puma -C puma.rb -e production
+# SIGUSR2 makes Puma restart itself and reload the code
+ExecReload=/bin/kill -USR2 $MAINPID
+
+# Come back by itself after a crash
+Restart=always
+RestartSec=5
+# If the kernel OOM killer hits one worker, keep the rest running;
+# the Puma master starts a new worker.
+OOMPolicy=continue
+
+[Install]
+WantedBy=multi-user.target

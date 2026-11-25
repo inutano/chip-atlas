@@ -2,7 +2,7 @@ version: "3"
 services:
   app:
     container_name: chip-atlas
-    image: ruby:3.2.2-slim
+    image: ruby:4.0.10-slim
     volumes:
       - ${PWD}:/app
     ports:

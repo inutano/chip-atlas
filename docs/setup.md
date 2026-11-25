@@ -44,19 +44,20 @@ $ git clone https://github.com/inutano/chip-atlas
 $ cd chip-atlas
 $ bundle install --path=vendor/bundle
 
-# Setup unicorn/nginx following http://recipes.sinatrarb.com/p/deployment/nginx_proxied_to_unicorn
+# Setup nginx as a reverse proxy to the app's unix socket (see config/nginx/chip-atlas.conf)
 $ mkdir -p tmp/sockets tmp/pids log
 $ sudo su -
 $ cp /etc/nginx/nginx.conf /etc/nginx/nginx.conf.ORG
-$ nano /etc/nginx/nginx.conf # Copy file on http://recipes.sinatrarb.com/p/deployment/nginx_proxied_to_unicorn and edit
+$ nano /etc/nginx/nginx.conf # see config/nginx/chip-atlas.conf
 
 # Fetch data
 $ wget -O /home/ubuntu/chip-atlas/database.sqlite "http://data.dbcls.jp/~inutano/chip-atlas/sqlite/latest/database.sqlite"
 
 # Launch app
-$ cd /home/ubuntu/chip-atlas; bundle exe unicorn -c /home/ubuntu/chip-atlas/unicorn.rb -E production -D
+$ sudo cp script/systemctl/chip-atlas.service /etc/systemd/system/ && sudo systemctl daemon-reload
+$ sudo systemctl enable --now chip-atlas
 $ sudo /etc/init.d/nginx restart
 
 # Stop the app server
-$ cat /home/ubuntu/chip-atlas/tmp/pids/unicorn.pid | xargs kill
+$ sudo systemctl stop chip-atlas
 ```

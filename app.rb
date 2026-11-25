@@ -374,8 +374,8 @@ class PeakJohn < Sinatra::Base
 
   # These two are polled every few seconds by the result pages. Without a
   # timeout a hung DDBJ endpoint (it completes the TLS handshake but never
-  # answers) pins a worker until unicorn's 60s SIGKILL, which with 2 workers
-  # takes the whole site down. Timeout::Error is a StandardError, so the
+  # answers) pins a server thread for as long as it hangs, and enough of them
+  # take the whole site down. Timeout::Error is a StandardError, so the
   # existing rescue turns it into the same "not ready yet" 404.
   get "/diff_analysis_log" do
     begin
@@ -511,7 +511,7 @@ class PeakJohn < Sinatra::Base
   end
 
   # Hosts that recently failed to connect, so that an outage of the data
-  # storage does not tie up every unicorn worker waiting on it (the default
+  # storage does not tie up every server thread waiting on it (the default
   # Net::HTTP open timeout is 60s and each experiment page asks several times).
   REMOTE_DOWN = {}
   REMOTE_DOWN_TTL = 60

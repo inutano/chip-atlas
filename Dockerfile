@@ -1,5 +1,6 @@
 # Docker container for chip-atlas dev env
-FROM ruby:3.2.2-slim
+ARG RUBY_VERSION=4.0.10
+FROM ruby:${RUBY_VERSION}-slim
 RUN apt-get update -y && apt-get install -y libffi-dev build-essential libpq-dev libsqlite3-dev sqlite3
 WORKDIR /app
 # Gems first, so that editing the app does not reinstall them
