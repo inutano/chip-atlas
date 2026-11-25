@@ -516,9 +516,19 @@ class PeakJohn < Sinatra::Base
   REMOTE_DOWN = {}
   REMOTE_DOWN_TTL = 60
 
+  # The pages only ever ask about files on the data storage. Anything else
+  # would let a visitor make this server send requests to arbitrary hosts.
+  REMOTE_STATUS_HOSTS = ["chip-atlas.dbcls.jp"].freeze
+
   get "/api/remoteUrlStatus" do
-    uri = URI.parse(params[:url].to_s)
-    halt 400 unless uri.is_a?(URI::HTTP) && uri.host
+    uri = begin
+      URI.parse(params[:url].to_s)
+    rescue URI::InvalidURIError
+      halt 400
+    end
+    halt 400 unless uri.is_a?(URI::HTTP) &&
+                    REMOTE_STATUS_HOSTS.include?(uri.host) &&
+                    uri.port == uri.default_port
 
     down_at = REMOTE_DOWN[uri.host]
     halt 503 if down_at && Time.now - down_at < REMOTE_DOWN_TTL
