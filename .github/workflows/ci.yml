@@ -32,49 +32,13 @@ jobs:
           mkdir -p tmp
           bundle exec rackup -p 9292 > tmp/rackup.log 2>&1 &
           pid=$!
-          fail() {
-            echo "FAIL: $1"
+          # The same script runs locally: bash script/test/docker-smoke.sh
+          if ! bash script/test/smoke.sh http://localhost:9292; then
             echo "--- rackup log ---"
             cat tmp/rackup.log
             kill "$pid" 2>/dev/null || true
             exit 1
-          }
-
-          # Booting downloads the experiment lists and builds the search
-          # index, so wait for the port instead of sleeping a fixed time.
-          for i in $(seq 1 60); do
-            curl -s -o /dev/null http://localhost:9292/health && break
-            kill -0 "$pid" 2>/dev/null || fail "rackup exited during boot"
-            sleep 3
-          done
-
-          health_status=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:9292/health || true)
-          [ "$health_status" = "200" ] || fail "/health returned $health_status"
-          echo "OK: /health returned 200"
-          curl -s http://localhost:9292/health | python3 -m json.tool
-
-          root_status=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:9292/ || true)
-          [ "$root_status" = "200" ] || fail "/ returned $root_status"
-          echo "OK: / returned 200"
-
-          # /api/remoteUrlStatus must only ask the data storage
-          remote_status() {
-            curl -s -o /dev/null -m 20 -w "%{http_code}" --get --data-urlencode "url=$1" http://localhost:9292/api/remoteUrlStatus || true
-          }
-          expect_remote() {
-            got=$(remote_status "$2")
-            [ "$got" = "$1" ] || fail "remoteUrlStatus returned $got, expected $1 for '$2'"
-            echo "OK: remoteUrlStatus returned $1 for '$2'"
-          }
-          expect_remote 200 "https://chip-atlas.dbcls.jp/data/metadata/ExperimentList.json"
-          expect_remote 404 "https://chip-atlas.dbcls.jp/data/no-such-file"
-          expect_remote 400 "https://example.com/"
-          expect_remote 400 "http://169.254.169.254/latest/meta-data/"
-          expect_remote 400 "https://chip-atlas.dbcls.jp:22/"
-          expect_remote 400 "https://chip-atlas.dbcls.jp.example.com/data/x"
-          expect_remote 400 "file:///etc/passwd"
-          expect_remote 400 ""
-
+          fi
           kill "$pid" 2>/dev/null || true
 
       - name: Validate nginx config syntax
